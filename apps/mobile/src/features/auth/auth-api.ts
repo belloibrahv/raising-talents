@@ -1,73 +1,47 @@
-import {
-  authResponseSchema,
-  meResponseSchema,
-  type MeResponse,
-  type SelectableRole,
-  type SignUpRequest,
-} from '@rt/contracts';
-import { http } from '../../shared/api/client';
+import type { MeResponse, SelectableRole, SignUpRequest } from '@rt/contracts';
+import { api, http } from '../../shared/api/client';
 import { getDeviceId } from '../../shared/storage/device-id';
 
 export type SignUpInput = Omit<SignUpRequest, 'deviceId'>;
 
 export const authApi = {
   async signUp(input: SignUpInput): Promise<MeResponse> {
-    const response = await http.request('/v1/auth/sign-up', {
-      method: 'POST',
+    const response = await api.call('auth.signUp', {
       body: { ...input, deviceId: await getDeviceId() },
-      authenticated: false,
-      schema: authResponseSchema,
     });
     await http.startSession(response.tokens);
     return response.me;
   },
 
   async signIn(email: string, password: string): Promise<MeResponse> {
-    const response = await http.request('/v1/auth/sign-in', {
-      method: 'POST',
+    const response = await api.call('auth.signIn', {
       body: { email, password, deviceId: await getDeviceId() },
-      authenticated: false,
-      schema: authResponseSchema,
     });
     await http.startSession(response.tokens);
     return response.me;
   },
 
   me(): Promise<MeResponse> {
-    return http.request('/v1/me', { schema: meResponseSchema });
+    return api.call('me.get');
   },
 
   verifyEmail(code: string): Promise<MeResponse> {
-    return http.request('/v1/auth/verify-email', {
-      method: 'POST',
-      body: { code },
-      schema: meResponseSchema,
-    });
+    return api.call('auth.verifyEmail', { body: { code } });
   },
 
-  async resendCode(): Promise<void> {
-    await http.request('/v1/auth/verify-email/resend', { method: 'POST' });
+  resendCode(): Promise<void> {
+    return api.call('auth.resendVerification');
   },
 
   chooseRole(role: SelectableRole): Promise<MeResponse> {
-    return http.request('/v1/me/role', {
-      method: 'POST',
-      body: { role },
-      schema: meResponseSchema,
-    });
+    return api.call('me.selectRole', { body: { role } });
   },
 
   /** Ends the session on the server when possible, and always on the device. */
   async signOut(): Promise<void> {
     const refreshToken = http.refreshToken();
     try {
-      if (refreshToken) {
-        await http.request('/v1/auth/sign-out', {
-          method: 'POST',
-          body: { refreshToken },
-          authenticated: false,
-        });
-      }
+      if (refreshToken) await api.call('auth.signOut', { body: { refreshToken } });
     } catch {
       // Offline sign-out still clears the device. The server session expires on its own.
     } finally {

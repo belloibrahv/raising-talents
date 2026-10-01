@@ -1,31 +1,5 @@
-import { ErrorCode, type ProblemDetails } from '@rt/contracts';
+import { ERROR_STATUS, type ErrorCode, type ProblemDetails } from '@rt/contracts';
 import type { DomainError } from '../domain-error.js';
-
-const STATUS_BY_CODE: Record<ErrorCode, number> = {
-  [ErrorCode.ValidationFailed]: 400,
-  [ErrorCode.Unauthenticated]: 401,
-  [ErrorCode.Forbidden]: 403,
-  [ErrorCode.NotFound]: 404,
-  [ErrorCode.Conflict]: 409,
-  [ErrorCode.RateLimited]: 429,
-  [ErrorCode.Internal]: 500,
-
-  [ErrorCode.EmailAlreadyRegistered]: 409,
-  [ErrorCode.UnderMinimumAge]: 422,
-  [ErrorCode.WeakPassword]: 422,
-  [ErrorCode.InvalidCredentials]: 401,
-  [ErrorCode.AccountSuspended]: 403,
-  [ErrorCode.AccountBanned]: 403,
-  [ErrorCode.SessionExpired]: 401,
-  [ErrorCode.SessionRevoked]: 401,
-  [ErrorCode.VerificationCodeInvalid]: 422,
-  [ErrorCode.VerificationCodeExpired]: 422,
-  [ErrorCode.VerificationAttemptsExceeded]: 422,
-  [ErrorCode.VerificationResendTooSoon]: 429,
-  [ErrorCode.EmailAlreadyVerified]: 409,
-  [ErrorCode.EmailNotVerified]: 403,
-  [ErrorCode.RoleAlreadyLocked]: 409,
-};
 
 const TITLE_BY_STATUS: Record<number, string> = {
   400: 'Invalid request',
@@ -52,7 +26,7 @@ export class ProblemException extends Error {
     detail?: string,
     extra: Pick<ProblemDetails, 'fields' | 'retryAfterSeconds'> = {},
   ): ProblemException {
-    const status = STATUS_BY_CODE[code];
+    const status = ERROR_STATUS[code];
     return new ProblemException({
       type: typeFor(code),
       title: TITLE_BY_STATUS[status] ?? 'Error',

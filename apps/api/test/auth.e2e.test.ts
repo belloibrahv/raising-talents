@@ -1,44 +1,11 @@
 import { ErrorCode, type AuthResponse, type MeResponse, type ProblemDetails } from '@rt/contracts';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
-import { Test } from '@nestjs/testing';
-import { pino } from 'pino';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { AppModule } from '../src/app.module.js';
-import { configureApiApp, createFastifyAdapter } from '../src/bootstrap/create-api-app.js';
-import { loadConfig } from '../src/config/env.js';
-import { ACCOUNTS } from '../src/modules/accounts/application/accounts.tokens.js';
-import { InMemoryAccountRepository } from '../src/modules/accounts/testing/in-memory-account.repository.js';
-import { IDENTITY } from '../src/modules/identity/application/identity.tokens.js';
-import type { ModuleEventHandlers } from '../src/modules/identity/identity.module.js';
-import {
-  CapturingEmailSender,
-  FakeBreachedPasswordChecker,
-  FakePasswordHasher,
-  InMemoryCredentialRepository,
-  InMemoryOneTimeCodeRepository,
-  InMemorySessionRepository,
-} from '../src/modules/identity/testing/fakes.js';
-import { generateTestSigningKeys } from '../src/modules/identity/testing/identity-test-harness.js';
-import { EventDispatcher } from '../src/platform/outbox/event-dispatcher.js';
-import { PLATFORM } from '../src/platform/platform.tokens.js';
-import {
-  FixedClock,
-  InMemoryEventRecorder,
-  InMemoryRateLimiter,
-  InMemoryUnitOfWork,
-} from '../src/platform/testing/fakes.js';
+import { createTestApp, type TestApp } from './support/create-test-app.js';
 
-const toBase64 = (value: string) => Buffer.from(value).toString('base64');
-
-/**
- * Drives the real HTTP stack (routing, validation, guards, the error filter)
- * with in-memory adapters in place of Postgres, Redis and SMTP.
- */
 describe('Auth over HTTP', () => {
   let app: NestFastifyApplication;
-  const events = new InMemoryEventRecorder();
-  const email = new CapturingEmailSender();
-  const dispatcher = new EventDispatcher();
+  let testApp: TestApp;
 
   const tunde = {
     email: 'tunde.bakare@example.com',
@@ -57,61 +24,9 @@ describe('Auth over HTTP', () => {
       headers: accessToken ? { authorization: `Bearer ${accessToken}` } : {},
     });
 
-  const deliverEvents = async () => {
-    for (const event of events.events.splice(0)) await dispatcher.dispatch(event);
-  };
-
   beforeAll(async () => {
-    const keys = await generateTestSigningKeys();
-    const config = loadConfig({
-      NODE_ENV: 'test',
-      DATABASE_URL: 'postgres://unused:unused@localhost:5432/unused',
-      REDIS_URL: 'redis://localhost:6379',
-      JWT_PRIVATE_KEY_BASE64: toBase64(keys.privateKeyPem),
-      JWT_PUBLIC_KEY_BASE64: toBase64(keys.publicKeyPem),
-      JWT_KEY_ID: 'e2e-key',
-      VERIFICATION_CODE_PEPPER: 'e2e-pepper-0123456789abcdef0123456789abcdef',
-      SMTP_HOST: 'localhost',
-      SMTP_PORT: '1025',
-    });
-    const logger = pino({ level: 'silent' });
-
-    const moduleRef = await Test.createTestingModule({
-      imports: [AppModule.register({ config, logger })],
-    })
-      .overrideProvider(PLATFORM.Clock)
-      .useValue(new FixedClock())
-      .overrideProvider(PLATFORM.UnitOfWork)
-      .useValue(new InMemoryUnitOfWork())
-      .overrideProvider(PLATFORM.EventRecorder)
-      .useValue(events)
-      .overrideProvider(PLATFORM.RateLimiter)
-      .useValue(new InMemoryRateLimiter())
-      .overrideProvider(PLATFORM.Redis)
-      .useValue({ ping: async () => 'PONG', quit: async () => 'OK' })
-      .overrideProvider(ACCOUNTS.Repository)
-      .useValue(new InMemoryAccountRepository(events))
-      .overrideProvider(IDENTITY.Sessions)
-      .useValue(new InMemorySessionRepository())
-      .overrideProvider(IDENTITY.Credentials)
-      .useValue(new InMemoryCredentialRepository())
-      .overrideProvider(IDENTITY.Codes)
-      .useValue(new InMemoryOneTimeCodeRepository())
-      .overrideProvider(IDENTITY.PasswordHasher)
-      .useValue(new FakePasswordHasher())
-      .overrideProvider(IDENTITY.BreachedPasswords)
-      .useValue(new FakeBreachedPasswordChecker())
-      .overrideProvider(IDENTITY.EmailSender)
-      .useValue(email)
-      .compile();
-
-    moduleRef.get<ModuleEventHandlers>(IDENTITY.EventHandlers).register(dispatcher);
-    app = configureApiApp(
-      moduleRef.createNestApplication<NestFastifyApplication>(createFastifyAdapter(config)),
-      logger,
-    );
-    await app.init();
-    await app.getHttpAdapter().getInstance().ready();
+    testApp = await createTestApp();
+    app = testApp.app;
   });
 
   afterAll(async () => {
@@ -133,8 +48,8 @@ describe('Auth over HTTP', () => {
     expect(tooEarly.statusCode).toBe(403);
     expect(tooEarly.json<ProblemDetails>().code).toBe(ErrorCode.EmailNotVerified);
 
-    await deliverEvents();
-    const code = email.lastCodeFor(tunde.email);
+    await testApp.deliverEvents();
+    const code = testApp.email.lastCodeFor(tunde.email);
     const verified = await post('/v1/auth/verify-email', { code }, auth.tokens.accessToken);
     expect(verified.statusCode).toBe(200);
     expect(verified.json<MeResponse>().emailVerified).toBe(true);

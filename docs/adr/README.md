@@ -2,21 +2,22 @@
 
 Each file records one decision: the context, what we chose, what we rejected and what it costs us. The same table lives in section 21 of the design document. A decision is changed by adding a new record that supersedes the old one, never by editing history.
 
-| ADR                                                        | Decision                                  | Status   |
-| ---------------------------------------------------------- | ----------------------------------------- | -------- |
-| [ADR-001](001-modular-monolith-three-processes.md)         | Modular monolith, three processes         | Accepted |
-| [ADR-002](002-postgresql-as-system-of-record.md)           | PostgreSQL as system of record            | Accepted |
-| [ADR-003](003-react-native-on-expo.md)                     | React Native on Expo                      | Accepted |
-| [ADR-004](004-nestjs-on-the-fastify-adapter.md)            | NestJS on the Fastify adapter             | Accepted |
-| [ADR-005](005-drizzle-orm-with-sql-migrations.md)          | Drizzle ORM with SQL migrations           | Accepted |
-| [ADR-006](006-typesense-for-talent-search.md)              | Typesense for talent search               | Accepted |
-| [ADR-007](007-mux-for-video.md)                            | Mux for video                             | Accepted |
-| [ADR-008](008-transactional-outbox-for-domain-events.md)   | Transactional outbox for domain events    | Accepted |
-| [ADR-009](009-writes-over-rest-delivery-over-websocket.md) | Writes over REST, delivery over WebSocket | Accepted |
-| [ADR-010](010-in-house-authentication-module.md)           | In-house authentication module            | Accepted |
-| [ADR-011](011-only-verified-agents-can-contact-talent.md)  | Only verified agents can contact talent   | Proposed |
-| [ADR-012](012-adults-only-18-in-v1.md)                     | Adults only (18+) in v1                   | Proposed |
-| [ADR-013](013-nigeria-as-launch-market.md)                 | Nigeria as launch market                  | Proposed |
-| [ADR-014](014-eas-internal-distribution-for-v1.md)         | EAS internal distribution for v1          | Accepted |
-| [ADR-015](015-aws-region-chosen-by-latency-test.md)        | AWS region chosen by latency test         | Proposed |
-| [ADR-016](016-pin-typescript-5.9-for-now.md)               | Pin TypeScript 5.9 for now                | Accepted |
+| ADR                                                                     | Decision                                                | Status   |
+| ----------------------------------------------------------------------- | ------------------------------------------------------- | -------- |
+| [ADR-001](001-modular-monolith-three-processes.md)                      | Modular monolith, three processes                       | Accepted |
+| [ADR-002](002-postgresql-as-system-of-record.md)                        | PostgreSQL as system of record                          | Accepted |
+| [ADR-003](003-react-native-on-expo.md)                                  | React Native on Expo                                    | Accepted |
+| [ADR-004](004-nestjs-on-the-fastify-adapter.md)                         | NestJS on the Fastify adapter                           | Accepted |
+| [ADR-005](005-drizzle-orm-with-sql-migrations.md)                       | Drizzle ORM with SQL migrations                         | Accepted |
+| [ADR-006](006-typesense-for-talent-search.md)                           | Typesense for talent search                             | Accepted |
+| [ADR-007](007-mux-for-video.md)                                         | Mux for video                                           | Accepted |
+| [ADR-008](008-transactional-outbox-for-domain-events.md)                | Transactional outbox for domain events                  | Accepted |
+| [ADR-009](009-writes-over-rest-delivery-over-websocket.md)              | Writes over REST, delivery over WebSocket               | Accepted |
+| [ADR-010](010-in-house-authentication-module.md)                        | In-house authentication module                          | Accepted |
+| [ADR-011](011-only-verified-agents-can-contact-talent.md)               | Only verified agents can contact talent                 | Proposed |
+| [ADR-012](012-adults-only-18-in-v1.md)                                  | Adults only (18+) in v1                                 | Proposed |
+| [ADR-013](013-nigeria-as-launch-market.md)                              | Nigeria as launch market                                | Proposed |
+| [ADR-014](014-eas-internal-distribution-for-v1.md)                      | EAS internal distribution for v1                        | Accepted |
+| [ADR-015](015-aws-region-chosen-by-latency-test.md)                     | AWS region chosen by latency test                       | Proposed |
+| [ADR-016](016-pin-typescript-5.9-for-now.md)                            | Pin TypeScript 5.9 for now                              | Accepted |
+| [ADR-017](017-shared-endpoint-catalogue-instead-of-generated-client.md) | Shared endpoint catalogue instead of a generated client | Accepted |

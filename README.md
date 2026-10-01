@@ -74,6 +74,16 @@ curl -X POST http://localhost:3000/v1/auth/sign-up \
 | `pnpm check:writing`                | Checks docs, comments, emails and app copy against the writing rules |
 | `pnpm --filter @rt/api db:generate` | Creates a SQL migration from schema changes. Commit the file         |
 
+## API reference
+
+Every route is listed once, in `packages/contracts/src/endpoints.ts`. From that list:
+
+- the app calls endpoints by name: `api.call('me.selectRole', { body: { role: 'agent' } })`, typed and validated,
+- `packages/contracts/openapi.json` is generated on build. Open it in any OpenAPI viewer, for example Swagger Editor,
+- an API test fails if a controller and the list disagree.
+
+To add an endpoint: add it to the list, build `@rt/contracts`, write the controller, and commit the regenerated `openapi.json`.
+
 ## Mobile app structure
 
 ```

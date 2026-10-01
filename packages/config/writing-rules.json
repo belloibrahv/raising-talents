@@ -1,7 +1,11 @@
 {
   "description": "Writing rules for Raising Talents. See section 19 of docs/DESIGN.md. Add phrases here; the CI check reads this file.",
   "bannedCharacters": [
-    { "char": "\u2014", "name": "em dash", "fix": "Use a full stop, comma, colon or brackets." },
+    {
+      "char": "\u2014",
+      "name": "em dash",
+      "fix": "Use a full stop, comma, colon or brackets."
+    },
     {
       "char": "\u2013",
       "name": "en dash",
@@ -37,7 +41,7 @@
   ],
   "include": {
     "markdown": ["README.md", "docs"],
-    "json": ["apps/mobile/src/i18n"],
+    "json": ["apps/mobile/src/i18n", "packages/contracts/openapi.json"],
     "templates": ["apps/api/src"],
     "codeComments": ["apps", "packages"]
   },

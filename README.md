@@ -9,7 +9,7 @@ Read [docs/DESIGN.md](docs/DESIGN.md) before you write code. It links to the ful
 ```
 apps/
   api/              NestJS backend. One codebase, three processes: api, worker, realtime (milestone 4)
-  mobile/           Expo app (next in milestone 1)
+  mobile/           Expo app (SDK 57, Expo Router)
 packages/
   contracts/        Zod schemas and error codes shared by the API and the app
   config/           Shared TypeScript, lint and writing-check configuration
@@ -48,6 +48,14 @@ pnpm --filter @rt/api dev:worker        # in a second terminal: sends emails and
 
 Emails land in Mailpit at http://localhost:8025.
 
+Then the app, in a third terminal:
+
+```bash
+pnpm --filter @rt/mobile dev
+```
+
+The app uses native modules (secure storage, fonts), so it runs in a development build, not Expo Go. Create one once with `eas build --profile development`, install it on your phone or simulator, and it connects to Metro from then on. In development the app finds the API on the same machine that runs Metro, so a phone on the same Wi-Fi works without setup.
+
 Try it:
 
 ```bash
@@ -65,6 +73,20 @@ curl -X POST http://localhost:3000/v1/auth/sign-up \
 | `pnpm typecheck`                    | TypeScript across every package                                      |
 | `pnpm check:writing`                | Checks docs, comments, emails and app copy against the writing rules |
 | `pnpm --filter @rt/api db:generate` | Creates a SQL migration from schema changes. Commit the file         |
+
+## Mobile app structure
+
+```
+apps/mobile/src/
+  app/              Screens and routes (Expo Router). Guards decide which screens exist for each stage
+  features/auth/    Session state, auth calls, onboarding order
+  shared/api/       The HTTP client: tokens, single refresh, error parsing
+  shared/storage/   Keychain storage for tokens and the install's device id
+  shared/ui/        Design tokens and components
+  i18n/en.json      Every word the app shows. Checked by the writing check
+```
+
+Onboarding is a strict order: sign up, verify email, choose a role, then the app. Screens for a later stage are not mounted until the person reaches it.
 
 ## Tests
 

@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790843359432,
+      "tag": "0000_initial_accounts_identity",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790843502466,
+      "tag": "0001_outbox_retry_backoff",
+      "breakpoints": true
+    }
+  ]
+}

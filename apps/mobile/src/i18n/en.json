@@ -1,0 +1,101 @@
+{
+  "common": {
+    "continue": "Continue",
+    "tryAgain": "Try again",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "show": "Show",
+    "hide": "Hide"
+  },
+  "welcome": {
+    "headline": "Get seen by the people who scout talent.",
+    "body": "Show your best work. Agents and scouts across Nigeria search here for athletes, musicians, models, actors and creators.",
+    "createAccount": "Create an account",
+    "signIn": "I already have an account"
+  },
+  "signUp": {
+    "title": "Create your account",
+    "subtitle": "You need to be 18 or older to join.",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 10 characters. A short phrase is easy to remember.",
+    "dateOfBirth": "Date of birth",
+    "dateOfBirthPlaceholder": "DD/MM/YYYY",
+    "dateOfBirthHint": "Only used to confirm your age. Never shown on your profile.",
+    "terms": "I agree to the Terms and the Community Guidelines.",
+    "readTerms": "Read the Terms",
+    "readGuidelines": "Read the Community Guidelines",
+    "submit": "Create account",
+    "haveAccount": "Already have an account? Sign in"
+  },
+  "signIn": {
+    "title": "Welcome back",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "noAccount": "New here? Create an account"
+  },
+  "verifyEmail": {
+    "title": "Check your email",
+    "body": "We sent a 6-digit code to {email}. It expires in 10 minutes.",
+    "codeLabel": "Verification code",
+    "submit": "Verify email",
+    "resend": "Send a new code",
+    "resendIn": "Send a new code in {seconds}s",
+    "resent": "New code sent. Check your inbox and spam folder.",
+    "wrongEmail": "Wrong email? Start again"
+  },
+  "chooseRole": {
+    "title": "How will you use Raising Talents?",
+    "body": "This decides what your profile looks like. You can change it until you finish setting up.",
+    "talentTitle": "I am a talent",
+    "talentBody": "Build a portfolio of your work so agents and scouts can find you.",
+    "agentTitle": "I am an agent or scout",
+    "agentBody": "Search for talent and get in touch. Agents are verified before they can message anyone.",
+    "submit": "Continue"
+  },
+  "home": {
+    "titleTalent": "Your portfolio starts here",
+    "titleAgent": "Your search starts here",
+    "bodyTalent": "Next you will add your discipline, a photo and your first clips.",
+    "bodyAgent": "Next you will confirm your agency details and get verified.",
+    "signedInAs": "Signed in as {email}",
+    "signOut": "Sign out"
+  },
+  "restore": {
+    "offlineTitle": "You are offline",
+    "offlineBody": "Raising Talents needs a connection to load your account."
+  },
+  "validation": {
+    "emailInvalid": "Enter a valid email address.",
+    "passwordShort": "Use at least 10 characters.",
+    "dateInvalid": "Enter your date of birth as DD/MM/YYYY.",
+    "termsRequired": "Tick the box to accept the Terms and Community Guidelines.",
+    "codeInvalid": "Enter the 6-digit code from the email."
+  },
+  "errors": {
+    "NETWORK": "No connection. Check your data or Wi-Fi and try again.",
+    "INTERNAL": "Something went wrong on our side. Try again in a moment.",
+    "UNAUTHENTICATED": "Sign in to continue.",
+    "FORBIDDEN": "You do not have access to this.",
+    "NOT_FOUND": "We could not find that. It may have been removed.",
+    "CONFLICT": "This changed while you were editing. Refresh and try again.",
+    "RATE_LIMITED": "Too many attempts. Wait a few minutes and try again.",
+    "VALIDATION_FAILED": "Some details need fixing. Check the highlighted fields.",
+    "EMAIL_ALREADY_REGISTERED": "An account with this email already exists. Sign in instead.",
+    "UNDER_MINIMUM_AGE": "You need to be 18 or older to join Raising Talents.",
+    "WEAK_PASSWORD": "Choose a stronger password.",
+    "INVALID_CREDENTIALS": "That email and password do not match.",
+    "ACCOUNT_SUSPENDED": "This account is suspended. Check your email for details.",
+    "ACCOUNT_BANNED": "This account has been closed for breaking the Community Guidelines.",
+    "SESSION_EXPIRED": "Your session has ended. Sign in again.",
+    "SESSION_REVOKED": "You were signed out to keep your account safe. Sign in again.",
+    "VERIFICATION_CODE_INVALID": "That code is not right. Check the email and try again.",
+    "VERIFICATION_CODE_EXPIRED": "That code has expired. Send a new one.",
+    "VERIFICATION_ATTEMPTS_EXCEEDED": "Too many wrong codes. Send a new one.",
+    "VERIFICATION_RESEND_TOO_SOON": "Wait a moment before asking for another code.",
+    "EMAIL_ALREADY_VERIFIED": "Your email is already verified.",
+    "EMAIL_NOT_VERIFIED": "Verify your email first.",
+    "ROLE_ALREADY_LOCKED": "Your role is set. Contact support to change it."
+  }
+}

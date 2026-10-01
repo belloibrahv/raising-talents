@@ -8,3 +8,6 @@ coverage/
 *.log
 .DS_Store
 .expo/
+.bundle-check/
+apps/mobile/ios/
+apps/mobile/android/

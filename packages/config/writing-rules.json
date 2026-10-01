@@ -1,0 +1,53 @@
+{
+  "description": "Writing rules for Raising Talents. See section 19 of docs/DESIGN.md. Add phrases here; the CI check reads this file.",
+  "bannedCharacters": [
+    { "char": "\u2014", "name": "em dash", "fix": "Use a full stop, comma, colon or brackets." },
+    {
+      "char": "\u2013",
+      "name": "en dash",
+      "fix": "Use 'to' for ranges, or a hyphen inside a word."
+    }
+  ],
+  "bannedPatterns": [
+    {
+      "pattern": "\\s--\\s",
+      "name": "double hyphen used as a dash",
+      "fix": "Use a full stop, comma, colon or brackets."
+    }
+  ],
+  "bannedPhrases": [
+    "seamless",
+    "seamlessly",
+    "leverage",
+    "leveraging",
+    "delve",
+    "robust",
+    "elevate",
+    "unlock your potential",
+    "empower your journey",
+    "in today's fast-paced world",
+    "it's worth noting",
+    "game-changer",
+    "game changer",
+    "cutting-edge",
+    "lorem ipsum",
+    "john doe",
+    "jane doe",
+    "acme"
+  ],
+  "include": {
+    "markdown": ["README.md", "docs"],
+    "json": ["apps/mobile/src/i18n"],
+    "templates": ["apps/api/src"],
+    "codeComments": ["apps", "packages"]
+  },
+  "ignoreDirectories": [
+    "node_modules",
+    "dist",
+    "coverage",
+    ".turbo",
+    ".expo",
+    "drizzle",
+    "generated"
+  ]
+}

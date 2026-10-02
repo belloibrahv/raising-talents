@@ -63,6 +63,25 @@ export const signOutRequestSchema = z
   .meta({ id: 'SignOutRequest' });
 export type SignOutRequest = z.infer<typeof signOutRequestSchema>;
 
+/** Always answered the same way, so it cannot be used to learn who has an account. */
+export const passwordResetRequestSchema = z
+  .object({
+    email: emailSchema,
+  })
+  .meta({ id: 'PasswordResetRequest' });
+export type PasswordResetRequest = z.infer<typeof passwordResetRequestSchema>;
+
+export const passwordResetConfirmSchema = z
+  .object({
+    email: emailSchema,
+    code: z
+      .string()
+      .regex(new RegExp(`^\\d{${VERIFICATION_CODE_LENGTH}}$`), 'Enter the 6-digit code'),
+    newPassword: passwordSchema,
+  })
+  .meta({ id: 'PasswordResetConfirm' });
+export type PasswordResetConfirm = z.infer<typeof passwordResetConfirmSchema>;
+
 export const verifyEmailRequestSchema = z
   .object({
     code: z

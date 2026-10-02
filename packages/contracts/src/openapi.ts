@@ -174,6 +174,11 @@ export function buildOpenApiDocument(version: string): JsonObject {
       { name: 'Taxonomy', description: 'Reference lists seeded by migrations' },
       { name: 'Talent profiles', description: 'Talent profiles and onboarding' },
       { name: 'Agent profiles', description: 'Agent profiles and onboarding' },
+      {
+        name: 'Media',
+        description:
+          'Uploads, processing and scanning. Nothing is visible before it passes the scan',
+      },
     ],
     paths,
     components: {

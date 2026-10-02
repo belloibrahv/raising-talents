@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { idSchema, isoDateTimeSchema } from './common.js';
+import { imageUrlsSchema } from './media.js';
 import { namedRefSchema, slugSchema } from './taxonomy.js';
 
 export const HANDLE_MIN = 3;
@@ -72,6 +73,7 @@ export const myTalentProfileSchema = z
     gender: genderSchema.nullable(),
     genderSearchable: z.boolean(),
     avatarMediaId: idSchema.nullable(),
+    avatarUrls: imageUrlsSchema.nullable(),
     isComplete: z.boolean(),
     missing: z.array(talentMissingFieldSchema),
     version: z.number().int().positive(),
@@ -94,6 +96,7 @@ export const publicTalentProfileSchema = z
     gender: genderSchema.nullable(),
     verified: z.boolean(),
     avatarMediaId: idSchema.nullable(),
+    avatarUrls: imageUrlsSchema.nullable(),
   })
   .meta({ id: 'PublicTalentProfile' });
 export type PublicTalentProfile = z.infer<typeof publicTalentProfileSchema>;

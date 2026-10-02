@@ -4,19 +4,15 @@ import type { Clock } from '../../../platform/clock.js';
 import { domainError, type DomainError } from '../../../platform/domain-error.js';
 import { err, ok, type Result } from '../../../platform/result.js';
 import type { UnitOfWork } from '../../../platform/unit-of-work.js';
+import { isActiveStaff } from '../../accounts/application/staff.js';
 import type { ProfileAccounts } from '../../talent-profiles/application/ports.js';
 import { MediaErrors, type MediaAssetRepository } from '../domain/media-asset.js';
 import type { MediaPresenter } from './media-presenter.js';
 
-const STAFF = new Set(['moderator', 'admin']);
-
 const notStaff = () => domainError('FORBIDDEN', 'Only moderators can do this.');
 
 async function ensureStaff(accounts: ProfileAccounts, userId: string): Promise<DomainError | null> {
-  const account = await accounts.profileContext(userId);
-  return account?.role && STAFF.has(account.role) && account.status === 'active'
-    ? null
-    : notStaff();
+  return isActiveStaff(await accounts.profileContext(userId)) ? null : notStaff();
 }
 
 /** An opaque position in the queue: when the item was held, and its id to break ties. */

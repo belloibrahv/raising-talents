@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useLayoutEffect, useRef, type ReactNode } from 'react';
 import { t } from '../../i18n';
 
 interface PageProps {
@@ -28,7 +28,8 @@ export function Page({
 }: PageProps) {
   const heading = useRef<HTMLHeadingElement>(null);
 
-  useEffect(() => {
+  // Before paint, so the screen never shows with focus still on the previous one.
+  useLayoutEffect(() => {
     const name = t('common.appName');
     document.title = documentTitle === name ? name : `${documentTitle ?? title} | ${name}`;
     heading.current?.focus();

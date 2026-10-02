@@ -1,6 +1,10 @@
 import '@testing-library/jest-dom/vitest';
-import { cleanup } from '@testing-library/react';
+import { cleanup, configure } from '@testing-library/react';
 import { afterEach } from 'vitest';
+
+// Screens load on demand and restore the session first. On a busy CI runner that can take
+// more than the default second, and these tests check what appears, not how fast.
+configure({ asyncUtilTimeout: 5000 });
 
 // jsdom has no media queries; the app reads display-mode to know whether it is installed.
 Object.defineProperty(window, 'matchMedia', {

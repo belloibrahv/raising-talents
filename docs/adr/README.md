@@ -22,3 +22,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-016](016-pin-typescript-5.9-for-now.md)                            | Pin TypeScript 5.9 for now                              | Accepted |
 | [ADR-017](017-shared-endpoint-catalogue-instead-of-generated-client.md) | Shared endpoint catalogue instead of a generated client | Accepted |
 | [ADR-018](018-opentofu-for-infrastructure.md)                           | OpenTofu for infrastructure                             | Accepted |
+| [ADR-019](019-slugs-as-taxonomy-keys.md)                                | Slugs as taxonomy keys, seeded by migration             | Accepted |

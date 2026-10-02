@@ -152,4 +152,7 @@ Milestone 1, foundations.
 | Endpoint catalogue, OpenAPI document and typed app client                                         | Done                                    |
 | Tracing across API and worker, error tracking for API, worker and app                             | Done                                    |
 | Staging infrastructure, container image and deploy pipeline                                       | Done, not yet applied to an AWS account |
+| Milestone 2: taxonomy, talent and agent profiles with versioned updates and onboarding completion | Done                                    |
+| Milestone 2: media upload pipeline with scanning, avatars, portfolio                              | Next                                    |
+| Milestone 2: onboarding screens in the app                                                        | Next                                    |
 | CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks            | Done                                    |

@@ -9,3 +9,4 @@ export * from './profiles.js';
 export * from './media.js';
 export * from './portfolio.js';
 export * from './search.js';
+export * from './moderation.js';

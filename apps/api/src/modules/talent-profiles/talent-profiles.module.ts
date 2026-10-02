@@ -7,6 +7,11 @@ import type { UnitOfWork } from '../../platform/unit-of-work.js';
 import type { AccountsFacade } from '../accounts/application/accounts.facade.js';
 import { ACCOUNTS } from '../accounts/application/accounts.tokens.js';
 import { AccountsModule } from '../accounts/accounts.module.js';
+import type { ModuleEventHandlers } from '../identity/identity.module.js';
+import type { MediaUrls } from '../media/application/media-urls.js';
+import { MEDIA } from '../media/application/media.use-cases.js';
+import { MediaEvents } from '../media/domain/media-asset.js';
+import { MediaModule } from '../media/media.module.js';
 import type { TaxonomySource } from '../taxonomy/application/taxonomy-catalog.js';
 import { TAXONOMY } from '../taxonomy/application/taxonomy.tokens.js';
 import { TaxonomyModule } from '../taxonomy/taxonomy.module.js';
@@ -15,14 +20,18 @@ import {
   GetPublicTalentProfileQuery,
 } from './application/get-talent-profile.queries.js';
 import type { ProfileAccounts } from './application/ports.js';
+import { SetApprovedAvatarHandler } from './application/set-approved-avatar.handler.js';
+import type { AvatarUrls } from './application/talent-profile.presenter.js';
 import { TALENT } from './application/talent-profile.tokens.js';
 import { UpdateMyTalentProfileHandler } from './application/update-my-talent-profile.handler.js';
 import type { TalentProfileRepository } from './domain/talent-profile.repository.js';
 import { DrizzleTalentProfileRepository } from './infrastructure/drizzle-talent-profile.repository.js';
 import { TalentProfileController } from './interface/http/talent-profile.controller.js';
 
+const AVATAR_URLS = Symbol('AvatarUrls');
+
 @Module({
-  imports: [AccountsModule, TaxonomyModule],
+  imports: [AccountsModule, TaxonomyModule, MediaModule],
   controllers: [TalentProfileController],
   providers: [
     {
@@ -37,6 +46,14 @@ import { TalentProfileController } from './interface/http/talent-profile.control
       useFactory: (facade: AccountsFacade): ProfileAccounts => facade,
     },
     {
+      provide: AVATAR_URLS,
+      inject: [MEDIA.Urls],
+      useFactory:
+        (urls: MediaUrls): AvatarUrls =>
+        (ownerId, mediaId) =>
+          urls.forImage(ownerId, mediaId),
+    },
+    {
       provide: TALENT.UpdateMine,
       inject: [
         TALENT.Repository,
@@ -44,6 +61,7 @@ import { TalentProfileController } from './interface/http/talent-profile.control
         TAXONOMY.Source,
         PLATFORM.UnitOfWork,
         PLATFORM.Clock,
+        AVATAR_URLS,
       ],
       useFactory: (
         repo: TalentProfileRepository,
@@ -51,27 +69,47 @@ import { TalentProfileController } from './interface/http/talent-profile.control
         taxonomy: TaxonomySource,
         uow: UnitOfWork,
         clock: Clock,
-      ) => new UpdateMyTalentProfileHandler(repo, accounts, taxonomy, uow, clock),
+        urls: AvatarUrls,
+      ) => new UpdateMyTalentProfileHandler(repo, accounts, taxonomy, uow, clock, urls),
     },
     {
       provide: TALENT.GetMine,
-      inject: [TALENT.Repository, TALENT.Accounts, TAXONOMY.Source],
+      inject: [TALENT.Repository, TALENT.Accounts, TAXONOMY.Source, AVATAR_URLS],
       useFactory: (
         repo: TalentProfileRepository,
         accounts: ProfileAccounts,
         taxonomy: TaxonomySource,
-      ) => new GetMyTalentProfileQuery(repo, accounts, taxonomy),
+        urls: AvatarUrls,
+      ) => new GetMyTalentProfileQuery(repo, accounts, taxonomy, urls),
     },
     {
       provide: TALENT.GetPublic,
-      inject: [TALENT.Repository, TALENT.Accounts, TAXONOMY.Source],
+      inject: [TALENT.Repository, TALENT.Accounts, TAXONOMY.Source, AVATAR_URLS],
       useFactory: (
         repo: TalentProfileRepository,
         accounts: ProfileAccounts,
         taxonomy: TaxonomySource,
-      ) => new GetPublicTalentProfileQuery(repo, accounts, taxonomy),
+        urls: AvatarUrls,
+      ) => new GetPublicTalentProfileQuery(repo, accounts, taxonomy, urls),
+    },
+    {
+      provide: TALENT.EventHandlers,
+      inject: [TALENT.Repository, TALENT.Accounts, PLATFORM.UnitOfWork, PLATFORM.Clock],
+      useFactory: (
+        repo: TalentProfileRepository,
+        accounts: ProfileAccounts,
+        uow: UnitOfWork,
+        clock: Clock,
+      ): ModuleEventHandlers => {
+        const setAvatar = new SetApprovedAvatarHandler(repo, accounts, uow, clock);
+        return {
+          register: (dispatcher) => {
+            dispatcher.on(MediaEvents.Ready, (event) => setAvatar.handle(event));
+          },
+        };
+      },
     },
   ],
-  exports: [TALENT.Repository],
+  exports: [TALENT.Repository, TALENT.EventHandlers],
 })
 export class TalentProfilesModule {}

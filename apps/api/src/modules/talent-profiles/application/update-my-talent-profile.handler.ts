@@ -12,7 +12,7 @@ import {
   type TalentProfileRepository,
 } from '../domain/talent-profile.repository.js';
 import type { ProfileAccounts } from './ports.js';
-import { toMyTalentProfile } from './talent-profile.presenter.js';
+import { toMyTalentProfile, type AvatarUrls } from './talent-profile.presenter.js';
 
 export interface UpdateMyTalentProfileCommand {
   readonly userId: string;
@@ -29,6 +29,7 @@ export class UpdateMyTalentProfileHandler {
     private readonly taxonomy: TaxonomySource,
     private readonly uow: UnitOfWork,
     private readonly clock: Clock,
+    private readonly avatarUrls: AvatarUrls,
     private readonly random: () => number = Math.random,
   ) {}
 
@@ -85,7 +86,7 @@ export class UpdateMyTalentProfileHandler {
           const completed = await this.accounts.completeOnboarding(command.userId);
           if (!completed.ok) return completed;
         }
-        return ok(toMyTalentProfile(profile, catalog));
+        return ok(toMyTalentProfile(profile, catalog, this.avatarUrls));
       });
     } catch (error) {
       // Two people chose the same handle at the same moment; the database kept one.

@@ -8,10 +8,14 @@ import { createAccountsHarness } from '../../accounts/testing/accounts-harness.j
 import { sampleTaxonomySource } from '../../taxonomy/testing/sample-taxonomy.js';
 import { TalentProfileEvents } from '../domain/talent-profile.events.js';
 import { InMemoryTalentProfileRepository } from '../testing/in-memory-talent-profile.repository.js';
+import { MediaUrls } from '../../media/application/media-urls.js';
 import { GetPublicTalentProfileQuery } from './get-talent-profile.queries.js';
 import { UpdateMyTalentProfileHandler } from './update-my-talent-profile.handler.js';
 
 const BIO = 'Left winger from Surulere. Fast on the break, comfortable on either foot.';
+
+const media = new MediaUrls('https://media.staging.raisingtalents.app');
+const urls = (ownerId: string, mediaId: string) => media.forImage(ownerId, mediaId);
 
 describe('UpdateMyTalentProfileHandler', () => {
   let clock: FixedClock;
@@ -33,9 +37,15 @@ describe('UpdateMyTalentProfileHandler', () => {
       sampleTaxonomySource,
       new InMemoryUnitOfWork(),
       clock,
+      urls,
       () => 0.5,
     );
-    publicQuery = new GetPublicTalentProfileQuery(profiles, accounts.facade, sampleTaxonomySource);
+    publicQuery = new GetPublicTalentProfileQuery(
+      profiles,
+      accounts.facade,
+      sampleTaxonomySource,
+      urls,
+    );
     talentId = await accounts.createAccount({ email: 'amaka.okafor@example.com', role: 'talent' });
   });
 
@@ -198,6 +208,9 @@ describe('UpdateMyTalentProfileHandler', () => {
     const view = await publicQuery.execute('Amaka.Okafor');
     if (!view.ok) throw new Error(view.error.message);
     expect(view.value).toMatchObject({ displayName: 'Amaka Okafor', ageYears: 25, gender: null });
+    expect(view.value.avatarUrls?.medium).toBe(
+      `https://media.staging.raisingtalents.app/media/${talentId}/0192a3b4-0000-7000-8000-0000000000aa/1024.webp`,
+    );
     expect(JSON.stringify(view.value)).not.toContain('2001-04-17');
     expect(events.ofType(TalentProfileEvents.Completed)).toHaveLength(1);
   });

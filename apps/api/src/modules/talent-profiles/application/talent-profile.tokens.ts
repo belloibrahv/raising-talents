@@ -4,4 +4,5 @@ export const TALENT = {
   UpdateMine: Symbol('UpdateMyTalentProfileHandler'),
   GetMine: Symbol('GetMyTalentProfileQuery'),
   GetPublic: Symbol('GetPublicTalentProfileQuery'),
+  EventHandlers: Symbol('TalentProfileEventHandlers'),
 } as const;

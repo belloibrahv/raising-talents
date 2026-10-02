@@ -3,4 +3,5 @@ export const AccountEvents = {
   EmailVerified: 'accounts.EmailVerified',
   RoleSelected: 'accounts.RoleSelected',
   OnboardingCompleted: 'accounts.OnboardingCompleted',
+  StaffRoleGranted: 'accounts.StaffRoleGranted',
 } as const;

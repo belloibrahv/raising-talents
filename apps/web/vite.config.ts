@@ -40,12 +40,18 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         // Latin and Latin Extended cover English and Nigerian names (ẹ, ọ, ṣ). The rest load only if used.
-        globIgnores: ['**/*vietnamese*'],
+        // hls.js is only for browsers without native HLS, and only once a video plays.
+        globIgnores: ['**/*vietnamese*', '**/hls-*.js'],
         navigateFallback: '/index.html',
         // API calls are personal and must never come from a cache.
         navigateFallbackDenylist: [/^\/v1\//],
         cleanupOutdatedCaches: true,
         runtimeCaching: [
+          {
+            urlPattern: ({ url }) => /\/assets\/hls-[\w-]+\.js$/.test(url.pathname),
+            handler: 'CacheFirst',
+            options: { cacheName: 'video-player', expiration: { maxEntries: 2 } },
+          },
           {
             // Ready images never change at a given address, so the cache can serve them first.
             urlPattern: ({ url }) =>

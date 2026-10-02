@@ -1,70 +1,19 @@
-import { QueryClientProvider } from '@tanstack/react-query';
-import { render, screen, waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import axe from 'axe-core';
-import { createMemoryRouter, RouterProvider } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { http, session } from '../shared/api/client';
-import { createQueryClient } from './query-client';
-import { buildRoutes } from './routes';
-
-const meFor = (overrides: Record<string, unknown> = {}) => ({
-  id: '0192a3b4-0000-7000-8000-000000000001',
-  email: 'ngozi.adeyemi@example.com',
-  emailVerified: true,
-  role: 'talent',
-  roleLocked: false,
-  status: 'onboarding',
-  countryCode: 'NG',
-  createdAt: '2026-10-01T09:00:00.000Z',
-  ...overrides,
-});
-
-const signedIn = (me = meFor()) =>
-  Response.json({ accessToken: 'access-1', accessTokenExpiresAt: '2099-01-01T00:00:00.000Z', me });
-
-const problem = (status: number, code: string, detail?: string) =>
-  Response.json({ type: 'about:blank', title: 'Error', status, code, detail }, { status });
-
-type Route = (init: RequestInit | undefined) => Response;
-
-/** Answers API calls by path; anything unexpected fails the test loudly. */
-function stubApi(routes: Record<string, Route>) {
-  const calls: { path: string; body: unknown }[] = [];
-  vi.stubGlobal('fetch', async (url: string, init?: RequestInit) => {
-    await Promise.resolve();
-    const path = new URL(url).pathname;
-    calls.push({ path, body: init?.body ? JSON.parse(init.body as string) : undefined });
-    const route = routes[path];
-    if (!route) throw new Error(`Unexpected call to ${path}`);
-    return route(init);
-  });
-  return calls;
-}
-
-function renderAt(path: string) {
-  const router = createMemoryRouter(buildRoutes(), { initialEntries: [path] });
-  render(
-    <QueryClientProvider client={createQueryClient()}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>,
-  );
-  return router;
-}
-
-/** axe without colour contrast, which jsdom cannot compute; contrast is checked against the tokens instead. */
-async function expectNoAxeViolations() {
-  const result = await axe.run(document.body, { rules: { 'color-contrast': { enabled: false } } });
-  expect(result.violations.map((violation) => `${violation.id}: ${violation.help}`)).toEqual([]);
-}
+import {
+  expectNoAxeViolations,
+  meFor,
+  problem,
+  renderAt,
+  resetSession,
+  signedIn,
+  stubApi,
+  TAXONOMY,
+} from '../test/app-harness';
 
 describe('the web app', () => {
-  beforeEach(() => {
-    // The client and the store live for the whole app; start each test as the app starts.
-    http.forgetSession();
-    session.signedOut();
-    session.restoring();
-  });
+  beforeEach(resetSession);
 
   it('sends a signed-out visitor to the welcome screen, which passes axe', async () => {
     stubApi({ '/v1/auth/web/refresh': () => problem(401, 'UNAUTHENTICATED') });
@@ -80,10 +29,12 @@ describe('the web app', () => {
     await expectNoAxeViolations();
   });
 
-  it('signs in and opens the app for a verified talent', async () => {
+  it('signs in a talent who has not finished setting up, and resumes the profile wizard', async () => {
     const calls = stubApi({
       '/v1/auth/web/refresh': () => problem(401, 'UNAUTHENTICATED'),
       '/v1/auth/web/sign-in': () => signedIn(),
+      '/v1/me/talent-profile': () => problem(404, 'NOT_FOUND'),
+      '/v1/taxonomy': () => Response.json(TAXONOMY),
     });
     const router = renderAt('/sign-in');
     const user = userEvent.setup();
@@ -91,10 +42,8 @@ describe('the web app', () => {
     await user.type(screen.getByLabelText('Password'), 'runway-lagos-fashion-week');
     await user.click(screen.getByRole('button', { name: 'Sign in' }));
 
-    expect(
-      await screen.findByRole('heading', { level: 1, name: 'Your portfolio starts here' }),
-    ).toBeVisible();
-    expect(router.state.location.pathname).toBe('/home');
+    expect(await screen.findByRole('heading', { level: 1, name: 'About you' })).toBeVisible();
+    expect(router.state.location.pathname).toBe('/onboarding/talent/about');
     const body = calls.find((call) => call.path === '/v1/auth/web/sign-in')?.body as Record<
       string,
       string
@@ -174,15 +123,15 @@ describe('the web app', () => {
     stubApi({
       '/v1/auth/web/refresh': () => signedIn(meFor({ role: null })),
       '/v1/me/role': () => Response.json(meFor({ role: 'agent' })),
+      '/v1/me/agent-profile': () => problem(404, 'NOT_FOUND'),
+      '/v1/taxonomy': () => Response.json(TAXONOMY),
     });
     const router = renderAt('/');
     const user = userEvent.setup();
     await user.click(await screen.findByRole('radio', { name: /I am an agent or scout/ }));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
-    expect(
-      await screen.findByRole('heading', { level: 1, name: 'Your search starts here' }),
-    ).toBeVisible();
-    expect(router.state.location.pathname).toBe('/home');
+    expect(await screen.findByRole('heading', { level: 1, name: 'Your agency' })).toBeVisible();
+    expect(router.state.location.pathname).toBe('/onboarding/agent');
   });
 
   it('offers a retry instead of signing out when the API cannot be reached', async () => {

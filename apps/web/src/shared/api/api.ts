@@ -18,7 +18,17 @@ type ParamsOption<N extends EndpointName> = [keyof PathParams<Endpoints[N]['path
   ? { readonly params?: undefined }
   : { readonly params: PathParams<Endpoints[N]['path']> };
 
-export type CallOptions<N extends EndpointName> = BodyOption<N> & ParamsOption<N>;
+/**
+ * Endpoints that check the version: send the version from the last read. The API's ETag
+ * is that number in quotes, and every such response carries it in the body as well.
+ */
+type IfMatchOption<N extends EndpointName> = Endpoints[N] extends { concurrency: 'if-match' }
+  ? { readonly ifMatch?: number | null }
+  : { readonly ifMatch?: undefined };
+
+export type CallOptions<N extends EndpointName> = BodyOption<N> &
+  ParamsOption<N> &
+  IfMatchOption<N>;
 
 /** Options can be left out only when the endpoint needs neither a body nor path parameters. */
 type CallArgs<N extends EndpointName> =
@@ -42,10 +52,17 @@ export function createApi(http: WebHttpClient): Api {
       ...args: CallArgs<N>
     ): Promise<EndpointResponse<N>> {
       const endpoint: EndpointDefinition = endpoints[name];
-      const options = (args[0] ?? {}) as { body?: unknown; params?: Record<string, string> };
+      const options = (args[0] ?? {}) as {
+        body?: unknown;
+        params?: Record<string, string>;
+        ifMatch?: number | null;
+      };
       const result = await http.request(buildPath(endpoint.path, options.params), {
         method: endpoint.method,
         authenticated: endpoint.auth,
+        ...(typeof options.ifMatch === 'number'
+          ? { headers: { 'if-match': `"${String(options.ifMatch)}"` } }
+          : {}),
         ...(options.body === undefined ? {} : { body: options.body }),
         ...(endpoint.response ? { schema: endpoint.response } : {}),
       });

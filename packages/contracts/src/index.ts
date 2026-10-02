@@ -7,3 +7,4 @@ export * from './openapi.js';
 export * from './taxonomy.js';
 export * from './profiles.js';
 export * from './media.js';
+export * from './portfolio.js';

@@ -43,6 +43,10 @@
     {
       "name": "Media",
       "description": "Uploads, processing and scanning. Nothing is visible before it passes the scan"
+    },
+    {
+      "name": "Portfolio",
+      "description": "Ordered images on a talent profile. Others see ready media only"
     }
   ],
   "paths": {
@@ -1731,6 +1735,724 @@
           }
         }
       }
+    },
+    "/v1/me/portfolio": {
+      "get": {
+        "operationId": "portfolio_getMine",
+        "summary": "The signed-in talent's portfolio, every item with its media status",
+        "tags": [
+          "Portfolio"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Version to send back in If-Match.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyPortfolio"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. Codes: WRONG_ROLE.",
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/portfolio/items": {
+      "post": {
+        "operationId": "portfolio_addItem",
+        "summary": "Add an uploaded image to the end of the portfolio",
+        "tags": [
+          "Portfolio"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddPortfolioItemRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "headers": {
+              "ETag": {
+                "description": "Version to send back in If-Match.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyPortfolio"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. Codes: WRONG_ROLE, EMAIL_NOT_VERIFIED.",
+            "x-error-codes": [
+              "WRONG_ROLE",
+              "EMAIL_NOT_VERIFIED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. Codes: NOT_FOUND.",
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict. Codes: MEDIA_NOT_UPLOADED, MEDIA_WRONG_STATE, MEDIA_ALREADY_USED, PORTFOLIO_FULL, CONFLICT.",
+            "x-error-codes": [
+              "MEDIA_NOT_UPLOADED",
+              "MEDIA_WRONG_STATE",
+              "MEDIA_ALREADY_USED",
+              "PORTFOLIO_FULL",
+              "CONFLICT"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request cannot be completed. Codes: MEDIA_WRONG_PURPOSE.",
+            "x-error-codes": [
+              "MEDIA_WRONG_PURPOSE"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/portfolio/items/{itemId}": {
+      "patch": {
+        "operationId": "portfolio_updateItem",
+        "summary": "Change an item's caption",
+        "tags": [
+          "Portfolio"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePortfolioItemRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Version to send back in If-Match.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyPortfolio"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. Codes: WRONG_ROLE.",
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. Codes: NOT_FOUND.",
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict. Codes: CONFLICT.",
+            "x-error-codes": [
+              "CONFLICT"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "portfolio_removeItem",
+        "summary": "Remove an item; its media is deleted from storage",
+        "tags": [
+          "Portfolio"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Version to send back in If-Match.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyPortfolio"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. Codes: WRONG_ROLE.",
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. Codes: NOT_FOUND.",
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict. Codes: CONFLICT.",
+            "x-error-codes": [
+              "CONFLICT"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/portfolio/order": {
+      "put": {
+        "operationId": "portfolio_reorder",
+        "summary": "Put every item in a new order",
+        "tags": [
+          "Portfolio"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "description": "The ETag from the last read. Required once the resource exists; a stale value returns 412.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderPortfolioRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "ETag": {
+                "description": "Version to send back in If-Match.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyPortfolio"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. Codes: WRONG_ROLE.",
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict. Codes: PORTFOLIO_ORDER_MISMATCH.",
+            "x-error-codes": [
+              "PORTFOLIO_ORDER_MISMATCH"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "412": {
+            "description": "Stale version. Codes: PRECONDITION_FAILED.",
+            "x-error-codes": [
+              "PRECONDITION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "428": {
+            "description": "If-Match header required. Codes: PRECONDITION_REQUIRED.",
+            "x-error-codes": [
+              "PRECONDITION_REQUIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/talents/{handle}/portfolio": {
+      "get": {
+        "operationId": "talents_getPortfolio",
+        "summary": "A talent's portfolio, as agents see it",
+        "tags": [
+          "Portfolio"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "handle",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicPortfolio"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. Codes: NOT_FOUND.",
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1801,7 +2523,11 @@
               "MEDIA_TOO_LARGE",
               "MEDIA_NOT_UPLOADED",
               "MEDIA_UPLOAD_MISMATCH",
-              "MEDIA_WRONG_STATE"
+              "MEDIA_WRONG_STATE",
+              "MEDIA_WRONG_PURPOSE",
+              "MEDIA_ALREADY_USED",
+              "PORTFOLIO_FULL",
+              "PORTFOLIO_ORDER_MISMATCH"
             ]
           },
           "detail": {
@@ -2859,6 +3585,195 @@
           "missing",
           "version",
           "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "AddPortfolioItemRequest": {
+        "type": "object",
+        "properties": {
+          "mediaId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "caption": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "mediaId"
+        ],
+        "additionalProperties": false
+      },
+      "UpdatePortfolioItemRequest": {
+        "type": "object",
+        "properties": {
+          "caption": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "caption"
+        ],
+        "additionalProperties": false
+      },
+      "ReorderPortfolioRequest": {
+        "type": "object",
+        "properties": {
+          "itemIds": {
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            }
+          }
+        },
+        "required": [
+          "itemIds"
+        ],
+        "additionalProperties": false
+      },
+      "MyPortfolioItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "image"
+            ]
+          },
+          "mediaId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "mediaStatus": {
+            "type": "string",
+            "enum": [
+              "awaiting_upload",
+              "processing",
+              "scanning",
+              "ready",
+              "held_for_review",
+              "rejected",
+              "failed",
+              "deleted"
+            ]
+          },
+          "caption": {
+            "type": "string"
+          },
+          "urls": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageUrls"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "rejectionReason": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "mediaId",
+          "mediaStatus",
+          "caption",
+          "urls",
+          "rejectionReason",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "MyPortfolio": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MyPortfolioItem"
+            }
+          },
+          "maxItems": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "items",
+          "maxItems",
+          "version"
+        ],
+        "additionalProperties": false
+      },
+      "PublicPortfolioItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "image"
+            ]
+          },
+          "caption": {
+            "type": "string"
+          },
+          "urls": {
+            "$ref": "#/components/schemas/ImageUrls"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "caption",
+          "urls"
+        ],
+        "additionalProperties": false
+      },
+      "PublicPortfolio": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicPortfolioItem"
+            }
+          }
+        },
+        "required": [
+          "items"
         ],
         "additionalProperties": false
       }

@@ -1,5 +1,10 @@
 export type SessionRevokedReason =
-  'rotated' | 'signed_out' | 'reuse_detected' | 'device_mismatch' | 'account_blocked';
+  | 'rotated'
+  | 'signed_out'
+  | 'reuse_detected'
+  | 'device_mismatch'
+  | 'account_blocked'
+  | 'password_reset';
 
 export interface SessionProps {
   readonly id: string;

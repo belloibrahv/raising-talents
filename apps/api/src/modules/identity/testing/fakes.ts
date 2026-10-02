@@ -30,6 +30,14 @@ export class InMemorySessionRepository implements SessionRepository {
     }
   }
 
+  async revokeAllForUser(userId: string, reason: SessionRevokedReason, now: Date): Promise<void> {
+    for (const [id, row] of this.rows) {
+      if (row.userId === userId && row.revokedAt === null) {
+        this.rows.set(id, { ...row, revokedAt: now, revokedReason: reason });
+      }
+    }
+  }
+
   activeSessionsFor(userId: string) {
     return [...this.rows.values()].filter((row) => row.userId === userId && row.revokedAt === null);
   }

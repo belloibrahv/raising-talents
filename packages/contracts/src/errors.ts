@@ -29,6 +29,13 @@ export const ErrorCode = {
   EmailAlreadyVerified: 'EMAIL_ALREADY_VERIFIED',
   EmailNotVerified: 'EMAIL_NOT_VERIFIED',
   RoleAlreadyLocked: 'ROLE_ALREADY_LOCKED',
+
+  PreconditionRequired: 'PRECONDITION_REQUIRED',
+  PreconditionFailed: 'PRECONDITION_FAILED',
+  WrongRole: 'WRONG_ROLE',
+  HandleTaken: 'HANDLE_TAKEN',
+  HandleInvalid: 'HANDLE_INVALID',
+  UnknownTaxonomy: 'UNKNOWN_TAXONOMY',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -60,6 +67,13 @@ export const ERROR_STATUS: Record<ErrorCode, number> = {
   [ErrorCode.EmailAlreadyVerified]: 409,
   [ErrorCode.EmailNotVerified]: 403,
   [ErrorCode.RoleAlreadyLocked]: 409,
+
+  [ErrorCode.PreconditionRequired]: 428,
+  [ErrorCode.PreconditionFailed]: 412,
+  [ErrorCode.WrongRole]: 403,
+  [ErrorCode.HandleTaken]: 409,
+  [ErrorCode.HandleInvalid]: 422,
+  [ErrorCode.UnknownTaxonomy]: 422,
 };
 
 export const fieldProblemSchema = z

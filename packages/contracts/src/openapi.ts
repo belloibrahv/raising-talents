@@ -19,7 +19,9 @@ const STATUS_DESCRIPTION: Record<number, string> = {
   403: 'Not allowed',
   404: 'Not found',
   409: 'Conflict',
+  412: 'Stale version',
   422: 'Request cannot be completed',
+  428: 'If-Match header required',
   429: 'Too many requests',
   500: 'Something went wrong',
 };
@@ -94,12 +96,29 @@ function errorResponses(endpoint: EndpointDefinition): JsonObject {
 }
 
 function operation(name: string, endpoint: EndpointDefinition): JsonObject {
-  const pathParams = [...endpoint.path.matchAll(/\{(\w+)\}/g)].map((match) => ({
+  const pathParams: JsonObject[] = [...endpoint.path.matchAll(/\{(\w+)\}/g)].map((match) => ({
     name: match[1],
     in: 'path',
     required: true,
     schema: { type: 'string' },
   }));
+  if (endpoint.concurrency === 'if-match') {
+    pathParams.push({
+      name: 'If-Match',
+      in: 'header',
+      required: false,
+      description:
+        'The ETag from the last read. Required once the resource exists; a stale value returns 412.',
+      schema: { type: 'string' },
+    });
+  }
+  const etagHeader = endpoint.concurrency
+    ? {
+        headers: {
+          ETag: { description: 'Version to send back in If-Match.', schema: { type: 'string' } },
+        },
+      }
+    : {};
   return {
     operationId: name.replace('.', '_'),
     summary: endpoint.summary,
@@ -117,6 +136,7 @@ function operation(name: string, endpoint: EndpointDefinition): JsonObject {
     responses: {
       [String(endpoint.successStatus)]: {
         description: STATUS_DESCRIPTION[endpoint.successStatus] ?? 'OK',
+        ...etagHeader,
         ...(endpoint.response
           ? { content: { 'application/json': { schema: ref(schemaId(endpoint.response)) } } }
           : {}),
@@ -151,6 +171,9 @@ export function buildOpenApiDocument(version: string): JsonObject {
     tags: [
       { name: 'Auth', description: 'Accounts, sessions and email verification' },
       { name: 'Me', description: 'The signed-in account' },
+      { name: 'Taxonomy', description: 'Reference lists seeded by migrations' },
+      { name: 'Talent profiles', description: 'Talent profiles and onboarding' },
+      { name: 'Agent profiles', description: 'Agent profiles and onboarding' },
     ],
     paths,
     components: {

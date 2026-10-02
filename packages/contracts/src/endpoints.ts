@@ -9,6 +9,14 @@ import {
   verifyEmailRequestSchema,
 } from './auth.js';
 import { ErrorCode } from './errors.js';
+import {
+  myAgentProfileSchema,
+  myTalentProfileSchema,
+  publicTalentProfileSchema,
+  updateAgentProfileRequestSchema,
+  updateTalentProfileRequestSchema,
+} from './profiles.js';
+import { taxonomyResponseSchema } from './taxonomy.js';
 
 export type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
 
@@ -25,6 +33,11 @@ export interface EndpointDefinition {
   /** Business errors this endpoint can return, beyond the ones every endpoint can return. */
   readonly errors: readonly ErrorCode[];
   readonly tag: string;
+  /**
+   * Optimistic concurrency: the response carries an ETag, and updates must send it
+   * back in If-Match. A stale version is refused with 412.
+   */
+  readonly concurrency?: 'etag' | 'if-match';
 }
 
 const define = <const T extends EndpointDefinition>(endpoint: T): T => endpoint;
@@ -139,6 +152,86 @@ export const endpoints = {
     successStatus: 200,
     errors: [ErrorCode.EmailNotVerified, ErrorCode.RoleAlreadyLocked],
     tag: 'Me',
+  }),
+  'taxonomy.get': define({
+    method: 'GET',
+    path: '/v1/taxonomy',
+    summary: 'Categories, subcategories, skills and cities',
+    auth: true,
+    response: taxonomyResponseSchema,
+    successStatus: 200,
+    errors: [],
+    tag: 'Taxonomy',
+  }),
+  'talentProfile.getMine': define({
+    method: 'GET',
+    path: '/v1/me/talent-profile',
+    summary: "The signed-in talent's profile, with what is still missing",
+    auth: true,
+    response: myTalentProfileSchema,
+    successStatus: 200,
+    errors: [ErrorCode.WrongRole, ErrorCode.NotFound],
+    tag: 'Talent profiles',
+    concurrency: 'etag',
+  }),
+  'talentProfile.updateMine': define({
+    method: 'PATCH',
+    path: '/v1/me/talent-profile',
+    summary: 'Create or update the talent profile, one onboarding step at a time',
+    auth: true,
+    request: updateTalentProfileRequestSchema,
+    response: myTalentProfileSchema,
+    successStatus: 200,
+    errors: [
+      ErrorCode.WrongRole,
+      ErrorCode.EmailNotVerified,
+      ErrorCode.PreconditionRequired,
+      ErrorCode.PreconditionFailed,
+      ErrorCode.HandleTaken,
+      ErrorCode.HandleInvalid,
+      ErrorCode.UnknownTaxonomy,
+    ],
+    tag: 'Talent profiles',
+    concurrency: 'if-match',
+  }),
+  'talents.getByHandle': define({
+    method: 'GET',
+    path: '/v1/talents/{handle}',
+    summary: 'A complete talent profile, as agents see it',
+    auth: true,
+    response: publicTalentProfileSchema,
+    successStatus: 200,
+    errors: [ErrorCode.NotFound],
+    tag: 'Talent profiles',
+  }),
+  'agentProfile.getMine': define({
+    method: 'GET',
+    path: '/v1/me/agent-profile',
+    summary: "The signed-in agent's profile, with what is still missing",
+    auth: true,
+    response: myAgentProfileSchema,
+    successStatus: 200,
+    errors: [ErrorCode.WrongRole, ErrorCode.NotFound],
+    tag: 'Agent profiles',
+    concurrency: 'etag',
+  }),
+  'agentProfile.updateMine': define({
+    method: 'PATCH',
+    path: '/v1/me/agent-profile',
+    summary: 'Create or update the agent profile',
+    auth: true,
+    request: updateAgentProfileRequestSchema,
+    response: myAgentProfileSchema,
+    successStatus: 200,
+    errors: [
+      ErrorCode.WrongRole,
+      ErrorCode.EmailNotVerified,
+      ErrorCode.PreconditionRequired,
+      ErrorCode.PreconditionFailed,
+      ErrorCode.UnknownTaxonomy,
+    ],
+    tag: 'Agent profiles',
+    concurrency: 'if-match',
   }),
 } as const satisfies Record<string, EndpointDefinition>;
 

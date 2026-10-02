@@ -18,6 +18,7 @@ import { TaxonomyModule } from '../taxonomy/taxonomy.module.js';
 import {
   GetMyTalentProfileQuery,
   GetPublicTalentProfileQuery,
+  TalentDirectory,
 } from './application/get-talent-profile.queries.js';
 import type { ProfileAccounts } from './application/ports.js';
 import { SetApprovedAvatarHandler } from './application/set-approved-avatar.handler.js';
@@ -93,6 +94,12 @@ const AVATAR_URLS = Symbol('AvatarUrls');
       ) => new GetPublicTalentProfileQuery(repo, accounts, taxonomy, urls),
     },
     {
+      provide: TALENT.Directory,
+      inject: [TALENT.Repository, TALENT.Accounts],
+      useFactory: (repo: TalentProfileRepository, accounts: ProfileAccounts) =>
+        new TalentDirectory(repo, accounts),
+    },
+    {
       provide: TALENT.EventHandlers,
       inject: [TALENT.Repository, TALENT.Accounts, PLATFORM.UnitOfWork, PLATFORM.Clock],
       useFactory: (
@@ -110,6 +117,6 @@ const AVATAR_URLS = Symbol('AvatarUrls');
       },
     },
   ],
-  exports: [TALENT.Repository, TALENT.EventHandlers],
+  exports: [TALENT.Repository, TALENT.Directory, TALENT.EventHandlers],
 })
 export class TalentProfilesModule {}

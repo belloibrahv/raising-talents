@@ -20,6 +20,14 @@ import {
 import { generateTestSigningKeys } from '../../src/modules/identity/testing/identity-test-harness.js';
 import { AGENT } from '../../src/modules/agent-profiles/application/agent-profile.use-cases.js';
 import { InMemoryAgentProfileRepository } from '../../src/modules/agent-profiles/testing/in-memory-agent-profile.repository.js';
+import { MEDIA } from '../../src/modules/media/application/media.use-cases.js';
+import {
+  FakeImageProcessor,
+  InMemoryMediaAssetRepository,
+  InMemoryObjectStorage,
+} from '../../src/modules/media/testing/fakes.js';
+import { PORTFOLIO } from '../../src/modules/portfolio/application/portfolio.use-cases.js';
+import { InMemoryPortfolioRepository } from '../../src/modules/portfolio/testing/in-memory-portfolio.repository.js';
 import { TALENT } from '../../src/modules/talent-profiles/application/talent-profile.tokens.js';
 import { InMemoryTalentProfileRepository } from '../../src/modules/talent-profiles/testing/in-memory-talent-profile.repository.js';
 import { TAXONOMY } from '../../src/modules/taxonomy/application/taxonomy.tokens.js';
@@ -41,6 +49,8 @@ export interface TestApp {
   readonly events: InMemoryEventRecorder;
   readonly email: CapturingEmailSender;
   readonly talentProfiles: InMemoryTalentProfileRepository;
+  readonly storage: InMemoryObjectStorage;
+  readonly mediaAssets: InMemoryMediaAssetRepository;
   /** Publishes recorded events the way the worker would. */
   deliverEvents(): Promise<void>;
 }
@@ -69,6 +79,8 @@ export async function createTestApp(): Promise<TestApp> {
   const events = new InMemoryEventRecorder();
   const email = new CapturingEmailSender();
   const talentProfiles = new InMemoryTalentProfileRepository(events);
+  const storage = new InMemoryObjectStorage();
+  const mediaAssets = new InMemoryMediaAssetRepository(events);
 
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule.register({ config, logger }), DiscoveryModule],
@@ -103,10 +115,20 @@ export async function createTestApp(): Promise<TestApp> {
     .useValue(talentProfiles)
     .overrideProvider(AGENT.Repository)
     .useValue(new InMemoryAgentProfileRepository(events))
+    .overrideProvider(MEDIA.Repository)
+    .useValue(mediaAssets)
+    .overrideProvider(MEDIA.Storage)
+    .useValue(storage)
+    .overrideProvider(MEDIA.Processor)
+    .useValue(new FakeImageProcessor())
+    .overrideProvider(PORTFOLIO.Repository)
+    .useValue(new InMemoryPortfolioRepository(events))
     .compile();
 
   const dispatcher = new EventDispatcher();
-  moduleRef.get<ModuleEventHandlers>(IDENTITY.EventHandlers).register(dispatcher);
+  for (const token of [IDENTITY.EventHandlers, MEDIA.EventHandlers, TALENT.EventHandlers]) {
+    moduleRef.get<ModuleEventHandlers>(token).register(dispatcher);
+  }
   const app = configureApiApp(
     moduleRef.createNestApplication<NestFastifyApplication>(createFastifyAdapter(config)),
     logger,
@@ -120,8 +142,13 @@ export async function createTestApp(): Promise<TestApp> {
     events,
     email,
     talentProfiles,
+    storage,
+    mediaAssets,
+    // Keeps draining, because handlers raise new events (an upload becomes ready, then completes a profile).
     deliverEvents: async () => {
-      for (const event of events.events.splice(0)) await dispatcher.dispatch(event);
+      while (events.events.length > 0) {
+        for (const event of events.events.splice(0)) await dispatcher.dispatch(event);
+      }
     },
   };
 }

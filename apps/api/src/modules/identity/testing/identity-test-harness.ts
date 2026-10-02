@@ -57,6 +57,7 @@ export async function createIdentityHarness(settings: Partial<IdentitySettings> 
     new CreateAccountHandler(accountRepository),
     new MarkEmailVerifiedHandler(accountRepository, clock),
     new GetMeQuery(accountRepository),
+    clock,
   );
   const directory = accountsDirectory(accounts);
   const sessions = new InMemorySessionRepository();

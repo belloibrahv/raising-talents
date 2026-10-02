@@ -96,3 +96,44 @@ describe('Account sign-in status', () => {
     expect(!banned.ok && banned.error.code).toBe(ErrorCode.AccountBanned);
   });
 });
+
+describe('Account onboarding completion', () => {
+  const ready = () => {
+    const result = Account.register({
+      id: '0192a3b4-0000-7000-8000-000000000009',
+      email: 'halima.sule@example.com',
+      dateOfBirth: '1998-02-11',
+      countryCode: 'NG',
+      now,
+    });
+    if (!result.ok) throw new Error('expected success');
+    result.value.markEmailVerified(now);
+    result.value.selectRole('talent', now);
+    result.value.pullEvents();
+    return result.value;
+  };
+
+  it('locks the role and activates the account, once', () => {
+    const account = ready();
+    expect(account.completeOnboarding(now).ok).toBe(true);
+    expect(account.snapshot()).toMatchObject({ status: 'active', roleLockedAt: now });
+    expect(account.completeOnboarding(now).ok).toBe(true);
+    expect(
+      account.pullEvents().filter((event) => event.type === AccountEvents.OnboardingCompleted),
+    ).toHaveLength(1);
+    expect(account.selectRole('agent', now).ok).toBe(false);
+  });
+
+  it('needs a chosen role', () => {
+    const result = Account.register({
+      id: '0192a3b4-0000-7000-8000-00000000000a',
+      email: 'kola.ade@example.com',
+      dateOfBirth: '1998-02-11',
+      countryCode: 'NG',
+      now,
+    });
+    if (!result.ok) throw new Error('expected success');
+    result.value.markEmailVerified(now);
+    expect(result.value.completeOnboarding(now).ok).toBe(false);
+  });
+});

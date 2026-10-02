@@ -92,6 +92,21 @@ aws secretsmanager put-secret-value --secret-id rt-staging/sentry --secret-strin
 aws secretsmanager put-secret-value --secret-id rt-staging/otlp --secret-string "<Authorization=Basic ... or empty>"
 ```
 
+Video needs a Mux environment named staging. In the Mux dashboard, in that environment:
+
+1. Settings, Access Tokens: create a token with Mux Video read and write. Keep the id and secret.
+2. Settings, Signing Keys: create a video signing key. Mux shows the private key once, already base64 encoded.
+3. Settings, Webhooks: add `https://api.staging.raisingtalents.app/v1/webhooks/mux` and copy its signing secret.
+
+```bash
+aws secretsmanager put-secret-value --secret-id rt-staging/mux --secret-string \
+  "$(jq -n --arg id "<token id>" --arg secret "<token secret>" --arg hook "<webhook signing secret>" \
+     --arg key "<signing key id>" --arg pem "<signing private key, as shown>" \
+     '{tokenId: $id, tokenSecret: $secret, webhookSecret: $hook, signingKeyId: $key, signingPrivateKeyBase64: $pem}')"
+```
+
+The API refuses to start in staging without these values, so a missing one shows up at deploy, not when someone first uploads a video.
+
 ## 6. Email
 
 SES starts in sandbox mode: it only delivers to addresses you have verified. For testers, verify each address in the SES console, or request production access (SES, Account dashboard, Request production access). Production access takes about a day and needs a short description of what the emails are.
@@ -120,3 +135,4 @@ Expect `200`, an `x-trace-id` header, and HSTS from the load balancer's HTTPS li
 | Migrations fail with a TLS error              | The image is missing the RDS certificate bundle; rebuild from the current Dockerfile |
 | `/health/ready` answers 503                   | The task cannot reach Postgres or Valkey; check security groups in the plan          |
 | No verification email                         | SES sandbox: the recipient is not verified (step 6)                                  |
+| Videos stay processing                        | Mux cannot reach the webhook URL, or the webhook secret in `rt-staging/mux` is wrong |

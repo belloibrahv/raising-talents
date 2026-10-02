@@ -48,6 +48,7 @@ import { SESv2Client } from '@aws-sdk/client-sesv2';
 import { SesEmailSender } from './infrastructure/ses-email-sender.js';
 import { SmtpEmailSender } from './infrastructure/smtp-email-sender.js';
 import { AuthController } from './interface/http/auth.controller.js';
+import { WebAuthController } from './interface/http/web-auth.controller.js';
 
 /** Registers identity's reactions to published events. Called by the worker. */
 export interface ModuleEventHandlers {
@@ -284,7 +285,7 @@ const applicationProviders: Provider[] = [
 
 @Module({
   imports: [AccountsModule],
-  controllers: [AuthController],
+  controllers: [AuthController, WebAuthController],
   providers: [...infrastructureProviders, ...applicationProviders],
   exports: [IDENTITY.EventHandlers],
 })

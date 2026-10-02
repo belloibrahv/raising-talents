@@ -43,6 +43,7 @@ import {
   InMemoryUnitOfWork,
 } from '../../src/platform/testing/fakes.js';
 
+export const E2E_WEB_ORIGIN = 'https://app.raisingtalents.test';
 export const E2E_WEBHOOK_SECRET = 'e2e-mux-webhook-secret';
 
 const toBase64 = (value: string) => Buffer.from(value).toString('base64');
@@ -80,6 +81,7 @@ export async function createTestApp(): Promise<TestApp> {
     MEDIA_BUCKET: 'raising-talents-media-test',
     MEDIA_CDN_URL: 'https://media.test',
     CONTENT_SCANNER: 'development-allow-all',
+    WEB_ORIGINS: E2E_WEB_ORIGIN,
   });
   const logger = pino({ level: 'silent' });
   const events = new InMemoryEventRecorder();

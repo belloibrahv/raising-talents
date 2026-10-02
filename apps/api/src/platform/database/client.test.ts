@@ -79,6 +79,29 @@ describe('loadConfig database and cache rules', () => {
     expect(config.DATABASE_HOST).toBe(base.DATABASE_HOST);
   });
 
+  it('reads web origins as a list, and refuses insecure cookies or http origins in staging', () => {
+    const local = loadConfig({
+      ...env,
+      REDIS_URL: 'redis://localhost:6379',
+      WEB_ORIGINS: 'http://localhost:5173, http://127.0.0.1:5173',
+    });
+    expect(local.WEB_ORIGINS).toEqual(['http://localhost:5173', 'http://127.0.0.1:5173']);
+    const staging = {
+      ...env,
+      ...mux,
+      NODE_ENV: 'staging',
+      REDIS_URL: 'rediss://default:token@cache:6379',
+      DATABASE_SSL: 'verify-full',
+      DATABASE_CA_FILE: '/etc/ssl/rds/global-bundle.pem',
+    };
+    expect(() => loadConfig({ ...staging, WEB_COOKIE_SECURE: 'false' })).toThrow(
+      /WEB_COOKIE_SECURE/,
+    );
+    expect(() => loadConfig({ ...staging, WEB_ORIGINS: 'http://app.example' })).toThrow(
+      /WEB_ORIGINS/,
+    );
+  });
+
   it('refuses staging without Mux, and Mux without every setting', () => {
     const staging = {
       ...env,

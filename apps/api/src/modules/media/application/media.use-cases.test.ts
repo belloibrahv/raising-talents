@@ -17,6 +17,7 @@ import {
   InMemoryObjectStorage,
   ScriptedScanner,
 } from '../testing/fakes.js';
+import { MediaFacade } from './media.facade.js';
 import { MediaUrls } from './media-urls.js';
 import {
   CompleteUploadHandler,
@@ -215,6 +216,35 @@ describe('Image pipeline', () => {
     expect(assets.rows.get(mediaId)?.status).toBe('processing');
     await process.handle(uploaded);
     expect(assets.rows.get(mediaId)?.status).toBe('ready');
+  });
+
+  it('does not bring back a file the owner deleted while it was being scanned', async () => {
+    const facade = new MediaFacade(assets, urls, clock);
+    const mediaId = await upload();
+    const scan = scanner.scanImage.bind(scanner);
+    scanner.scanImage = async () => {
+      // The owner removes the portfolio item while the worker waits on the scanner.
+      await facade.discard(mediaId, talentId);
+      return scan();
+    };
+    await runWorker();
+    expect(assets.rows.get(mediaId)?.status).toBe('deleted');
+    expect([...storage.objects.keys()].filter((key) => key.includes(mediaId))).toEqual([]);
+  });
+
+  it('lets other modules read an asset and discard only their own user’s files', async () => {
+    const facade = new MediaFacade(assets, urls, clock);
+    const mediaId = await upload();
+    await runWorker();
+    const described = (await facade.describe([mediaId, 'missing'])).get(mediaId);
+    expect(described).toMatchObject({ ownerId: talentId, status: 'ready' });
+    expect(described?.urls?.small).toContain(mediaId);
+
+    await facade.discard(mediaId, 'someone-else');
+    expect(assets.rows.get(mediaId)?.status).toBe('ready');
+    await facade.discard(mediaId, talentId);
+    expect(assets.rows.get(mediaId)?.status).toBe('deleted');
+    expect(events.ofType(MediaEvents.Deleted)).toHaveLength(1);
   });
 
   it('answers a repeated complete with the current state instead of an error', async () => {

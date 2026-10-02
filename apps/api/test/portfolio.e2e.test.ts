@@ -193,7 +193,7 @@ describe('Portfolio over HTTP', () => {
       },
       { 'if-match': etag },
     );
-    // The avatar upload earlier passed the scan, so the profile completes once the other fields are in.
+    // An approved avatar is the last missing field, so it completes the profile.
     await upload(talent, 'avatar');
     await testApp.deliverEvents();
     const mine = (await call('GET', '/v1/me/talent-profile', talent)).json<MyTalentProfile>();

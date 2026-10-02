@@ -214,7 +214,18 @@ export class ProcessImageHandler {
     const decision = decideScan(await this.scanner.scanImage(medium.body), this.policy);
     asset.applyScan(decision, this.clock.now());
 
-    await this.uow.run(() => this.assets.save(asset));
+    // The owner may have deleted it while we worked. Saving our stale copy would bring it back.
+    const discarded = await this.uow.run(async () => {
+      const current = await this.assets.findById(asset.id, { lock: true });
+      if (current?.status === 'deleted') return true;
+      await this.assets.save(asset);
+      return false;
+    });
+    if (discarded) {
+      await this.storage.remove(asset.storedKeys);
+      this.logger.info({ mediaId: asset.id }, 'media deleted during processing');
+      return;
+    }
     // The original may carry location data the phone failed to strip; it is not kept once processed.
     await this.storage.remove([asset.originalKey]);
     if (decision.outcome === 'rejected') {

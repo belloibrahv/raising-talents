@@ -1,3 +1,10 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+auditConfig:
+  ignoreGhsas:
+    # node-forge reaches us only through @expo/cli, the build and dev server tool.
+    # It is not bundled into the app or used by the API. No patched version exists yet.
+    # Review by 2026-11-02 or when Expo ships a fix, whichever comes first.
+    - GHSA-86w9-cpqp-85rv

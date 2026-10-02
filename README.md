@@ -15,7 +15,7 @@ packages/
   contracts/        Zod schemas and error codes shared by the API and the app
   config/           Shared TypeScript, lint and writing-check configuration
 infra/
-  docker/           Local Postgres, Redis, Typesense and Mailpit
+  docker/           Local Postgres, Redis, Typesense, Mailpit and S3
   terraform/        AWS infrastructure, written for OpenTofu (see infra/terraform/README.md)
 docs/
   adr/              Architecture decision records
@@ -39,7 +39,7 @@ You need Node 22, pnpm 10 and Docker.
 
 ```bash
 pnpm install
-pnpm dev:infra                          # Postgres, Redis, Typesense, Mailpit
+pnpm dev:infra                          # Postgres, Redis, Typesense, Mailpit, S3 (LocalStack)
 cp apps/api/.env.example apps/api/.env
 pnpm --filter @rt/api keys:generate     # paste the three lines into apps/api/.env
 openssl rand -hex 32                    # paste as VERIFICATION_CODE_PEPPER
@@ -48,7 +48,7 @@ pnpm --filter @rt/api dev               # API on http://localhost:3000
 pnpm --filter @rt/api dev:worker        # in a second terminal: sends emails and publishes events
 ```
 
-Emails land in Mailpit at http://localhost:8025.
+Emails land in Mailpit at http://localhost:8025. Uploads go to S3 on port 4569 (LocalStack), which creates the media bucket with the same upload rules, size limits and CORS as staging. Its files are gone when the container restarts.
 
 The web app, in a third terminal:
 
@@ -186,6 +186,6 @@ Milestone 1, foundations.
 | Milestone 2: scheduled cleanup of abandoned uploads                                                           | Done                                    |
 | PWA (ADR-023): browser sessions with an HttpOnly refresh cookie (ADR-024), CORS                               | Done                                    |
 | PWA: installable shell, offline start, update prompt, sign up, sign in, email code, role choice               | Done                                    |
-| PWA: talent and agent onboarding, avatar and portfolio screens                                                | Next                                    |
+| PWA: talent wizard, agent profile, profile photo, portfolio (photos and video), public talent page            | Done                                    |
 | PWA: hosting on S3 and CloudFront, deploy pipeline                                                            | Next                                    |
 | CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                        | Done                                    |

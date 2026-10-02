@@ -21,6 +21,11 @@ export function AppLayout() {
                 <NavLink to="/home">{t('nav.home')}</NavLink>
               </li>
             )}
+            {me?.role === 'moderator' || me?.role === 'admin' ? (
+              <li>
+                <NavLink to="/moderation">{t('nav.moderation')}</NavLink>
+              </li>
+            ) : null}
             {me?.role === 'agent' && !onboarding ? (
               <li>
                 <NavLink to="/search">{t('nav.search')}</NavLink>

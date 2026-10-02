@@ -38,6 +38,12 @@ import {
   moderationQueueQuerySchema,
 } from './moderation.js';
 import { searchTalentsQuerySchema, talentSearchResponseSchema } from './search.js';
+import {
+  myAgentVerificationSchema,
+  requestAgentVerificationSchema,
+  verificationDecisionSchema,
+  verificationQueuePageSchema,
+} from './verification.js';
 import { taxonomyResponseSchema } from './taxonomy.js';
 
 export type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
@@ -477,13 +483,19 @@ export const endpoints = {
     query: searchTalentsQuerySchema,
     response: talentSearchResponseSchema,
     successStatus: 200,
-    errors: [ErrorCode.WrongRole, ErrorCode.Forbidden, ErrorCode.RateLimited, ErrorCode.SearchUnavailable],
+    errors: [
+      ErrorCode.WrongRole,
+      ErrorCode.Forbidden,
+      ErrorCode.RateLimited,
+      ErrorCode.SearchUnavailable,
+    ],
     tag: 'Search',
   }),
   'moderation.heldMedia': define({
     method: 'GET',
     path: '/v1/moderation/media',
-    summary: 'Media the scanner held for a person to check, oldest first. Moderators and admins only',
+    summary:
+      'Media the scanner held for a person to check, oldest first. Moderators and admins only',
     auth: true,
     query: moderationQueueQuerySchema,
     response: heldMediaPageSchema,
@@ -499,6 +511,54 @@ export const endpoints = {
     request: moderationDecisionSchema,
     successStatus: 204,
     errors: [ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.MediaWrongState],
+    tag: 'Moderation',
+  }),
+  'agentVerification.getMine': define({
+    method: 'GET',
+    path: '/v1/me/agent-verification',
+    summary: "The signed-in agent's verification: not requested, pending, verified or declined",
+    auth: true,
+    response: myAgentVerificationSchema,
+    successStatus: 200,
+    errors: [ErrorCode.WrongRole],
+    tag: 'Agent profiles',
+  }),
+  'agentVerification.request': define({
+    method: 'POST',
+    path: '/v1/me/agent-verification',
+    summary: 'Ask to be verified, with evidence that you work for your agency',
+    auth: true,
+    request: requestAgentVerificationSchema,
+    response: myAgentVerificationSchema,
+    successStatus: 201,
+    errors: [
+      ErrorCode.WrongRole,
+      ErrorCode.AgentProfileIncomplete,
+      ErrorCode.VerificationPending,
+      ErrorCode.AlreadyVerified,
+      ErrorCode.RateLimited,
+    ],
+    tag: 'Agent profiles',
+  }),
+  'moderation.agentVerifications': define({
+    method: 'GET',
+    path: '/v1/moderation/agent-verifications',
+    summary: 'Pending agent verification requests, oldest first. Moderators and admins only',
+    auth: true,
+    query: moderationQueueQuerySchema,
+    response: verificationQueuePageSchema,
+    successStatus: 200,
+    errors: [ErrorCode.Forbidden],
+    tag: 'Moderation',
+  }),
+  'moderation.decideAgentVerification': define({
+    method: 'POST',
+    path: '/v1/moderation/agent-verifications/{requestId}/decision',
+    summary: 'Verify the agent, or decline for a stated reason. Recorded with the moderator',
+    auth: true,
+    request: verificationDecisionSchema,
+    successStatus: 204,
+    errors: [ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.Conflict],
     tag: 'Moderation',
   }),
   'webhooks.mux': define({

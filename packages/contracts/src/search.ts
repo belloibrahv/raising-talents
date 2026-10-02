@@ -13,7 +13,9 @@ const slugList = (max: number) =>
   z
     .string()
     .optional()
-    .transform((value) => (value ? [...new Set(value.split(',').map((part) => part.trim()))].filter(Boolean) : []))
+    .transform((value) =>
+      value ? [...new Set(value.split(',').map((part) => part.trim()))].filter(Boolean) : [],
+    )
     .pipe(z.array(slugSchema).max(max));
 
 const age = z.coerce.number().int().min(SEARCH_MIN_AGE).max(SEARCH_MAX_AGE).optional();
@@ -32,10 +34,14 @@ export const searchTalentsQuerySchema = z
     page: z.coerce.number().int().min(1).max(SEARCH_MAX_PAGE).default(1),
   })
   .strict()
-  .refine((query) => query.ageMin === undefined || query.ageMax === undefined || query.ageMin <= query.ageMax, {
-    message: 'The lowest age must not be above the highest',
-    path: ['ageMin'],
-  });
+  .refine(
+    (query) =>
+      query.ageMin === undefined || query.ageMax === undefined || query.ageMin <= query.ageMax,
+    {
+      message: 'The lowest age must not be above the highest',
+      path: ['ageMin'],
+    },
+  );
 export type SearchTalentsQuery = z.output<typeof searchTalentsQuerySchema>;
 export type SearchTalentsQueryInput = z.input<typeof searchTalentsQuerySchema>;
 

@@ -1,6 +1,11 @@
 import { z } from 'zod';
 import { idSchema, isoDateTimeSchema } from './common.js';
-import { imageUrlsSchema, mediaKindSchema, mediaPurposeSchema, videoPlaybackSchema } from './media.js';
+import {
+  imageUrlsSchema,
+  mediaKindSchema,
+  mediaPurposeSchema,
+  videoPlaybackSchema,
+} from './media.js';
 
 export const MODERATION_PAGE_SIZE = 20;
 
@@ -22,7 +27,9 @@ export const heldMediaSchema = z
     ownerId: idSchema,
     purpose: mediaPurposeSchema,
     kind: mediaKindSchema,
-    labels: z.array(z.object({ name: z.string(), parentName: z.string().nullable(), confidence: z.number() })),
+    labels: z.array(
+      z.object({ name: z.string(), parentName: z.string().nullable(), confidence: z.number() }),
+    ),
     /** The processed image, never the original upload. */
     urls: imageUrlsSchema.nullable(),
     video: videoPlaybackSchema.nullable(),

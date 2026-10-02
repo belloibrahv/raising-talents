@@ -49,6 +49,10 @@ export const ErrorCode = {
   PortfolioOrderMismatch: 'PORTFOLIO_ORDER_MISMATCH',
 
   SearchUnavailable: 'SEARCH_UNAVAILABLE',
+
+  AgentProfileIncomplete: 'AGENT_PROFILE_INCOMPLETE',
+  VerificationPending: 'VERIFICATION_PENDING',
+  AlreadyVerified: 'ALREADY_VERIFIED',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -100,6 +104,10 @@ export const ERROR_STATUS: Record<ErrorCode, number> = {
   [ErrorCode.PortfolioOrderMismatch]: 409,
 
   [ErrorCode.SearchUnavailable]: 503,
+
+  [ErrorCode.AgentProfileIncomplete]: 409,
+  [ErrorCode.VerificationPending]: 409,
+  [ErrorCode.AlreadyVerified]: 409,
 };
 
 export const fieldProblemSchema = z

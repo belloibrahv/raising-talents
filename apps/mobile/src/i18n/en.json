@@ -107,7 +107,11 @@
     "MEDIA_TOO_LARGE": "That photo is too large. Choose one under 15 MB.",
     "MEDIA_NOT_UPLOADED": "The upload did not finish. Check your connection and try again.",
     "MEDIA_UPLOAD_MISMATCH": "Something went wrong with that upload. Choose the photo again.",
-    "MEDIA_WRONG_STATE": "This photo is already being processed."
+    "MEDIA_WRONG_STATE": "This photo is already being processed.",
+    "MEDIA_WRONG_PURPOSE": "That photo was uploaded for something else. Choose it again from your gallery.",
+    "MEDIA_ALREADY_USED": "That photo is already in your portfolio.",
+    "PORTFOLIO_FULL": "Your portfolio is full. Remove an item to add a new one.",
+    "PORTFOLIO_ORDER_MISMATCH": "Your portfolio changed on another device. We have loaded the latest order; try again."
   },
   "crash": {
     "title": "Something went wrong",

@@ -47,6 +47,8 @@ export const ErrorCode = {
 
   PortfolioFull: 'PORTFOLIO_FULL',
   PortfolioOrderMismatch: 'PORTFOLIO_ORDER_MISMATCH',
+
+  SearchUnavailable: 'SEARCH_UNAVAILABLE',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -96,6 +98,8 @@ export const ERROR_STATUS: Record<ErrorCode, number> = {
 
   [ErrorCode.PortfolioFull]: 409,
   [ErrorCode.PortfolioOrderMismatch]: 409,
+
+  [ErrorCode.SearchUnavailable]: 503,
 };
 
 export const fieldProblemSchema = z

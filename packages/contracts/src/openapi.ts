@@ -24,7 +24,23 @@ const STATUS_DESCRIPTION: Record<number, string> = {
   428: 'If-Match header required',
   429: 'Too many requests',
   500: 'Something went wrong',
+  503: 'Temporarily unavailable',
 };
+
+/** Query parameters from a Zod object, documented as clients send them. */
+function queryParameters(schema: z.ZodType | undefined): JsonObject[] {
+  if (!schema) return [];
+  const json = z.toJSONSchema(schema, { io: 'input', target: 'draft-2020-12', unrepresentable: 'any' }) as {
+    properties?: Record<string, JsonObject>;
+    required?: string[];
+  };
+  return Object.entries(json.properties ?? {}).map(([name, property]) => ({
+    name,
+    in: 'query',
+    required: json.required?.includes(name) ?? false,
+    schema: property,
+  }));
+}
 
 const ref = (id: string) => ({ $ref: `#/components/schemas/${id}` });
 
@@ -102,6 +118,7 @@ function operation(name: string, endpoint: EndpointDefinition): JsonObject {
     required: true,
     schema: { type: 'string' },
   }));
+  pathParams.push(...queryParameters(endpoint.query));
   if (endpoint.concurrency === 'if-match') {
     pathParams.push({
       name: 'If-Match',
@@ -179,6 +196,10 @@ export function buildOpenApiDocument(version: string): JsonObject {
       { name: 'Taxonomy', description: 'Reference lists seeded by migrations' },
       { name: 'Talent profiles', description: 'Talent profiles and onboarding' },
       { name: 'Agent profiles', description: 'Agent profiles and onboarding' },
+      {
+        name: 'Search',
+        description: 'Finding talent. Only complete, active profiles are indexed',
+      },
       {
         name: 'Media',
         description:

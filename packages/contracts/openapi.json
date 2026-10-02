@@ -46,7 +46,11 @@
     },
     {
       "name": "Portfolio",
-      "description": "Ordered images on a talent profile. Others see ready media only"
+      "description": "Ordered images and videos on a talent profile. Others see ready media only"
+    },
+    {
+      "name": "Webhooks",
+      "description": "Calls from outside services. Not for the app"
     }
   ],
   "paths": {
@@ -1417,7 +1421,7 @@
     "/v1/media/upload-intents": {
       "post": {
         "operationId": "media_createUploadIntent",
-        "summary": "Get permission to upload one image straight to storage",
+        "summary": "Get permission to upload one image or video straight to storage",
         "tags": [
           "Media"
         ],
@@ -2453,6 +2457,60 @@
           }
         }
       }
+    },
+    "/v1/webhooks/mux": {
+      "post": {
+        "operationId": "webhooks_mux",
+        "summary": "Video processing events from Mux, signed with the shared webhook secret",
+        "tags": [
+          "Webhooks"
+        ],
+        "security": [],
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: UNAUTHENTICATED.",
+            "x-error-codes": [
+              "UNAUTHENTICATED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2818,7 +2876,9 @@
               "image/jpeg",
               "image/png",
               "image/webp",
-              "image/heic"
+              "image/heic",
+              "video/mp4",
+              "video/quicktime"
             ]
           },
           "bytes": {
@@ -2845,6 +2905,13 @@
           "upload": {
             "type": "object",
             "properties": {
+              "method": {
+                "type": "string",
+                "enum": [
+                  "POST",
+                  "PUT"
+                ]
+              },
               "url": {
                 "type": "string",
                 "format": "uri"
@@ -2860,6 +2927,7 @@
               }
             },
             "required": [
+              "method",
               "url",
               "fields"
             ],
@@ -2901,6 +2969,35 @@
         ],
         "additionalProperties": false
       },
+      "VideoPlayback": {
+        "type": "object",
+        "properties": {
+          "streamUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "posterUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "durationSeconds": {
+            "type": "number",
+            "minimum": 0
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "streamUrl",
+          "posterUrl",
+          "durationSeconds",
+          "expiresAt"
+        ],
+        "additionalProperties": false
+      },
       "MediaAsset": {
         "type": "object",
         "properties": {
@@ -2914,6 +3011,13 @@
             "enum": [
               "avatar",
               "portfolio"
+            ]
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "image",
+              "video"
             ]
           },
           "status": {
@@ -2939,6 +3043,16 @@
               }
             ]
           },
+          "video": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VideoPlayback"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "rejectionReason": {
             "type": [
               "string",
@@ -2954,8 +3068,10 @@
         "required": [
           "id",
           "purpose",
+          "kind",
           "status",
           "urls",
+          "video",
           "rejectionReason",
           "createdAt"
         ],
@@ -3648,7 +3764,8 @@
           "kind": {
             "type": "string",
             "enum": [
-              "image"
+              "image",
+              "video"
             ]
           },
           "mediaId": {
@@ -3682,6 +3799,16 @@
               }
             ]
           },
+          "video": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VideoPlayback"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "rejectionReason": {
             "type": [
               "string",
@@ -3701,6 +3828,7 @@
           "mediaStatus",
           "caption",
           "urls",
+          "video",
           "rejectionReason",
           "createdAt"
         ],
@@ -3734,33 +3862,62 @@
         "additionalProperties": false
       },
       "PublicPortfolioItem": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "kind": {
+                "type": "string",
+                "const": "image"
+              },
+              "caption": {
+                "type": "string"
+              },
+              "urls": {
+                "$ref": "#/components/schemas/ImageUrls"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "caption",
+              "urls"
+            ],
+            "additionalProperties": false
           },
-          "kind": {
-            "type": "string",
-            "enum": [
-              "image"
-            ]
-          },
-          "caption": {
-            "type": "string"
-          },
-          "urls": {
-            "$ref": "#/components/schemas/ImageUrls"
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "kind": {
+                "type": "string",
+                "const": "video"
+              },
+              "caption": {
+                "type": "string"
+              },
+              "video": {
+                "$ref": "#/components/schemas/VideoPlayback"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "caption",
+              "video"
+            ],
+            "additionalProperties": false
           }
-        },
-        "required": [
-          "id",
-          "kind",
-          "caption",
-          "urls"
-        ],
-        "additionalProperties": false
+        ]
       },
       "PublicPortfolio": {
         "type": "object",

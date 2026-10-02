@@ -248,7 +248,7 @@ export const endpoints = {
   'media.createUploadIntent': define({
     method: 'POST',
     path: '/v1/media/upload-intents',
-    summary: 'Get permission to upload one image straight to storage',
+    summary: 'Get permission to upload one image or video straight to storage',
     auth: true,
     request: createUploadIntentRequestSchema,
     response: uploadIntentResponseSchema,
@@ -369,6 +369,15 @@ export const endpoints = {
     successStatus: 200,
     errors: [ErrorCode.NotFound],
     tag: 'Portfolio',
+  }),
+  'webhooks.mux': define({
+    method: 'POST',
+    path: '/v1/webhooks/mux',
+    summary: 'Video processing events from Mux, signed with the shared webhook secret',
+    auth: false,
+    successStatus: 204,
+    errors: [ErrorCode.Unauthenticated],
+    tag: 'Webhooks',
   }),
 } as const satisfies Record<string, EndpointDefinition>;
 

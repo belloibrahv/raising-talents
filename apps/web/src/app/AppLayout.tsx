@@ -21,6 +21,11 @@ export function AppLayout() {
                 <NavLink to="/home">{t('nav.home')}</NavLink>
               </li>
             )}
+            {me?.role === 'agent' && !onboarding ? (
+              <li>
+                <NavLink to="/search">{t('nav.search')}</NavLink>
+              </li>
+            ) : null}
             {me?.role === 'talent' && !onboarding ? (
               <li>
                 <NavLink to="/portfolio">{t('nav.portfolio')}</NavLink>

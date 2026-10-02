@@ -138,7 +138,7 @@ describe('talent onboarding', () => {
       'PATCH /v1/me/talent-profile': fake.patch,
     });
     const router = renderAt('/home');
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
 
     expect(await screen.findByRole('heading', { level: 1, name: 'About you' })).toBeVisible();
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1');
@@ -218,7 +218,7 @@ describe('talent onboarding', () => {
       'PATCH /v1/me/talent-profile': fake.patch,
     });
     renderAt('/onboarding/talent/about');
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     await user.click(await screen.findByRole('button', { name: 'Save and continue' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(/changed on another device/);
   });
@@ -286,7 +286,7 @@ describe('talent onboarding', () => {
       'GET /v1/me': () => Response.json(meFor({ status: 'active' })),
     });
     renderAt('/onboarding/talent/photo');
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const input = await screen.findByLabelText('Choose a photo');
     await user.upload(input, new File(['jpeg-bytes'], 'ngozi.jpg', { type: 'image/jpeg' }));
 
@@ -322,7 +322,7 @@ describe('talent onboarding', () => {
       'GET /v1/me/talent-profile': fake.get,
     });
     renderAt('/onboarding/talent/photo');
-    const user = userEvent.setup({ applyAccept: false });
+    const user = userEvent.setup({ delay: null, applyAccept: false });
     await user.upload(
       await screen.findByLabelText('Choose a photo'),
       new File(['mp4'], 'clip.mp4', { type: 'video/mp4' }),
@@ -359,7 +359,7 @@ describe('agent onboarding', () => {
       'GET /v1/me': () => Response.json(meFor({ role: 'agent', status: 'active' })),
     });
     renderAt('/home');
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     await user.type(await screen.findByLabelText('Agency or company'), 'Eko Talent Partners');
     await user.type(screen.getByLabelText('Your role'), 'Talent scout');
     await user.click(screen.getByRole('checkbox', { name: 'Music' }));

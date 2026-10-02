@@ -5,13 +5,14 @@ import type { Database } from './platform/database/client.js';
 import { createLogger, PinoNestLogger } from './platform/logging/logger.js';
 import { EventDispatcher } from './platform/outbox/event-dispatcher.js';
 import { OutboxRelay } from './platform/outbox/outbox-relay.js';
+import type { ErrorReporter } from './platform/observability/error-reporter.js';
 import { PLATFORM } from './platform/platform.tokens.js';
 import { IDENTITY } from './modules/identity/application/identity.tokens.js';
 import type { ModuleEventHandlers } from './modules/identity/identity.module.js';
 import { WorkerModule } from './worker.module.js';
 
 const config = loadConfig();
-const logger = createLogger(config);
+const logger = createLogger(config, 'worker');
 
 const app = await NestFactory.createApplicationContext(WorkerModule.register({ config, logger }), {
   logger: new PinoNestLogger(logger),
@@ -20,9 +21,15 @@ const app = await NestFactory.createApplicationContext(WorkerModule.register({ c
 const dispatcher = new EventDispatcher();
 app.get<ModuleEventHandlers>(IDENTITY.EventHandlers).register(dispatcher);
 
-const relay = new OutboxRelay(app.get<Database>(PLATFORM.Database), dispatcher, logger);
+const errors = app.get<ErrorReporter>(PLATFORM.ErrorReporter);
+const relay = new OutboxRelay(app.get<Database>(PLATFORM.Database), dispatcher, logger, errors);
 relay.start();
 logger.info('worker process started');
+
+process.on('unhandledRejection', (reason) => {
+  logger.error({ err: reason }, 'Unhandled rejection in worker');
+  errors.capture(reason, { process: 'worker' });
+});
 
 // ECS sends SIGTERM on deploy: finish the current batch, then close connections.
 const shutdown = async (signal: string) => {

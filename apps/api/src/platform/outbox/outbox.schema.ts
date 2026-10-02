@@ -10,6 +10,8 @@ export const outbox = platformSchema.table(
     eventType: text('event_type').notNull(),
     aggregateId: uuid('aggregate_id').notNull(),
     payload: jsonb('payload').$type<Record<string, unknown>>().notNull(),
+    /** Trace context of the request that caused the event, so the worker continues the same trace. */
+    headers: jsonb('headers').$type<Record<string, string>>().notNull().default({}),
     occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull(),
     publishedAt: timestamp('published_at', { withTimezone: true }),
     attempts: integer('attempts').notNull().default(0),

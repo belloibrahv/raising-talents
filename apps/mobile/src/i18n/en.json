@@ -102,7 +102,12 @@
     "WRONG_ROLE": "This part of the app is for a different kind of account.",
     "HANDLE_TAKEN": "That username is taken. Try another.",
     "HANDLE_INVALID": "That username is not available. Try another.",
-    "UNKNOWN_TAXONOMY": "One of your choices is no longer available. Pick again from the list."
+    "UNKNOWN_TAXONOMY": "One of your choices is no longer available. Pick again from the list.",
+    "MEDIA_TYPE_NOT_ALLOWED": "Use a photo in JPEG, PNG, WebP or HEIC format.",
+    "MEDIA_TOO_LARGE": "That photo is too large. Choose one under 15 MB.",
+    "MEDIA_NOT_UPLOADED": "The upload did not finish. Check your connection and try again.",
+    "MEDIA_UPLOAD_MISMATCH": "Something went wrong with that upload. Choose the photo again.",
+    "MEDIA_WRONG_STATE": "This photo is already being processed."
   },
   "crash": {
     "title": "Something went wrong",

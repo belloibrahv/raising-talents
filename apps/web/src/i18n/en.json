@@ -132,7 +132,10 @@
     "MEDIA_ALREADY_USED": "That photo is already in your portfolio.",
     "PORTFOLIO_FULL": "Your portfolio is full. Remove an item to add a new one.",
     "PORTFOLIO_ORDER_MISMATCH": "Your portfolio changed on another device. We have loaded the latest order; try again.",
-    "SEARCH_UNAVAILABLE": "Search is not available right now. Try again in a few minutes."
+    "SEARCH_UNAVAILABLE": "Search is not available right now. Try again in a few minutes.",
+    "AGENT_PROFILE_INCOMPLETE": "Finish your agency profile before asking to be verified.",
+    "VERIFICATION_PENDING": "Your request is with a moderator. We will decide soon.",
+    "ALREADY_VERIFIED": "Your agency is already verified."
   },
   "crash": {
     "title": "Something went wrong",
@@ -170,7 +173,9 @@
     "search": "Find talent",
     "forgotPassword": "Reset your password",
     "resetPassword": "Choose a new password",
-    "moderation": "Moderation queue"
+    "moderation": "Moderation queue",
+    "verification": "Get verified",
+    "moderationAgents": "Agent verification queue"
   },
   "nav": {
     "home": "Home",
@@ -376,6 +381,46 @@
     "approved": "Approved. The owner can use it now.",
     "rejected": "Rejected. The owner sees the reason.",
     "loadMore": "Show older items",
-    "previewAlt": "Held photo uploaded by an account"
+    "previewAlt": "Held photo uploaded by an account",
+    "tabs": "Queues",
+    "mediaTab": "Media",
+    "agentsTab": "Agents",
+    "agentsTitle": "Agent verification queue",
+    "agentsBody": "Check that each person works for the agency they name. Oldest first.",
+    "agentsEmpty": "No agents are waiting.",
+    "agentHeading": "{agency}: {name}",
+    "jobTitle": "Role",
+    "email": "Account email",
+    "evidence": "Evidence",
+    "registration": "CAC number",
+    "website": "Website on profile",
+    "noteLabel": "Their note",
+    "previouslyDeclined": "Declined {count} times before",
+    "verify": "Verify",
+    "decline": "Decline",
+    "confirmDecline": "Decline for this reason",
+    "agency_not_confirmed": "Could not confirm they work there",
+    "details_do_not_match": "Details do not match the evidence",
+    "evidence_unreachable": "Evidence page would not open",
+    "agentVerified": "Verified. The agent now has the badge.",
+    "agentDeclined": "Declined. The agent sees the reason and can try again.",
+    "none": "None given"
+  },
+  "verification": {
+    "title": "Get verified",
+    "body": "Talent only accept contact from verified agents. Show us that you work for your agency; a moderator checks every request by hand.",
+    "evidence": "A page that shows you work there",
+    "evidenceHint": "For example your agency's team page, or its official Instagram or LinkedIn page that names you. Must start with https://",
+    "registration": "CAC registration number (optional)",
+    "registrationHint": "As printed on the certificate, for example RC 123456 or BN 1234567.",
+    "note": "Anything else we should know (optional)",
+    "submit": "Send for review",
+    "sent": "Sent. A moderator will check it, usually within two working days.",
+    "pending": "Verification requested on {date}. A moderator is checking it.",
+    "verified": "Verified. Talent can see your agency is genuine.",
+    "declined": "Not verified yet: {reason}",
+    "start": "Get verified",
+    "tryAgain": "Send new evidence",
+    "notReady": "Finish your agency profile first, then ask to be verified."
   }
 }

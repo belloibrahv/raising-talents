@@ -112,7 +112,10 @@
     "MEDIA_ALREADY_USED": "That photo is already in your portfolio.",
     "PORTFOLIO_FULL": "Your portfolio is full. Remove an item to add a new one.",
     "PORTFOLIO_ORDER_MISMATCH": "Your portfolio changed on another device. We have loaded the latest order; try again.",
-    "SEARCH_UNAVAILABLE": "Search is not available right now. Try again in a few minutes."
+    "SEARCH_UNAVAILABLE": "Search is not available right now. Try again in a few minutes.",
+    "AGENT_PROFILE_INCOMPLETE": "Finish your agency profile before asking to be verified.",
+    "VERIFICATION_PENDING": "Your request is with a moderator. We will decide soon.",
+    "ALREADY_VERIFIED": "Your agency is already verified."
   },
   "crash": {
     "title": "Something went wrong",

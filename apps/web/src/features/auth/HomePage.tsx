@@ -3,6 +3,7 @@ import { t } from '../../i18n';
 import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
 import { Page } from '../../shared/ui/Page';
 import { useMyAgentProfile, useMyTalentProfile } from '../profile/queries';
+import { VerificationCard } from '../profile/VerificationCard';
 import { useSession } from './use-auth';
 
 /** The signed-in start: finishes onboarding first, then a short dashboard for each role. */
@@ -55,6 +56,7 @@ function AgentHome() {
       documentTitle={t('titles.home')}
       subtitle={data?.verified ? t('home.agentVerified') : t('home.agentPending')}
     >
+      <VerificationCard />
       <p>{t('home.agentSearchSoon')}</p>
       <Link className="button button--primary" to="/search">
         {t('home.findTalent')}

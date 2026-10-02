@@ -561,3 +561,19 @@ details > summary {
 .result .badge {
   margin-left: var(--space-sm);
 }
+
+.facts {
+  display: grid;
+  gap: var(--space-sm);
+  margin: 0;
+}
+
+.facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+nav .button[aria-current='page'] {
+  background: var(--ink);
+  color: var(--paper);
+}

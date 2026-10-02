@@ -51,6 +51,15 @@ export class AccountsFacade {
     };
   }
 
+  /**
+   * For the search index only: whether the account may be found, and the date of birth so
+   * agents can filter by age. Search results show age in years, never this date.
+   */
+  async indexFacts(userId: string): Promise<{ status: AccountStatus; dateOfBirth: string } | null> {
+    const account = await this.accounts.findById(userId);
+    return account ? { status: account.status, dateOfBirth: account.dateOfBirth } : null;
+  }
+
   /** Locks the role and activates the account. Joins the caller's transaction. */
   async completeOnboarding(userId: string): Promise<Result<void, DomainError>> {
     const account = await this.accounts.findById(userId);

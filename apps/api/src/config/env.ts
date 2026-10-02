@@ -68,6 +68,11 @@ const envSchema = z.object({
   MUX_SIGNING_PRIVATE_KEY_BASE64: z.string().min(1).optional(),
   VIDEO_PLAYBACK_TTL_SECONDS: z.coerce.number().int().min(300).max(86_400).default(21_600),
 
+  /** typesense needs TYPESENSE_URL and TYPESENSE_API_KEY; disabled answers search with 503 (ADR-006). */
+  SEARCH_INDEX: z.enum(['typesense', 'disabled']).default('disabled'),
+  TYPESENSE_URL: z.url().optional(),
+  TYPESENSE_API_KEY: z.string().min(1).optional(),
+
   /**
    * Origins of the web app, comma separated, for example https://app.raisingtalents.app.
    * Only these may call the API from a browser (CORS) or use the cookie session endpoints.
@@ -125,6 +130,12 @@ const checkedEnvSchema = envSchema.superRefine((env, ctx) => {
       path: ['SCAN_REVIEW_AT'],
       message: 'The review threshold must be below the reject threshold',
     });
+  }
+  if (env.SEARCH_INDEX === 'typesense') {
+    for (const key of ['TYPESENSE_URL', 'TYPESENSE_API_KEY'] as const) {
+      if (!env[key])
+        ctx.addIssue({ code: 'custom', path: [key], message: 'typesense needs this setting' });
+    }
   }
   if (env.VIDEO_PROVIDER === 'mux') {
     for (const key of MUX_KEYS) {

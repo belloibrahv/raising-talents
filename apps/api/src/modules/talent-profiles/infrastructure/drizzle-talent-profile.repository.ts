@@ -1,4 +1,4 @@
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq, gt } from 'drizzle-orm';
 import type { DrizzleUnitOfWork } from '../../../platform/database/drizzle-unit-of-work.js';
 import type { EventRecorder } from '../../../platform/domain-event.js';
 import { TalentProfile } from '../domain/talent-profile.js';
@@ -53,6 +53,21 @@ export class DrizzleTalentProfileRepository implements TalentProfileRepository {
       .where(eq(profiles.handle, handle))
       .limit(1);
     return rows.length > 0;
+  }
+
+  async listCompleteUserIds(after: string | null, limit: number): Promise<string[]> {
+    const rows = await this.uow
+      .executor()
+      .select({ userId: profiles.userId })
+      .from(profiles)
+      .where(
+        after
+          ? and(eq(profiles.isComplete, true), gt(profiles.userId, after))
+          : eq(profiles.isComplete, true),
+      )
+      .orderBy(asc(profiles.userId))
+      .limit(limit);
+    return rows.map((row) => row.userId);
   }
 
   async save(profile: TalentProfile): Promise<void> {

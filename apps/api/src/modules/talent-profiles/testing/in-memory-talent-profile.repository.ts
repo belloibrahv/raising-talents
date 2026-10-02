@@ -24,6 +24,15 @@ export class InMemoryTalentProfileRepository implements TalentProfileRepository 
     return [...this.rows.values()].some((candidate) => candidate.handle === handle);
   }
 
+  async listCompleteUserIds(after: string | null, limit: number): Promise<string[]> {
+    return [...this.rows.values()]
+      .filter((row) => TalentProfile.restore(row).isComplete)
+      .map((row) => row.userId)
+      .sort()
+      .filter((id) => after === null || id > after)
+      .slice(0, limit);
+  }
+
   async save(profile: TalentProfile): Promise<void> {
     const props = profile.snapshot();
     const clash = [...this.rows.values()].find(

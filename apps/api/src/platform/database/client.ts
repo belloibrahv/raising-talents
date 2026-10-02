@@ -10,6 +10,8 @@ export type Executor = Database | Transaction;
 
 export interface DatabaseHandle {
   readonly db: Database;
+  /** For the few things Drizzle does not cover, such as session advisory locks. */
+  readonly pool: pg.Pool;
   close(): Promise<void>;
 }
 
@@ -57,5 +59,5 @@ export function poolConfig(
 export function createDatabase(settings: DatabaseSettings): DatabaseHandle {
   const pool = new pg.Pool(poolConfig(settings));
   const db = drizzle(pool, { schema });
-  return { db, close: () => pool.end() };
+  return { db, pool, close: () => pool.end() };
 }

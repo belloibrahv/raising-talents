@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import type { DrizzleUnitOfWork } from '../../../platform/database/drizzle-unit-of-work.js';
 import type { EventRecorder } from '../../../platform/domain-event.js';
 import { MediaAsset, type MediaAssetRepository } from '../domain/media-asset.js';
@@ -14,6 +14,16 @@ export class DrizzleMediaAssetRepository implements MediaAssetRepository {
     const query = this.uow.executor().select().from(assets).where(eq(assets.id, id)).limit(1);
     const [row] = options.lock ? await query.for('update') : await query;
     return row ? MediaAsset.restore(row) : null;
+  }
+
+  async findByIds(ids: readonly string[]): Promise<MediaAsset[]> {
+    if (ids.length === 0) return [];
+    const rows = await this.uow
+      .executor()
+      .select()
+      .from(assets)
+      .where(inArray(assets.id, [...ids]));
+    return rows.map((row) => MediaAsset.restore(row));
   }
 
   async save(asset: MediaAsset): Promise<void> {

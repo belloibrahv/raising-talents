@@ -34,6 +34,8 @@ export const MEDIA = {
   Complete: Symbol('CompleteUploadHandler'),
   Get: Symbol('GetMediaQuery'),
   Process: Symbol('ProcessImageHandler'),
+  Facade: Symbol('MediaFacade'),
+  RemoveDeleted: Symbol('RemoveDeletedMediaHandler'),
   EventHandlers: Symbol('MediaEventHandlers'),
 } as const;
 

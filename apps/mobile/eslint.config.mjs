@@ -21,6 +21,7 @@ export default [
       'vitest.config.ts',
       'expo-env.d.ts',
       'app.config.ts',
+      'metro.config.js',
     ],
   },
 ];

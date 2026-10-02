@@ -7,8 +7,9 @@ import {
   Figtree_500Medium,
   Figtree_600SemiBold,
 } from '@expo-google-fonts/figtree';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
+import type { ErrorBoundaryProps } from 'expo-router';
 import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -19,14 +20,43 @@ import { areaFor, type AppArea } from '../features/auth/route-for-session';
 import { useSession } from '../features/auth/session-store';
 import { useRestoreSession } from '../features/auth/use-auth';
 import { OfflineScreen } from '../features/auth/OfflineScreen';
+import { t } from '../i18n';
+import {
+  initErrorReporting,
+  reportError,
+  withErrorReporting,
+} from '../shared/observability/error-reporting';
+import { AppText } from '../shared/ui/AppText';
+import { Button } from '../shared/ui/Button';
+import { Screen } from '../shared/ui/Screen';
+import { colors } from '../shared/ui/theme';
 
+initErrorReporting();
 void SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1 }, mutations: { retry: 0 } },
+  // Every failed request passes through here. Only unexpected ones are reported.
+  queryCache: new QueryCache({ onError: reportError }),
+  mutationCache: new MutationCache({ onError: reportError }),
 });
 
-export default function RootLayout() {
+/** Shown when a screen crashes while rendering. Expo Router uses this export automatically. */
+export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
+  useEffect(() => {
+    reportError(error);
+  }, [error]);
+  return (
+    <Screen footer={<Button label={t('crash.retry')} onPress={() => void retry()} />}>
+      <AppText variant="title">{t('crash.title')}</AppText>
+      <AppText color={colors.slate}>{t('crash.body')}</AppText>
+    </Screen>
+  );
+}
+
+export default withErrorReporting(RootLayout);
+
+function RootLayout() {
   const [fontsLoaded] = useFonts({
     BricolageGrotesque_600SemiBold,
     BricolageGrotesque_700Bold,

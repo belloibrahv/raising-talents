@@ -97,5 +97,10 @@
     "EMAIL_ALREADY_VERIFIED": "Your email is already verified.",
     "EMAIL_NOT_VERIFIED": "Verify your email first.",
     "ROLE_ALREADY_LOCKED": "Your role is set. Contact support to change it."
+  },
+  "crash": {
+    "title": "Something went wrong",
+    "body": "The app hit a problem it could not recover from. Your account and your work are safe.",
+    "retry": "Reload"
   }
 }

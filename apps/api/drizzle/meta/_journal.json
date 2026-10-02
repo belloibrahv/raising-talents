@@ -71,6 +71,13 @@
       "when": 1790974194887,
       "tag": "0009_media_review",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1790975258130,
+      "tag": "0010_agent_verification",
+      "breakpoints": true
     }
   ]
 }

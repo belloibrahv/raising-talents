@@ -20,6 +20,8 @@ import {
 import { generateTestSigningKeys } from '../../src/modules/identity/testing/identity-test-harness.js';
 import { AGENT } from '../../src/modules/agent-profiles/application/agent-profile.use-cases.js';
 import { InMemoryAgentProfileRepository } from '../../src/modules/agent-profiles/testing/in-memory-agent-profile.repository.js';
+import { VERIFICATION } from '../../src/modules/agent-profiles/application/verification.use-cases.js';
+import { InMemoryVerificationRequestRepository } from '../../src/modules/agent-profiles/testing/in-memory-verification-request.repository.js';
 import { MEDIA } from '../../src/modules/media/application/media.use-cases.js';
 import {
   FakeImageProcessor,
@@ -125,6 +127,8 @@ export async function createTestApp(): Promise<TestApp> {
     .useValue(talentProfiles)
     .overrideProvider(AGENT.Repository)
     .useValue(new InMemoryAgentProfileRepository(events))
+    .overrideProvider(VERIFICATION.Requests)
+    .useValue(new InMemoryVerificationRequestRepository(events))
     .overrideProvider(MEDIA.Repository)
     .useValue(mediaAssets)
     .overrideProvider(MEDIA.Storage)

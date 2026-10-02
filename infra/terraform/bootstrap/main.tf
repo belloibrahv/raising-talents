@@ -221,6 +221,17 @@ data "aws_iam_policy_document" "deploy" {
     }
   }
   statement {
+    sid       = "PublishTheWebApp"
+    actions   = ["s3:PutObject", "s3:ListBucket"]
+    resources = ["arn:aws:s3:::rt-${each.key}-web-${var.aws_account_id}", "arn:aws:s3:::rt-${each.key}-web-${var.aws_account_id}/*"]
+  }
+  statement {
+    # Distribution ids are not known when this role is made; invalidating a cache is harmless.
+    sid       = "RefreshTheWebAppCache"
+    actions   = ["cloudfront:CreateInvalidation", "cloudfront:GetInvalidation"]
+    resources = ["arn:aws:cloudfront::${var.aws_account_id}:distribution/*"]
+  }
+  statement {
     sid       = "ReadMigrationLogs"
     actions   = ["logs:GetLogEvents", "logs:FilterLogEvents"]
     resources = ["arn:aws:logs:${var.aws_region}:${var.aws_account_id}:log-group:/ecs/rt-${each.key}-migrate:*"]

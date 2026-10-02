@@ -8,6 +8,11 @@ output "bucket_arn" {
   value       = aws_s3_bucket.media.arn
 }
 
+output "upload_origin" {
+  description = "Where presigned POST uploads go, for the web app's Content-Security-Policy."
+  value       = "https://${aws_s3_bucket.media.bucket_regional_domain_name}"
+}
+
 output "distribution_id" {
   description = "For cache invalidations."
   value       = aws_cloudfront_distribution.media.id

@@ -3,6 +3,11 @@ output "api_url" {
   value       = module.edge.api_url
 }
 
+output "web_url" {
+  description = "Public web app address."
+  value       = module.web.web_url
+}
+
 output "media_url" {
   description = "Public media address."
   value       = module.media.media_url
@@ -23,6 +28,8 @@ output "deploy" {
     migrate_subnets        = module.network.private_subnet_ids
     migrate_security_group = module.migrate.security_group_id
     migrate_log_group      = module.migrate.log_group_name
+    web_bucket             = module.web.bucket_name
+    web_distribution_id    = module.web.distribution_id
   }
 }
 

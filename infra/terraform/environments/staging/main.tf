@@ -10,6 +10,7 @@ locals {
   env_domain   = "${var.subdomain}.${var.root_domain}"
   api_domain   = "api.${local.env_domain}"
   media_domain = "media.${local.env_domain}"
+  web_domain   = "app.${local.env_domain}"
   email_from   = "no-reply@${local.env_domain}"
   image        = "${module.ecr.repository_url}:${var.image_tag}"
   node_args    = ["--import", "./dist/instrument.js"]
@@ -209,6 +210,7 @@ locals {
     MEDIA_CDN_URL               = module.media.media_url
     CONTENT_SCANNER             = "rekognition"
     VIDEO_PROVIDER              = "mux"
+    WEB_ORIGINS                 = "https://${local.web_domain}"
     OTEL_EXPORTER_OTLP_ENDPOINT = var.otlp_endpoint
     OTEL_TRACES_SAMPLER         = "parentbased_traceidratio"
     OTEL_TRACES_SAMPLER_ARG     = var.trace_sample_ratio
@@ -445,6 +447,50 @@ module "media" {
   domain_name     = local.media_domain
   certificate_arn = aws_acm_certificate_validation.media.certificate_arn
   hosted_zone_id  = data.aws_route53_zone.root.zone_id
+
+  upload_cors_origins = ["https://${local.web_domain}"]
+}
+
+# ---------- Web app (ADR-023) ----------
+
+resource "aws_acm_certificate" "web" {
+  provider          = aws.us_east_1
+  domain_name       = local.web_domain
+  validation_method = "DNS"
+  lifecycle {
+    create_before_destroy = true
+  }
+}
+
+resource "aws_route53_record" "web_certificate_validation" {
+  for_each = {
+    for option in aws_acm_certificate.web.domain_validation_options : option.domain_name => option
+  }
+  zone_id         = data.aws_route53_zone.root.zone_id
+  name            = each.value.resource_record_name
+  type            = each.value.resource_record_type
+  records         = [each.value.resource_record_value]
+  ttl             = 300
+  allow_overwrite = true
+}
+
+resource "aws_acm_certificate_validation" "web" {
+  provider                = aws.us_east_1
+  certificate_arn         = aws_acm_certificate.web.arn
+  validation_record_fqdns = [for record in aws_route53_record.web_certificate_validation : record.fqdn]
+}
+
+module "web" {
+  source = "../../modules/web"
+
+  name            = local.name
+  account_id      = local.account_id
+  domain_name     = local.web_domain
+  certificate_arn = aws_acm_certificate_validation.web.certificate_arn
+  hosted_zone_id  = data.aws_route53_zone.root.zone_id
+  api_url         = "https://${local.api_domain}"
+  media_url       = module.media.media_url
+  upload_origins  = [module.media.upload_origin]
 }
 
 # ---------- Alerts and cost ----------

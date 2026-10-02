@@ -1,0 +1,97 @@
+name: Infrastructure
+
+on:
+  pull_request:
+    paths: ['infra/terraform/**', '.github/workflows/infra.yml']
+  push:
+    branches: [main]
+    paths: ['infra/terraform/**']
+
+concurrency:
+  group: infra-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+env:
+  TOFU_VERSION: 1.13.1
+  WORKDIR: infra/terraform/environments/staging
+
+jobs:
+  checks:
+    name: Format, validate, lint, security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+      - run: tofu fmt -recursive -check infra/terraform
+      - name: Validate every stack
+        run: |
+          for stack in infra/terraform/bootstrap infra/terraform/environments/staging; do
+            tofu -chdir="$stack" init -backend=false -input=false
+            tofu -chdir="$stack" validate
+          done
+      - uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: v0.64.0
+      - name: TFLint with the AWS ruleset
+        working-directory: infra/terraform
+        run: |
+          tflint --init --config "$PWD/.tflint.hcl"
+          tflint --config "$PWD/.tflint.hcl" --recursive
+      - name: Checkov security scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: infra/terraform
+          framework: terraform
+          quiet: true
+
+  plan:
+    name: Plan staging
+    needs: checks
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.STAGING_PLAN_ROLE_ARN }}
+          aws-region: ${{ vars.STAGING_AWS_REGION }}
+      - run: tofu -chdir="$WORKDIR" init -input=false -backend-config="bucket=${{ vars.TOFU_STATE_BUCKET }}"
+      - name: Plan
+        run: |
+          tofu -chdir="$WORKDIR" plan -input=false -lock=false -var-file=staging.tfvars -no-color > plan.txt
+          {
+            echo '### Staging plan'
+            echo '```'
+            tail -c 60000 plan.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  apply:
+    name: Apply staging
+    needs: checks
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    # The staging environment can require a reviewer before this job starts.
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: ${{ env.TOFU_VERSION }}
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.STAGING_APPLY_ROLE_ARN }}
+          aws-region: ${{ vars.STAGING_AWS_REGION }}
+      - run: tofu -chdir="$WORKDIR" init -input=false -backend-config="bucket=${{ vars.TOFU_STATE_BUCKET }}"
+      - run: tofu -chdir="$WORKDIR" plan -input=false -var-file=staging.tfvars -out=staging.tfplan
+      - run: tofu -chdir="$WORKDIR" apply -input=false staging.tfplan

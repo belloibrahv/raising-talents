@@ -1,0 +1,83 @@
+name: Deploy staging
+
+# Runs after CI passes on main. Manual runs redeploy a chosen commit.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  release:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    environment:
+      name: staging
+      url: https://api.staging.raisingtalents.app
+    env:
+      AWS_REGION: ${{ vars.STAGING_AWS_REGION }}
+      SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SHA }}
+
+      - name: AWS credentials (short-lived, no stored keys)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.STAGING_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.STAGING_AWS_REGION }}
+
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build and push the API image (ARM64)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          platforms: linux/arm64
+          push: true
+          provenance: true
+          sbom: true
+          build-args: APP_VERSION=${{ env.SHA }}
+          tags: ${{ vars.STAGING_ECR_REPOSITORY_URL }}:${{ env.SHA }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan the image for known vulnerabilities
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: ${{ vars.STAGING_ECR_REPOSITORY_URL }}:${{ env.SHA }}
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Migrate, roll out and smoke test
+        env:
+          IMAGE: ${{ vars.STAGING_ECR_REPOSITORY_URL }}:${{ env.SHA }}
+          CLUSTER: rt-staging
+          API_SERVICE: rt-staging-api
+          API_FAMILY: rt-staging-api
+          WORKER_SERVICE: rt-staging-worker
+          WORKER_FAMILY: rt-staging-worker
+          MIGRATE_FAMILY: rt-staging-migrate
+          MIGRATE_SUBNETS: ${{ vars.STAGING_PRIVATE_SUBNETS }}
+          MIGRATE_SECURITY_GROUP: ${{ vars.STAGING_MIGRATE_SECURITY_GROUP }}
+          MIGRATE_LOG_GROUP: /ecs/rt-staging-migrate
+          API_URL: https://api.staging.raisingtalents.app
+          GITHUB_SHA: ${{ env.SHA }}
+        run: scripts/deploy-ecs.sh

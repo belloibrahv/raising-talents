@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray, lt } from 'drizzle-orm';
+import { and, asc, eq, gt, inArray, lt, or } from 'drizzle-orm';
 import type { DrizzleUnitOfWork } from '../../../platform/database/drizzle-unit-of-work.js';
 import type { EventRecorder } from '../../../platform/domain-event.js';
 import { MediaAsset, type MediaAssetRepository } from '../domain/media-asset.js';
@@ -23,6 +23,28 @@ export class DrizzleMediaAssetRepository implements MediaAssetRepository {
       .select()
       .from(assets)
       .where(inArray(assets.id, [...ids]));
+    return rows.map((row) => MediaAsset.restore(row));
+  }
+
+  async findHeld(after: { heldAt: Date; id: string } | null, limit: number): Promise<MediaAsset[]> {
+    const held = eq(assets.status, 'held_for_review');
+    const rows = await this.uow
+      .executor()
+      .select()
+      .from(assets)
+      .where(
+        after
+          ? and(
+              held,
+              or(
+                gt(assets.updatedAt, after.heldAt),
+                and(eq(assets.updatedAt, after.heldAt), gt(assets.id, after.id)),
+              ),
+            )
+          : held,
+      )
+      .orderBy(asc(assets.updatedAt), asc(assets.id))
+      .limit(limit);
     return rows.map((row) => MediaAsset.restore(row));
   }
 

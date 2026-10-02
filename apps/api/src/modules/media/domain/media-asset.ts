@@ -11,7 +11,12 @@ import {
 import { domainError, type DomainError } from '../../../platform/domain-error.js';
 import type { DomainEvent } from '../../../platform/domain-event.js';
 import { err, ok, type Result } from '../../../platform/result.js';
-import { rejectionReason, type ModerationLabel, type ScanDecision } from './scan-decision.js';
+import {
+  rejectionReason,
+  type ModerationLabel,
+  type RejectionCategory,
+  type ScanDecision,
+} from './scan-decision.js';
 
 export const MediaEvents = {
   Uploaded: 'media.MediaUploaded',
@@ -73,6 +78,9 @@ export interface MediaAssetProps {
   readonly providerAssetId: string | null;
   readonly playbackId: string | null;
   readonly durationSeconds: number | null;
+  /** Set when a moderator decided on held media. */
+  readonly reviewedBy: string | null;
+  readonly reviewedAt: Date | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -116,6 +124,8 @@ export class MediaAsset {
         providerAssetId: null,
         playbackId: null,
         durationSeconds: null,
+        reviewedBy: null,
+        reviewedAt: null,
         createdAt: input.now,
         updatedAt: input.now,
       }),
@@ -213,6 +223,33 @@ export class MediaAsset {
     this.raise(MediaEvents.VideoTranscoded, now);
   }
 
+  /**
+   * A moderator's decision on held media. Approval raises Ready, exactly like a clean scan,
+   * so whatever waits for the file (an avatar completing a profile) carries on.
+   */
+  review(
+    decision: { approve: true } | { approve: false; category: RejectionCategory },
+    reviewerId: string,
+    now: Date,
+  ): Result<void, DomainError> {
+    if (this.props.status !== 'held_for_review')
+      return err(MediaErrors.wrongState(this.props.status));
+    const reviewed = { reviewedBy: reviewerId, reviewedAt: now, updatedAt: now };
+    if (decision.approve) {
+      this.props = { ...this.props, ...reviewed, status: 'ready', readyAt: now };
+      this.raise(MediaEvents.Ready, now);
+    } else {
+      this.props = {
+        ...this.props,
+        ...reviewed,
+        status: 'rejected',
+        rejectionReason: rejectionReason(decision.category, this.kind),
+      };
+      this.raise(MediaEvents.Rejected, now);
+    }
+    return ok(undefined);
+  }
+
   /** Nobody finished the upload in time. */
   abandon(now: Date): void {
     if (this.props.status !== 'awaiting_upload') return;
@@ -292,6 +329,8 @@ export class MediaAsset {
 export interface MediaAssetRepository {
   findById(id: string, options?: { lock?: boolean }): Promise<MediaAsset | null>;
   findByIds(ids: readonly string[]): Promise<MediaAsset[]>;
+  /** Held media, oldest first, after the given position in that order. */
+  findHeld(after: { heldAt: Date; id: string } | null, limit: number): Promise<MediaAsset[]>;
   /** Intents older than the cutoff that never got a file, oldest first. */
   findAbandoned(createdBefore: Date, limit: number): Promise<MediaAsset[]>;
   save(asset: MediaAsset): Promise<void>;

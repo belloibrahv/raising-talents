@@ -40,11 +40,17 @@ export const assets = mediaSchema.table(
     providerAssetId: text('provider_asset_id'),
     playbackId: text('playback_id'),
     durationSeconds: real('duration_seconds'),
+    reviewedBy: uuid('reviewed_by').references(() => users.id, { onDelete: 'set null' }),
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
   },
   (table) => [
     index('assets_owner_idx').on(table.ownerId, table.createdAt),
+    // The moderation queue: held items, oldest first.
+    index('assets_held_idx')
+      .on(table.updatedAt, table.id)
+      .where(sql`status = 'held_for_review'`),
     // Finds abandoned intents for the cleanup job.
     index('assets_awaiting_upload_idx')
       .on(table.createdAt)

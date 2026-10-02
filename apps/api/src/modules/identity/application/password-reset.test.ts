@@ -132,7 +132,8 @@ describe('Password reset', () => {
     await request();
     await deliver();
     // The worker drops a request whose code was already sent after it was made.
-    const resetEmails = () => harness.email.sent.filter((message) => message.subject.endsWith('reset code'));
+    const resetEmails = () =>
+      harness.email.sent.filter((message) => message.subject.endsWith('reset code'));
     expect(resetEmails()).toHaveLength(1);
     harness.clock.advanceSeconds(61);
     await request();

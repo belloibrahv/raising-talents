@@ -28,3 +28,10 @@ export class DevelopmentAllowAllScanner implements ContentScanner {
     return Promise.resolve([]);
   }
 }
+
+/** Reports a borderline label for every image, so everything waits for a moderator. */
+export class DevelopmentHoldAllScanner implements ContentScanner {
+  scanImage(): Promise<readonly { name: string; parentName: string | null; confidence: number }[]> {
+    return Promise.resolve([{ name: 'Suggestive', parentName: null, confidence: 60 }]);
+  }
+}

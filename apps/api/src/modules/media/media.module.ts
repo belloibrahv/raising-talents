@@ -39,6 +39,7 @@ import type { ScanPolicy } from './domain/scan-decision.js';
 import { DrizzleMediaAssetRepository } from './infrastructure/drizzle-media-asset.repository.js';
 import {
   DevelopmentAllowAllScanner,
+  DevelopmentHoldAllScanner,
   RekognitionContentScanner,
 } from './infrastructure/rekognition-content-scanner.js';
 import {
@@ -49,7 +50,9 @@ import {
 } from './infrastructure/mux-video-provider.js';
 import { S3ObjectStorage } from './infrastructure/s3-object-storage.js';
 import { SharpImageProcessor } from './infrastructure/sharp-image-processor.js';
+import { DecideHeldMediaHandler, ListHeldMediaQuery } from './application/moderation.use-cases.js';
 import { MediaController } from './interface/http/media.controller.js';
+import { ModerationController } from './interface/http/moderation.controller.js';
 import { VideoWebhookController } from './interface/http/video-webhook.controller.js';
 
 /** The provider and its signer share one instance, so the signing key is read once. */
@@ -62,7 +65,7 @@ interface VideoParts {
 
 @Module({
   imports: [AccountsModule],
-  controllers: [MediaController, VideoWebhookController],
+  controllers: [MediaController, VideoWebhookController, ModerationController],
   providers: [
     {
       provide: VIDEO_PARTS,
@@ -133,7 +136,9 @@ interface VideoParts {
       useFactory: (config: AppConfig): ContentScanner =>
         config.CONTENT_SCANNER === 'rekognition'
           ? new RekognitionContentScanner(new RekognitionClient({}))
-          : new DevelopmentAllowAllScanner(),
+          : config.CONTENT_SCANNER === 'development-hold-all'
+            ? new DevelopmentHoldAllScanner()
+            : new DevelopmentAllowAllScanner(),
     },
     {
       provide: MEDIA.ScanPolicy,
@@ -262,6 +267,32 @@ interface VideoParts {
         clock: Clock,
         logger: Logger,
       ) => new HandleVideoProviderEventHandler(repo, video, uow, clock, logger),
+    },
+    {
+      provide: MEDIA.ListHeld,
+      inject: [MEDIA.Repository, ACCOUNTS.Facade, MEDIA.Presenter],
+      useFactory: (
+        repo: MediaAssetRepository,
+        accounts: AccountsFacade,
+        presenter: MediaPresenter,
+      ) => new ListHeldMediaQuery(repo, accounts, presenter),
+    },
+    {
+      provide: MEDIA.Decide,
+      inject: [
+        MEDIA.Repository,
+        ACCOUNTS.Facade,
+        PLATFORM.UnitOfWork,
+        PLATFORM.Clock,
+        PLATFORM.Logger,
+      ],
+      useFactory: (
+        repo: MediaAssetRepository,
+        accounts: AccountsFacade,
+        uow: UnitOfWork,
+        clock: Clock,
+        logger: Logger,
+      ) => new DecideHeldMediaHandler(repo, accounts, uow, clock, logger),
     },
     {
       provide: MEDIA.AbandonedUploads,

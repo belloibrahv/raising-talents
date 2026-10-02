@@ -25,6 +25,20 @@ export class InMemoryMediaAssetRepository implements MediaAssetRepository {
     });
   }
 
+  async findHeld(after: { heldAt: Date; id: string } | null, limit: number): Promise<MediaAsset[]> {
+    return [...this.rows.values()]
+      .filter((row) => row.status === 'held_for_review')
+      .sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime() || a.id.localeCompare(b.id))
+      .filter(
+        (row) =>
+          after === null ||
+          row.updatedAt > after.heldAt ||
+          (row.updatedAt.getTime() === after.heldAt.getTime() && row.id > after.id),
+      )
+      .slice(0, limit)
+      .map((row) => MediaAsset.restore(row));
+  }
+
   async findAbandoned(createdBefore: Date, limit: number): Promise<MediaAsset[]> {
     return [...this.rows.values()]
       .filter((row) => row.status === 'awaiting_upload' && row.createdAt < createdBefore)

@@ -18,6 +18,9 @@ import { AuthGuard } from './http/auth.guard.js';
 import { DrizzleEventRecorder } from './outbox/drizzle-event-recorder.js';
 import { PLATFORM } from './platform.tokens.js';
 import { RedisRateLimiter } from './rate-limit/redis-rate-limiter.js';
+import { NoopErrorReporter } from './observability/error-reporter.js';
+import { SentryErrorReporter } from './observability/sentry-error-reporter.js';
+import { flushTelemetry, isSentryEnabled } from './observability/telemetry.js';
 
 const DATABASE_HANDLE = Symbol('DatabaseHandle');
 
@@ -29,7 +32,7 @@ class PlatformLifecycle implements OnApplicationShutdown {
   ) {}
 
   async onApplicationShutdown(): Promise<void> {
-    await Promise.allSettled([this.database.close(), this.redis.quit()]);
+    await Promise.allSettled([this.database.close(), this.redis.quit(), flushTelemetry()]);
   }
 }
 
@@ -52,6 +55,11 @@ export class PlatformModule {
         { provide: PLATFORM.Config, useValue: config },
         { provide: PLATFORM.Logger, useValue: logger },
         { provide: PLATFORM.Clock, useClass: SystemClock },
+        {
+          provide: PLATFORM.ErrorReporter,
+          useFactory: () =>
+            isSentryEnabled() ? new SentryErrorReporter() : new NoopErrorReporter(),
+        },
         {
           provide: DATABASE_HANDLE,
           useFactory: () => createDatabase(config.DATABASE_URL, config.DATABASE_POOL_MAX),
@@ -105,6 +113,7 @@ export class PlatformModule {
         PLATFORM.Config,
         PLATFORM.Logger,
         PLATFORM.Clock,
+        PLATFORM.ErrorReporter,
         PLATFORM.Database,
         PLATFORM.UnitOfWork,
         PLATFORM.EventRecorder,

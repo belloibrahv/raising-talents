@@ -1,6 +1,7 @@
 import { pino, type Logger } from 'pino';
 import type { LoggerService } from '@nestjs/common';
 import type { AppConfig } from '../../config/env.js';
+import { traceLogFields } from '../observability/trace-context.js';
 
 /**
  * Paths that must never reach the logs. Redaction is configured here once,
@@ -21,11 +22,18 @@ export const REDACTED_PATHS = [
   'body.dateOfBirth',
 ];
 
-export function createLogger(config: Pick<AppConfig, 'LOG_LEVEL' | 'NODE_ENV'>): Logger {
+export type ProcessName = 'api' | 'worker' | 'realtime';
+
+export function createLogger(
+  config: Pick<AppConfig, 'LOG_LEVEL' | 'NODE_ENV'>,
+  processName: ProcessName,
+): Logger {
   return pino({
     level: config.LOG_LEVEL,
     redact: { paths: REDACTED_PATHS, censor: '[redacted]' },
-    base: { service: 'raising-talents-api', env: config.NODE_ENV },
+    base: { service: `raising-talents-${processName}`, env: config.NODE_ENV },
+    // Every line logged inside a traced request carries trace_id and span_id.
+    mixin: traceLogFields,
     ...(config.NODE_ENV === 'development'
       ? { transport: { target: 'pino-pretty', options: { singleLine: true } } }
       : {}),

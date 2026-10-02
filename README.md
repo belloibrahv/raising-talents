@@ -74,6 +74,26 @@ curl -X POST http://localhost:3000/v1/auth/sign-up \
 | `pnpm check:writing`                | Checks docs, comments, emails and app copy against the writing rules |
 | `pnpm --filter @rt/api db:generate` | Creates a SQL migration from schema changes. Commit the file         |
 
+## Observability
+
+Tracing and error tracking are off unless configured, so local development needs nothing.
+
+| Signal                          | Where it goes                             | Turned on by                           |
+| ------------------------------- | ----------------------------------------- | -------------------------------------- |
+| Traces                          | Grafana Cloud through OpenTelemetry       | `OTEL_EXPORTER_OTLP_ENDPOINT`          |
+| Errors from the API and worker  | Sentry                                    | `SENTRY_DSN`                           |
+| Errors and crashes from the app | Sentry                                    | `EXPO_PUBLIC_SENTRY_DSN` in `eas.json` |
+| Logs                            | stdout as JSON, collected by the platform | always on                              |
+
+How the pieces connect:
+
+- One trace follows a request through the API and into the worker. Each outbox row stores the trace context of the request that created it.
+- Every log line inside a request carries `trace_id`. Every error response carries `traceId` and every response an `x-trace-id` header, so a support ticket quoting one leads to the logs and the trace.
+- Sentry events from the API carry a `trace_id` tag. App events for server errors carry `api_trace_id`.
+- Nothing personal is sent: no request bodies, no local variables, no cookies or auth headers, no SQL values, and Redis spans record only the command name. Tests pin these settings.
+
+The API's processes load telemetry with `node --import ./dist/instrument.js` before the application, which `pnpm start` already does.
+
 ## API reference
 
 Every route is listed once, in `packages/contracts/src/endpoints.ts`. From that list:

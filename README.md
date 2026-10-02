@@ -174,7 +174,7 @@ Milestone 1, foundations.
 | Monorepo, contracts, shared config                                                                            | Done                                     |
 | Backend platform: config, logging, errors, unit of work, outbox with backoff, rate limits, health             | Done                                     |
 | Accounts: age gate, account status, role choice                                                               | Done                                     |
-| Identity: sign up, sign in, refresh rotation with reuse detection, sign out, email codes                      | Done                                     |
+| Identity: sign up, sign in, refresh rotation with reuse detection, sign out, email codes, password reset      | Done                                     |
 | Mobile app shell: welcome, sign up, sign in, email code, role choice, session restore                         | Done                                     |
 | Endpoint catalogue, OpenAPI document and typed app client                                                     | Done                                     |
 | Tracing across API and worker, error tracking for API, worker and app                                         | Done                                     |

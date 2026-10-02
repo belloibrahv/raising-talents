@@ -96,7 +96,13 @@
     "VERIFICATION_RESEND_TOO_SOON": "Wait a moment before asking for another code.",
     "EMAIL_ALREADY_VERIFIED": "Your email is already verified.",
     "EMAIL_NOT_VERIFIED": "Verify your email first.",
-    "ROLE_ALREADY_LOCKED": "Your role is set. Contact support to change it."
+    "ROLE_ALREADY_LOCKED": "Your role is set. Contact support to change it.",
+    "PRECONDITION_REQUIRED": "Reload your profile, then try saving again.",
+    "PRECONDITION_FAILED": "Your profile was changed on another device. We have loaded the latest version; check it and save again.",
+    "WRONG_ROLE": "This part of the app is for a different kind of account.",
+    "HANDLE_TAKEN": "That username is taken. Try another.",
+    "HANDLE_INVALID": "That username is not available. Try another.",
+    "UNKNOWN_TAXONOMY": "One of your choices is no longer available. Pick again from the list."
   },
   "crash": {
     "title": "Something went wrong",

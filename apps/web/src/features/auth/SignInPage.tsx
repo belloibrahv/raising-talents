@@ -1,5 +1,5 @@
 import { useState, type SubmitEvent } from 'react';
-import { Link } from 'react-router';
+import { Link, useLocation } from 'react-router';
 import { z } from 'zod';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
@@ -16,6 +16,8 @@ const emailSchema = z.email();
 
 export function SignInPage() {
   const signIn = useSignIn();
+  const passwordChanged =
+    (useLocation().state as { passwordChanged?: boolean } | null)?.passwordChanged === true;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<Errors>({});
@@ -35,6 +37,9 @@ export function SignInPage() {
   return (
     <Page title={t('signIn.title')} documentTitle={t('titles.signIn')}>
       <form ref={form} className="stack" onSubmit={submit} noValidate>
+        <FormMessage tone="success">
+          {passwordChanged && !signIn.error ? t('signIn.passwordChanged') : null}
+        </FormMessage>
         <FormMessage tone="error">{signIn.error ? errorMessage(signIn.error) : null}</FormMessage>
         <TextField
           label={t('signIn.email')}
@@ -62,6 +67,9 @@ export function SignInPage() {
         <Button type="submit" loading={signIn.isPending}>
           {t('signIn.submit')}
         </Button>
+        <Link className="button button--text" to="/forgot-password">
+          {t('signIn.forgot')}
+        </Link>
         <Link className="button button--text" to="/sign-up" replace>
           {t('signIn.noAccount')}
         </Link>

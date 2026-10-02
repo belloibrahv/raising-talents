@@ -42,6 +42,12 @@ const TalentProfilePage = lazy(() =>
 const SearchPage = lazy(() =>
   import('../features/search/SearchPage').then((m) => ({ default: m.SearchPage })),
 );
+const ForgotPasswordPage = lazy(() =>
+  import('../features/auth/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })),
+);
+const ResetPasswordPage = lazy(() =>
+  import('../features/auth/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })),
+);
 const HomePage = lazy(() =>
   import('../features/auth/HomePage').then((m) => ({ default: m.HomePage })),
 );
@@ -88,6 +94,8 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
         screen('welcome', 'auth', <WelcomePage />),
         screen('sign-up', 'auth', <SignUpPage />),
         screen('sign-in', 'auth', <SignInPage />),
+        screen('forgot-password', 'auth', <ForgotPasswordPage />),
+        screen('reset-password', 'auth', <ResetPasswordPage />),
         screen('verify-email', 'verifyEmail', <VerifyEmailPage />),
         screen('choose-role', 'chooseRole', <ChooseRolePage />),
         {

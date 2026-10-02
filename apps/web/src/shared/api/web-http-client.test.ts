@@ -198,3 +198,20 @@ describe('WebHttpClient', () => {
     expect(ended()).toBe(1);
   });
 });
+
+describe('WebHttpClient responses', () => {
+  it('reads the body of a 202, which media.complete uses for the asset', async () => {
+    const fake = new FakeBrowserAndApi();
+    fake.signIn();
+    const { client } = tab(fake);
+    await client.restore();
+    const fetchFn = fake.fetch;
+    fake.fetch = async (url, init) =>
+      url.endsWith('/v1/accepted') ? Response.json(me, { status: 202 }) : fetchFn(url, init);
+    const accepted = tab(fake);
+    await accepted.client.restore();
+    expect(
+      await accepted.client.request('/v1/accepted', { method: 'POST', schema: meResponseSchema }),
+    ).toEqual(me);
+  });
+});

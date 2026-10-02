@@ -97,7 +97,8 @@ export class WebHttpClient {
     }
 
     if (!response.ok) throw await ApiError.fromResponse(response);
-    if (response.status === 204 || response.status === 202 || !options.schema) {
+    // 202 can carry a body (media.complete answers with the asset), so only 204 means none.
+    if (response.status === 204 || !options.schema) {
       return undefined as Parsed<TSchema>;
     }
     return options.schema.parse(await response.json()) as Parsed<TSchema>;

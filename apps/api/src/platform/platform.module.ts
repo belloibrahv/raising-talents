@@ -62,7 +62,7 @@ export class PlatformModule {
         },
         {
           provide: DATABASE_HANDLE,
-          useFactory: () => createDatabase(config.DATABASE_URL, config.DATABASE_POOL_MAX),
+          useFactory: () => createDatabase(config),
         },
         {
           provide: PLATFORM.Database,

@@ -44,6 +44,8 @@ import { DrizzleCredentialRepository } from './infrastructure/drizzle-credential
 import { DrizzleOneTimeCodeRepository } from './infrastructure/drizzle-one-time-code.repository.js';
 import { DrizzleSessionRepository } from './infrastructure/drizzle-session.repository.js';
 import { HibpBreachedPasswordChecker } from './infrastructure/hibp-breached-password-checker.js';
+import { SESv2Client } from '@aws-sdk/client-sesv2';
+import { SesEmailSender } from './infrastructure/ses-email-sender.js';
 import { SmtpEmailSender } from './infrastructure/smtp-email-sender.js';
 import { AuthController } from './interface/http/auth.controller.js';
 
@@ -93,15 +95,17 @@ const infrastructureProviders: Provider[] = [
   {
     provide: IDENTITY.EmailSender,
     inject: [PLATFORM.Config],
-    useFactory: (config: AppConfig) =>
-      new SmtpEmailSender({
-        host: config.SMTP_HOST,
-        port: config.SMTP_PORT,
-        secure: config.SMTP_SECURE,
-        user: config.SMTP_USER,
-        password: config.SMTP_PASSWORD,
-        from: config.EMAIL_FROM,
-      }),
+    useFactory: (config: AppConfig): EmailSender =>
+      config.EMAIL_TRANSPORT === 'ses'
+        ? new SesEmailSender(new SESv2Client({}), config.EMAIL_FROM, config.SES_CONFIGURATION_SET)
+        : new SmtpEmailSender({
+            host: config.SMTP_HOST ?? 'localhost',
+            port: config.SMTP_PORT ?? 1025,
+            secure: config.SMTP_SECURE,
+            user: config.SMTP_USER,
+            password: config.SMTP_PASSWORD,
+            from: config.EMAIL_FROM,
+          }),
   },
   {
     provide: IDENTITY.AccountDirectory,

@@ -25,7 +25,7 @@ export const REDACTED_PATHS = [
 export type ProcessName = 'api' | 'worker' | 'realtime';
 
 export function createLogger(
-  config: Pick<AppConfig, 'LOG_LEVEL' | 'NODE_ENV'>,
+  config: Pick<AppConfig, 'LOG_LEVEL' | 'LOG_FORMAT' | 'NODE_ENV'>,
   processName: ProcessName,
 ): Logger {
   return pino({
@@ -34,7 +34,7 @@ export function createLogger(
     base: { service: `raising-talents-${processName}`, env: config.NODE_ENV },
     // Every line logged inside a traced request carries trace_id and span_id.
     mixin: traceLogFields,
-    ...(config.NODE_ENV === 'development'
+    ...(config.LOG_FORMAT === 'pretty'
       ? { transport: { target: 'pino-pretty', options: { singleLine: true } } }
       : {}),
   });

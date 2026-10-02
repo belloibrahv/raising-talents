@@ -29,3 +29,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-023](023-pwa-first-for-the-mvp.md)                                 | A progressive web app first, the native app later                    | Accepted                          |
 | [ADR-024](024-browser-sessions-with-an-httponly-refresh-cookie.md)      | Browser sessions with an HttpOnly refresh cookie                     | Accepted                          |
 | [ADR-025](025-talent-search-rules-and-hosting.md)                       | Talent search: who appears, who can search, and where Typesense runs | Proposed                          |
+| [ADR-026](026-how-agents-are-verified.md)                               | How agents are verified                                              | Proposed                          |

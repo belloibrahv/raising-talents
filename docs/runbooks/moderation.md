@@ -1,4 +1,4 @@
-# Moderation: staff accounts and the held media queue
+# Moderation: staff accounts, held media and agent verification
 
 ## Make someone a moderator
 
@@ -23,6 +23,17 @@ The scanner holds files it is unsure about (design section 10, ADR-007 for video
 - Reject: choose the closest reason. The owner sees a fixed sentence for it, never the scanner's labels, and the files are deleted.
 
 Every decision is recorded on the file (who and when) and in the API log as `held media reviewed`.
+
+## Verify agents
+
+The Agents tab lists agents who asked to be verified, oldest first. For each:
+
+1. Open the evidence link. It should be a page from the agency (its website or official social account) that names this person.
+2. Compare the agency name, city and website on their profile with the page. An account email on the agency's own domain is a good sign.
+3. If a CAC number is given, check it on the CAC public search.
+4. Verify, or decline with the closest reason. "Declined N times before" means look harder.
+
+Verified agents get the badge at once. If they rename their agency, the badge goes until they ask again (ADR-026).
 
 ## If something is wrong
 

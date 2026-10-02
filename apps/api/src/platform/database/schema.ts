@@ -7,3 +7,4 @@ export * from '../../modules/identity/infrastructure/identity.schema.js';
 export * from '../../modules/taxonomy/infrastructure/taxonomy.schema.js';
 export * from '../../modules/talent-profiles/infrastructure/talent-profile.schema.js';
 export * from '../../modules/agent-profiles/infrastructure/agent-profile.schema.js';
+export * from '../../modules/media/infrastructure/media.schema.js';

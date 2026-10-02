@@ -42,6 +42,21 @@ services:
       - '1025:1025'
       - '8025:8025'
 
+  s3:
+    # S3 for uploads, as in staging. Presigned POST, its size limit and CORS behave as on AWS.
+    # Files do not survive a restart of this container, which suits test uploads.
+    image: localstack/localstack:4
+    environment:
+      SERVICES: s3
+    ports:
+      - '4569:4566'
+    volumes:
+      - ./s3-init:/etc/localstack/init/ready.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'awslocal s3api head-bucket --bucket raising-talents-media-local']
+      interval: 5s
+      retries: 20
+
 volumes:
   postgres-data:
   typesense-data:

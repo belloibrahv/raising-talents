@@ -170,6 +170,11 @@ export function buildOpenApiDocument(version: string): JsonObject {
     ],
     tags: [
       { name: 'Auth', description: 'Accounts, sessions and email verification' },
+      {
+        name: 'Auth (web)',
+        description:
+          'The same flows for browsers. Calls must come from an allowed Origin and send credentials',
+      },
       { name: 'Me', description: 'The signed-in account' },
       { name: 'Taxonomy', description: 'Reference lists seeded by migrations' },
       { name: 'Talent profiles', description: 'Talent profiles and onboarding' },

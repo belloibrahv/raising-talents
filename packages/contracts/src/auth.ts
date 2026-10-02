@@ -89,3 +89,23 @@ export const authResponseSchema = z
   })
   .meta({ id: 'AuthResponse' });
 export type AuthResponse = z.infer<typeof authResponseSchema>;
+
+/**
+ * Browsers get the access token only. The refresh token travels in an HttpOnly
+ * cookie the page cannot read (ADR-024), so a script injected into the page cannot steal it.
+ */
+export const webAuthResponseSchema = z
+  .object({
+    accessToken: z.string(),
+    accessTokenExpiresAt: isoDateTimeSchema,
+    me: meResponseSchema,
+  })
+  .meta({ id: 'WebAuthResponse' });
+export type WebAuthResponse = z.infer<typeof webAuthResponseSchema>;
+
+export const webRefreshRequestSchema = z
+  .object({
+    deviceId: deviceIdSchema,
+  })
+  .meta({ id: 'WebRefreshRequest' });
+export type WebRefreshRequest = z.infer<typeof webRefreshRequestSchema>;

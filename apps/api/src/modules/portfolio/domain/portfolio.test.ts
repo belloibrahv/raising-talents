@@ -9,6 +9,7 @@ const later = new Date('2026-10-01T09:05:00.000Z');
 const media = (overrides: Partial<CandidateMedia> = {}): CandidateMedia => ({
   ownerId: TALENT,
   purpose: 'portfolio',
+  kind: 'image',
   status: 'ready',
   ...overrides,
 });

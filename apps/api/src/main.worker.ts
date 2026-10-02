@@ -7,6 +7,11 @@ import { EventDispatcher } from './platform/outbox/event-dispatcher.js';
 import { OutboxRelay } from './platform/outbox/outbox-relay.js';
 import type { ErrorReporter } from './platform/observability/error-reporter.js';
 import { PLATFORM } from './platform/platform.tokens.js';
+import {
+  JobScheduler,
+  type JobLock,
+  type ScheduledJob,
+} from './platform/scheduling/job-scheduler.js';
 import { IDENTITY } from './modules/identity/application/identity.tokens.js';
 import type { ModuleEventHandlers } from './modules/identity/identity.module.js';
 import { MEDIA } from './modules/media/application/media.use-cases.js';
@@ -26,8 +31,17 @@ for (const token of [IDENTITY.EventHandlers, MEDIA.EventHandlers, TALENT.EventHa
 }
 
 const errors = app.get<ErrorReporter>(PLATFORM.ErrorReporter);
-const relay = new OutboxRelay(app.get<Database>(PLATFORM.Database), dispatcher, logger, errors);
+const database = app.get<Database>(PLATFORM.Database);
+const relay = new OutboxRelay(database, dispatcher, logger, errors);
 relay.start();
+
+const scheduler = new JobScheduler(
+  [app.get<ScheduledJob>(MEDIA.AbandonedUploads)],
+  app.get<JobLock>(PLATFORM.JobLock),
+  logger,
+  errors,
+);
+scheduler.start();
 logger.info('worker process started');
 
 process.on('unhandledRejection', (reason) => {
@@ -38,7 +52,7 @@ process.on('unhandledRejection', (reason) => {
 // ECS sends SIGTERM on deploy: finish the current batch, then close connections.
 const shutdown = async (signal: string) => {
   logger.info({ signal }, 'worker shutting down');
-  await relay.stop();
+  await Promise.all([relay.stop(), scheduler.stop()]);
   await app.close();
   process.exit(0);
 };

@@ -58,15 +58,39 @@ describe('loadConfig database and cache rules', () => {
     ).toThrow(/verify-full[\s\S]*rediss/);
   });
 
+  const mux = {
+    VIDEO_PROVIDER: 'mux',
+    MUX_TOKEN_ID: 'token-id',
+    MUX_TOKEN_SECRET: 'token-secret',
+    MUX_WEBHOOK_SECRET: 'webhook-secret',
+    MUX_SIGNING_KEY_ID: 'signing-key',
+    MUX_SIGNING_PRIVATE_KEY_BASE64: 'cGVt',
+  };
+
   it('accepts staging with verified TLS', () => {
     const config = loadConfig({
       ...env,
+      ...mux,
       NODE_ENV: 'staging',
       REDIS_URL: 'rediss://default:token@cache:6379',
       DATABASE_SSL: 'verify-full',
       DATABASE_CA_FILE: '/etc/ssl/rds/global-bundle.pem',
     });
     expect(config.DATABASE_HOST).toBe(base.DATABASE_HOST);
+  });
+
+  it('refuses staging without Mux, and Mux without every setting', () => {
+    const staging = {
+      ...env,
+      NODE_ENV: 'staging',
+      REDIS_URL: 'rediss://default:token@cache:6379',
+      DATABASE_SSL: 'verify-full',
+      DATABASE_CA_FILE: '/etc/ssl/rds/global-bundle.pem',
+    };
+    expect(() => loadConfig(staging)).toThrow(/VIDEO_PROVIDER/);
+    expect(() => loadConfig({ ...staging, ...mux, MUX_WEBHOOK_SECRET: undefined })).toThrow(
+      /MUX_WEBHOOK_SECRET/,
+    );
   });
 
   it('needs either a URL or every part', () => {

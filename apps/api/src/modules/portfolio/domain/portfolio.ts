@@ -77,6 +77,7 @@ export interface PortfolioProps {
 export interface CandidateMedia {
   readonly ownerId: string;
   readonly purpose: string;
+  readonly kind: PortfolioItemKind;
   readonly status: MediaStatus;
 }
 
@@ -145,7 +146,7 @@ export class Portfolio {
     const item: PortfolioItemProps = {
       id: input.id,
       mediaId: input.mediaId,
-      kind: 'image',
+      kind: media.kind,
       caption: input.caption,
       createdAt: input.now,
       updatedAt: input.now,

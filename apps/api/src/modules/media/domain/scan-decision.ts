@@ -51,10 +51,16 @@ export function decideScan(labels: readonly ModerationLabel[], policy: ScanPolic
 }
 
 /** What the owner reads. It names the rule, never the scanner's raw labels. */
-export const REJECTION_REASON: Record<RejectionCategory, string> = {
+const REJECTION_REASON: Record<RejectionCategory, string> = {
   sexual:
     'This image looks like it contains nudity or sexual content, which the Community Guidelines do not allow.',
   violence:
     'This image looks like it shows graphic violence, which the Community Guidelines do not allow.',
   hate: 'This image looks like it contains a hate symbol, which the Community Guidelines do not allow.',
 };
+
+/** For video the scanner sees frames, so the reason talks about the video. */
+export const rejectionReason = (category: RejectionCategory, kind: 'image' | 'video'): string =>
+  kind === 'video'
+    ? REJECTION_REASON[category].replace('This image', 'This video')
+    : REJECTION_REASON[category];

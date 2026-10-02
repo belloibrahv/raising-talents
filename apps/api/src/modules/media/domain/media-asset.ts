@@ -1,8 +1,17 @@
-import { ErrorCode, IMAGE_MAX_BYTES, type MediaPurpose, type MediaStatus } from '@rt/contracts';
+import {
+  ErrorCode,
+  IMAGE_MAX_BYTES,
+  mediaKindOf,
+  VIDEO_MAX_BYTES,
+  VIDEO_MAX_SECONDS,
+  type MediaKind,
+  type MediaPurpose,
+  type MediaStatus,
+} from '@rt/contracts';
 import { domainError, type DomainError } from '../../../platform/domain-error.js';
 import type { DomainEvent } from '../../../platform/domain-event.js';
 import { err, ok, type Result } from '../../../platform/result.js';
-import { REJECTION_REASON, type ModerationLabel, type ScanDecision } from './scan-decision.js';
+import { rejectionReason, type ModerationLabel, type ScanDecision } from './scan-decision.js';
 
 export const MediaEvents = {
   Uploaded: 'media.MediaUploaded',
@@ -11,11 +20,21 @@ export const MediaEvents = {
   Rejected: 'media.MediaRejected',
   Failed: 'media.MediaFailed',
   Deleted: 'media.MediaDeleted',
+  /** The video provider finished transcoding; thumbnails can be scanned. */
+  VideoTranscoded: 'media.VideoTranscoded',
 } as const;
 
 export const MediaErrors = {
   notFound: () => domainError(ErrorCode.NotFound, 'This file does not exist or is not available.'),
-  tooLarge: () => domainError(ErrorCode.MediaTooLarge, 'Images can be up to 15 MB.'),
+  tooLarge: (kind: MediaKind) =>
+    domainError(
+      ErrorCode.MediaTooLarge,
+      kind === 'video' ? 'Videos can be up to 300 MB.' : 'Images can be up to 15 MB.',
+    ),
+  videoNotAllowed: () =>
+    domainError(ErrorCode.MediaTypeNotAllowed, 'Profile pictures must be photos.'),
+  videoUnavailable: () =>
+    domainError(ErrorCode.MediaTypeNotAllowed, 'Video uploads are not available yet.'),
   notUploaded: () =>
     domainError(
       ErrorCode.MediaNotUploaded,
@@ -35,6 +54,8 @@ export const MediaErrors = {
 
 export const IMAGE_SIZES = { small: 256, medium: 1024, large: 2048 } as const;
 
+export const VIDEO_TOO_LONG_REASON = `Videos can be up to ${String(VIDEO_MAX_SECONDS)} seconds. Trim it and upload again.`;
+
 export interface MediaAssetProps {
   readonly id: string;
   readonly ownerId: string;
@@ -47,6 +68,11 @@ export interface MediaAssetProps {
   readonly rejectionReason: string | null;
   readonly failureReason: string | null;
   readonly readyAt: Date | null;
+  /** Video only: the provider's direct upload, its asset and the playback id. */
+  readonly providerUploadId: string | null;
+  readonly providerAssetId: string | null;
+  readonly playbackId: string | null;
+  readonly durationSeconds: number | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -68,7 +94,11 @@ export class MediaAsset {
     bytes: number;
     now: Date;
   }): Result<MediaAsset, DomainError> {
-    if (input.bytes > IMAGE_MAX_BYTES) return err(MediaErrors.tooLarge());
+    const kind = mediaKindOf(input.contentType);
+    if (kind === 'video' && input.purpose !== 'portfolio')
+      return err(MediaErrors.videoNotAllowed());
+    if (input.bytes > (kind === 'video' ? VIDEO_MAX_BYTES : IMAGE_MAX_BYTES))
+      return err(MediaErrors.tooLarge(kind));
     return ok(
       new MediaAsset({
         id: input.id,
@@ -82,6 +112,10 @@ export class MediaAsset {
         rejectionReason: null,
         failureReason: null,
         readyAt: null,
+        providerUploadId: null,
+        providerAssetId: null,
+        playbackId: null,
+        durationSeconds: null,
         createdAt: input.now,
         updatedAt: input.now,
       }),
@@ -103,6 +137,9 @@ export class MediaAsset {
   }
   get purpose(): MediaPurpose {
     return this.props.purpose;
+  }
+  get kind(): MediaKind {
+    return mediaKindOf(this.props.contentType);
   }
 
   /** The original lands here. The bucket's lifecycle rule deletes anything left under pending/ after a day. */
@@ -134,6 +171,54 @@ export class MediaAsset {
     return ok(undefined);
   }
 
+  /** Video: the direct upload the phone sends the file to. Set once, before anyone sees the intent. */
+  attachProviderUpload(uploadId: string): void {
+    this.props = { ...this.props, providerUploadId: uploadId };
+  }
+
+  /**
+   * Video: the provider has the whole file. Reached from the phone's complete call or
+   * the provider's webhook, whichever comes first; the second is a no-op.
+   */
+  confirmVideoUpload(providerAssetId: string, now: Date): Result<void, DomainError> {
+    if (this.kind !== 'video') return err(MediaErrors.mismatch());
+    if (this.props.status !== 'awaiting_upload') return ok(undefined);
+    this.props = { ...this.props, status: 'processing', providerAssetId, updatedAt: now };
+    this.raise(MediaEvents.Uploaded, now);
+    return ok(undefined);
+  }
+
+  /** Video: transcoded. Too-long clips are refused here; the rest go on to be scanned. */
+  videoTranscoded(
+    input: { providerAssetId: string; playbackId: string; durationSeconds: number },
+    now: Date,
+  ): void {
+    if (this.kind !== 'video') return;
+    if (this.props.status === 'awaiting_upload')
+      this.confirmVideoUpload(input.providerAssetId, now);
+    if (this.props.status !== 'processing') return;
+    this.props = {
+      ...this.props,
+      providerAssetId: input.providerAssetId,
+      playbackId: input.playbackId,
+      durationSeconds: input.durationSeconds,
+      updatedAt: now,
+    };
+    if (input.durationSeconds > VIDEO_MAX_SECONDS) {
+      this.props = { ...this.props, status: 'rejected', rejectionReason: VIDEO_TOO_LONG_REASON };
+      this.raise(MediaEvents.Rejected, now);
+      return;
+    }
+    this.props = { ...this.props, status: 'scanning' };
+    this.raise(MediaEvents.VideoTranscoded, now);
+  }
+
+  /** Nobody finished the upload in time. */
+  abandon(now: Date): void {
+    if (this.props.status !== 'awaiting_upload') return;
+    this.fail('The upload was not finished.', now);
+  }
+
   markProcessed(now: Date): void {
     if (this.props.status !== 'processing') return;
     this.props = { ...this.props, status: 'scanning', updatedAt: now };
@@ -157,7 +242,7 @@ export class MediaAsset {
         ...this.props,
         status: 'rejected',
         moderationLabels: decision.labels,
-        rejectionReason: REJECTION_REASON[decision.category],
+        rejectionReason: rejectionReason(decision.category, this.kind),
         updatedAt: now,
       };
       this.raise(MediaEvents.Rejected, now);
@@ -177,8 +262,9 @@ export class MediaAsset {
     this.raise(MediaEvents.Deleted, now);
   }
 
-  /** Every object this asset can have in storage, whatever state it reached. */
+  /** Every object this asset can have in our storage. Video lives with the provider instead. */
   get storedKeys(): string[] {
+    if (this.kind === 'video') return [];
     return [
       this.originalKey,
       ...(Object.keys(IMAGE_SIZES) as (keyof typeof IMAGE_SIZES)[]).map((size) =>
@@ -198,7 +284,7 @@ export class MediaAsset {
       type,
       aggregateId: this.props.id,
       occurredAt,
-      payload: { ownerId: this.props.ownerId, purpose: this.props.purpose },
+      payload: { ownerId: this.props.ownerId, purpose: this.props.purpose, kind: this.kind },
     });
   }
 }
@@ -206,5 +292,7 @@ export class MediaAsset {
 export interface MediaAssetRepository {
   findById(id: string, options?: { lock?: boolean }): Promise<MediaAsset | null>;
   findByIds(ids: readonly string[]): Promise<MediaAsset[]>;
+  /** Intents older than the cutoff that never got a file, oldest first. */
+  findAbandoned(createdBefore: Date, limit: number): Promise<MediaAsset[]>;
   save(asset: MediaAsset): Promise<void>;
 }

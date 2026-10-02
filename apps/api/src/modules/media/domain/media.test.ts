@@ -104,3 +104,101 @@ describe('MediaAsset', () => {
     expect(!again.ok && again.error.code).toBe('MEDIA_WRONG_STATE');
   });
 });
+
+describe('MediaAsset video', () => {
+  const requestVideo = (bytes = 80_000_000) => {
+    const result = MediaAsset.requestUpload({
+      id: 'v1',
+      ownerId: 'u1',
+      purpose: 'portfolio',
+      contentType: 'video/mp4',
+      bytes,
+      now,
+    });
+    if (!result.ok) throw new Error(result.error.message);
+    result.value.attachProviderUpload('upload-1');
+    return result.value;
+  };
+  const transcoded = { providerAssetId: 'asset-1', playbackId: 'play-1', durationSeconds: 42.5 };
+
+  it('allows video for the portfolio only, up to 300 MB', () => {
+    const avatar = MediaAsset.requestUpload({
+      id: 'v',
+      ownerId: 'u1',
+      purpose: 'avatar',
+      contentType: 'video/mp4',
+      bytes: 1000,
+      now,
+    });
+    expect(avatar.ok ? null : avatar.error.code).toBe('MEDIA_TYPE_NOT_ALLOWED');
+    const huge = MediaAsset.requestUpload({
+      id: 'v',
+      ownerId: 'u1',
+      purpose: 'portfolio',
+      contentType: 'video/quicktime',
+      bytes: 301 * 1024 * 1024,
+      now,
+    });
+    expect(huge.ok ? null : huge.error.message).toBe('Videos can be up to 300 MB.');
+    expect(requestVideo().kind).toBe('video');
+    expect(requestVideo().storedKeys).toEqual([]);
+  });
+
+  it('goes from upload to scanning, raising the event the worker scans on', () => {
+    const asset = requestVideo();
+    expect(asset.confirmVideoUpload('asset-1', now).ok).toBe(true);
+    asset.videoTranscoded(transcoded, now);
+    expect(asset.status).toBe('scanning');
+    expect(asset.snapshot()).toMatchObject({ playbackId: 'play-1', durationSeconds: 42.5 });
+    expect(asset.pullEvents().map((event) => event.type)).toEqual([
+      MediaEvents.Uploaded,
+      MediaEvents.VideoTranscoded,
+    ]);
+  });
+
+  it('copes with the ready webhook arriving before the upload is confirmed', () => {
+    const asset = requestVideo();
+    asset.videoTranscoded(transcoded, now);
+    expect(asset.status).toBe('scanning');
+    expect(asset.snapshot().providerAssetId).toBe('asset-1');
+  });
+
+  it('ignores repeated events', () => {
+    const asset = requestVideo();
+    asset.confirmVideoUpload('asset-1', now);
+    asset.videoTranscoded(transcoded, now);
+    asset.pullEvents();
+    asset.confirmVideoUpload('asset-1', now);
+    asset.videoTranscoded(transcoded, now);
+    expect(asset.status).toBe('scanning');
+    expect(asset.pullEvents()).toEqual([]);
+  });
+
+  it('rejects a clip over 60 seconds and tells the owner how to fix it', () => {
+    const asset = requestVideo();
+    asset.videoTranscoded({ ...transcoded, durationSeconds: 61.2 }, now);
+    expect(asset.status).toBe('rejected');
+    expect(asset.snapshot().rejectionReason).toBe(
+      'Videos can be up to 60 seconds. Trim it and upload again.',
+    );
+  });
+
+  it('words a scan rejection for video', () => {
+    const asset = requestVideo();
+    asset.videoTranscoded(transcoded, now);
+    asset.applyScan({ outcome: 'rejected', category: 'violence', labels: [] }, now);
+    expect(asset.snapshot().rejectionReason).toMatch(
+      /^This video looks like it shows graphic violence/,
+    );
+  });
+
+  it('closes an intent nobody finished, and leaves anything further along alone', () => {
+    const abandoned = requestVideo();
+    abandoned.abandon(now);
+    expect(abandoned.status).toBe('failed');
+    const confirmed = requestVideo();
+    confirmed.confirmVideoUpload('asset-1', now);
+    confirmed.abandon(now);
+    expect(confirmed.status).toBe('processing');
+  });
+});

@@ -1,48 +1,50 @@
-import type { ImageUrls, MediaPurpose, MediaStatus } from '@rt/contracts';
+import type { ImageUrls, MediaKind, MediaPurpose, MediaStatus, VideoPlayback } from '@rt/contracts';
 import type { Logger } from 'pino';
 import type { Clock } from '../../../platform/clock.js';
 import type { DomainEvent } from '../../../platform/domain-event.js';
 import type { MediaAssetRepository } from '../domain/media-asset.js';
-import type { MediaUrls } from './media-urls.js';
-import type { ObjectStorage } from './ports.js';
+import type { MediaPresenter } from './media-presenter.js';
+import type { ObjectStorage, VideoProvider } from './ports.js';
 
 /** What another module may know about an asset. */
 export interface MediaSummary {
   readonly id: string;
   readonly ownerId: string;
   readonly purpose: MediaPurpose;
+  readonly kind: MediaKind;
   readonly status: MediaStatus;
   readonly rejectionReason: string | null;
-  /** Set only when the asset is ready. */
+  /** Set only when a ready image. */
   readonly urls: ImageUrls | null;
+  /** Set only when a ready video. */
+  readonly video: VideoPlayback | null;
 }
 
 /** How other modules read and release media. They never touch media tables or storage. */
 export class MediaFacade {
   constructor(
     private readonly assets: MediaAssetRepository,
-    private readonly urls: MediaUrls,
+    private readonly presenter: MediaPresenter,
     private readonly clock: Clock,
   ) {}
 
   async describe(ids: readonly string[]): Promise<Map<string, MediaSummary>> {
     const found = await this.assets.findByIds(ids);
-    return new Map(
-      found.map((asset) => {
+    const summaries = await Promise.all(
+      found.map(async (asset): Promise<MediaSummary> => {
         const props = asset.snapshot();
-        return [
-          props.id,
-          {
-            id: props.id,
-            ownerId: props.ownerId,
-            purpose: props.purpose,
-            status: props.status,
-            rejectionReason: props.rejectionReason,
-            urls: props.status === 'ready' ? this.urls.forImage(props.ownerId, props.id) : null,
-          },
-        ];
+        return {
+          id: props.id,
+          ownerId: props.ownerId,
+          purpose: props.purpose,
+          kind: asset.kind,
+          status: props.status,
+          rejectionReason: props.rejectionReason,
+          ...(await this.presenter.links(asset)),
+        };
       }),
     );
+    return new Map(summaries.map((summary) => [summary.id, summary]));
   }
 
   /**
@@ -57,18 +59,29 @@ export class MediaFacade {
   }
 }
 
-/** Runs in the worker for every MediaDeleted event. Removing a missing object is not an error. */
+/**
+ * Runs in the worker for MediaDeleted, and for MediaRejected on video (images
+ * remove their own rejected files). Removing something already gone is not an error.
+ */
 export class RemoveDeletedMediaHandler {
   constructor(
     private readonly assets: MediaAssetRepository,
     private readonly storage: ObjectStorage,
+    private readonly video: VideoProvider,
     private readonly logger: Logger,
   ) {}
 
   async handle(event: DomainEvent): Promise<void> {
     const asset = await this.assets.findById(event.aggregateId);
-    if (asset?.status !== 'deleted') return;
-    await this.storage.remove(asset.storedKeys);
-    this.logger.info({ mediaId: asset.id }, 'media files removed');
+    if (asset?.status !== 'deleted' && !(asset?.status === 'rejected' && asset.kind === 'video'))
+      return;
+    const keys = asset.storedKeys;
+    if (keys.length > 0) await this.storage.remove(keys);
+    const { providerAssetId, providerUploadId } = asset.snapshot();
+    if (asset.kind === 'video' && this.video.enabled) {
+      if (providerAssetId) await this.video.deleteAsset(providerAssetId);
+      else if (providerUploadId) await this.video.cancelUpload(providerUploadId);
+    }
+    this.logger.info({ mediaId: asset.id, status: asset.status }, 'media files removed');
   }
 }

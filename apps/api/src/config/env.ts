@@ -67,6 +67,23 @@ const envSchema = z.object({
   MUX_SIGNING_KEY_ID: z.string().min(1).optional(),
   MUX_SIGNING_PRIVATE_KEY_BASE64: z.string().min(1).optional(),
   VIDEO_PLAYBACK_TTL_SECONDS: z.coerce.number().int().min(300).max(86_400).default(21_600),
+
+  /**
+   * Origins of the web app, comma separated, for example https://app.raisingtalents.app.
+   * Only these may call the API from a browser (CORS) or use the cookie session endpoints.
+   */
+  WEB_ORIGINS: z
+    .string()
+    .default('')
+    .transform((value) =>
+      value
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+    )
+    .pipe(z.array(z.url())),
+  /** Secure cookies need HTTPS. Only a laptop on plain http://localhost may turn it off. */
+  WEB_COOKIE_SECURE: booleanFromString.default(true),
 });
 
 const MUX_KEYS = [
@@ -116,6 +133,20 @@ const checkedEnvSchema = envSchema.superRefine((env, ctx) => {
     }
   }
   if (env.NODE_ENV === 'staging' || env.NODE_ENV === 'production') {
+    if (!env.WEB_COOKIE_SECURE) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['WEB_COOKIE_SECURE'],
+        message: 'Staging and production must send the session cookie over HTTPS only',
+      });
+    }
+    if (env.WEB_ORIGINS.some((origin) => !origin.startsWith('https://'))) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['WEB_ORIGINS'],
+        message: 'Staging and production web origins must use https',
+      });
+    }
     if (env.VIDEO_PROVIDER !== 'mux') {
       ctx.addIssue({
         code: 'custom',

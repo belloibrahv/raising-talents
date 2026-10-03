@@ -44,6 +44,17 @@ export function configureApiApp(
   app.useGlobalFilters(
     new ProblemDetailsFilter(logger, app.get<ErrorReporter>(PLATFORM.ErrorReporter)),
   );
+  // Browsers may call the API only from the web app's origins. Credentials are allowed
+  // so the refresh cookie reaches the web auth endpoints; everything else uses bearer tokens.
+  const config = app.get<AppConfig>(PLATFORM.Config);
+  app.enableCors({
+    origin: config.WEB_ORIGINS,
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+    allowedHeaders: ['authorization', 'content-type', 'if-match', 'accept'],
+    exposedHeaders: ['etag', 'x-trace-id', 'retry-after'],
+    maxAge: 600,
+  });
   app.enableShutdownHooks();
   const fastify = app.getHttpAdapter().getInstance();
   // Names the request's trace after its route, so /v1/talents/{id} groups as one operation.

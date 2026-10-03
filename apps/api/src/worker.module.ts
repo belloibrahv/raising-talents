@@ -3,6 +3,7 @@ import { AccountsModule } from './modules/accounts/accounts.module.js';
 import { IdentityModule } from './modules/identity/identity.module.js';
 import { MediaModule } from './modules/media/media.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
+import { PrivacyModule } from './modules/privacy/privacy.module.js';
 import { SearchModule } from './modules/search/search.module.js';
 import { TalentProfilesModule } from './modules/talent-profiles/talent-profiles.module.js';
 import { PlatformModule, type PlatformOptions } from './platform/platform.module.js';
@@ -21,6 +22,7 @@ export class WorkerModule {
         TalentProfilesModule,
         SearchModule,
         NotificationsModule,
+        PrivacyModule,
       ],
     };
   }

@@ -16,6 +16,7 @@ import { IDENTITY } from './modules/identity/application/identity.tokens.js';
 import type { ModuleEventHandlers } from './modules/identity/identity.module.js';
 import { MEDIA } from './modules/media/application/media.use-cases.js';
 import { NOTIFICATIONS } from './modules/notifications/application/notifications.js';
+import { PRIVACY } from './modules/privacy/application/privacy.use-cases.js';
 import { SEARCH } from './modules/search/application/search.use-cases.js';
 import { TALENT } from './modules/talent-profiles/application/talent-profile.tokens.js';
 import { WorkerModule } from './worker.module.js';
@@ -44,7 +45,7 @@ const relay = new OutboxRelay(database, dispatcher, logger, errors);
 relay.start();
 
 const scheduler = new JobScheduler(
-  [app.get<ScheduledJob>(MEDIA.AbandonedUploads)],
+  [app.get<ScheduledJob>(MEDIA.AbandonedUploads), app.get<ScheduledJob>(PRIVACY.Erasure)],
   app.get<JobLock>(PLATFORM.JobLock),
   logger,
   errors,

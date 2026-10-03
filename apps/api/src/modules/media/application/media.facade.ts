@@ -28,6 +28,8 @@ export class MediaFacade {
     private readonly assets: MediaAssetRepository,
     private readonly presenter: MediaPresenter,
     private readonly clock: Clock,
+    private readonly storage: ObjectStorage,
+    private readonly video: VideoProvider,
   ) {}
 
   async describe(ids: readonly string[]): Promise<Map<string, MediaSummary>> {
@@ -48,6 +50,30 @@ export class MediaFacade {
       }),
     );
     return new Map(summaries.map((summary) => [summary.id, summary]));
+  }
+
+  /** Every file the person uploaded, for their data export. */
+  async listForOwner(ownerId: string): Promise<MediaSummary[]> {
+    const assets = await this.assets.findByOwner(ownerId);
+    return [...(await this.describe(assets.map((asset) => asset.id))).values()];
+  }
+
+  /**
+   * Removes every stored copy of the person's files, at us and at the video provider,
+   * before their account is erased (the rows then go with the account).
+   */
+  async purgeOwnerFiles(ownerId: string): Promise<number> {
+    const assets = await this.assets.findByOwner(ownerId);
+    for (const asset of assets) {
+      const keys = asset.storedKeys;
+      if (keys.length > 0) await this.storage.remove(keys);
+      const { providerAssetId, providerUploadId } = asset.snapshot();
+      if (asset.kind === 'video' && this.video.enabled) {
+        if (providerAssetId) await this.video.deleteAsset(providerAssetId);
+        else if (providerUploadId) await this.video.cancelUpload(providerUploadId);
+      }
+    }
+    return assets.length;
   }
 
   /**

@@ -16,6 +16,7 @@ const me = {
   roleLocked: false,
   status: 'onboarding',
   countryCode: 'NG',
+  deletionScheduledAt: null,
   createdAt: NOW.toISOString(),
 };
 

@@ -15,6 +15,7 @@ export function toMeResponse(account: Account): MeResponse {
     roleLocked: props.roleLockedAt !== null,
     status: props.status,
     countryCode: props.countryCode,
+    deletionScheduledAt: props.deletionScheduledAt?.toISOString() ?? null,
     createdAt: props.createdAt.toISOString(),
   };
 }

@@ -26,4 +26,23 @@ export class InMemoryAccountRepository implements AccountRepository {
     const events: DomainEvent[] = account.pullEvents();
     await this.events.record(events);
   }
+
+  async findDueForDeletion(now: Date, limit: number): Promise<Account[]> {
+    return [...this.rows.values()]
+      .filter(
+        (row) =>
+          row.status === 'pending_deletion' &&
+          row.deletionScheduledAt !== null &&
+          row.deletionScheduledAt <= now,
+      )
+      .slice(0, limit)
+      .map((row) => Account.restore(row));
+  }
+
+  async erase(id: string, now: Date): Promise<void> {
+    await this.events.record([
+      { type: 'accounts.AccountDeleted', aggregateId: id, occurredAt: now, payload: {} },
+    ]);
+    this.rows.delete(id);
+  }
 }

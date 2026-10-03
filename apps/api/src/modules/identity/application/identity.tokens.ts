@@ -22,4 +22,5 @@ export const IDENTITY = {
   ResetPassword: Symbol('ResetPasswordHandler'),
   NotifyPasswordChanged: Symbol('NotifyPasswordChangedHandler'),
   EventHandlers: Symbol('IdentityEventHandlers'),
+  Facade: Symbol('IdentityFacade'),
 } as const;

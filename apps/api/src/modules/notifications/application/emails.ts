@@ -104,3 +104,24 @@ export function agentDeclinedEmail(input: {
     link: { href: `${input.appUrl}/verification`, label: 'Send new evidence' },
   });
 }
+
+export function deletionScheduledEmail(input: {
+  to: string;
+  scheduledFor: Date;
+  appUrl: string;
+}): EmailMessage {
+  const date = new Intl.DateTimeFormat('en-NG', {
+    dateStyle: 'long',
+    timeZone: 'Africa/Lagos',
+  }).format(input.scheduledFor);
+  return email({
+    to: input.to,
+    subject: 'Your Raising Talents account will be deleted',
+    paragraphs: [
+      `You asked us to delete your account. It is hidden from agents now, and on ${date} we will erase it with your profile, portfolio and files.`,
+      'Changed your mind? Sign in before then and choose Keep my account.',
+      'If you did not ask for this, sign in, keep your account, and change your password.',
+    ],
+    link: { href: `${input.appUrl}/sign-in`, label: 'Sign in to keep your account' },
+  });
+}

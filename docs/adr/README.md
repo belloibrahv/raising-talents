@@ -30,3 +30,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-024](024-browser-sessions-with-an-httponly-refresh-cookie.md)      | Browser sessions with an HttpOnly refresh cookie                     | Accepted                          |
 | [ADR-025](025-talent-search-rules-and-hosting.md)                       | Talent search: who appears, who can search, and where Typesense runs | Proposed                          |
 | [ADR-026](026-how-agents-are-verified.md)                               | How agents are verified                                              | Proposed                          |
+| [ADR-027](027-account-deletion-and-data-export.md)                      | Account deletion and data export                                     | Proposed                          |

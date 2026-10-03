@@ -26,6 +26,16 @@ export class DrizzleMediaAssetRepository implements MediaAssetRepository {
     return rows.map((row) => MediaAsset.restore(row));
   }
 
+  async findByOwner(ownerId: string): Promise<MediaAsset[]> {
+    const rows = await this.uow
+      .executor()
+      .select()
+      .from(assets)
+      .where(eq(assets.ownerId, ownerId))
+      .orderBy(asc(assets.createdAt));
+    return rows.map((row) => MediaAsset.restore(row));
+  }
+
   async findHeld(after: { heldAt: Date; id: string } | null, limit: number): Promise<MediaAsset[]> {
     const held = eq(assets.status, 'held_for_review');
     const rows = await this.uow

@@ -20,6 +20,8 @@ export interface AccountProps {
   readonly status: AccountStatus;
   readonly dateOfBirth: string;
   readonly countryCode: string;
+  /** Set while the owner has asked for deletion; the account is erased after this moment. */
+  readonly deletionScheduledAt: Date | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -53,6 +55,7 @@ export class Account {
       role: null,
       roleLockedAt: null,
       status: 'onboarding',
+      deletionScheduledAt: null,
       dateOfBirth: input.dateOfBirth,
       countryCode: input.countryCode,
       createdAt: input.now,
@@ -135,6 +138,35 @@ export class Account {
     this.props = { ...this.props, role, roleLockedAt: now, status, updatedAt: now };
     this.raise(AccountEvents.StaffRoleGranted, now, { role });
     return ok(undefined);
+  }
+
+  /**
+   * The owner asked to delete the account. It disappears from search and public view at
+   * once and is erased after the grace period, unless they cancel first.
+   */
+  requestDeletion(now: Date, graceDays: number): Result<Date, DomainError> {
+    if (this.props.status === 'suspended') return err(AccountErrors.suspended());
+    if (this.props.status === 'banned') return err(AccountErrors.banned());
+    if (this.props.status === 'pending_deletion' && this.props.deletionScheduledAt) {
+      return ok(this.props.deletionScheduledAt);
+    }
+    const scheduledFor = new Date(now.getTime() + graceDays * 24 * 60 * 60 * 1000);
+    this.props = {
+      ...this.props,
+      status: 'pending_deletion',
+      deletionScheduledAt: scheduledFor,
+      updatedAt: now,
+    };
+    this.raise(AccountEvents.DeletionRequested, now, { scheduledFor: scheduledFor.toISOString() });
+    return ok(scheduledFor);
+  }
+
+  /** Keeps the account. It returns to where it was: active once onboarding had finished. */
+  cancelDeletion(now: Date): void {
+    if (this.props.status !== 'pending_deletion') return;
+    const status = this.props.roleLockedAt === null ? 'onboarding' : 'active';
+    this.props = { ...this.props, status, deletionScheduledAt: null, updatedAt: now };
+    this.raise(AccountEvents.DeletionCancelled, now, {});
   }
 
   get role(): Role | null {

@@ -25,6 +25,12 @@ export class InMemoryMediaAssetRepository implements MediaAssetRepository {
     });
   }
 
+  async findByOwner(ownerId: string): Promise<MediaAsset[]> {
+    return [...this.rows.values()]
+      .filter((row) => row.ownerId === ownerId)
+      .map((row) => MediaAsset.restore(row));
+  }
+
   async findHeld(after: { heldAt: Date; id: string } | null, limit: number): Promise<MediaAsset[]> {
     return [...this.rows.values()]
       .filter((row) => row.status === 'held_for_review')

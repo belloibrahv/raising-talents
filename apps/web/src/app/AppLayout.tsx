@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router';
+import { DeletionBanner } from '../features/account/DeletionBanner';
 import { useSession, useSignOut } from '../features/auth/use-auth';
 import { t } from '../i18n';
 import { InstallCard } from '../shared/pwa/InstallCard';
@@ -37,6 +38,9 @@ export function AppLayout() {
               </li>
             ) : null}
             <li>
+              <NavLink to="/account">{t('nav.account')}</NavLink>
+            </li>
+            <li>
               <button
                 type="button"
                 onClick={() => {
@@ -49,6 +53,7 @@ export function AppLayout() {
           </ul>
         </nav>
       </header>
+      <DeletionBanner />
       <Outlet />
       {onboarding ? null : (
         <aside className="install-slot">

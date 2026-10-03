@@ -222,9 +222,14 @@ interface VideoParts {
     },
     {
       provide: MEDIA.Facade,
-      inject: [MEDIA.Repository, MEDIA.Presenter, PLATFORM.Clock],
-      useFactory: (repo: MediaAssetRepository, presenter: MediaPresenter, clock: Clock) =>
-        new MediaFacade(repo, presenter, clock),
+      inject: [MEDIA.Repository, MEDIA.Presenter, PLATFORM.Clock, MEDIA.Storage, MEDIA.Video],
+      useFactory: (
+        repo: MediaAssetRepository,
+        presenter: MediaPresenter,
+        clock: Clock,
+        storage: ObjectStorage,
+        video: VideoProvider,
+      ) => new MediaFacade(repo, presenter, clock, storage, video),
     },
     {
       provide: MEDIA.RemoveDeleted,

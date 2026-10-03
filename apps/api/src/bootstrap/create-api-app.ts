@@ -27,7 +27,8 @@ export async function createApiApp(
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule.register({ config, logger }),
     createFastifyAdapter(config),
-    { logger: new PinoNestLogger(logger) },
+    // rawBody keeps the exact bytes for webhook signature checks; parsed bodies are unchanged.
+    { logger: new PinoNestLogger(logger), rawBody: true },
   );
   return configureApiApp(app, logger);
 }

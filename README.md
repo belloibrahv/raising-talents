@@ -155,6 +155,7 @@ Milestone 1, foundations.
 | Milestone 2: taxonomy, talent and agent profiles with versioned updates and onboarding completion             | Done                                    |
 | Milestone 2: image pipeline (direct upload, metadata stripping, WebP variants, scanning) and approved avatars | Done                                    |
 | Milestone 2: portfolio items (add, caption, reorder with If-Match, remove with media cleanup, public view)    | Done, limits provisional (ADR-020)      |
-| Milestone 2: video through Mux, cleanup of abandoned uploads                                                  | Next                                    |
+| Milestone 2: video through Mux (direct upload, signed webhooks, frame scanning, signed playback)              | Done, limits provisional (ADR-021)      |
+| Milestone 2: scheduled cleanup of abandoned uploads                                                           | Done                                    |
 | Milestone 2: onboarding screens in the app                                                                    | Next                                    |
 | CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                        | Done                                    |

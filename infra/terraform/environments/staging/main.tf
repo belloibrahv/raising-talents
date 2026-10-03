@@ -113,6 +113,7 @@ resource "aws_secretsmanager_secret" "app" {
     pepper = "Server secret for hashing verification codes"
     sentry = "Sentry DSN for the API and worker"
     otlp   = "OTLP headers for Grafana Cloud, for example Authorization=Basic ..."
+    mux    = "Mux: JSON with tokenId, tokenSecret, webhookSecret, signingKeyId, signingPrivateKeyBase64"
   }
   name                    = "${local.name}/${each.key}"
   description             = each.value
@@ -207,19 +208,25 @@ locals {
     MEDIA_BUCKET                = module.media.bucket_name
     MEDIA_CDN_URL               = module.media.media_url
     CONTENT_SCANNER             = "rekognition"
+    VIDEO_PROVIDER              = "mux"
     OTEL_EXPORTER_OTLP_ENDPOINT = var.otlp_endpoint
     OTEL_TRACES_SAMPLER         = "parentbased_traceidratio"
     OTEL_TRACES_SAMPLER_ARG     = var.trace_sample_ratio
   })
 
   app_secrets = merge(local.database_secrets, {
-    REDIS_URL                  = module.cache.url_secret_arn
-    JWT_PRIVATE_KEY_BASE64     = "${aws_secretsmanager_secret.app["jwt"].arn}:privateKeyBase64::"
-    JWT_PUBLIC_KEY_BASE64      = "${aws_secretsmanager_secret.app["jwt"].arn}:publicKeyBase64::"
-    JWT_KEY_ID                 = "${aws_secretsmanager_secret.app["jwt"].arn}:keyId::"
-    VERIFICATION_CODE_PEPPER   = aws_secretsmanager_secret.app["pepper"].arn
-    SENTRY_DSN                 = aws_secretsmanager_secret.app["sentry"].arn
-    OTEL_EXPORTER_OTLP_HEADERS = aws_secretsmanager_secret.app["otlp"].arn
+    REDIS_URL                      = module.cache.url_secret_arn
+    JWT_PRIVATE_KEY_BASE64         = "${aws_secretsmanager_secret.app["jwt"].arn}:privateKeyBase64::"
+    JWT_PUBLIC_KEY_BASE64          = "${aws_secretsmanager_secret.app["jwt"].arn}:publicKeyBase64::"
+    JWT_KEY_ID                     = "${aws_secretsmanager_secret.app["jwt"].arn}:keyId::"
+    VERIFICATION_CODE_PEPPER       = aws_secretsmanager_secret.app["pepper"].arn
+    SENTRY_DSN                     = aws_secretsmanager_secret.app["sentry"].arn
+    OTEL_EXPORTER_OTLP_HEADERS     = aws_secretsmanager_secret.app["otlp"].arn
+    MUX_TOKEN_ID                   = "${aws_secretsmanager_secret.app["mux"].arn}:tokenId::"
+    MUX_TOKEN_SECRET               = "${aws_secretsmanager_secret.app["mux"].arn}:tokenSecret::"
+    MUX_WEBHOOK_SECRET             = "${aws_secretsmanager_secret.app["mux"].arn}:webhookSecret::"
+    MUX_SIGNING_KEY_ID             = "${aws_secretsmanager_secret.app["mux"].arn}:signingKeyId::"
+    MUX_SIGNING_PRIVATE_KEY_BASE64 = "${aws_secretsmanager_secret.app["mux"].arn}:signingPrivateKeyBase64::"
   })
 
   service_defaults = {

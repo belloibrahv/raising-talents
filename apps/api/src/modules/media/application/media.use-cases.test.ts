@@ -17,7 +17,9 @@ import {
   InMemoryObjectStorage,
   ScriptedScanner,
 } from '../testing/fakes.js';
+import { FakeVideoProvider } from '../testing/fake-video-provider.js';
 import { MediaFacade } from './media.facade.js';
+import { MediaPresenter } from './media-presenter.js';
 import { MediaUrls } from './media-urls.js';
 import {
   CompleteUploadHandler,
@@ -43,6 +45,8 @@ describe('Image pipeline', () => {
   let setAvatar: SetApprovedAvatarHandler;
   let talentId: string;
   const urls = new MediaUrls('https://media.staging.raisingtalents.app');
+  let video: FakeVideoProvider;
+  let presenter: MediaPresenter;
 
   /** Asks for an intent, uploads like the phone does, and confirms. Returns the media id. */
   async function upload(
@@ -80,14 +84,17 @@ describe('Image pipeline', () => {
     scanner = new ScriptedScanner();
     profiles = new InMemoryTalentProfileRepository(events);
     const uow = new InMemoryUnitOfWork();
+    video = new FakeVideoProvider();
+    presenter = new MediaPresenter(urls, video);
     createIntent = new CreateUploadIntentHandler(
       assets,
       storage,
+      video,
       accounts.facade,
       new InMemoryRateLimiter(),
       clock,
     );
-    complete = new CompleteUploadHandler(assets, storage, urls, uow, clock);
+    complete = new CompleteUploadHandler(assets, storage, video, presenter, uow, clock);
     process = new ProcessImageHandler(
       assets,
       storage,
@@ -98,7 +105,7 @@ describe('Image pipeline', () => {
       clock,
       pino({ level: 'silent' }),
     );
-    get = new GetMediaQuery(assets, urls);
+    get = new GetMediaQuery(assets, presenter);
     setAvatar = new SetApprovedAvatarHandler(profiles, accounts.facade, uow, clock);
     talentId = await accounts.createAccount({ email: 'amaka.okafor@example.com', role: 'talent' });
   });
@@ -219,7 +226,7 @@ describe('Image pipeline', () => {
   });
 
   it('does not bring back a file the owner deleted while it was being scanned', async () => {
-    const facade = new MediaFacade(assets, urls, clock);
+    const facade = new MediaFacade(assets, presenter, clock);
     const mediaId = await upload();
     const scan = scanner.scanImage.bind(scanner);
     scanner.scanImage = async () => {
@@ -233,7 +240,7 @@ describe('Image pipeline', () => {
   });
 
   it('lets other modules read an asset and discard only their own user’s files', async () => {
-    const facade = new MediaFacade(assets, urls, clock);
+    const facade = new MediaFacade(assets, presenter, clock);
     const mediaId = await upload();
     await runWorker();
     const described = (await facade.describe([mediaId, 'missing'])).get(mediaId);

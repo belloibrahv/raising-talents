@@ -26,6 +26,8 @@ import {
   InMemoryMediaAssetRepository,
   InMemoryObjectStorage,
 } from '../../src/modules/media/testing/fakes.js';
+import { FakeVideoProvider } from '../../src/modules/media/testing/fake-video-provider.js';
+import { MuxWebhookVerifier } from '../../src/modules/media/infrastructure/mux-video-provider.js';
 import { PORTFOLIO } from '../../src/modules/portfolio/application/portfolio.use-cases.js';
 import { InMemoryPortfolioRepository } from '../../src/modules/portfolio/testing/in-memory-portfolio.repository.js';
 import { TALENT } from '../../src/modules/talent-profiles/application/talent-profile.tokens.js';
@@ -41,6 +43,8 @@ import {
   InMemoryUnitOfWork,
 } from '../../src/platform/testing/fakes.js';
 
+export const E2E_WEBHOOK_SECRET = 'e2e-mux-webhook-secret';
+
 const toBase64 = (value: string) => Buffer.from(value).toString('base64');
 
 export interface TestApp {
@@ -51,6 +55,8 @@ export interface TestApp {
   readonly talentProfiles: InMemoryTalentProfileRepository;
   readonly storage: InMemoryObjectStorage;
   readonly mediaAssets: InMemoryMediaAssetRepository;
+  readonly video: FakeVideoProvider;
+  readonly clock: FixedClock;
   /** Publishes recorded events the way the worker would. */
   deliverEvents(): Promise<void>;
 }
@@ -81,12 +87,14 @@ export async function createTestApp(): Promise<TestApp> {
   const talentProfiles = new InMemoryTalentProfileRepository(events);
   const storage = new InMemoryObjectStorage();
   const mediaAssets = new InMemoryMediaAssetRepository(events);
+  const video = new FakeVideoProvider();
+  const clock = new FixedClock();
 
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule.register({ config, logger }), DiscoveryModule],
   })
     .overrideProvider(PLATFORM.Clock)
-    .useValue(new FixedClock())
+    .useValue(clock)
     .overrideProvider(PLATFORM.UnitOfWork)
     .useValue(new InMemoryUnitOfWork())
     .overrideProvider(PLATFORM.EventRecorder)
@@ -121,6 +129,12 @@ export async function createTestApp(): Promise<TestApp> {
     .useValue(storage)
     .overrideProvider(MEDIA.Processor)
     .useValue(new FakeImageProcessor())
+    .overrideProvider(MEDIA.Video)
+    .useValue(video)
+    .overrideProvider(MEDIA.Signer)
+    .useValue(video)
+    .overrideProvider(MEDIA.WebhookVerifier)
+    .useValue(new MuxWebhookVerifier(E2E_WEBHOOK_SECRET, clock))
     .overrideProvider(PORTFOLIO.Repository)
     .useValue(new InMemoryPortfolioRepository(events))
     .compile();
@@ -130,7 +144,9 @@ export async function createTestApp(): Promise<TestApp> {
     moduleRef.get<ModuleEventHandlers>(token).register(dispatcher);
   }
   const app = configureApiApp(
-    moduleRef.createNestApplication<NestFastifyApplication>(createFastifyAdapter(config)),
+    moduleRef.createNestApplication<NestFastifyApplication>(createFastifyAdapter(config), {
+      rawBody: true,
+    }),
     logger,
   );
   await app.init();
@@ -144,6 +160,8 @@ export async function createTestApp(): Promise<TestApp> {
     talentProfiles,
     storage,
     mediaAssets,
+    video,
+    clock,
     // Keeps draining, because handlers raise new events (an upload becomes ready, then completes a profile).
     deliverEvents: async () => {
       while (events.events.length > 0) {

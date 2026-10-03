@@ -25,6 +25,14 @@ export class InMemoryMediaAssetRepository implements MediaAssetRepository {
     });
   }
 
+  async findAbandoned(createdBefore: Date, limit: number): Promise<MediaAsset[]> {
+    return [...this.rows.values()]
+      .filter((row) => row.status === 'awaiting_upload' && row.createdAt < createdBefore)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+      .slice(0, limit)
+      .map((row) => MediaAsset.restore(row));
+  }
+
   async save(asset: MediaAsset): Promise<void> {
     this.rows.set(asset.id, asset.snapshot());
     await this.events.record(asset.pullEvents());

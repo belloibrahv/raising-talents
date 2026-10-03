@@ -8,4 +8,5 @@ export const PLATFORM = {
   RateLimiter: Symbol('RateLimiter'),
   Logger: Symbol('Logger'),
   ErrorReporter: Symbol('ErrorReporter'),
+  JobLock: Symbol('JobLock'),
 } as const;

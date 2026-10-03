@@ -57,7 +57,25 @@ const envSchema = z.object({
   CONTENT_SCANNER: z.enum(['rekognition', 'development-allow-all']).default('rekognition'),
   SCAN_REVIEW_AT: z.coerce.number().min(0).max(100).default(50),
   SCAN_REJECT_AT: z.coerce.number().min(0).max(100).default(80),
+
+  /** disabled refuses video uploads; mux needs every MUX_ setting. Staging and production use mux. */
+  VIDEO_PROVIDER: z.enum(['mux', 'disabled']).default('disabled'),
+  MUX_TOKEN_ID: z.string().min(1).optional(),
+  MUX_TOKEN_SECRET: z.string().min(1).optional(),
+  MUX_WEBHOOK_SECRET: z.string().min(1).optional(),
+  /** A Mux signing key for signed playback: its id and the base64 of its PEM private key. */
+  MUX_SIGNING_KEY_ID: z.string().min(1).optional(),
+  MUX_SIGNING_PRIVATE_KEY_BASE64: z.string().min(1).optional(),
+  VIDEO_PLAYBACK_TTL_SECONDS: z.coerce.number().int().min(300).max(86_400).default(21_600),
 });
+
+const MUX_KEYS = [
+  'MUX_TOKEN_ID',
+  'MUX_TOKEN_SECRET',
+  'MUX_WEBHOOK_SECRET',
+  'MUX_SIGNING_KEY_ID',
+  'MUX_SIGNING_PRIVATE_KEY_BASE64',
+] as const;
 
 const checkedEnvSchema = envSchema.superRefine((env, ctx) => {
   const hasParts =
@@ -91,7 +109,20 @@ const checkedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: 'The review threshold must be below the reject threshold',
     });
   }
+  if (env.VIDEO_PROVIDER === 'mux') {
+    for (const key of MUX_KEYS) {
+      if (!env[key])
+        ctx.addIssue({ code: 'custom', path: [key], message: 'mux needs this setting' });
+    }
+  }
   if (env.NODE_ENV === 'staging' || env.NODE_ENV === 'production') {
+    if (env.VIDEO_PROVIDER !== 'mux') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['VIDEO_PROVIDER'],
+        message: 'Staging and production must process video with Mux',
+      });
+    }
     if (env.CONTENT_SCANNER !== 'rekognition') {
       ctx.addIssue({
         code: 'custom',

@@ -6,8 +6,9 @@ import type {
   PublicPortfolio,
   UploadIntentResponse,
 } from '@rt/contracts';
+import { createHmac } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { createTestApp, type TestApp } from './support/create-test-app.js';
+import { createTestApp, E2E_WEBHOOK_SECRET, type TestApp } from './support/create-test-app.js';
 
 const BIO =
   'Afro-soul singer from Lekki. Backing vocals on two albums and a residency at Hard Rock Lagos.';
@@ -209,5 +210,88 @@ describe('Portfolio over HTTP', () => {
     expect(items).toHaveLength(1);
     expect(items[0]).toMatchObject({ kind: 'image', caption: 'Eko Atlantic editorial' });
     expect(items[0]).not.toHaveProperty('mediaId');
+  });
+
+  /** What Mux sends: the JSON body, signed over its exact bytes. */
+  function muxWebhook(payload: object, secret = E2E_WEBHOOK_SECRET) {
+    const body = JSON.stringify(payload);
+    const timestamp = Math.floor(testApp.clock.now().getTime() / 1000);
+    const signature = createHmac('sha256', secret)
+      .update(`${String(timestamp)}.${body}`)
+      .digest('hex');
+    return testApp.app.inject({
+      method: 'POST',
+      url: '/v1/webhooks/mux',
+      payload: body,
+      headers: {
+        'content-type': 'application/json',
+        'mux-signature': `t=${String(timestamp)},v1=${signature}`,
+      },
+    });
+  }
+
+  it('refuses webhooks without a valid signature', async () => {
+    const payload = { type: 'video.asset.errored', data: { passthrough: 'x' } };
+    const forged = await muxWebhook(payload, 'not-the-secret');
+    expect(forged.statusCode).toBe(401);
+    const unsigned = await testApp.app.inject({ method: 'POST', url: '/v1/webhooks/mux', payload });
+    expect(unsigned.statusCode).toBe(401);
+  });
+
+  it('adds a video that plays for agents once Mux has transcoded it and every frame is clean', async () => {
+    const intent = await call('POST', '/v1/media/upload-intents', talent, {
+      purpose: 'portfolio',
+      contentType: 'video/mp4',
+      bytes: 52_000_000,
+    });
+    expect(intent.statusCode).toBe(201);
+    const { mediaId, upload } = intent.json<UploadIntentResponse>();
+    expect(upload).toMatchObject({ method: 'PUT', fields: {} });
+
+    const uploadId = upload.url.split('/').pop() ?? '';
+    const assetId = testApp.video.receiveFile(uploadId);
+    const created = await muxWebhook({
+      type: 'video.upload.asset_created',
+      data: { id: uploadId, asset_id: assetId, new_asset_settings: { passthrough: mediaId } },
+    });
+    expect(created.statusCode).toBe(204);
+    // The phone's own complete call arrives after the webhook and just reports progress.
+    const complete = await call('POST', `/v1/media/${mediaId}/complete`, talent);
+    expect(complete.json<MediaAsset>()).toMatchObject({ kind: 'video', status: 'processing' });
+
+    await call('POST', '/v1/me/portfolio/items', talent, {
+      mediaId,
+      caption: 'Live at Hard Rock Lagos, acoustic set',
+    });
+    const readyEvent = {
+      type: 'video.asset.ready',
+      data: {
+        id: assetId,
+        passthrough: mediaId,
+        duration: 47.3,
+        playback_ids: [{ id: 'signed-playback-1', policy: 'signed' }],
+      },
+    };
+    expect((await muxWebhook(readyEvent)).statusCode).toBe(204);
+    // Mux retries; a repeat must not change anything.
+    expect((await muxWebhook(readyEvent)).statusCode).toBe(204);
+    await testApp.deliverEvents();
+
+    const mine = (await call('GET', '/v1/me/portfolio', talent)).json<MyPortfolio>();
+    const item = mine.items.find((candidate) => candidate.mediaId === mediaId);
+    expect(item).toMatchObject({
+      kind: 'video',
+      mediaStatus: 'ready',
+      urls: null,
+      video: { durationSeconds: 47.3 },
+    });
+    expect(item?.video?.streamUrl).toContain('signed-playback-1');
+
+    const shown = (
+      await call('GET', '/v1/talents/adaeze.okafor/portfolio', agent)
+    ).json<PublicPortfolio>();
+    const video = shown.items.find((candidate) => candidate.kind === 'video');
+    expect(video?.caption).toBe('Live at Hard Rock Lagos, acoustic set');
+    expect(video?.kind === 'video' && video.video.posterUrl).toContain('signed-playback-1');
   });
 });

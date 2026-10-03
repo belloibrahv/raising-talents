@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { index, integer, jsonb, pgSchema, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { index, integer, jsonb, pgSchema, real, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { users } from '../../accounts/infrastructure/account.schema.js';
 
 export const mediaSchema = pgSchema('media');
@@ -35,6 +35,11 @@ export const assets = mediaSchema.table(
     rejectionReason: text('rejection_reason'),
     failureReason: text('failure_reason'),
     readyAt: timestamp('ready_at', { withTimezone: true }),
+    // Video only. Nullable, so the migration only adds columns (expand).
+    providerUploadId: text('provider_upload_id'),
+    providerAssetId: text('provider_asset_id'),
+    playbackId: text('playback_id'),
+    durationSeconds: real('duration_seconds'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
   },

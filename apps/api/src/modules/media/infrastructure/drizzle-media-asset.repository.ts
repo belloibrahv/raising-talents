@@ -1,4 +1,4 @@
-import { eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray, lt } from 'drizzle-orm';
 import type { DrizzleUnitOfWork } from '../../../platform/database/drizzle-unit-of-work.js';
 import type { EventRecorder } from '../../../platform/domain-event.js';
 import { MediaAsset, type MediaAssetRepository } from '../domain/media-asset.js';
@@ -23,6 +23,17 @@ export class DrizzleMediaAssetRepository implements MediaAssetRepository {
       .select()
       .from(assets)
       .where(inArray(assets.id, [...ids]));
+    return rows.map((row) => MediaAsset.restore(row));
+  }
+
+  async findAbandoned(createdBefore: Date, limit: number): Promise<MediaAsset[]> {
+    const rows = await this.uow
+      .executor()
+      .select()
+      .from(assets)
+      .where(and(eq(assets.status, 'awaiting_upload'), lt(assets.createdAt, createdBefore)))
+      .orderBy(asc(assets.createdAt))
+      .limit(limit);
     return rows.map((row) => MediaAsset.restore(row));
   }
 

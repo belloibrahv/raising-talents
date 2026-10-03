@@ -4,7 +4,7 @@ import { assets } from '../../media/infrastructure/media.schema.js';
 
 export const portfolioSchema = pgSchema('portfolio');
 
-export const portfolioItemKindEnum = portfolioSchema.enum('item_kind', ['image']);
+export const portfolioItemKindEnum = portfolioSchema.enum('item_kind', ['image', 'video']);
 
 /** The aggregate root. Locking this row serialises every change to one talent's portfolio. */
 export const portfolios = portfolioSchema.table('portfolios', {

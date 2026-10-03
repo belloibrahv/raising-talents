@@ -1,8 +1,12 @@
 import {
   PORTFOLIO_MAX_ITEMS,
+  type ImageUrls,
+  type MediaKind,
+  type MediaStatus,
   type MyPortfolio,
   type PublicPortfolio,
   type Role,
+  type VideoPlayback,
 } from '@rt/contracts';
 import type { Clock } from '../../../platform/clock.js';
 import { domainError, type DomainError } from '../../../platform/domain-error.js';
@@ -42,9 +46,11 @@ export interface PortfolioMedia {
       {
         ownerId: string;
         purpose: string;
-        status: MyPortfolio['items'][number]['mediaStatus'];
+        kind: MediaKind;
+        status: MediaStatus;
         rejectionReason: string | null;
-        urls: MyPortfolio['items'][number]['urls'];
+        urls: ImageUrls | null;
+        video: VideoPlayback | null;
       }
     >
   >;
@@ -69,6 +75,7 @@ async function present(portfolio: Portfolio, media: PortfolioMedia): Promise<MyP
         mediaStatus: file?.status ?? 'deleted',
         caption: item.caption,
         urls: file?.urls ?? null,
+        video: file?.video ?? null,
         rejectionReason: file?.rejectionReason ?? null,
         createdAt: item.createdAt.toISOString(),
       };
@@ -232,10 +239,13 @@ export class GetPublicPortfolioQuery {
     if (!portfolio) return ok({ items: [] });
     const described = await this.media.describe(portfolio.items.map((item) => item.mediaId));
     return ok({
-      items: portfolio.items.flatMap((item) => {
+      items: portfolio.items.flatMap((item): PublicPortfolio['items'] => {
         const file = described.get(item.mediaId);
-        if (file?.status !== 'ready' || !file.urls) return [];
-        return [{ id: item.id, kind: item.kind, caption: item.caption, urls: file.urls }];
+        if (file?.status !== 'ready') return [];
+        const shared = { id: item.id, caption: item.caption };
+        if (file.urls) return [{ ...shared, kind: 'image', urls: file.urls }];
+        if (file.video) return [{ ...shared, kind: 'video', video: file.video }];
+        return [];
       }),
     });
   }

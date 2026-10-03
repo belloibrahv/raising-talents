@@ -181,7 +181,11 @@ export function buildOpenApiDocument(version: string): JsonObject {
       },
       {
         name: 'Portfolio',
-        description: 'Ordered images on a talent profile. Others see ready media only',
+        description: 'Ordered images and videos on a talent profile. Others see ready media only',
+      },
+      {
+        name: 'Webhooks',
+        description: 'Calls from outside services. Not for the app',
       },
     ],
     paths,

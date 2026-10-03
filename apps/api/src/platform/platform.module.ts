@@ -12,6 +12,7 @@ import { ACCESS_TOKENS } from './auth/access-tokens.js';
 import { JoseAccessTokens } from './auth/jose-access-tokens.js';
 import { SystemClock, type Clock } from './clock.js';
 import { createDatabase, type DatabaseHandle } from './database/client.js';
+import { PostgresJobLock } from './scheduling/postgres-job-lock.js';
 import { DrizzleUnitOfWork } from './database/drizzle-unit-of-work.js';
 import { HealthController } from './health/health.controller.js';
 import { AuthGuard } from './http/auth.guard.js';
@@ -70,6 +71,11 @@ export class PlatformModule {
           useFactory: (handle: DatabaseHandle) => handle.db,
         },
         {
+          provide: PLATFORM.JobLock,
+          inject: [DATABASE_HANDLE],
+          useFactory: (handle: DatabaseHandle) => new PostgresJobLock(handle.pool),
+        },
+        {
           provide: PLATFORM.UnitOfWork,
           inject: [DATABASE_HANDLE],
           useFactory: (handle: DatabaseHandle) => new DrizzleUnitOfWork(handle.db),
@@ -115,6 +121,7 @@ export class PlatformModule {
         PLATFORM.Clock,
         PLATFORM.ErrorReporter,
         PLATFORM.Database,
+        PLATFORM.JobLock,
         PLATFORM.UnitOfWork,
         PLATFORM.EventRecorder,
         PLATFORM.Redis,

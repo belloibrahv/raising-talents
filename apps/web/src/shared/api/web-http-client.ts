@@ -131,9 +131,20 @@ export class WebHttpClient {
       { method: 'POST', body: { deviceId: this.options.deviceId() } },
       false,
     );
-    // 204: no cookie at all, so nobody is signed in on this browser.
+    // 204: no cookie at all, so nobody is signed in on this browser. If this tab thought it
+    // was signed in (the cookie was cleared or expired), the session has ended.
     if (response.status === 204) {
+      const hadSession = this.access !== null;
       this.access = null;
+      if (hadSession) {
+        this.sessionEndedBy = new ApiError({
+          type: 'about:blank',
+          title: 'Not signed in',
+          status: 401,
+          code: 'UNAUTHENTICATED',
+        });
+        this.options.onSessionEnded();
+      }
       return null;
     }
     if (response.ok) return this.startSession(webAuthResponseSchema.parse(await response.json()));

@@ -620,7 +620,7 @@
     "/v1/auth/web/refresh": {
       "post": {
         "operationId": "authWeb_refresh",
-        "summary": "Swap the refresh cookie for a new access token and a rotated cookie. 204 when there is no cookie",
+        "summary": "Swap the refresh cookie for a new access token and a rotated cookie",
         "tags": [
           "Auth (web)"
         ],
@@ -645,6 +645,9 @@
                 }
               }
             }
+          },
+          "204": {
+            "description": "No refresh cookie was sent: nobody is signed in on this browser"
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",

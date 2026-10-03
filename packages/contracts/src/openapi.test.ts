@@ -23,6 +23,11 @@ describe('buildOpenApiDocument', () => {
     expect(result.valid).toBe(true);
   });
 
+  it('documents a second, bodyless success where an endpoint has one', () => {
+    const refresh = document.paths['/v1/auth/web/refresh']?.['post']?.responses ?? {};
+    expect(Object.keys(refresh)).toEqual(expect.arrayContaining(['200', '204']));
+  });
+
   it('documents every endpoint in the catalogue', () => {
     for (const endpoint of Object.values(endpoints)) {
       expect(document.paths[endpoint.path]?.[endpoint.method.toLowerCase()]).toBeDefined();

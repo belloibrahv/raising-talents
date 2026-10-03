@@ -126,6 +126,19 @@ describe('WebHttpClient', () => {
     expect(ended()).toBe(0);
   });
 
+  it('ends the session when the cookie disappears while signed in', async () => {
+    const fake = new FakeBrowserAndApi();
+    fake.signIn();
+    fake.accessMinutes = 0;
+    const { client, ended } = tab(fake);
+    await client.restore();
+    fake.cookie = null;
+    await expect(client.request('/v1/me', { schema: meResponseSchema })).rejects.toMatchObject({
+      code: 'UNAUTHENTICATED',
+    });
+    expect(ended()).toBe(1);
+  });
+
   it('restores from the cookie, then calls with the bearer token and no credentials', async () => {
     const fake = new FakeBrowserAndApi();
     fake.signIn();

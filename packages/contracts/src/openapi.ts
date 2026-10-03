@@ -162,6 +162,7 @@ function operation(name: string, endpoint: EndpointDefinition): JsonObject {
           ? { content: { 'application/json': { schema: ref(schemaId(endpoint.response)) } } }
           : {}),
       },
+      ...(endpoint.noContent ? { '204': { description: endpoint.noContent } } : {}),
       ...errorResponses(endpoint),
     },
   };

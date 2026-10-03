@@ -82,6 +82,8 @@ export interface EndpointDefinition {
    * back in If-Match. A stale version is refused with 412.
    */
   readonly concurrency?: 'etag' | 'if-match';
+  /** A bodyless 204 that also counts as success, and what it means. */
+  readonly noContent?: string;
 }
 
 const define = <const T extends EndpointDefinition>(endpoint: T): T => endpoint;
@@ -187,8 +189,8 @@ export const endpoints = {
   'authWeb.refresh': define({
     method: 'POST',
     path: '/v1/auth/web/refresh',
-    summary:
-      'Swap the refresh cookie for a new access token and a rotated cookie. 204 when there is no cookie',
+    summary: 'Swap the refresh cookie for a new access token and a rotated cookie',
+    noContent: 'No refresh cookie was sent: nobody is signed in on this browser',
     auth: false,
     request: webRefreshRequestSchema,
     response: webAuthResponseSchema,

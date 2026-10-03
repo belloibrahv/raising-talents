@@ -6,10 +6,17 @@ const booleanFromString = z.enum(['true', 'false']).transform((value) => value =
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'staging', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(3000),
+  /** '::' listens on IPv6 and IPv4, for private networks that are IPv6 only (Railway). */
+  HOST: z.string().min(1).default('0.0.0.0'),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
   /** JSON everywhere except a developer's terminal. pretty needs pino-pretty, a dev dependency. */
   LOG_FORMAT: z.enum(['json', 'pretty']).default('json'),
   TRUST_PROXY: booleanFromString.default(false),
+  /**
+   * Shared with the web server that passes /v1 to the API (ADR-036). Only a request carrying
+   * it may name the client address, so other services on the private network cannot.
+   */
+  PROXY_SECRET: z.string().min(32).optional(),
 
   // Either one URL (local development) or separate parts (AWS, where RDS keeps the
   // username and password in Secrets Manager and ECS injects them).
@@ -50,15 +57,21 @@ const envSchema = z.object({
   MEDIA_BUCKET: z.string().min(3),
   /** CloudFront in AWS. Ready images are served from MEDIA_CDN_URL/media/... */
   MEDIA_CDN_URL: z.url(),
+  /**
+   * cdn: a CDN reads the bucket (AWS). api: the bucket is private and the API serves the
+   * processed variants itself at /media/..., so MEDIA_CDN_URL is the API's address (ADR-036).
+   */
+  MEDIA_DELIVERY: z.enum(['cdn', 'api']).default('cdn'),
   /** Only for an S3-compatible server in development. Unset on AWS. */
   S3_ENDPOINT: z.url().optional(),
   S3_FORCE_PATH_STYLE: booleanFromString.default(false),
   /**
-   * development-allow-all approves every image; development-hold-all sends every image to a
-   * moderator, for trying the moderation queue. Both are refused in staging and production.
+   * rekognition scans automatically; manual-review holds every image for a moderator, for
+   * hosts without Rekognition (ADR-036). development-allow-all approves every image and
+   * development-hold-all fakes a borderline label; both are refused in staging and production.
    */
   CONTENT_SCANNER: z
-    .enum(['rekognition', 'development-allow-all', 'development-hold-all'])
+    .enum(['rekognition', 'manual-review', 'development-allow-all', 'development-hold-all'])
     .default('rekognition'),
   SCAN_REVIEW_AT: z.coerce.number().min(0).max(100).default(50),
   SCAN_REJECT_AT: z.coerce.number().min(0).max(100).default(80),
@@ -109,6 +122,20 @@ const MUX_KEYS = [
   'MUX_SIGNING_KEY_ID',
   'MUX_SIGNING_PRIVATE_KEY_BASE64',
 ] as const;
+
+/** Hosts on a network the platform encrypts end to end, such as Railway's (*.railway.internal). */
+const PRIVATE_NETWORK_SUFFIXES = ['.railway.internal'] as const;
+
+const hostOf = (url: string): string | undefined => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return undefined;
+  }
+};
+
+const onPrivateNetwork = (host: string | undefined): boolean =>
+  host !== undefined && PRIVATE_NETWORK_SUFFIXES.some((suffix) => host.endsWith(suffix));
 
 const checkedEnvSchema = envSchema.superRefine((env, ctx) => {
   const hasParts =
@@ -169,32 +196,28 @@ const checkedEnvSchema = envSchema.superRefine((env, ctx) => {
         message: 'Staging and production web origins must use https',
       });
     }
-    if (env.VIDEO_PROVIDER !== 'mux') {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['VIDEO_PROVIDER'],
-        message: 'Staging and production must process video with Mux',
-      });
-    }
-    if (env.CONTENT_SCANNER !== 'rekognition') {
+    // Video may be off (uploads are refused, so nothing goes unprocessed), but never faked.
+    if (env.CONTENT_SCANNER !== 'rekognition' && env.CONTENT_SCANNER !== 'manual-review') {
       ctx.addIssue({
         code: 'custom',
         path: ['CONTENT_SCANNER'],
-        message: 'Staging and production must scan with Rekognition',
+        message: 'Staging and production must scan with Rekognition or hold every image for review',
       });
     }
-    if (env.DATABASE_SSL !== 'verify-full') {
+    // Plain connections are allowed only inside an encrypted private network (ADR-036).
+    const databaseHost = env.DATABASE_URL ? hostOf(env.DATABASE_URL) : env.DATABASE_HOST;
+    if (env.DATABASE_SSL !== 'verify-full' && !onPrivateNetwork(databaseHost)) {
       ctx.addIssue({
         code: 'custom',
         path: ['DATABASE_SSL'],
-        message: 'Staging and production must use verify-full',
+        message: 'Staging and production must use verify-full outside a private network',
       });
     }
-    if (!env.REDIS_URL.startsWith('rediss://')) {
+    if (!env.REDIS_URL.startsWith('rediss://') && !onPrivateNetwork(hostOf(env.REDIS_URL))) {
       ctx.addIssue({
         code: 'custom',
         path: ['REDIS_URL'],
-        message: 'Staging and production must use TLS (rediss://)',
+        message: 'Staging and production must use TLS (rediss://) outside a private network',
       });
     }
   }

@@ -44,7 +44,8 @@ export class InMemoryEventRecorder implements EventRecorder {
 }
 
 export class InMemoryRateLimiter implements RateLimiter {
-  private readonly counts = new Map<string, number>();
+  /** Every key consumed, so tests can see what a limit was counted against. */
+  readonly counts = new Map<string, number>();
 
   async consume(key: string, limit: number, windowSeconds: number): Promise<RateLimitDecision> {
     const count = (this.counts.get(key) ?? 0) + 1;

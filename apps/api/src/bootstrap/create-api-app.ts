@@ -9,6 +9,8 @@ import { PinoNestLogger } from '../platform/logging/logger.js';
 import type { ErrorReporter } from '../platform/observability/error-reporter.js';
 import { currentTraceId, nameServerSpan } from '../platform/observability/trace-context.js';
 import { PLATFORM } from '../platform/platform.tokens.js';
+import { timingSafeEqual } from 'node:crypto';
+import type { WithClientIp } from '../platform/http/client-ip.decorator.js';
 
 const ONE_MEGABYTE = 1_048_576;
 
@@ -62,6 +64,23 @@ export function configureApiApp(
     nameServerSpan(request.method, request.routeOptions.url);
     done();
   });
+  // Our web server proves itself with PROXY_SECRET and names the client it forwards for.
+  // Anyone else on the network who sends the headers is ignored (ADR-036).
+  const proxySecret = config.PROXY_SECRET ? Buffer.from(config.PROXY_SECRET) : null;
+  if (proxySecret) {
+    fastify.addHook('onRequest', (request, _reply, done) => {
+      const offered = Buffer.from(String(request.headers['x-proxy-secret'] ?? ''));
+      const forwardedFor = String(request.headers['x-forwarded-for'] ?? '').trim();
+      if (
+        forwardedFor &&
+        offered.length === proxySecret.length &&
+        timingSafeEqual(offered, proxySecret)
+      ) {
+        (request as WithClientIp).clientIp = forwardedFor;
+      }
+      done();
+    });
+  }
   // Lets the app attach the trace id to its own error reports.
   fastify.addHook('onSend', (request, reply, payload, done) => {
     void reply.header('x-trace-id', currentTraceId() ?? request.id);

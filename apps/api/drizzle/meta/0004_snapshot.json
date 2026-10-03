@@ -235,14 +235,10 @@
         "credentials_user_id_users_id_fk": {
           "name": "credentials_user_id_users_id_fk",
           "tableFrom": "credentials",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -341,14 +337,10 @@
         "one_time_codes_user_id_users_id_fk": {
           "name": "one_time_codes_user_id_users_id_fk",
           "tableFrom": "one_time_codes",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -471,14 +463,10 @@
         "sessions_user_id_users_id_fk": {
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         }
@@ -612,14 +600,10 @@
         "skills_category_slug_categories_slug_fk": {
           "name": "skills_category_slug_categories_slug_fk",
           "tableFrom": "skills",
-          "columnsFrom": [
-            "category_slug"
-          ],
+          "columnsFrom": ["category_slug"],
           "tableTo": "categories",
           "schemaTo": "taxonomy",
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsTo": ["slug"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -687,14 +671,10 @@
         "subcategories_category_slug_categories_slug_fk": {
           "name": "subcategories_category_slug_categories_slug_fk",
           "tableFrom": "subcategories",
-          "columnsFrom": [
-            "category_slug"
-          ],
+          "columnsFrom": ["category_slug"],
           "tableTo": "categories",
           "schemaTo": "taxonomy",
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsTo": ["slug"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -749,28 +729,20 @@
         "profile_skills_user_id_profiles_user_id_fk": {
           "name": "profile_skills_user_id_profiles_user_id_fk",
           "tableFrom": "profile_skills",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "profiles",
           "schemaTo": "talent",
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsTo": ["user_id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "profile_skills_skill_slug_skills_slug_fk": {
           "name": "profile_skills_skill_slug_skills_slug_fk",
           "tableFrom": "profile_skills",
-          "columnsFrom": [
-            "skill_slug"
-          ],
+          "columnsFrom": ["skill_slug"],
           "tableTo": "skills",
           "schemaTo": "taxonomy",
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsTo": ["slug"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -778,10 +750,7 @@
       "compositePrimaryKeys": {
         "profile_skills_user_id_skill_slug_pk": {
           "name": "profile_skills_user_id_skill_slug_pk",
-          "columns": [
-            "user_id",
-            "skill_slug"
-          ]
+          "columns": ["user_id", "skill_slug"]
         }
       },
       "uniqueConstraints": {},
@@ -833,28 +802,20 @@
         "profile_subcategories_user_id_profiles_user_id_fk": {
           "name": "profile_subcategories_user_id_profiles_user_id_fk",
           "tableFrom": "profile_subcategories",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "profiles",
           "schemaTo": "talent",
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsTo": ["user_id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "profile_subcategories_subcategory_slug_subcategories_slug_fk": {
           "name": "profile_subcategories_subcategory_slug_subcategories_slug_fk",
           "tableFrom": "profile_subcategories",
-          "columnsFrom": [
-            "subcategory_slug"
-          ],
+          "columnsFrom": ["subcategory_slug"],
           "tableTo": "subcategories",
           "schemaTo": "taxonomy",
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsTo": ["slug"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -862,10 +823,7 @@
       "compositePrimaryKeys": {
         "profile_subcategories_user_id_subcategory_slug_pk": {
           "name": "profile_subcategories_user_id_subcategory_slug_pk",
-          "columns": [
-            "user_id",
-            "subcategory_slug"
-          ]
+          "columns": ["user_id", "subcategory_slug"]
         }
       },
       "uniqueConstraints": {},
@@ -1016,42 +974,30 @@
         "profiles_user_id_users_id_fk": {
           "name": "profiles_user_id_users_id_fk",
           "tableFrom": "profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "profiles_category_slug_categories_slug_fk": {
           "name": "profiles_category_slug_categories_slug_fk",
           "tableFrom": "profiles",
-          "columnsFrom": [
-            "category_slug"
-          ],
+          "columnsFrom": ["category_slug"],
           "tableTo": "categories",
           "schemaTo": "taxonomy",
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsTo": ["slug"],
           "onUpdate": "no action",
           "onDelete": "no action"
         },
         "profiles_city_slug_cities_slug_fk": {
           "name": "profiles_city_slug_cities_slug_fk",
           "tableFrom": "profiles",
-          "columnsFrom": [
-            "city_slug"
-          ],
+          "columnsFrom": ["city_slug"],
           "tableTo": "cities",
           "schemaTo": "taxonomy",
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsTo": ["slug"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1132,28 +1078,20 @@
         "profiles_user_id_users_id_fk": {
           "name": "profiles_user_id_users_id_fk",
           "tableFrom": "profiles",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsTo": [
-            "id"
-          ],
+          "columnsTo": ["id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "profiles_city_slug_cities_slug_fk": {
           "name": "profiles_city_slug_cities_slug_fk",
           "tableFrom": "profiles",
-          "columnsFrom": [
-            "city_slug"
-          ],
+          "columnsFrom": ["city_slug"],
           "tableTo": "cities",
           "schemaTo": "taxonomy",
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsTo": ["slug"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1208,28 +1146,20 @@
         "profile_specializations_user_id_profiles_user_id_fk": {
           "name": "profile_specializations_user_id_profiles_user_id_fk",
           "tableFrom": "profile_specializations",
-          "columnsFrom": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
           "tableTo": "profiles",
           "schemaTo": "agent",
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsTo": ["user_id"],
           "onUpdate": "no action",
           "onDelete": "cascade"
         },
         "profile_specializations_category_slug_categories_slug_fk": {
           "name": "profile_specializations_category_slug_categories_slug_fk",
           "tableFrom": "profile_specializations",
-          "columnsFrom": [
-            "category_slug"
-          ],
+          "columnsFrom": ["category_slug"],
           "tableTo": "categories",
           "schemaTo": "taxonomy",
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsTo": ["slug"],
           "onUpdate": "no action",
           "onDelete": "no action"
         }
@@ -1237,10 +1167,7 @@
       "compositePrimaryKeys": {
         "profile_specializations_user_id_category_slug_pk": {
           "name": "profile_specializations_user_id_category_slug_pk",
-          "columns": [
-            "user_id",
-            "category_slug"
-          ]
+          "columns": ["user_id", "category_slug"]
         }
       },
       "uniqueConstraints": {},
@@ -1253,50 +1180,27 @@
     "accounts.account_status": {
       "name": "account_status",
       "schema": "accounts",
-      "values": [
-        "onboarding",
-        "active",
-        "suspended",
-        "banned",
-        "pending_deletion"
-      ]
+      "values": ["onboarding", "active", "suspended", "banned", "pending_deletion"]
     },
     "accounts.role": {
       "name": "role",
       "schema": "accounts",
-      "values": [
-        "talent",
-        "agent",
-        "moderator",
-        "admin"
-      ]
+      "values": ["talent", "agent", "moderator", "admin"]
     },
     "identity.code_purpose": {
       "name": "code_purpose",
       "schema": "identity",
-      "values": [
-        "email_verification"
-      ]
+      "values": ["email_verification"]
     },
     "identity.session_revoked_reason": {
       "name": "session_revoked_reason",
       "schema": "identity",
-      "values": [
-        "rotated",
-        "signed_out",
-        "reuse_detected",
-        "device_mismatch",
-        "account_blocked"
-      ]
+      "values": ["rotated", "signed_out", "reuse_detected", "device_mismatch", "account_blocked"]
     },
     "talent.gender": {
       "name": "gender",
       "schema": "talent",
-      "values": [
-        "female",
-        "male",
-        "non_binary"
-      ]
+      "values": ["female", "male", "non_binary"]
     }
   },
   "schemas": {

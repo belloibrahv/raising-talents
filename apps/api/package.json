@@ -15,6 +15,7 @@
     "search:rebuild": "tsx --env-file-if-exists=.env scripts/rebuild-search-index.ts",
     "staff:grant": "tsx --env-file-if-exists=.env scripts/grant-staff-role.ts",
     "account:reinstate": "tsx --env-file-if-exists=.env scripts/reinstate-account.ts",
+    "storage:cors": "tsx --env-file-if-exists=.env scripts/configure-storage-cors.ts",
     "lint": "eslint .",
     "db:check": "drizzle-kit check",
     "start": "node --import ./dist/instrument.js dist/main.api.js",

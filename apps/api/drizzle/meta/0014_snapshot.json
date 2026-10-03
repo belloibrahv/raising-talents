@@ -237,12 +237,8 @@
           "tableFrom": "credentials",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -343,12 +339,8 @@
           "tableFrom": "one_time_codes",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -479,12 +471,8 @@
           "tableFrom": "sessions",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -620,12 +608,8 @@
           "tableFrom": "skills",
           "tableTo": "categories",
           "schemaTo": "taxonomy",
-          "columnsFrom": [
-            "category_slug"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsFrom": ["category_slug"],
+          "columnsTo": ["slug"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -695,12 +679,8 @@
           "tableFrom": "subcategories",
           "tableTo": "categories",
           "schemaTo": "taxonomy",
-          "columnsFrom": [
-            "category_slug"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsFrom": ["category_slug"],
+          "columnsTo": ["slug"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -757,12 +737,8 @@
           "tableFrom": "profile_skills",
           "tableTo": "profiles",
           "schemaTo": "talent",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -771,12 +747,8 @@
           "tableFrom": "profile_skills",
           "tableTo": "skills",
           "schemaTo": "taxonomy",
-          "columnsFrom": [
-            "skill_slug"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsFrom": ["skill_slug"],
+          "columnsTo": ["slug"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -784,10 +756,7 @@
       "compositePrimaryKeys": {
         "profile_skills_user_id_skill_slug_pk": {
           "name": "profile_skills_user_id_skill_slug_pk",
-          "columns": [
-            "user_id",
-            "skill_slug"
-          ]
+          "columns": ["user_id", "skill_slug"]
         }
       },
       "uniqueConstraints": {},
@@ -841,12 +810,8 @@
           "tableFrom": "profile_subcategories",
           "tableTo": "profiles",
           "schemaTo": "talent",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -855,12 +820,8 @@
           "tableFrom": "profile_subcategories",
           "tableTo": "subcategories",
           "schemaTo": "taxonomy",
-          "columnsFrom": [
-            "subcategory_slug"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsFrom": ["subcategory_slug"],
+          "columnsTo": ["slug"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -868,10 +829,7 @@
       "compositePrimaryKeys": {
         "profile_subcategories_user_id_subcategory_slug_pk": {
           "name": "profile_subcategories_user_id_subcategory_slug_pk",
-          "columns": [
-            "user_id",
-            "subcategory_slug"
-          ]
+          "columns": ["user_id", "subcategory_slug"]
         }
       },
       "uniqueConstraints": {},
@@ -1024,12 +982,8 @@
           "tableFrom": "profiles",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1038,12 +992,8 @@
           "tableFrom": "profiles",
           "tableTo": "categories",
           "schemaTo": "taxonomy",
-          "columnsFrom": [
-            "category_slug"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsFrom": ["category_slug"],
+          "columnsTo": ["slug"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1052,12 +1002,8 @@
           "tableFrom": "profiles",
           "tableTo": "cities",
           "schemaTo": "taxonomy",
-          "columnsFrom": [
-            "city_slug"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsFrom": ["city_slug"],
+          "columnsTo": ["slug"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1140,12 +1086,8 @@
           "tableFrom": "profiles",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1154,12 +1096,8 @@
           "tableFrom": "profiles",
           "tableTo": "cities",
           "schemaTo": "taxonomy",
-          "columnsFrom": [
-            "city_slug"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsFrom": ["city_slug"],
+          "columnsTo": ["slug"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1216,12 +1154,8 @@
           "tableFrom": "profile_specializations",
           "tableTo": "profiles",
           "schemaTo": "agent",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1230,12 +1164,8 @@
           "tableFrom": "profile_specializations",
           "tableTo": "categories",
           "schemaTo": "taxonomy",
-          "columnsFrom": [
-            "category_slug"
-          ],
-          "columnsTo": [
-            "slug"
-          ],
+          "columnsFrom": ["category_slug"],
+          "columnsTo": ["slug"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1243,10 +1173,7 @@
       "compositePrimaryKeys": {
         "profile_specializations_user_id_category_slug_pk": {
           "name": "profile_specializations_user_id_category_slug_pk",
-          "columns": [
-            "user_id",
-            "category_slug"
-          ]
+          "columns": ["user_id", "category_slug"]
         }
       },
       "uniqueConstraints": {},
@@ -1389,12 +1316,8 @@
           "tableFrom": "verification_requests",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1403,12 +1326,8 @@
           "tableFrom": "verification_requests",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "decided_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["decided_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1608,12 +1527,8 @@
           "tableFrom": "assets",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "owner_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["owner_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1622,12 +1537,8 @@
           "tableFrom": "assets",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "reviewed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reviewed_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1737,12 +1648,8 @@
           "tableFrom": "items",
           "tableTo": "portfolios",
           "schemaTo": "portfolio",
-          "columnsFrom": [
-            "talent_id"
-          ],
-          "columnsTo": [
-            "talent_id"
-          ],
+          "columnsFrom": ["talent_id"],
+          "columnsTo": ["talent_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1751,12 +1658,8 @@
           "tableFrom": "items",
           "tableTo": "assets",
           "schemaTo": "media",
-          "columnsFrom": [
-            "media_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["media_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1803,12 +1706,8 @@
           "tableFrom": "portfolios",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "talent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["talent_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1916,12 +1815,8 @@
           "tableFrom": "enforcement_actions",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "account_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["account_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1930,12 +1825,8 @@
           "tableFrom": "enforcement_actions",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "actor_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["actor_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -2060,12 +1951,8 @@
           "tableFrom": "reports",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "reporter_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["reporter_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         },
@@ -2074,12 +1961,8 @@
           "tableFrom": "reports",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "subject_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["subject_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2088,12 +1971,8 @@
           "tableFrom": "reports",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "closed_by"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["closed_by"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -2190,12 +2069,8 @@
           "tableFrom": "entries",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "agent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["agent_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2204,12 +2079,8 @@
           "tableFrom": "entries",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "talent_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["talent_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2217,10 +2088,7 @@
       "compositePrimaryKeys": {
         "entries_agent_id_talent_id_pk": {
           "name": "entries_agent_id_talent_id_pk",
-          "columns": [
-            "agent_id",
-            "talent_id"
-          ]
+          "columns": ["agent_id", "talent_id"]
         }
       },
       "uniqueConstraints": {},
@@ -2233,31 +2101,17 @@
     "accounts.account_status": {
       "name": "account_status",
       "schema": "accounts",
-      "values": [
-        "onboarding",
-        "active",
-        "suspended",
-        "banned",
-        "pending_deletion"
-      ]
+      "values": ["onboarding", "active", "suspended", "banned", "pending_deletion"]
     },
     "accounts.role": {
       "name": "role",
       "schema": "accounts",
-      "values": [
-        "talent",
-        "agent",
-        "moderator",
-        "admin"
-      ]
+      "values": ["talent", "agent", "moderator", "admin"]
     },
     "identity.code_purpose": {
       "name": "code_purpose",
       "schema": "identity",
-      "values": [
-        "email_verification",
-        "password_reset"
-      ]
+      "values": ["email_verification", "password_reset"]
     },
     "identity.session_revoked_reason": {
       "name": "session_revoked_reason",
@@ -2275,38 +2129,22 @@
     "talent.gender": {
       "name": "gender",
       "schema": "talent",
-      "values": [
-        "female",
-        "male",
-        "non_binary"
-      ]
+      "values": ["female", "male", "non_binary"]
     },
     "agent.verification_decline_category": {
       "name": "verification_decline_category",
       "schema": "agent",
-      "values": [
-        "agency_not_confirmed",
-        "details_do_not_match",
-        "evidence_unreachable",
-        "other"
-      ]
+      "values": ["agency_not_confirmed", "details_do_not_match", "evidence_unreachable", "other"]
     },
     "agent.verification_status": {
       "name": "verification_status",
       "schema": "agent",
-      "values": [
-        "pending",
-        "approved",
-        "declined"
-      ]
+      "values": ["pending", "approved", "declined"]
     },
     "media.purpose": {
       "name": "purpose",
       "schema": "media",
-      "values": [
-        "avatar",
-        "portfolio"
-      ]
+      "values": ["avatar", "portfolio"]
     },
     "media.status": {
       "name": "status",
@@ -2325,19 +2163,12 @@
     "portfolio.item_kind": {
       "name": "item_kind",
       "schema": "portfolio",
-      "values": [
-        "image",
-        "video"
-      ]
+      "values": ["image", "video"]
     },
     "safety.enforcement_action": {
       "name": "enforcement_action",
       "schema": "safety",
-      "values": [
-        "suspend",
-        "ban",
-        "reinstate"
-      ]
+      "values": ["suspend", "ban", "reinstate"]
     },
     "safety.report_category": {
       "name": "report_category",
@@ -2353,11 +2184,7 @@
     "safety.report_status": {
       "name": "report_status",
       "schema": "safety",
-      "values": [
-        "open",
-        "dismissed",
-        "actioned"
-      ]
+      "values": ["open", "dismissed", "actioned"]
     }
   },
   "schemas": {

@@ -29,6 +29,20 @@ export class DevelopmentAllowAllScanner implements ContentScanner {
   }
 }
 
+/**
+ * For deployments without automatic scanning (ADR-036): every image waits for a moderator.
+ * The label says so plainly, and sits at the review threshold so it is held, never rejected.
+ */
+export class ManualReviewScanner implements ContentScanner {
+  constructor(private readonly reviewAt: number) {}
+
+  scanImage(): Promise<readonly { name: string; parentName: string | null; confidence: number }[]> {
+    return Promise.resolve([
+      { name: 'No automatic scan: check by eye', parentName: null, confidence: this.reviewAt },
+    ]);
+  }
+}
+
 /** Reports a borderline label for every image, so everything waits for a moderator. */
 export class DevelopmentHoldAllScanner implements ContentScanner {
   scanImage(): Promise<readonly { name: string; parentName: string | null; confidence: number }[]> {

@@ -31,7 +31,7 @@ export class MediaPresenter {
   async preview(asset: MediaAsset): Promise<MediaLinks> {
     const props = asset.snapshot();
     if (asset.kind === 'image')
-      return { urls: this.urls.forImage(props.ownerId, props.id), video: null };
+      return { urls: this.urls.forPreview(props.ownerId, props.id), video: null };
     if (!props.playbackId) return { urls: null, video: null };
     return {
       urls: null,

@@ -1,0 +1,35 @@
+# The API image for Railway (ADR-036). Same build as Dockerfile, without BuildKit cache
+# mounts (Railway needs service-specific mount ids) and without the AWS database CA.
+# APP_ROLE picks the process (api, worker or migrate), since Railway starts containers
+# without a shell and the runtime image has none:
+#   docker build -f apps/api/Dockerfile.railway -t raising-talents-api .
+
+ARG NODE_VERSION=22.22
+
+FROM node:${NODE_VERSION}-bookworm-slim AS base
+ENV PNPM_HOME=/pnpm \
+    PATH=/pnpm:$PATH \
+    CI=true
+RUN corepack enable
+WORKDIR /repo
+
+FROM base AS build
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+RUN pnpm fetch --frozen-lockfile
+COPY . .
+RUN pnpm install --frozen-lockfile --offline --filter=@rt/api... \
+ && pnpm turbo run build --filter=@rt/api... \
+ && pnpm --filter=@rt/api deploy --prod --legacy /out
+
+# Distroless: no shell, no package manager, runs as a non-root user (uid 65532).
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runtime
+# Set for GitHub-triggered deploys. CLI deploys set the APP_VERSION variable instead, which
+# overrides this at run time (see the runbook).
+ARG RAILWAY_GIT_COMMIT_SHA=dev
+ENV NODE_ENV=production \
+    APP_VERSION=${RAILWAY_GIT_COMMIT_SHA}
+WORKDIR /app
+COPY --from=build --chown=65532:65532 /out ./
+USER 65532:65532
+EXPOSE 3000
+CMD ["--import", "./dist/instrument.js", "dist/main.js"]

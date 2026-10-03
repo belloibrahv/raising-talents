@@ -7,5 +7,13 @@ export default [
       parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
     },
   },
-  { ignores: ['dist/**', 'drizzle/**', 'eslint.config.mjs', 'vitest.config.ts', 'drizzle.config.ts'] },
+  {
+    ignores: [
+      'dist/**',
+      'drizzle/**',
+      'eslint.config.mjs',
+      'vitest.config.ts',
+      'drizzle.config.ts',
+    ],
+  },
 ];

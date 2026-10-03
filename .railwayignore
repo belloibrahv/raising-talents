@@ -1,0 +1,5 @@
+# Kept out of `railway up` uploads, on top of .gitignore.
+raising-talents-patches.zip
+.npmrc
+**/.lighthouseci
+apps/mobile

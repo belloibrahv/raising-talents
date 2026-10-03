@@ -237,12 +237,8 @@
           "tableFrom": "credentials",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -343,12 +339,8 @@
           "tableFrom": "one_time_codes",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -473,12 +465,8 @@
           "tableFrom": "sessions",
           "tableTo": "users",
           "schemaTo": "accounts",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -494,41 +482,22 @@
     "accounts.account_status": {
       "name": "account_status",
       "schema": "accounts",
-      "values": [
-        "onboarding",
-        "active",
-        "suspended",
-        "banned",
-        "pending_deletion"
-      ]
+      "values": ["onboarding", "active", "suspended", "banned", "pending_deletion"]
     },
     "accounts.role": {
       "name": "role",
       "schema": "accounts",
-      "values": [
-        "talent",
-        "agent",
-        "moderator",
-        "admin"
-      ]
+      "values": ["talent", "agent", "moderator", "admin"]
     },
     "identity.code_purpose": {
       "name": "code_purpose",
       "schema": "identity",
-      "values": [
-        "email_verification"
-      ]
+      "values": ["email_verification"]
     },
     "identity.session_revoked_reason": {
       "name": "session_revoked_reason",
       "schema": "identity",
-      "values": [
-        "rotated",
-        "signed_out",
-        "reuse_detected",
-        "device_mismatch",
-        "account_blocked"
-      ]
+      "values": ["rotated", "signed_out", "reuse_detected", "device_mismatch", "account_blocked"]
     }
   },
   "schemas": {

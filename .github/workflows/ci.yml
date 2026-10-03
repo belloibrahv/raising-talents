@@ -55,6 +55,10 @@ jobs:
       - name: Lint, typecheck, test, build
         run: pnpm turbo run lint typecheck test build
 
+      - name: Mobile app bundles for iOS and Android
+        working-directory: apps/mobile
+        run: pnpm bundle:check
+
       - name: Schema matches committed migrations
         working-directory: apps/api
         run: |

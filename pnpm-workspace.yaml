@@ -1,3 +1,13 @@
 packages:
   - "apps/*"
   - "packages/*"
+
+auditConfig:
+  ignoreGhsas:
+    # node-forge reaches us only through @expo/cli, the build and dev server tool.
+    # It is not bundled into the app or used by the API. No patched version exists yet.
+    # Review by 2026-11-02 or when Expo ships a fix, whichever comes first.
+    - GHSA-86w9-cpqp-85rv
+    # braces also reaches us only through @expo/cli (its Metro file map), build tooling for the
+    # parked native app. No patched version exists yet. Review by 2026-11-03.
+    - GHSA-vfj7-8cjw-p6xm

@@ -197,4 +197,5 @@ Milestone 1, foundations.
 | PWA design system: shadcn/ui on Tailwind, brand tokens, dark scheme, bottom tab bar on phones (ADR-029)        | Done                                     |
 | Shortlists: agents save talent with private notes, in the data export (ADR-030)                                | Done, limit provisional                  |
 | Account security: change password, signed-in devices, sign out one or every other device (ADR-031)             | Done                                     |
+| Notification inbox: bell with unread count, inbox page, 180-day retention, in the data export (ADR-032)        | Done                                     |
 | CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                         | Done                                     |

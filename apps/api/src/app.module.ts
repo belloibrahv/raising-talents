@@ -4,6 +4,7 @@ import { AgentProfilesModule } from './modules/agent-profiles/agent-profiles.mod
 import { IdentityModule } from './modules/identity/identity.module.js';
 import { MediaModule } from './modules/media/media.module.js';
 import { PortfolioModule } from './modules/portfolio/portfolio.module.js';
+import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { PrivacyModule } from './modules/privacy/privacy.module.js';
 import { SafetyModule } from './modules/safety/safety.module.js';
 import { ShortlistsModule } from './modules/shortlists/shortlists.module.js';
@@ -28,6 +29,7 @@ export class AppModule {
         MediaModule,
         PortfolioModule,
         SearchModule,
+        NotificationsModule,
         PrivacyModule,
         SafetyModule,
         ShortlistsModule,

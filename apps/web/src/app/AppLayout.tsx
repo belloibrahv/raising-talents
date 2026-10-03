@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { DeletionBanner } from '../features/account/DeletionBanner';
 import { useSession, useSignOut } from '../features/auth/use-auth';
 import { t } from '../i18n';
+import { NotificationBell } from '../features/notifications/NotificationBell';
 import { InstallCard } from '../shared/pwa/InstallCard';
 import { BrandMark } from '../shared/ui/BrandMark';
 
@@ -85,17 +86,19 @@ export function AppLayout() {
               ))}
             </ul>
           </nav>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="ml-auto md:ml-0"
-            onClick={() => {
-              signOut.mutate();
-            }}
-          >
-            <LogOut aria-hidden="true" />
-            {t('nav.signOut')}
-          </Button>
+          <div className="ml-auto flex items-center gap-1 md:ml-0">
+            <NotificationBell />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                signOut.mutate();
+              }}
+            >
+              <LogOut aria-hidden="true" />
+              {t('nav.signOut')}
+            </Button>
+          </div>
         </div>
       </header>
       <DeletionBanner />

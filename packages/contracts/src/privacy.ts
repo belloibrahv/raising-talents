@@ -7,6 +7,7 @@ import {
   mediaStatusSchema,
   videoPlaybackSchema,
 } from './media.js';
+import { notificationSchema } from './notifications.js';
 import { myPortfolioSchema } from './portfolio.js';
 import { myAgentProfileSchema, myTalentProfileSchema } from './profiles.js';
 import { accountStatusSchema, roleSchema } from './accounts.js';
@@ -37,6 +38,8 @@ export const dataExportSchema = z
     agentProfile: myAgentProfileSchema.nullable(),
     agentVerification: myAgentVerificationSchema.nullable(),
     portfolio: myPortfolioSchema.nullable(),
+    /** Notices in the app inbox, newest first. */
+    notifications: z.array(notificationSchema),
     /** Agents only: who they saved and their private notes. Empty for everyone else. */
     shortlist: z.array(
       z.object({ handle: z.string().nullable(), note: z.string(), savedAt: isoDateTimeSchema }),

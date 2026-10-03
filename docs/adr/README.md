@@ -35,3 +35,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-029](029-shadcn-ui-on-tailwind-for-the-web-app.md)                 | shadcn/ui on Tailwind CSS for the web app                            | Accepted                          |
 | [ADR-030](030-agent-shortlists.md)                                      | Agent shortlists                                                     | Proposed                          |
 | [ADR-031](031-signed-in-devices-and-password-changes.md)                | Signed-in devices and password changes                               | Accepted                          |
+| [ADR-032](032-in-app-notification-inbox.md)                             | An in-app notification inbox                                         | Accepted                          |

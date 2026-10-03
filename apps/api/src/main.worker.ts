@@ -45,7 +45,11 @@ const relay = new OutboxRelay(database, dispatcher, logger, errors);
 relay.start();
 
 const scheduler = new JobScheduler(
-  [app.get<ScheduledJob>(MEDIA.AbandonedUploads), app.get<ScheduledJob>(PRIVACY.Erasure)],
+  [
+    app.get<ScheduledJob>(MEDIA.AbandonedUploads),
+    app.get<ScheduledJob>(PRIVACY.Erasure),
+    app.get<ScheduledJob>(NOTIFICATIONS.Prune),
+  ],
   app.get<JobLock>(PLATFORM.JobLock),
   logger,
   errors,

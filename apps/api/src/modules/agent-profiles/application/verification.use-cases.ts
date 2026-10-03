@@ -27,6 +27,7 @@ import {
   VerificationRequest,
   type VerificationRequestRepository,
 } from '../domain/verification-request.js';
+import { decodeCursor, encodeCursor } from '../../../platform/cursor.js';
 
 export const VERIFICATION = {
   Requests: Symbol('VerificationRequestRepository'),
@@ -173,15 +174,10 @@ export class RequestVerificationHandler {
   }
 }
 
-const encodeCursor = (at: Date, id: string) =>
-  Buffer.from(`${at.toISOString()}|${id}`).toString('base64url');
-
-function decodeCursor(cursor: string | undefined): { submittedAt: Date; id: string } | null {
-  if (!cursor) return null;
-  const [iso, id] = Buffer.from(cursor, 'base64url').toString().split('|');
-  const submittedAt = new Date(iso ?? '');
-  return id && !Number.isNaN(submittedAt.getTime()) ? { submittedAt, id } : null;
-}
+const pageAfter = (cursor: string | undefined) => {
+  const after = decodeCursor(cursor);
+  return after ? { submittedAt: after.at, id: after.id } : null;
+};
 
 export class ListPendingVerificationsQuery {
   constructor(
@@ -196,7 +192,7 @@ export class ListPendingVerificationsQuery {
     cursor?: string,
   ): Promise<Result<VerificationQueuePage, DomainError>> {
     if (!isActiveStaff(await this.accounts.profileContext(viewerId))) return err(notStaff());
-    const rows = await this.requests.findPending(decodeCursor(cursor), MODERATION_PAGE_SIZE + 1);
+    const rows = await this.requests.findPending(pageAfter(cursor), MODERATION_PAGE_SIZE + 1);
     const page = rows.slice(0, MODERATION_PAGE_SIZE);
     const catalog = await this.taxonomy.current();
     const items = await Promise.all(

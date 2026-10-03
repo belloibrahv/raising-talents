@@ -18,7 +18,8 @@ export function SaveToggle({ handle, name }: { readonly handle: string; readonly
         variant={saved ? 'secondary' : 'primary'}
         size="sm"
         loading={busy}
-        disabled={entry.isPending}
+        // A second press while saving would repeat the same request.
+        disabled={entry.isPending || busy}
         onClick={() => {
           if (saved) remove.mutate(handle);
           else save.mutate({ handle });

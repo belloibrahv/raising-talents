@@ -14,6 +14,7 @@ import type { Clock } from '../../../platform/clock.js';
 import { domainError, type DomainError } from '../../../platform/domain-error.js';
 import { err, ok, type Result } from '../../../platform/result.js';
 import type { ShortlistEntry, ShortlistRepository } from '../domain/shortlist.js';
+import { decodeCursor, encodeCursor } from '../../../platform/cursor.js';
 
 export const SHORTLIST = {
   Entries: Symbol('ShortlistRepository'),
@@ -71,15 +72,10 @@ const view = (entry: ShortlistEntry, talent: TalentCard): ShortlistEntryView => 
   updatedAt: entry.updatedAt.toISOString(),
 });
 
-const encodeCursor = (entry: ShortlistEntry) =>
-  Buffer.from(`${entry.savedAt.toISOString()}|${entry.talentId}`).toString('base64url');
-
-function decodeCursor(cursor: string | undefined): { savedAt: Date; talentId: string } | null {
-  if (!cursor) return null;
-  const [iso, talentId] = Buffer.from(cursor, 'base64url').toString().split('|');
-  const savedAt = new Date(iso ?? '');
-  return talentId && !Number.isNaN(savedAt.getTime()) ? { savedAt, talentId } : null;
-}
+const pageAfter = (cursor: string | undefined) => {
+  const after = decodeCursor(cursor);
+  return after ? { savedAt: after.at, talentId: after.id } : null;
+};
 
 export class ListShortlistQuery {
   constructor(
@@ -92,7 +88,7 @@ export class ListShortlistQuery {
     const refused = await ensureAgent(this.accounts, agentId, false);
     if (refused) return err(refused);
     const [rows, saved] = await Promise.all([
-      this.entries.page(agentId, decodeCursor(cursor), SHORTLIST_PAGE_SIZE + 1),
+      this.entries.page(agentId, pageAfter(cursor), SHORTLIST_PAGE_SIZE + 1),
       this.entries.count(agentId),
     ]);
     const page = rows.slice(0, SHORTLIST_PAGE_SIZE);
@@ -105,7 +101,10 @@ export class ListShortlistQuery {
       }),
       saved,
       max: SHORTLIST_MAX,
-      nextCursor: rows.length > SHORTLIST_PAGE_SIZE && last ? encodeCursor(last) : null,
+      nextCursor:
+        rows.length > SHORTLIST_PAGE_SIZE && last
+          ? encodeCursor(last.savedAt, last.talentId)
+          : null,
     });
   }
 }

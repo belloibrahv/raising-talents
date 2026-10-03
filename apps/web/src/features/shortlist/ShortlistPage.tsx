@@ -1,5 +1,5 @@
 import { SHORTLIST_NOTE_MAX, type ShortlistEntry } from '@rt/contracts';
-import { Bookmark, ChevronRight, Trash2 } from 'lucide-react';
+import { Bookmark, ChevronRight, EyeOff, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { t } from '../../i18n';
@@ -38,7 +38,14 @@ export function ShortlistPage() {
           {t('shortlist.count', { saved: first.saved, max: first.max })}
         </p>
       ) : null}
-      {first && items.length === 0 ? (
+      {first && first.saved > 0 && items.length === 0 && !shortlist.hasNextPage ? (
+        <EmptyState
+          icon={EyeOff}
+          title={t('shortlist.allHidden')}
+          description={t('shortlist.allHiddenBody')}
+        />
+      ) : null}
+      {first?.saved === 0 ? (
         <EmptyState
           icon={Bookmark}
           title={t('shortlist.empty')}

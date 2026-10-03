@@ -8,6 +8,7 @@ import { isActiveStaff } from '../../accounts/application/staff.js';
 import type { ProfileAccounts } from '../../talent-profiles/application/ports.js';
 import { MediaErrors, type MediaAssetRepository } from '../domain/media-asset.js';
 import type { MediaPresenter } from './media-presenter.js';
+import { decodeCursor, encodeCursor } from '../../../platform/cursor.js';
 
 const notStaff = () => domainError('FORBIDDEN', 'Only moderators can do this.');
 
@@ -16,15 +17,11 @@ async function ensureStaff(accounts: ProfileAccounts, userId: string): Promise<D
 }
 
 /** An opaque position in the queue: when the item was held, and its id to break ties. */
-const encodeCursor = (heldAt: Date, id: string) =>
-  Buffer.from(`${heldAt.toISOString()}|${id}`).toString('base64url');
 
-function decodeCursor(cursor: string | undefined): { heldAt: Date; id: string } | null {
-  if (!cursor) return null;
-  const [iso, id] = Buffer.from(cursor, 'base64url').toString().split('|');
-  const heldAt = new Date(iso ?? '');
-  return id && !Number.isNaN(heldAt.getTime()) ? { heldAt, id } : null;
-}
+const pageAfter = (cursor: string | undefined) => {
+  const after = decodeCursor(cursor);
+  return after ? { heldAt: after.at, id: after.id } : null;
+};
 
 export class ListHeldMediaQuery {
   constructor(
@@ -37,7 +34,7 @@ export class ListHeldMediaQuery {
     const refused = await ensureStaff(this.accounts, viewerId);
     if (refused) return err(refused);
     // One extra row says whether another page exists without counting the queue.
-    const rows = await this.assets.findHeld(decodeCursor(cursor), MODERATION_PAGE_SIZE + 1);
+    const rows = await this.assets.findHeld(pageAfter(cursor), MODERATION_PAGE_SIZE + 1);
     const page = rows.slice(0, MODERATION_PAGE_SIZE);
     const items = await Promise.all(
       page.map(async (asset) => {

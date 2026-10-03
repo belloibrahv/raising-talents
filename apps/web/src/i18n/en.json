@@ -520,6 +520,8 @@
     "noteSaved": "Note saved.",
     "remove": "Remove",
     "removeLabel": "Remove {name} from your shortlist",
-    "removed": "{name} removed from your shortlist."
+    "removed": "{name} removed from your shortlist.",
+    "allHidden": "Your saved talent are hidden right now",
+    "allHiddenBody": "They stay on your shortlist and come back here if their profiles return."
   }
 }

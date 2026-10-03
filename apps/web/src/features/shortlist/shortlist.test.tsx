@@ -120,4 +120,15 @@ describe('shortlist', () => {
     expect(await screen.findByText('Nobody saved yet')).toBeVisible();
     expect(screen.getByRole('link', { name: 'Find talent' })).toHaveAttribute('href', '/search');
   });
+
+  it('says saved talent are hidden, not that nothing was saved', async () => {
+    stubApi({
+      '/v1/auth/web/refresh': () => signedIn(agent),
+      'GET /v1/me/shortlist': () =>
+        Response.json({ items: [], saved: 2, max: 500, nextCursor: null }),
+    });
+    renderAt('/shortlist');
+    expect(await screen.findByText('Your saved talent are hidden right now')).toBeVisible();
+    expect(screen.queryByText('Nobody saved yet')).toBeNull();
+  });
 });

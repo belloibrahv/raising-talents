@@ -46,6 +46,17 @@ const envSchema = z.object({
   EMAIL_FROM: z.string().min(3).default('Raising Talents <no-reply@raisingtalents.app>'),
 
   BREACHED_PASSWORD_CHECK: booleanFromString.default(true),
+
+  MEDIA_BUCKET: z.string().min(3),
+  /** CloudFront in AWS. Ready images are served from MEDIA_CDN_URL/media/... */
+  MEDIA_CDN_URL: z.url(),
+  /** Only for an S3-compatible server in development. Unset on AWS. */
+  S3_ENDPOINT: z.url().optional(),
+  S3_FORCE_PATH_STYLE: booleanFromString.default(false),
+  /** development-allow-all approves every image and is refused outside development and test. */
+  CONTENT_SCANNER: z.enum(['rekognition', 'development-allow-all']).default('rekognition'),
+  SCAN_REVIEW_AT: z.coerce.number().min(0).max(100).default(50),
+  SCAN_REJECT_AT: z.coerce.number().min(0).max(100).default(80),
 });
 
 const checkedEnvSchema = envSchema.superRefine((env, ctx) => {
@@ -73,7 +84,21 @@ const checkedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: 'verify-full needs the CA bundle path',
     });
   }
+  if (env.SCAN_REVIEW_AT >= env.SCAN_REJECT_AT) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['SCAN_REVIEW_AT'],
+      message: 'The review threshold must be below the reject threshold',
+    });
+  }
   if (env.NODE_ENV === 'staging' || env.NODE_ENV === 'production') {
+    if (env.CONTENT_SCANNER !== 'rekognition') {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['CONTENT_SCANNER'],
+        message: 'Staging and production must scan with Rekognition',
+      });
+    }
     if (env.DATABASE_SSL !== 'verify-full') {
       ctx.addIssue({
         code: 'custom',

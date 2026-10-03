@@ -150,11 +150,13 @@ resource "aws_s3_bucket_policy" "media" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid       = "CloudFrontReadsThroughOriginAccessControl"
+        # Only processed, scanned variants under media/. Raw uploads under pending/ may
+        # carry location data and have not been scanned, so the CDN can never serve them.
+        Sid       = "CloudFrontReadsScannedMediaOnly"
         Effect    = "Allow"
         Principal = { Service = "cloudfront.amazonaws.com" }
         Action    = "s3:GetObject"
-        Resource  = "${aws_s3_bucket.media.arn}/*"
+        Resource  = "${aws_s3_bucket.media.arn}/media/*"
         Condition = { StringEquals = { "AWS:SourceArn" = aws_cloudfront_distribution.media.arn } }
       },
       {

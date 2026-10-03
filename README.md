@@ -142,17 +142,18 @@ Onboarding is a strict order: sign up, verify email, choose a role, then the app
 
 Milestone 1, foundations.
 
-| Area                                                                                              | State                                   |
-| ------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| Monorepo, contracts, shared config                                                                | Done                                    |
-| Backend platform: config, logging, errors, unit of work, outbox with backoff, rate limits, health | Done                                    |
-| Accounts: age gate, account status, role choice                                                   | Done                                    |
-| Identity: sign up, sign in, refresh rotation with reuse detection, sign out, email codes          | Done                                    |
-| Mobile app shell: welcome, sign up, sign in, email code, role choice, session restore             | Done                                    |
-| Endpoint catalogue, OpenAPI document and typed app client                                         | Done                                    |
-| Tracing across API and worker, error tracking for API, worker and app                             | Done                                    |
-| Staging infrastructure, container image and deploy pipeline                                       | Done, not yet applied to an AWS account |
-| Milestone 2: taxonomy, talent and agent profiles with versioned updates and onboarding completion | Done                                    |
-| Milestone 2: media upload pipeline with scanning, avatars, portfolio                              | Next                                    |
-| Milestone 2: onboarding screens in the app                                                        | Next                                    |
-| CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks            | Done                                    |
+| Area                                                                                                          | State                                   |
+| ------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Monorepo, contracts, shared config                                                                            | Done                                    |
+| Backend platform: config, logging, errors, unit of work, outbox with backoff, rate limits, health             | Done                                    |
+| Accounts: age gate, account status, role choice                                                               | Done                                    |
+| Identity: sign up, sign in, refresh rotation with reuse detection, sign out, email codes                      | Done                                    |
+| Mobile app shell: welcome, sign up, sign in, email code, role choice, session restore                         | Done                                    |
+| Endpoint catalogue, OpenAPI document and typed app client                                                     | Done                                    |
+| Tracing across API and worker, error tracking for API, worker and app                                         | Done                                    |
+| Staging infrastructure, container image and deploy pipeline                                                   | Done, not yet applied to an AWS account |
+| Milestone 2: taxonomy, talent and agent profiles with versioned updates and onboarding completion             | Done                                    |
+| Milestone 2: image pipeline (direct upload, metadata stripping, WebP variants, scanning) and approved avatars | Done                                    |
+| Milestone 2: video through Mux, portfolio items, cleanup of abandoned uploads                                 | Next                                    |
+| Milestone 2: onboarding screens in the app                                                                    | Next                                    |
+| CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                        | Done                                    |

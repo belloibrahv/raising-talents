@@ -204,6 +204,9 @@ locals {
     JWT_ISSUER                  = "https://${local.api_domain}"
     JWT_AUDIENCE                = "raising-talents-app"
     BREACHED_PASSWORD_CHECK     = "true"
+    MEDIA_BUCKET                = module.media.bucket_name
+    MEDIA_CDN_URL               = module.media.media_url
+    CONTENT_SCANNER             = "rekognition"
     OTEL_EXPORTER_OTLP_ENDPOINT = var.otlp_endpoint
     OTEL_TRACES_SAMPLER         = "parentbased_traceidratio"
     OTEL_TRACES_SAMPLER_ARG     = var.trace_sample_ratio
@@ -229,7 +232,34 @@ locals {
   }
 }
 
+data "aws_iam_policy_document" "api" {
+  # Presigned uploads are signed with the API's role, so it needs PutObject on the
+  # upload prefix only. HeadObject (the completion check) is covered by GetObject.
+  statement {
+    sid       = "SignUploadsCheckAndDiscardThem"
+    actions   = ["s3:PutObject", "s3:GetObject", "s3:DeleteObject"]
+    resources = ["${module.media.bucket_arn}/pending/*"]
+  }
+}
+
 data "aws_iam_policy_document" "worker" {
+  #checkov:skip=CKV_AWS_356:rekognition:DetectModerationLabels has no resource-level permissions; every S3 statement is scoped to a prefix
+  statement {
+    sid       = "ReadAndDiscardUploads"
+    actions   = ["s3:GetObject", "s3:DeleteObject"]
+    resources = ["${module.media.bucket_arn}/pending/*"]
+  }
+  statement {
+    sid       = "WriteProcessedImages"
+    actions   = ["s3:PutObject", "s3:DeleteObject"]
+    resources = ["${module.media.bucket_arn}/media/*"]
+  }
+  statement {
+    sid       = "ScanImages"
+    actions   = ["rekognition:DetectModerationLabels"]
+    resources = ["*"]
+  }
+
   # The worker sends verification and notification emails, only as the no-reply address.
   statement {
     sid       = "SendEmailAsNoReply"
@@ -268,6 +298,8 @@ module "api" {
     target_group_arn  = module.edge.target_group_arn
     security_group_id = module.edge.alb_security_group_id
   }
+
+  task_policy_json = data.aws_iam_policy_document.api.json
 
   environment = merge(local.app_environment, { PORT = "3000" })
   secrets     = local.app_secrets

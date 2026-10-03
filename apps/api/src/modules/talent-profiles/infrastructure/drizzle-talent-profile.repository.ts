@@ -86,27 +86,23 @@ export class DrizzleTalentProfileRepository implements TalentProfileRepository {
     }
     await db.delete(profileSubcategories).where(eq(profileSubcategories.userId, props.userId));
     if (props.subcategorySlugs.length > 0) {
-      await db
-        .insert(profileSubcategories)
-        .values(
-          props.subcategorySlugs.map((subcategorySlug, position) => ({
-            userId: props.userId,
-            subcategorySlug,
-            position,
-          })),
-        );
+      await db.insert(profileSubcategories).values(
+        props.subcategorySlugs.map((subcategorySlug, position) => ({
+          userId: props.userId,
+          subcategorySlug,
+          position,
+        })),
+      );
     }
     await db.delete(profileSkills).where(eq(profileSkills.userId, props.userId));
     if (props.skillSlugs.length > 0) {
-      await db
-        .insert(profileSkills)
-        .values(
-          props.skillSlugs.map((skillSlug, position) => ({
-            userId: props.userId,
-            skillSlug,
-            position,
-          })),
-        );
+      await db.insert(profileSkills).values(
+        props.skillSlugs.map((skillSlug, position) => ({
+          userId: props.userId,
+          skillSlug,
+          position,
+        })),
+      );
     }
     await this.events.record(profile.pullEvents());
   }

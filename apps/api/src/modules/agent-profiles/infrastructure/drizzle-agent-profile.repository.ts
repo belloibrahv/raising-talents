@@ -38,15 +38,13 @@ export class DrizzleAgentProfileRepository implements AgentProfileRepository {
       .onConflictDoUpdate({ target: agentProfiles.userId, set: { ...row, createdAt: undefined } });
     await db.delete(agentSpecializations).where(eq(agentSpecializations.userId, row.userId));
     if (specializationSlugs.length > 0) {
-      await db
-        .insert(agentSpecializations)
-        .values(
-          specializationSlugs.map((categorySlug, position) => ({
-            userId: row.userId,
-            categorySlug,
-            position,
-          })),
-        );
+      await db.insert(agentSpecializations).values(
+        specializationSlugs.map((categorySlug, position) => ({
+          userId: row.userId,
+          categorySlug,
+          position,
+        })),
+      );
     }
     await this.events.record(profile.pullEvents());
   }

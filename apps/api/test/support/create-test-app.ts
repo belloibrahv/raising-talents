@@ -61,6 +61,9 @@ export async function createTestApp(): Promise<TestApp> {
     VERIFICATION_CODE_PEPPER: 'e2e-pepper-0123456789abcdef0123456789abcdef',
     SMTP_HOST: 'localhost',
     SMTP_PORT: '1025',
+    MEDIA_BUCKET: 'raising-talents-media-test',
+    MEDIA_CDN_URL: 'https://media.test',
+    CONTENT_SCANNER: 'development-allow-all',
   });
   const logger = pino({ level: 'silent' });
   const events = new InMemoryEventRecorder();

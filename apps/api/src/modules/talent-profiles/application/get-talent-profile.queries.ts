@@ -6,13 +6,18 @@ import type { TaxonomySource } from '../../taxonomy/application/taxonomy-catalog
 import { TalentProfileErrors } from '../domain/talent-profile.errors.js';
 import type { TalentProfileRepository } from '../domain/talent-profile.repository.js';
 import type { ProfileAccounts } from './ports.js';
-import { toMyTalentProfile, toPublicTalentProfile } from './talent-profile.presenter.js';
+import {
+  toMyTalentProfile,
+  toPublicTalentProfile,
+  type AvatarUrls,
+} from './talent-profile.presenter.js';
 
 export class GetMyTalentProfileQuery {
   constructor(
     private readonly profiles: TalentProfileRepository,
     private readonly accounts: ProfileAccounts,
     private readonly taxonomy: TaxonomySource,
+    private readonly avatarUrls: AvatarUrls,
   ) {}
 
   async execute(userId: string): Promise<Result<MyTalentProfile, DomainError>> {
@@ -20,7 +25,7 @@ export class GetMyTalentProfileQuery {
     if (!account || account.role !== 'talent') return err(TalentProfileErrors.wrongRole());
     const profile = await this.profiles.findByUserId(userId);
     if (!profile) return err(TalentProfileErrors.notFound());
-    return ok(toMyTalentProfile(profile, await this.taxonomy.current()));
+    return ok(toMyTalentProfile(profile, await this.taxonomy.current(), this.avatarUrls));
   }
 }
 
@@ -33,6 +38,7 @@ export class GetPublicTalentProfileQuery {
     private readonly profiles: TalentProfileRepository,
     private readonly accounts: ProfileAccounts,
     private readonly taxonomy: TaxonomySource,
+    private readonly avatarUrls: AvatarUrls,
   ) {}
 
   async execute(handle: string): Promise<Result<PublicTalentProfile, DomainError>> {
@@ -41,7 +47,12 @@ export class GetPublicTalentProfileQuery {
     if (!profile?.isComplete) return err(notFound);
     const account = await this.accounts.profileContext(profile.userId);
     if (account?.status !== 'active') return err(notFound);
-    const view = toPublicTalentProfile(profile, await this.taxonomy.current(), account.ageYears);
+    const view = toPublicTalentProfile(
+      profile,
+      await this.taxonomy.current(),
+      account.ageYears,
+      this.avatarUrls,
+    );
     return view ? ok(view) : err(notFound);
   }
 }

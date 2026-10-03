@@ -16,6 +16,11 @@ import {
   updateAgentProfileRequestSchema,
   updateTalentProfileRequestSchema,
 } from './profiles.js';
+import {
+  createUploadIntentRequestSchema,
+  mediaAssetSchema,
+  uploadIntentResponseSchema,
+} from './media.js';
 import { taxonomyResponseSchema } from './taxonomy.js';
 
 export type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
@@ -232,6 +237,48 @@ export const endpoints = {
     ],
     tag: 'Agent profiles',
     concurrency: 'if-match',
+  }),
+  'media.createUploadIntent': define({
+    method: 'POST',
+    path: '/v1/media/upload-intents',
+    summary: 'Get permission to upload one image straight to storage',
+    auth: true,
+    request: createUploadIntentRequestSchema,
+    response: uploadIntentResponseSchema,
+    successStatus: 201,
+    errors: [
+      ErrorCode.WrongRole,
+      ErrorCode.EmailNotVerified,
+      ErrorCode.MediaTypeNotAllowed,
+      ErrorCode.MediaTooLarge,
+      ErrorCode.RateLimited,
+    ],
+    tag: 'Media',
+  }),
+  'media.complete': define({
+    method: 'POST',
+    path: '/v1/media/{mediaId}/complete',
+    summary: 'Confirm the upload finished; processing and scanning start',
+    auth: true,
+    response: mediaAssetSchema,
+    successStatus: 202,
+    errors: [
+      ErrorCode.NotFound,
+      ErrorCode.MediaNotUploaded,
+      ErrorCode.MediaUploadMismatch,
+      ErrorCode.MediaWrongState,
+    ],
+    tag: 'Media',
+  }),
+  'media.get': define({
+    method: 'GET',
+    path: '/v1/media/{mediaId}',
+    summary: 'An asset: every state for its owner, ready assets only for everyone else',
+    auth: true,
+    response: mediaAssetSchema,
+    successStatus: 200,
+    errors: [ErrorCode.NotFound],
+    tag: 'Media',
   }),
 } as const satisfies Record<string, EndpointDefinition>;
 

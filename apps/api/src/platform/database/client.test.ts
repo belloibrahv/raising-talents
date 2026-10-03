@@ -44,6 +44,8 @@ describe('loadConfig database and cache rules', () => {
     VERIFICATION_CODE_PEPPER: 'p'.repeat(32),
     SMTP_HOST: 'email-smtp.eu-west-1.amazonaws.com',
     SMTP_PORT: '587',
+    MEDIA_BUCKET: 'raising-talents-media-test',
+    MEDIA_CDN_URL: 'https://media.test',
     DATABASE_HOST: base.DATABASE_HOST,
     DATABASE_NAME: 'raising_talents',
     DATABASE_USER: 'rt_admin',

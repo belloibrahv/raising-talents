@@ -9,6 +9,8 @@ import type { ErrorReporter } from './platform/observability/error-reporter.js';
 import { PLATFORM } from './platform/platform.tokens.js';
 import { IDENTITY } from './modules/identity/application/identity.tokens.js';
 import type { ModuleEventHandlers } from './modules/identity/identity.module.js';
+import { MEDIA } from './modules/media/application/media.use-cases.js';
+import { TALENT } from './modules/talent-profiles/application/talent-profile.tokens.js';
 import { WorkerModule } from './worker.module.js';
 
 const config = loadConfig();
@@ -19,7 +21,9 @@ const app = await NestFactory.createApplicationContext(WorkerModule.register({ c
 });
 
 const dispatcher = new EventDispatcher();
-app.get<ModuleEventHandlers>(IDENTITY.EventHandlers).register(dispatcher);
+for (const token of [IDENTITY.EventHandlers, MEDIA.EventHandlers, TALENT.EventHandlers]) {
+  app.get<ModuleEventHandlers>(token).register(dispatcher);
+}
 
 const errors = app.get<ErrorReporter>(PLATFORM.ErrorReporter);
 const relay = new OutboxRelay(app.get<Database>(PLATFORM.Database), dispatcher, logger, errors);

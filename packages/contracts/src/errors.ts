@@ -36,6 +36,12 @@ export const ErrorCode = {
   HandleTaken: 'HANDLE_TAKEN',
   HandleInvalid: 'HANDLE_INVALID',
   UnknownTaxonomy: 'UNKNOWN_TAXONOMY',
+
+  MediaTypeNotAllowed: 'MEDIA_TYPE_NOT_ALLOWED',
+  MediaTooLarge: 'MEDIA_TOO_LARGE',
+  MediaNotUploaded: 'MEDIA_NOT_UPLOADED',
+  MediaUploadMismatch: 'MEDIA_UPLOAD_MISMATCH',
+  MediaWrongState: 'MEDIA_WRONG_STATE',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -74,6 +80,12 @@ export const ERROR_STATUS: Record<ErrorCode, number> = {
   [ErrorCode.HandleTaken]: 409,
   [ErrorCode.HandleInvalid]: 422,
   [ErrorCode.UnknownTaxonomy]: 422,
+
+  [ErrorCode.MediaTypeNotAllowed]: 422,
+  [ErrorCode.MediaTooLarge]: 422,
+  [ErrorCode.MediaNotUploaded]: 409,
+  [ErrorCode.MediaUploadMismatch]: 422,
+  [ErrorCode.MediaWrongState]: 409,
 };
 
 export const fieldProblemSchema = z

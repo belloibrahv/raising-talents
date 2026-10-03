@@ -76,13 +76,44 @@ function compressed(file, encoding) {
 
 const upstream = process.env.API_UPSTREAM ? new URL(process.env.API_UPSTREAM) : null;
 
+// Headers that describe one connection, not the request: never passed on (RFC 9110, 7.6.1).
+const HOP_BY_HOP = new Set([
+  'connection',
+  'keep-alive',
+  'proxy-authenticate',
+  'proxy-authorization',
+  'te',
+  'trailer',
+  'transfer-encoding',
+  'upgrade',
+]);
+
+function withoutHopByHop(headers) {
+  const named = String(headers.connection ?? '')
+    .split(',')
+    .map((name) => name.trim().toLowerCase())
+    .filter(Boolean);
+  return Object.fromEntries(
+    Object.entries(headers).filter(
+      ([name]) => !HOP_BY_HOP.has(name.toLowerCase()) && !named.includes(name.toLowerCase()),
+    ),
+  );
+}
+
 /** Streams the request to the API and its answer back, cookies and status included. */
 function proxyToApi(request, response) {
   // The edge appends the caller's address; earlier entries could be the caller's own invention.
   const chain = String(request.headers['x-forwarded-for'] ?? '').split(',');
   const client = chain.at(-1)?.trim() || request.socket.remoteAddress || '';
-  const headers = { ...request.headers, host: upstream.host, 'x-forwarded-for': client };
-  headers['x-forwarded-proto'] = secure ? 'https' : 'http';
+  const headers = {
+    ...withoutHopByHop(request.headers),
+    host: upstream.host,
+    'x-forwarded-for': client,
+    'x-forwarded-proto': secure ? 'https' : 'http',
+  };
+  // Proves to the API that this server named the client; a caller's own value never passes.
+  delete headers['x-proxy-secret'];
+  if (process.env.PROXY_SECRET) headers['x-proxy-secret'] = process.env.PROXY_SECRET;
   const outgoing = forward(
     {
       hostname: upstream.hostname,
@@ -92,14 +123,20 @@ function proxyToApi(request, response) {
       headers,
     },
     (answer) => {
-      response.writeHead(answer.statusCode ?? 502, answer.headers);
+      response.writeHead(answer.statusCode ?? 502, withoutHopByHop(answer.headers));
       answer.pipe(response);
+      answer.on('error', () => response.destroy());
     },
   );
+  // Idle for 30 seconds: the API has stopped answering.
   outgoing.setTimeout(30_000, () => outgoing.destroy(new Error('API timed out')));
   outgoing.on('error', () => {
-    if (!response.headersSent)
-      response.writeHead(502, { 'content-type': 'application/problem+json' });
+    // Part of an answer already went out: cut it, rather than append an error to it.
+    if (response.headersSent) {
+      response.destroy();
+      return;
+    }
+    response.writeHead(502, { 'content-type': 'application/problem+json' });
     response.end(
       JSON.stringify({
         type: 'about:blank',

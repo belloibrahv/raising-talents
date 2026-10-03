@@ -1,5 +1,6 @@
 import { RekognitionClient } from '@aws-sdk/client-rekognition';
 import { S3Client } from '@aws-sdk/client-s3';
+import { createHmac } from 'node:crypto';
 import { Module } from '@nestjs/common';
 import type { Logger } from 'pino';
 import type { AppConfig } from '../../config/env.js';
@@ -159,8 +160,20 @@ interface VideoParts {
     },
     {
       provide: MEDIA.Urls,
-      inject: [PLATFORM.Config],
-      useFactory: (config: AppConfig) => new MediaUrls(config.MEDIA_CDN_URL),
+      inject: [PLATFORM.Config, PLATFORM.Clock],
+      useFactory: (config: AppConfig, clock: Clock) =>
+        new MediaUrls(
+          config.MEDIA_CDN_URL,
+          // Only the API needs to sign previews; a CDN serves held files by address (ADR-036).
+          config.MEDIA_DELIVERY === 'api'
+            ? {
+                key: createHmac('sha256', config.VERIFICATION_CODE_PEPPER)
+                  .update('media-preview')
+                  .digest(),
+                now: () => clock.now(),
+              }
+            : null,
+        ),
     },
     {
       provide: MEDIA.CreateIntent,

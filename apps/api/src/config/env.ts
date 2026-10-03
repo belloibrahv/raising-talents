@@ -12,6 +12,11 @@ const envSchema = z.object({
   /** JSON everywhere except a developer's terminal. pretty needs pino-pretty, a dev dependency. */
   LOG_FORMAT: z.enum(['json', 'pretty']).default('json'),
   TRUST_PROXY: booleanFromString.default(false),
+  /**
+   * Shared with the web server that passes /v1 to the API (ADR-036). Only a request carrying
+   * it may name the client address, so other services on the private network cannot.
+   */
+  PROXY_SECRET: z.string().min(32).optional(),
 
   // Either one URL (local development) or separate parts (AWS, where RDS keeps the
   // username and password in Secrets Manager and ECS injects them).

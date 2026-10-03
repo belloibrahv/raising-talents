@@ -13,11 +13,13 @@ WORKDIR /repo
 ARG VITE_API_URL
 ARG VITE_SENTRY_DSN
 ARG VITE_APP_ENV=railway
+# Set for GitHub-triggered deploys; CLI deploys set VITE_RELEASE themselves (see the runbook).
 ARG RAILWAY_GIT_COMMIT_SHA=dev
+ARG VITE_RELEASE=${RAILWAY_GIT_COMMIT_SHA}
 ENV VITE_API_URL=${VITE_API_URL} \
     VITE_SENTRY_DSN=${VITE_SENTRY_DSN} \
     VITE_APP_ENV=${VITE_APP_ENV} \
-    VITE_RELEASE=${RAILWAY_GIT_COMMIT_SHA}
+    VITE_RELEASE=${VITE_RELEASE}
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 RUN pnpm fetch --frozen-lockfile
 COPY . .

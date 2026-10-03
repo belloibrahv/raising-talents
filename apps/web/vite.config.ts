@@ -1,15 +1,35 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 const BRAND_INK = '#1C1A3D';
 
-export default defineConfig({
+/**
+ * Opens the connection to the API while the app downloads, so the first call (restoring the
+ * session, which sends the cookie) does not wait for DNS and TLS.
+ */
+function preconnectToApi(apiUrl: string): Plugin {
+  return {
+    name: 'preconnect-to-api',
+    transformIndexHtml: () => [
+      {
+        tag: 'link',
+        attrs: { rel: 'preconnect', href: new URL(apiUrl).origin, crossorigin: 'use-credentials' },
+        injectTo: 'head',
+      },
+    ],
+  };
+}
+
+export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     tailwindcss(),
+    preconnectToApi(
+      loadEnv(mode, process.cwd(), 'VITE_')['VITE_API_URL'] ?? 'http://localhost:3000',
+    ),
     VitePWA({
       // The app asks before switching to a new version, so nobody loses a half-filled form.
       registerType: 'prompt',
@@ -83,4 +103,4 @@ export default defineConfig({
   server: { port: 5173, strictPort: true },
   preview: { port: 4173, strictPort: true },
   build: { sourcemap: true, target: 'es2022' },
-});
+}));

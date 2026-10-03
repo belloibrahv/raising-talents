@@ -1,6 +1,5 @@
 import { Body, Controller, HttpCode, Inject, Post, Req, Res, UseGuards } from '@nestjs/common';
 import {
-  ErrorCode,
   signInRequestSchema,
   signUpRequestSchema,
   webRefreshRequestSchema,
@@ -14,7 +13,7 @@ import type { AppConfig } from '../../../../config/env.js';
 import type { Clock } from '../../../../platform/clock.js';
 import { ClientIp } from '../../../../platform/http/client-ip.decorator.js';
 import { DeviceLabel } from '../../../../platform/http/device-label.js';
-import { ProblemException, unwrap } from '../../../../platform/http/problem.js';
+import { unwrap } from '../../../../platform/http/problem.js';
 import {
   clearedRefreshCookie,
   readCookie,
@@ -91,10 +90,13 @@ export class WebAuthController {
     @Body(body(webRefreshRequestSchema)) request: WebRefreshRequest,
     @Req() http: FastifyRequest,
     @Res({ passthrough: true }) reply: FastifyReply,
-  ): Promise<WebAuthResponse> {
+  ): Promise<WebAuthResponse | undefined> {
     const refreshToken = readCookie(http.headers.cookie, REFRESH_COOKIE);
     if (!refreshToken) {
-      throw ProblemException.fromCode(ErrorCode.Unauthenticated, 'Sign in to continue.');
+      // No cookie is not an error: the visitor is simply signed out. 204 says so without the
+      // browser logging a failed request on every first visit. A bad cookie is still a 401.
+      void reply.status(204);
+      return undefined;
     }
     const refreshed = await this.refreshHandler.execute({
       refreshToken,

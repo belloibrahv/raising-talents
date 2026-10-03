@@ -129,8 +129,10 @@ describe('Web sessions over HTTP', () => {
       payload: credentials,
     });
     expect(none.statusCode).toBe(403);
+    // No cookie means nobody is signed in on this browser: a plain answer, not an error.
     const noCookie = await post('/v1/auth/web/refresh', { deviceId: DEVICE });
-    expect(noCookie.json<ProblemDetails>().code).toBe('UNAUTHENTICATED');
+    expect(noCookie.statusCode).toBe(204);
+    expect(noCookie.body).toBe('');
   });
 
   it('signs out by revoking the session and clearing the cookie', async () => {

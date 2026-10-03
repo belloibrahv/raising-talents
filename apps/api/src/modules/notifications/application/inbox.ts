@@ -37,13 +37,12 @@ export interface Inbox {
 /** Notices are kept this long, read or not (ADR-032). */
 export const INBOX_RETENTION_DAYS = 180;
 
-const view = (entry: InboxEntry): Notification =>
-  ({
-    ...entry.content,
-    id: entry.id,
-    createdAt: entry.createdAt.toISOString(),
-    read: entry.readAt !== null,
-  });
+const view = (entry: InboxEntry): Notification => ({
+  ...entry.content,
+  id: entry.id,
+  createdAt: entry.createdAt.toISOString(),
+  read: entry.readAt !== null,
+});
 
 export class ListNotificationsQuery {
   constructor(private readonly inbox: Inbox) {}

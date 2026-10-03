@@ -17,3 +17,4 @@ apps/mobile/android/
 *.tfstate
 *.tfstate.*
 *.tfplan
+.lighthouseci

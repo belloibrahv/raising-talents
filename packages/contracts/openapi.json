@@ -646,6 +646,9 @@
               }
             }
           },
+          "204": {
+            "description": "No refresh cookie was sent: nobody is signed in on this browser"
+          },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
             "x-error-codes": [

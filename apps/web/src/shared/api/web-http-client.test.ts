@@ -72,7 +72,7 @@ class FakeBrowserAndApi {
 
     if (path === '/v1/auth/web/refresh') {
       this.refreshCalls += 1;
-      if (!sentCookie) return problem(401, 'UNAUTHENTICATED');
+      if (!sentCookie) return new Response(null, { status: 204 });
       if (this.revoked) return problem(401, 'SESSION_REVOKED');
       if (this.usedCookies.has(sentCookie)) {
         this.revoked = true;
@@ -124,6 +124,19 @@ describe('WebHttpClient', () => {
     const { client, ended } = tab(fake);
     await expect(client.restore()).resolves.toBeNull();
     expect(ended()).toBe(0);
+  });
+
+  it('ends the session when the cookie disappears while signed in', async () => {
+    const fake = new FakeBrowserAndApi();
+    fake.signIn();
+    fake.accessMinutes = 0;
+    const { client, ended } = tab(fake);
+    await client.restore();
+    fake.cookie = null;
+    await expect(client.request('/v1/me', { schema: meResponseSchema })).rejects.toMatchObject({
+      code: 'UNAUTHENTICATED',
+    });
+    expect(ended()).toBe(1);
   });
 
   it('restores from the cookie, then calls with the bearer token and no credentials', async () => {

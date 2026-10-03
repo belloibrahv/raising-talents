@@ -4,8 +4,6 @@ import { domainError } from '../../../platform/domain-error.js';
 export const TalentProfileErrors = {
   notFound: () => domainError(ErrorCode.NotFound, 'You have not started your talent profile yet.'),
   wrongRole: () => domainError(ErrorCode.WrongRole, 'Only talent accounts have a talent profile.'),
-  emailNotVerified: () =>
-    domainError(ErrorCode.EmailNotVerified, 'Verify your email before setting up your profile.'),
   versionRequired: () =>
     domainError(
       ErrorCode.PreconditionRequired,

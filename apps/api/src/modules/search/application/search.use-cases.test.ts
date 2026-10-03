@@ -44,10 +44,19 @@ class FakeTalents implements SearchTalents {
 }
 
 class FakeAccounts implements SearchAccounts {
-  readonly accounts = new Map<string, { role: Role; status: AccountStatus; dateOfBirth: string }>();
+  readonly accounts = new Map<
+    string,
+    { role: Role; status: AccountStatus; dateOfBirth: string; emailVerified?: boolean }
+  >();
   async indexFacts(userId: string) {
     const account = this.accounts.get(userId);
-    return account ? { status: account.status, dateOfBirth: account.dateOfBirth } : null;
+    return account
+      ? {
+          status: account.status,
+          emailVerified: account.emailVerified ?? true,
+          dateOfBirth: account.dateOfBirth,
+        }
+      : null;
   }
   async profileContext(userId: string) {
     const account = this.accounts.get(userId);
@@ -125,6 +134,21 @@ describe('talent search', () => {
     talents.profiles.delete('tobi');
     await indexer.handle(event('tobi'));
     expect(index.documents.has('tobi')).toBe(false);
+  });
+
+  it('keeps a talent out of search until their email is verified', async () => {
+    await addTalent('ngozi');
+    accounts.accounts.set('ngozi', {
+      role: 'talent',
+      status: 'active',
+      dateOfBirth: '1999-02-02',
+      emailVerified: false,
+    });
+    await indexer.handle(event('ngozi'));
+    expect(index.documents.has('ngozi')).toBe(false);
+    accounts.accounts.set('ngozi', { role: 'talent', status: 'active', dateOfBirth: '1999-02-02' });
+    await indexer.handle({ ...event('ngozi'), type: 'accounts.EmailVerified' });
+    expect(index.documents.has('ngozi')).toBe(true);
   });
 
   it('keeps the date of birth out of every result, showing age in years', async () => {

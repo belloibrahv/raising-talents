@@ -42,7 +42,11 @@ export const VERIFICATION_REQUEST_LIMIT = { perDay: 3, windowSeconds: 86_400 } a
 
 /** What verification needs from accounts. Implemented by AccountsFacade. */
 export interface VerificationAccounts {
-  profileContext(userId: string): Promise<{ role: Role | null; status: AccountStatus } | null>;
+  profileContext(userId: string): Promise<{
+    role: Role | null;
+    status: AccountStatus;
+    emailVerified: boolean;
+  } | null>;
   findSummaryById(id: string): Promise<{ email: string } | null>;
 }
 
@@ -51,6 +55,7 @@ const notStaff = () => domainError('FORBIDDEN', 'Only moderators can do this.');
 function viewFor(
   profile: AgentProfile | null,
   latest: VerificationRequest | null,
+  emailVerified: boolean,
 ): MyAgentVerification {
   const request = latest?.snapshot();
   const state = profile?.isVerified
@@ -70,7 +75,8 @@ function viewFor(
       request && state !== 'not_requested' && state !== 'verified'
         ? request.submittedAt.toISOString()
         : null,
-    canRequest: Boolean(profile?.isComplete) && state !== 'verified' && state !== 'pending',
+    canRequest:
+      Boolean(profile?.isComplete) && emailVerified && state !== 'verified' && state !== 'pending',
   };
 }
 
@@ -108,7 +114,7 @@ export class GetMyVerificationQuery {
       this.profiles.findByUserId(agentId),
       this.requests.findLatestForAgent(agentId),
     ]);
-    return ok(viewFor(profile, latest));
+    return ok(viewFor(profile, latest, account.emailVerified));
   }
 }
 
@@ -137,6 +143,8 @@ export class RequestVerificationHandler {
     if (!profile?.isComplete || account.status !== 'active')
       return err(VerificationErrors.profileIncomplete());
     if (profile.isVerified) return err(VerificationErrors.alreadyVerified());
+    // Moderators check the agency through its email domain, so the address must be real.
+    if (!account.emailVerified) return err(VerificationErrors.emailNotVerified());
     if ((await this.requests.findLatestForAgent(agentId))?.status === 'pending') {
       return err(VerificationErrors.pending());
     }
@@ -170,7 +178,7 @@ export class RequestVerificationHandler {
       if (error instanceof PendingVerificationExistsError) return err(VerificationErrors.pending());
       throw error;
     }
-    return ok(viewFor(profile, request));
+    return ok(viewFor(profile, request, true));
   }
 }
 

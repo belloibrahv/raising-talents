@@ -30,7 +30,7 @@ describe('Profiles over HTTP', () => {
     });
 
   /** Signs up, verifies the email from the captured message and chooses a role. */
-  async function onboard(email: string, role: 'talent' | 'agent'): Promise<string> {
+  async function onboard(email: string, role: 'talent' | 'agent', verify = true): Promise<string> {
     const signUp = await testApp.app.inject({
       method: 'POST',
       url: '/v1/auth/sign-up',
@@ -45,7 +45,11 @@ describe('Profiles over HTTP', () => {
     });
     const token = signUp.json<{ tokens: { accessToken: string } }>().tokens.accessToken;
     await testApp.deliverEvents();
-    await call('POST', '/v1/auth/verify-email', token, { code: testApp.email.lastCodeFor(email) });
+    if (verify) {
+      await call('POST', '/v1/auth/verify-email', token, {
+        code: testApp.email.lastCodeFor(email),
+      });
+    }
     await call('POST', '/v1/me/role', token, { role });
     return token;
   }
@@ -195,6 +199,33 @@ describe('Profiles over HTTP', () => {
     expect(view.ageYears).toBeGreaterThanOrEqual(27);
     expect(visible.body).not.toContain('1999-03-08');
     expect(visible.body).not.toContain('dateOfBirth');
+  });
+
+  it('keeps a finished profile private until the email is verified (ADR-037)', async () => {
+    const talentToken = await onboard('funke.unverified@example.com', 'talent', false);
+    const step = await call('PATCH', '/v1/me/talent-profile', talentToken, {
+      displayName: 'Funke Ade',
+      handle: 'funke.sings',
+      categorySlug: 'sports',
+      subcategorySlugs: ['athletics'],
+      citySlug: 'ng-lagos',
+      bio: BIO,
+    });
+    expect(step.statusCode).toBe(200);
+    const userId = step.json<MyTalentProfile>().userId;
+    const profile = await testApp.talentProfiles.findByUserId(userId);
+    if (!profile) throw new Error('profile missing');
+    profile.setApprovedAvatar('0192a3b4-0000-7000-8000-0000000000ab', new Date());
+    await testApp.talentProfiles.save(profile);
+    await testApp.moduleRef.get<AccountsFacade>(ACCOUNTS.Facade).completeOnboarding(userId);
+
+    const agentToken = await onboard('scout.ibadan2@example.com', 'agent');
+    expect((await call('GET', '/v1/talents/funke.sings', agentToken)).statusCode).toBe(404);
+
+    await call('POST', '/v1/auth/verify-email', talentToken, {
+      code: testApp.email.lastCodeFor('funke.unverified@example.com'),
+    });
+    expect((await call('GET', '/v1/talents/funke.sings', agentToken)).statusCode).toBe(200);
   });
 
   it('completes agent onboarding and locks the role', async () => {

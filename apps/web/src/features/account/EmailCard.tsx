@@ -1,13 +1,15 @@
 import { VERIFICATION_CODE_LENGTH, type PendingEmailChange } from '@rt/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Mail } from 'lucide-react';
+import { BadgeCheck, Mail, MailWarning } from 'lucide-react';
 import { useState, type SubmitEvent } from 'react';
 import { z } from 'zod';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { isApiError } from '../../shared/api/api-error';
 import { api, session } from '../../shared/api/client';
-import { Button } from '../../shared/ui/Button';
+import { Link } from 'react-router';
+import { Badge } from '@/components/ui/badge';
+import { Button, buttonLink } from '../../shared/ui/Button';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { PasswordField, TextField } from '../../shared/ui/TextField';
 import { useFocusFirstError } from '../../shared/ui/use-focus-first-error';
@@ -66,17 +68,37 @@ export function EmailCard() {
         />
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="min-w-0 font-semibold break-all">{me?.email}</p>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              setDone(false);
-              setEditing(true);
-            }}
-          >
-            {t('emailChange.change')}
-          </Button>
+          <div className="grid min-w-0 gap-1.5">
+            <p className="font-semibold break-all">{me?.email}</p>
+            {me?.emailVerified ? (
+              <Badge variant="success">
+                <BadgeCheck aria-hidden="true" />
+                {t('emailChange.verified')}
+              </Badge>
+            ) : (
+              <Badge variant="destructive">
+                <MailWarning aria-hidden="true" />
+                {t('emailChange.notVerified')}
+              </Badge>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {me && !me.emailVerified ? (
+              <Link className={buttonLink('primary', 'sm')} to="/verify-email">
+                {t('emailChange.verifyNow')}
+              </Link>
+            ) : null}
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => {
+                setDone(false);
+                setEditing(true);
+              }}
+            >
+              {t('emailChange.change')}
+            </Button>
+          </div>
         </div>
       )}
     </section>

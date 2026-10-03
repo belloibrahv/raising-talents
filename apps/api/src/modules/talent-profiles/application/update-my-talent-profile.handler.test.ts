@@ -156,7 +156,7 @@ describe('UpdateMyTalentProfileHandler', () => {
     expect(!result.ok && result.error.code).toBe('HANDLE_TAKEN');
   });
 
-  it('keeps agents and unverified talent out', async () => {
+  it('keeps agents out, and lets unverified talent build a profile (ADR-037)', async () => {
     const agent = await accounts.createAccount({ email: 'scout@example.com', role: 'agent' });
     const unverified = await accounts.createAccount({
       email: 'new.talent@example.com',
@@ -174,7 +174,7 @@ describe('UpdateMyTalentProfileHandler', () => {
       patch: { displayName: 'New' },
     });
     expect(!asAgent.ok && asAgent.error.code).toBe('WRONG_ROLE');
-    expect(!asUnverified.ok && asUnverified.error.code).toBe('EMAIL_NOT_VERIFIED');
+    expect(asUnverified.ok).toBe(true);
   });
 
   it('completes onboarding, locks the role and goes public once the avatar is approved', async () => {

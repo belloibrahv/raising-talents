@@ -18,6 +18,21 @@ const pending = { newEmail: NEW, requestedAt: '2026-10-03T09:00:00.000Z' };
 describe('changing the email address', () => {
   beforeEach(resetSession);
 
+  it('shows whether the address is verified, and links to verify it', async () => {
+    stubApi({
+      '/v1/auth/web/refresh': () => signedIn({ ...agent, emailVerified: false }),
+      'GET /v1/me/sessions': () => Response.json({ items: [] }),
+      'GET /v1/me/email/change': () => problem(404, 'NOT_FOUND'),
+    });
+    renderAt('/account');
+    const card = await screen.findByRole('region', { name: 'Email address' });
+    expect(within(card).getByText('Not verified')).toBeVisible();
+    expect(within(card).getByRole('link', { name: 'Verify now' })).toHaveAttribute(
+      'href',
+      '/verify-email',
+    );
+  });
+
   it('asks for the password, sends a code, and switches the address with it', async () => {
     let waiting: typeof pending | null = null;
     const calls = stubApi({

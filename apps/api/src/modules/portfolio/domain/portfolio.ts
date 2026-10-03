@@ -15,8 +15,6 @@ export const PortfolioEvents = {
 
 export const PortfolioErrors = {
   wrongRole: () => domainError(ErrorCode.WrongRole, 'Only talent accounts have a portfolio.'),
-  emailNotVerified: () =>
-    domainError(ErrorCode.EmailNotVerified, 'Verify your email before adding to your portfolio.'),
   itemNotFound: () => domainError(ErrorCode.NotFound, 'This item is not in your portfolio.'),
   mediaNotFound: () => domainError(ErrorCode.NotFound, 'This file does not exist.'),
   mediaNotUploaded: () =>

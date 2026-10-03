@@ -50,7 +50,9 @@ export interface SearchTalents {
 
 /** What search needs from accounts. Implemented by AccountsFacade. */
 export interface SearchAccounts {
-  indexFacts(userId: string): Promise<{ status: AccountStatus; dateOfBirth: string } | null>;
+  indexFacts(
+    userId: string,
+  ): Promise<{ status: AccountStatus; emailVerified: boolean; dateOfBirth: string } | null>;
   profileContext(userId: string): Promise<{ role: Role | null; status: AccountStatus } | null>;
 }
 

@@ -12,6 +12,13 @@ import {
   type AvatarUrls,
 } from './talent-profile.presenter.js';
 
+/**
+ * Who others may see: an active account with a verified email. Until the email is verified
+ * the profile is private, however complete it is (ADR-037).
+ */
+export const isPublic = (account: { status: string; emailVerified: boolean } | null): boolean =>
+  account?.status === 'active' && account.emailVerified;
+
 export class GetMyTalentProfileQuery {
   constructor(
     private readonly profiles: TalentProfileRepository,
@@ -78,7 +85,7 @@ export class TalentDirectory {
       this.profiles.findByUserId(userId),
       this.accounts.profileContext(userId),
     ]);
-    if (!profile?.isComplete || account?.status !== 'active') return null;
+    if (!profile?.isComplete || !account || !isPublic(account)) return null;
     const view = toPublicTalentProfile(
       profile,
       await this.taxonomy.current(),
@@ -114,7 +121,7 @@ export class TalentDirectory {
     const profile = await this.profiles.findByHandle(handle.toLowerCase());
     if (!profile?.isComplete) return null;
     const account = await this.accounts.profileContext(profile.userId);
-    return account?.status === 'active' ? profile.userId : null;
+    return isPublic(account) ? profile.userId : null;
   }
 }
 
@@ -135,7 +142,7 @@ export class GetPublicTalentProfileQuery {
     const profile = await this.profiles.findByHandle(handle.toLowerCase());
     if (!profile?.isComplete) return err(notFound);
     const account = await this.accounts.profileContext(profile.userId);
-    if (account?.status !== 'active') return err(notFound);
+    if (!isPublic(account) || !account) return err(notFound);
     const view = toPublicTalentProfile(
       profile,
       await this.taxonomy.current(),

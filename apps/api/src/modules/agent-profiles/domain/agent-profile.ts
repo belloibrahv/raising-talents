@@ -10,8 +10,6 @@ export const AgentProfileEvents = {
 export const AgentProfileErrors = {
   notFound: () => domainError(ErrorCode.NotFound, 'You have not started your agent profile yet.'),
   wrongRole: () => domainError(ErrorCode.WrongRole, 'Only agent accounts have an agent profile.'),
-  emailNotVerified: () =>
-    domainError(ErrorCode.EmailNotVerified, 'Verify your email before setting up your profile.'),
   versionRequired: () =>
     domainError(
       ErrorCode.PreconditionRequired,

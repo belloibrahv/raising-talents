@@ -57,7 +57,6 @@ export class UpdateMyAgentProfileHandler {
     command: UpdateMyAgentProfileCommand,
   ): Promise<Result<MyAgentProfile, DomainError>> {
     const account = await this.accounts.profileContext(command.userId);
-    if (account && !account.emailVerified) return err(AgentProfileErrors.emailNotVerified());
     if (account?.role !== 'agent') return err(AgentProfileErrors.wrongRole());
     const catalog = await this.taxonomy.current();
 

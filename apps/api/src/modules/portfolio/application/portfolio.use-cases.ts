@@ -95,13 +95,8 @@ abstract class OwnerPortfolioUseCase {
     protected readonly clock: Clock,
   ) {}
 
-  protected async checkTalent(
-    userId: string,
-    options: { needsVerifiedEmail: boolean },
-  ): Promise<DomainError | null> {
+  protected async checkTalent(userId: string): Promise<DomainError | null> {
     const account = await this.accounts.profileContext(userId);
-    if (options.needsVerifiedEmail && account && !account.emailVerified)
-      return PortfolioErrors.emailNotVerified();
     return account?.role === 'talent' ? null : PortfolioErrors.wrongRole();
   }
 
@@ -162,7 +157,7 @@ export class AddPortfolioItemHandler extends OwnerPortfolioUseCase {
     mediaId: string;
     caption?: string | undefined;
   }): Promise<Result<MyPortfolio, DomainError>> {
-    const refused = await this.checkTalent(input.userId, { needsVerifiedEmail: true });
+    const refused = await this.checkTalent(input.userId);
     if (refused) return err(refused);
     return this.mutate(input.userId, async (portfolio, now) => {
       const media = (await this.media.describe([input.mediaId])).get(input.mediaId) ?? null;
@@ -183,7 +178,7 @@ export class UpdatePortfolioItemHandler extends OwnerPortfolioUseCase {
     itemId: string;
     caption: string;
   }): Promise<Result<MyPortfolio, DomainError>> {
-    const refused = await this.checkTalent(input.userId, { needsVerifiedEmail: false });
+    const refused = await this.checkTalent(input.userId);
     if (refused) return err(refused);
     return this.mutate(input.userId, (portfolio, now) =>
       portfolio.updateCaption(input.itemId, input.caption, now),
@@ -197,7 +192,7 @@ export class RemovePortfolioItemHandler extends OwnerPortfolioUseCase {
     userId: string;
     itemId: string;
   }): Promise<Result<MyPortfolio, DomainError>> {
-    const refused = await this.checkTalent(input.userId, { needsVerifiedEmail: false });
+    const refused = await this.checkTalent(input.userId);
     if (refused) return err(refused);
     return this.mutate(input.userId, async (portfolio, now) => {
       const removed = portfolio.removeItem(input.itemId, now);
@@ -213,7 +208,7 @@ export class ReorderPortfolioHandler extends OwnerPortfolioUseCase {
     expectedVersion: number | null;
     itemIds: readonly string[];
   }): Promise<Result<MyPortfolio, DomainError>> {
-    const refused = await this.checkTalent(input.userId, { needsVerifiedEmail: false });
+    const refused = await this.checkTalent(input.userId);
     if (refused) return err(refused);
     if (input.expectedVersion === null) return err(PortfolioErrors.versionRequired());
     const expected = input.expectedVersion;

@@ -104,6 +104,17 @@ describe('Agent verification', () => {
     });
   });
 
+  it('needs a verified email, which moderators use to check the agency (ADR-037)', async () => {
+    const unverified = await accounts.createAccount({
+      email: 'new.scout@eko-talent.example',
+      role: 'agent',
+      verified: false,
+    });
+    await completeProfile(unverified);
+    const asked = await ask.execute(unverified, EVIDENCE);
+    expect(asked.ok ? null : asked.error.code).toBe('EMAIL_NOT_VERIFIED');
+  });
+
   it('goes from request to a moderator to a verified badge', async () => {
     await completeProfile(agentId);
     const asked = await ask.execute(agentId, EVIDENCE);

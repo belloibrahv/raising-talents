@@ -55,9 +55,17 @@ export class AccountsFacade {
    * For the search index only: whether the account may be found, and the date of birth so
    * agents can filter by age. Search results show age in years, never this date.
    */
-  async indexFacts(userId: string): Promise<{ status: AccountStatus; dateOfBirth: string } | null> {
+  async indexFacts(
+    userId: string,
+  ): Promise<{ status: AccountStatus; emailVerified: boolean; dateOfBirth: string } | null> {
     const account = await this.accounts.findById(userId);
-    return account ? { status: account.status, dateOfBirth: account.dateOfBirth } : null;
+    return account
+      ? {
+          status: account.status,
+          emailVerified: account.isEmailVerified,
+          dateOfBirth: account.dateOfBirth,
+        }
+      : null;
   }
 
   /** Schedules erasure after the grace period. Joins the caller's transaction. */

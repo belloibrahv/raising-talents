@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
@@ -103,20 +103,71 @@ describe('the web app', () => {
     expect(screen.queryByRole('alert')).toBeNull();
   });
 
-  it('keeps an unverified account on the code screen, whatever address it opens', async () => {
+  it('lets an unverified account choose a role, and verify whenever it likes (ADR-037)', async () => {
     stubApi({
       '/v1/auth/web/refresh': () => signedIn(meFor({ emailVerified: false, role: null })),
     });
     const router = renderAt('/home');
+    expect(await screen.findByRole('radio', { name: /I am an agent or scout/ })).toBeVisible();
+    expect(router.state.location.pathname).toBe('/choose-role');
+
+    await router.navigate('/verify-email');
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Check your email' }),
+      await screen.findByRole('heading', { level: 1, name: 'Verify your email' }),
     ).toBeVisible();
-    expect(router.state.location.pathname).toBe('/verify-email');
     expect(screen.getByLabelText('Verification code')).toHaveAttribute(
       'autocomplete',
       'one-time-code',
     );
+    expect(screen.getByRole('link', { name: 'Do this later' })).toHaveAttribute(
+      'href',
+      '/choose-role',
+    );
     await expectNoAxeViolations();
+  });
+
+  it('nudges an unverified talent from every screen, and clears once verified', async () => {
+    const talent = meFor({ emailVerified: false, role: 'talent', status: 'active' });
+    stubApi({
+      '/v1/auth/web/refresh': () => signedIn(talent),
+      'GET /v1/me/portfolio': () => Response.json({ items: [], maxItems: 30, version: 0 }),
+      'GET /v1/me/notifications/unread': () => Response.json({ unread: 0 }),
+      'POST /v1/auth/verify-email': () => Response.json({ ...talent, emailVerified: true }),
+    });
+    renderAt('/portfolio');
+    const user = userEvent.setup({ delay: null });
+    const banner = await screen.findByRole('region', { name: 'Email not verified' });
+    expect(banner).toHaveTextContent('Verify your email so agents can find your profile.');
+    expect(screen.getByRole('link', { name: 'Account, Email not verified' })).toBeVisible();
+    await expectNoAxeViolations();
+
+    await user.click(within(banner).getByRole('link', { name: 'Verify now' }));
+    await user.type(await screen.findByLabelText('Verification code'), '482913');
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Your email is verified' }),
+    ).toBeVisible();
+    await user.click(screen.getByRole('link', { name: 'Continue' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('region', { name: 'Email not verified' })).toBeNull();
+    });
+    expect(screen.getByRole('link', { name: 'Account' })).toBeVisible();
+  });
+
+  it('lets the nudge be hidden for the visit', async () => {
+    stubApi({
+      '/v1/auth/web/refresh': () =>
+        signedIn(meFor({ emailVerified: false, role: 'agent', status: 'active' })),
+      'GET /v1/me/notifications/unread': () => Response.json({ unread: 0 }),
+      'GET /v1/me/agent-profile': () => problem(404, 'NOT_FOUND'),
+      'GET /v1/me/agent-verification': () => problem(404, 'NOT_FOUND'),
+    });
+    renderAt('/account');
+    const user = userEvent.setup({ delay: null });
+    const banner = await screen.findByRole('region', { name: 'Email not verified' });
+    expect(banner).toHaveTextContent('Verify your email to ask us to verify your agency.');
+    await user.click(within(banner).getByRole('button', { name: 'Hide for now' }));
+    expect(screen.queryByRole('region', { name: 'Email not verified' })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Account, Email not verified' })).toBeVisible();
   });
 
   it('asks for a role next, using a labelled radio group', async () => {

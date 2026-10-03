@@ -34,6 +34,7 @@ export const SEARCH = {
 export const INDEXING_EVENTS = [
   'talent.TalentProfileUpdated',
   'accounts.OnboardingCompleted',
+  'accounts.EmailVerified',
   'accounts.DeletionRequested',
   'accounts.DeletionCancelled',
   'accounts.AccountDeleted',
@@ -67,7 +68,8 @@ async function documentFor(
     talents.searchable(userId),
     accounts.indexFacts(userId),
   ]);
-  if (!talent || facts?.status !== 'active') return null;
+  // Unverified accounts stay out of search until they verify (ADR-037).
+  if (!talent || facts?.status !== 'active' || !facts.emailVerified) return null;
   return toDocument({ ...talent, dateOfBirth: facts.dateOfBirth });
 }
 

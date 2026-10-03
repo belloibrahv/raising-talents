@@ -33,7 +33,7 @@ describe('Auth over HTTP', () => {
     await app.close();
   });
 
-  it('walks a new agent through sign-up, email verification and role choice', async () => {
+  it('walks a new agent through sign-up, role choice and email verification', async () => {
     const signUp = await post('/v1/auth/sign-up', tunde);
     expect(signUp.statusCode).toBe(201);
     const auth = signUp.json<AuthResponse>();
@@ -44,9 +44,10 @@ describe('Auth over HTTP', () => {
       countryCode: 'NG',
     });
 
-    const tooEarly = await post('/v1/me/role', { role: 'agent' }, auth.tokens.accessToken);
-    expect(tooEarly.statusCode).toBe(403);
-    expect(tooEarly.json<ProblemDetails>().code).toBe(ErrorCode.EmailNotVerified);
+    // Setting up does not wait for the email (ADR-037); being seen by others does.
+    const early = await post('/v1/me/role', { role: 'agent' }, auth.tokens.accessToken);
+    expect(early.statusCode).toBe(200);
+    expect(early.json<MeResponse>()).toMatchObject({ role: 'agent', emailVerified: false });
 
     await testApp.deliverEvents();
     const code = testApp.email.lastCodeFor(tunde.email);

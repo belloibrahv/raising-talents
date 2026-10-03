@@ -42,7 +42,11 @@ export const VERIFICATION_REQUEST_LIMIT = { perDay: 3, windowSeconds: 86_400 } a
 
 /** What verification needs from accounts. Implemented by AccountsFacade. */
 export interface VerificationAccounts {
-  profileContext(userId: string): Promise<{ role: Role | null; status: AccountStatus } | null>;
+  profileContext(userId: string): Promise<{
+    role: Role | null;
+    status: AccountStatus;
+    emailVerified: boolean;
+  } | null>;
   findSummaryById(id: string): Promise<{ email: string } | null>;
 }
 
@@ -137,6 +141,8 @@ export class RequestVerificationHandler {
     if (!profile?.isComplete || account.status !== 'active')
       return err(VerificationErrors.profileIncomplete());
     if (profile.isVerified) return err(VerificationErrors.alreadyVerified());
+    // Moderators check the agency through its email domain, so the address must be real.
+    if (!account.emailVerified) return err(VerificationErrors.emailNotVerified());
     if ((await this.requests.findLatestForAgent(agentId))?.status === 'pending') {
       return err(VerificationErrors.pending());
     }

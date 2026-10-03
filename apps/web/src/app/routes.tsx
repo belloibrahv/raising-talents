@@ -94,7 +94,13 @@ function Shell({ updatePrompt }: { readonly updatePrompt: ReactNode }) {
   );
 }
 
-function Gate({ area, children }: { readonly area?: AppArea; readonly children?: ReactNode }) {
+function Gate({
+  area,
+  children,
+}: {
+  readonly area?: AppArea | readonly AppArea[];
+  readonly children?: ReactNode;
+}) {
   const retry = useOutletContext<() => void>();
   return (
     <AreaGate area={area} retry={retry}>
@@ -103,7 +109,11 @@ function Gate({ area, children }: { readonly area?: AppArea; readonly children?:
   );
 }
 
-const screen = (path: string, area: AppArea, element: ReactNode): RouteObject => ({
+const screen = (
+  path: string,
+  area: AppArea | readonly AppArea[],
+  element: ReactNode,
+): RouteObject => ({
   path,
   element: <Gate area={area}>{element}</Gate>,
 });
@@ -148,7 +158,8 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
         ),
         screen(
           'verify-email',
-          'verifyEmail',
+          // Open to anyone signed in, at any point: verifying is optional until it is needed.
+          ['chooseRole', 'app'],
           <AuthFrame>
             <VerifyEmailPage />
           </AuthFrame>,

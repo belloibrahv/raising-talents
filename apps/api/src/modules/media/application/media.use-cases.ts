@@ -76,8 +76,6 @@ export class CreateUploadIntentHandler {
     bytes: number;
   }): Promise<Result<UploadIntentResponse, DomainError>> {
     const account = await this.accounts.profileContext(input.userId);
-    if (account && !account.emailVerified)
-      return err(domainError('EMAIL_NOT_VERIFIED', 'Verify your email before uploading.'));
     if (!account?.role || !PURPOSE_ROLES[input.purpose].includes(account.role)) {
       return err(domainError('WRONG_ROLE', 'Your account cannot upload this kind of file.'));
     }

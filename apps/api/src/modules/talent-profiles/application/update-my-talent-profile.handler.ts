@@ -37,9 +37,6 @@ export class UpdateMyTalentProfileHandler {
     command: UpdateMyTalentProfileCommand,
   ): Promise<Result<MyTalentProfile, DomainError>> {
     const account = await this.accounts.profileContext(command.userId);
-    // Email first: an unverified account cannot have chosen a role yet, so checking the
-    // role first would send it the wrong next step.
-    if (account && !account.emailVerified) return err(TalentProfileErrors.emailNotVerified());
     if (account?.role !== 'talent') return err(TalentProfileErrors.wrongRole());
     const catalog = await this.taxonomy.current();
 

@@ -100,10 +100,12 @@ export class Account {
     return ok(undefined);
   }
 
-  /** The role can change freely until onboarding completes and locks it. */
+  /**
+   * The role can change freely until onboarding completes and locks it. An unverified
+   * email does not stop it: people set up first and verify when they can (ADR-037).
+   */
   selectRole(role: SelectableRole, now: Date): Result<void, DomainError> {
     if (this.props.roleLockedAt !== null) return err(AccountErrors.roleLocked());
-    if (!this.isEmailVerified) return err(AccountErrors.emailNotVerified());
     if (this.props.role === role) return ok(undefined);
     this.props = { ...this.props, role, updatedAt: now };
     this.raise(AccountEvents.RoleSelected, now, { role });
@@ -112,11 +114,11 @@ export class Account {
 
   /**
    * Called when the first complete profile is saved. Locks the role (only an admin can
-   * change it afterwards) and activates the account. Safe to call again.
+   * change it afterwards) and activates the account. Safe to call again. Others only see
+   * the profile once the email is verified as well (ADR-037).
    */
   completeOnboarding(now: Date): Result<void, DomainError> {
     if (this.props.roleLockedAt !== null) return ok(undefined);
-    if (!this.isEmailVerified) return err(AccountErrors.emailNotVerified());
     if (this.props.role === null) return err(AccountErrors.noRoleChosen());
     const status = this.props.status === 'onboarding' ? 'active' : this.props.status;
     this.props = { ...this.props, roleLockedAt: now, status, updatedAt: now };

@@ -50,14 +50,20 @@
     "passwordChanged": "Your password was changed. Sign in with the new one."
   },
   "verifyEmail": {
-    "title": "Check your email",
-    "body": "We sent a 6-digit code to {email}. It expires in 10 minutes.",
+    "title": "Verify your email",
+    "body": "We send 6-digit codes to {email}. Each lasts 10 minutes, and you can ask for a new one at any time.",
     "codeLabel": "Verification code",
     "submit": "Verify email",
     "resend": "Send a new code",
     "resendIn": "Send a new code in {seconds}s",
     "resent": "New code sent. Check your inbox and spam folder.",
-    "wrongEmail": "Wrong email? Start again"
+    "wrongEmail": "Wrong email? Start again",
+    "whyTalent": "Until you do, your profile stays private and agents cannot find you.",
+    "whyAgent": "You need this before asking us to verify your agency.",
+    "later": "Do this later",
+    "doneTitle": "Your email is verified",
+    "doneBody": "Thank you. Everything is open to you now.",
+    "continue": "Continue"
   },
   "chooseRole": {
     "title": "How will you use Raising Talents?",
@@ -586,7 +592,10 @@
     "code": "Code from the new address",
     "confirm": "Use this address",
     "keepCurrent": "Keep my current address",
-    "done": "Your email address is changed. Use it next time you sign in."
+    "done": "Your email address is changed. Use it next time you sign in.",
+    "verified": "Verified",
+    "notVerified": "Not verified",
+    "verifyNow": "Verify now"
   },
   "routeError": {
     "title": "Something went wrong",
@@ -598,5 +607,14 @@
     "update": "Reload",
     "offlineTitle": "You are offline",
     "offlineBody": "This screen needs a connection. Check your signal, then try again."
+  },
+  "verifyBanner": {
+    "region": "Email not verified",
+    "talent": "Verify your email so agents can find your profile.",
+    "agent": "Verify your email to ask us to verify your agency.",
+    "other": "Verify your email to use everything Raising Talents offers.",
+    "action": "Verify now",
+    "dismiss": "Hide for now",
+    "dot": "Email not verified"
   }
 }

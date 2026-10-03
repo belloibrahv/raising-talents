@@ -55,12 +55,12 @@ describe('Account role choice', () => {
     return result.value;
   };
 
-  it('needs a verified email first', () => {
+  it('lets an unverified account choose a role and finish onboarding (ADR-037)', () => {
     const result = register('2001-04-17');
     if (!result.ok) throw new Error('expected success');
-    const chosen = result.value.selectRole('agent', now);
-    expect(chosen.ok).toBe(false);
-    if (!chosen.ok) expect(chosen.error.code).toBe(ErrorCode.EmailNotVerified);
+    expect(result.value.selectRole('agent', now).ok).toBe(true);
+    expect(result.value.completeOnboarding(now).ok).toBe(true);
+    expect(result.value.snapshot()).toMatchObject({ status: 'active', emailVerifiedAt: null });
   });
 
   it('can change the role until it is locked', () => {

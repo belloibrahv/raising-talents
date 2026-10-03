@@ -21,10 +21,10 @@ describe('areaFor', () => {
     expect(areaFor('unreachable', null)).toBeNull();
   });
 
-  it('walks onboarding in order: email, role, then the app', () => {
+  it('walks onboarding in order: role, then the app, whether or not the email is verified', () => {
     expect(areaFor('signedOut', null)).toBe('auth');
-    expect(areaFor('signedIn', me({ emailVerified: false, role: null }))).toBe('verifyEmail');
-    expect(areaFor('signedIn', me({ emailVerified: false, role: 'talent' }))).toBe('verifyEmail');
+    expect(areaFor('signedIn', me({ emailVerified: false, role: null }))).toBe('chooseRole');
+    expect(areaFor('signedIn', me({ emailVerified: false, role: 'talent' }))).toBe('app');
     expect(areaFor('signedIn', me({ role: null }))).toBe('chooseRole');
     expect(areaFor('signedIn', me({}))).toBe('app');
   });

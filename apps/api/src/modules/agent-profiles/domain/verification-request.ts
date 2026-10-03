@@ -25,6 +25,11 @@ export const VerificationErrors = {
   alreadyVerified: () => domainError(ErrorCode.AlreadyVerified, 'Your agency is already verified.'),
   notFound: () => domainError(ErrorCode.NotFound, 'This verification request does not exist.'),
   alreadyDecided: () => domainError(ErrorCode.Conflict, 'This request has already been decided.'),
+  emailNotVerified: () =>
+    domainError(
+      ErrorCode.EmailNotVerified,
+      'Verify your email first. Moderators use it to check that you work for the agency.',
+    ),
 };
 
 /** The sentence the agent reads for each decline reason. Provisional (ADR-026). */

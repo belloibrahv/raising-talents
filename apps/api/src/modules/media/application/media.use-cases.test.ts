@@ -260,7 +260,7 @@ describe('Image pipeline', () => {
     expect(again.ok && again.value.status).toBe('processing');
   });
 
-  it('keeps agents and unverified accounts from uploading profile media', async () => {
+  it('keeps agents from uploading profile media, but lets unverified talent set up (ADR-037)', async () => {
     const agent = await accounts.createAccount({ email: 'chidi@example.com', role: 'agent' });
     const unverified = await accounts.createAccount({
       email: 'new@example.com',
@@ -280,6 +280,6 @@ describe('Image pipeline', () => {
       bytes: 1000,
     });
     expect(!asAgent.ok && asAgent.error.code).toBe('WRONG_ROLE');
-    expect(!asUnverified.ok && asUnverified.error.code).toBe('EMAIL_NOT_VERIFIED');
+    expect(asUnverified.ok).toBe(true);
   });
 });

@@ -5,6 +5,7 @@ import { NavLink, Outlet } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { DeletionBanner } from '../features/account/DeletionBanner';
+import { VerifyEmailBanner } from '../features/auth/VerifyEmailBanner';
 import { useSession, useSignOut } from '../features/auth/use-auth';
 import { t } from '../i18n';
 import { NotificationBell } from '../features/notifications/NotificationBell';
@@ -73,14 +74,23 @@ export function AppLayout() {
                       <>
                         <span
                           className={cn(
-                            'grid h-7 w-12 place-items-center rounded-full transition-colors md:h-auto md:w-auto',
+                            'relative grid h-7 w-12 place-items-center rounded-full transition-colors md:h-auto md:w-auto',
                             isActive &&
                               'bg-spotlight text-spotlight-foreground md:bg-transparent md:text-current',
                           )}
                         >
                           <Icon aria-hidden="true" className="size-5 md:size-4" />
+                          {to === '/account' && me && !me.emailVerified ? (
+                            <span
+                              aria-hidden="true"
+                              className="absolute top-0.5 right-2.5 size-2.5 rounded-full bg-destructive ring-2 ring-background md:-top-0.5 md:-right-1"
+                            />
+                          ) : null}
                         </span>
                         {label}
+                        {to === '/account' && me && !me.emailVerified ? (
+                          <span className="sr-only">{`, ${t('verifyBanner.dot')}`}</span>
+                        ) : null}
                       </>
                     )}
                   </NavLink>
@@ -104,6 +114,7 @@ export function AppLayout() {
         </div>
       </header>
       <DeletionBanner />
+      <VerifyEmailBanner />
       {/* Screens load their code on demand; the header and tabs stay while they do. */}
       <Suspense fallback={<PageSkeleton />}>
         <Outlet />

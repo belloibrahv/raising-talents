@@ -23,16 +23,7 @@ export interface VerificationCodeFactory {
   hashOf(code: string): string;
 }
 
-export interface EmailMessage {
-  readonly to: string;
-  readonly subject: string;
-  readonly text: string;
-  readonly html: string;
-}
-
-export interface EmailSender {
-  send(message: EmailMessage): Promise<void>;
-}
+export type { EmailMessage, EmailSender } from '../../../platform/email/email-sender.js';
 
 export interface DirectoryAccount {
   readonly id: string;

@@ -13,6 +13,10 @@ import { JoseAccessTokens } from './auth/jose-access-tokens.js';
 import { SystemClock, type Clock } from './clock.js';
 import { createDatabase, type DatabaseHandle } from './database/client.js';
 import { PostgresJobLock } from './scheduling/postgres-job-lock.js';
+import { SESv2Client } from '@aws-sdk/client-sesv2';
+import type { EmailSender } from './email/email-sender.js';
+import { SesEmailSender } from './email/ses-email-sender.js';
+import { SmtpEmailSender } from './email/smtp-email-sender.js';
 import { DrizzleUnitOfWork } from './database/drizzle-unit-of-work.js';
 import { HealthController } from './health/health.controller.js';
 import { AuthGuard } from './http/auth.guard.js';
@@ -71,6 +75,24 @@ export class PlatformModule {
           useFactory: (handle: DatabaseHandle) => handle.db,
         },
         {
+          provide: PLATFORM.EmailSender,
+          useFactory: (): EmailSender =>
+            config.EMAIL_TRANSPORT === 'ses'
+              ? new SesEmailSender(
+                  new SESv2Client({}),
+                  config.EMAIL_FROM,
+                  config.SES_CONFIGURATION_SET,
+                )
+              : new SmtpEmailSender({
+                  host: config.SMTP_HOST ?? 'localhost',
+                  port: config.SMTP_PORT ?? 1025,
+                  secure: config.SMTP_SECURE,
+                  user: config.SMTP_USER,
+                  password: config.SMTP_PASSWORD,
+                  from: config.EMAIL_FROM,
+                }),
+        },
+        {
           provide: PLATFORM.JobLock,
           inject: [DATABASE_HANDLE],
           useFactory: (handle: DatabaseHandle) => new PostgresJobLock(handle.pool),
@@ -122,6 +144,7 @@ export class PlatformModule {
         PLATFORM.ErrorReporter,
         PLATFORM.Database,
         PLATFORM.JobLock,
+        PLATFORM.EmailSender,
         PLATFORM.UnitOfWork,
         PLATFORM.EventRecorder,
         PLATFORM.Redis,

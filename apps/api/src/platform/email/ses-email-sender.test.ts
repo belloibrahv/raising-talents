@@ -1,7 +1,14 @@
 import { SendEmailCommand } from '@aws-sdk/client-sesv2';
 import { describe, expect, it } from 'vitest';
-import { verificationCodeEmail } from '../application/emails/verification-code.template.js';
 import { SesEmailSender } from './ses-email-sender.js';
+
+/** A plain message, so this platform test does not depend on any module's templates. */
+const message = (to: string, code: string) => ({
+  to,
+  subject: `${code} is your Raising Talents code`,
+  text: `Your Raising Talents verification code is ${code}.`,
+  html: `<p>Your Raising Talents verification code is <strong>${code}</strong>.</p>`,
+});
 
 describe('SesEmailSender', () => {
   it('sends text and HTML through the SES API with the configured sender', async () => {
@@ -17,7 +24,7 @@ describe('SesEmailSender', () => {
       'rt-staging',
     );
 
-    await sender.send(verificationCodeEmail({ to: 'kemi.lawal@example.com', code: '482913' }));
+    await sender.send(message('kemi.lawal@example.com', '482913'));
 
     expect(sent[0]?.input).toMatchObject({
       FromEmailAddress: 'Raising Talents <no-reply@staging.raisingtalents.app>',
@@ -34,8 +41,6 @@ describe('SesEmailSender', () => {
       } as never,
       'a@b.c',
     );
-    await expect(
-      sender.send(verificationCodeEmail({ to: 'x@example.com', code: '111111' })),
-    ).rejects.toThrow('Throttling');
+    await expect(sender.send(message('x@example.com', '111111'))).rejects.toThrow('Throttling');
   });
 });

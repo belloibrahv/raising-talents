@@ -131,6 +131,11 @@ export class WebHttpClient {
       { method: 'POST', body: { deviceId: this.options.deviceId() } },
       false,
     );
+    // 204: no cookie at all, so nobody is signed in on this browser.
+    if (response.status === 204) {
+      this.access = null;
+      return null;
+    }
     if (response.ok) return this.startSession(webAuthResponseSchema.parse(await response.json()));
 
     // The server refused the cookie: missing, expired, revoked or reused. Only now do we sign out.

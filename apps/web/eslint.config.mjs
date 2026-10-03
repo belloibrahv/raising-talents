@@ -13,5 +13,14 @@ export default [
       'react-hooks/exhaustive-deps': 'error',
     },
   },
-  { ignores: ['dist/**', 'dev-dist/**', 'eslint.config.mjs', 'scripts/**'] },
+  {
+    ignores: [
+      'dist/**',
+      'dev-dist/**',
+      'eslint.config.mjs',
+      'scripts/**',
+      'lighthouserc.cjs',
+      '.lighthouseci/**',
+    ],
+  },
 ];

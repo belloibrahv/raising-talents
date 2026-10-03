@@ -620,7 +620,7 @@
     "/v1/auth/web/refresh": {
       "post": {
         "operationId": "authWeb_refresh",
-        "summary": "Swap the refresh cookie for a new access token and a rotated cookie",
+        "summary": "Swap the refresh cookie for a new access token and a rotated cookie. 204 when there is no cookie",
         "tags": [
           "Auth (web)"
         ],

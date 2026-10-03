@@ -72,7 +72,7 @@ class FakeBrowserAndApi {
 
     if (path === '/v1/auth/web/refresh') {
       this.refreshCalls += 1;
-      if (!sentCookie) return problem(401, 'UNAUTHENTICATED');
+      if (!sentCookie) return new Response(null, { status: 204 });
       if (this.revoked) return problem(401, 'SESSION_REVOKED');
       if (this.usedCookies.has(sentCookie)) {
         this.revoked = true;

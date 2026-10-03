@@ -187,7 +187,8 @@ export const endpoints = {
   'authWeb.refresh': define({
     method: 'POST',
     path: '/v1/auth/web/refresh',
-    summary: 'Swap the refresh cookie for a new access token and a rotated cookie',
+    summary:
+      'Swap the refresh cookie for a new access token and a rotated cookie. 204 when there is no cookie',
     auth: false,
     request: webRefreshRequestSchema,
     response: webAuthResponseSchema,

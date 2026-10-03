@@ -169,33 +169,34 @@ Onboarding is a strict order: sign up, verify email, choose a role, then the app
 
 Milestone 1, foundations.
 
-| Area                                                                                                           | State                                    |
-| -------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| Monorepo, contracts, shared config                                                                             | Done                                     |
-| Backend platform: config, logging, errors, unit of work, outbox with backoff, rate limits, health              | Done                                     |
-| Accounts: age gate, account status, role choice                                                                | Done                                     |
-| Identity: sign up, sign in, refresh rotation with reuse detection, sign out, email codes, password reset       | Done                                     |
-| Mobile app shell: welcome, sign up, sign in, email code, role choice, session restore                          | Done                                     |
-| Endpoint catalogue, OpenAPI document and typed app client                                                      | Done                                     |
-| Tracing across API and worker, error tracking for API, worker and app                                          | Done                                     |
-| Staging infrastructure, container image and deploy pipeline                                                    | Done, not yet applied to an AWS account  |
-| Milestone 2: taxonomy, talent and agent profiles with versioned updates and onboarding completion              | Done                                     |
-| Milestone 2: image pipeline (direct upload, metadata stripping, WebP variants, scanning) and approved avatars  | Done                                     |
-| Milestone 2: portfolio items (add, caption, reorder with If-Match, remove with media cleanup, public view)     | Done, limits provisional (ADR-020)       |
-| Milestone 2: video through Mux (direct upload, signed webhooks, frame scanning, signed playback)               | Done, limits provisional (ADR-021)       |
-| Milestone 2: scheduled cleanup of abandoned uploads                                                            | Done                                     |
-| PWA (ADR-023): browser sessions with an HttpOnly refresh cookie (ADR-024), CORS                                | Done                                     |
-| PWA: installable shell, offline start, update prompt, sign up, sign in, email code, role choice                | Done                                     |
-| PWA: talent wizard, agent profile, profile photo, portfolio (photos and video), public talent page             | Done                                     |
-| PWA: hosting on S3 and CloudFront with a strict CSP, deploy pipeline                                           | Done, not yet applied to an AWS account  |
-| Milestone 3: talent search (Typesense, event-driven indexing, rebuild, agent search screen)                    | Done; hosting needs a decision (ADR-025) |
-| Moderation: staff accounts, held media queue, approve or reject with an audit trail                            | Done                                     |
-| Agent verification: request with evidence, moderator queue, badge (ADR-026)                                    | Done, evidence rules provisional         |
-| Notifications: emails for moderation and verification decisions, sent once per event                           | Done                                     |
-| Privacy: data export, account deletion with a grace period and scheduled erasure (ADR-027)                     | Done, grace period provisional           |
-| Safety: member reports, moderator queue, suspend and ban with sign-out and email, operator reinstate (ADR-028) | Done, categories provisional             |
-| PWA design system: shadcn/ui on Tailwind, brand tokens, dark scheme, bottom tab bar on phones (ADR-029)        | Done                                     |
-| Shortlists: agents save talent with private notes, in the data export (ADR-030)                                | Done, limit provisional                  |
-| Account security: change password, signed-in devices, sign out one or every other device (ADR-031)             | Done                                     |
-| Notification inbox: bell with unread count, inbox page, 180-day retention, in the data export (ADR-032)        | Done                                     |
-| CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                         | Done                                     |
+| Area                                                                                                                    | State                                    |
+| ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| Monorepo, contracts, shared config                                                                                      | Done                                     |
+| Backend platform: config, logging, errors, unit of work, outbox with backoff, rate limits, health                       | Done                                     |
+| Accounts: age gate, account status, role choice                                                                         | Done                                     |
+| Identity: sign up, sign in, refresh rotation with reuse detection, sign out, email codes, password reset                | Done                                     |
+| Mobile app shell: welcome, sign up, sign in, email code, role choice, session restore                                   | Done                                     |
+| Endpoint catalogue, OpenAPI document and typed app client                                                               | Done                                     |
+| Tracing across API and worker, error tracking for API, worker and app                                                   | Done                                     |
+| Staging infrastructure, container image and deploy pipeline                                                             | Done, not yet applied to an AWS account  |
+| Milestone 2: taxonomy, talent and agent profiles with versioned updates and onboarding completion                       | Done                                     |
+| Milestone 2: image pipeline (direct upload, metadata stripping, WebP variants, scanning) and approved avatars           | Done                                     |
+| Milestone 2: portfolio items (add, caption, reorder with If-Match, remove with media cleanup, public view)              | Done, limits provisional (ADR-020)       |
+| Milestone 2: video through Mux (direct upload, signed webhooks, frame scanning, signed playback)                        | Done, limits provisional (ADR-021)       |
+| Milestone 2: scheduled cleanup of abandoned uploads                                                                     | Done                                     |
+| PWA (ADR-023): browser sessions with an HttpOnly refresh cookie (ADR-024), CORS                                         | Done                                     |
+| PWA: installable shell, offline start, update prompt, sign up, sign in, email code, role choice                         | Done                                     |
+| PWA: talent wizard, agent profile, profile photo, portfolio (photos and video), public talent page                      | Done                                     |
+| PWA: hosting on S3 and CloudFront with a strict CSP, deploy pipeline                                                    | Done, not yet applied to an AWS account  |
+| Milestone 3: talent search (Typesense, event-driven indexing, rebuild, agent search screen)                             | Done; hosting needs a decision (ADR-025) |
+| Moderation: staff accounts, held media queue, approve or reject with an audit trail                                     | Done                                     |
+| Agent verification: request with evidence, moderator queue, badge (ADR-026)                                             | Done, evidence rules provisional         |
+| Notifications: emails for moderation and verification decisions, sent once per event                                    | Done                                     |
+| Privacy: data export, account deletion with a grace period and scheduled erasure (ADR-027)                              | Done, grace period provisional           |
+| Safety: member reports, moderator queue, suspend and ban with sign-out and email, operator reinstate (ADR-028)          | Done, categories provisional             |
+| PWA design system: shadcn/ui on Tailwind, brand tokens, dark scheme, bottom tab bar on phones (ADR-029)                 | Done                                     |
+| Shortlists: agents save talent with private notes, in the data export (ADR-030)                                         | Done, limit provisional                  |
+| Account security: change password, signed-in devices, sign out one or every other device (ADR-031)                      | Done                                     |
+| Notification inbox: bell with unread count, inbox page, 180-day retention, in the data export (ADR-032)                 | Done                                     |
+| Quality: Lighthouse in CI (performance 85+, accessibility and best practices 100) on a CloudFront-like server (ADR-033) | Done                                     |
+| CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                                  | Done                                     |

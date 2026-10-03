@@ -1,6 +1,6 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - 'apps/*'
+  - 'packages/*'
 
 auditConfig:
   ignoreGhsas:
@@ -11,3 +11,10 @@ auditConfig:
     # braces also reaches us only through @expo/cli (its Metro file map), build tooling for the
     # parked native app. No patched version exists yet. Review by 2026-11-03.
     - GHSA-vfj7-8cjw-p6xm
+
+packageExtensions:
+  # Its multipart interceptor imports rxjs without declaring it, so it worked only while pnpm
+  # happened to hoist rxjs 7. Declaring the peer pins it to the one the API uses.
+  '@nestjs/platform-fastify':
+    peerDependencies:
+      rxjs: ^7.1.0

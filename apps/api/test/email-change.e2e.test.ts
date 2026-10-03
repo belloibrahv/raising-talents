@@ -108,4 +108,24 @@ describe('Changing the email address over HTTP', () => {
     expect((await signIn(NEW)).statusCode).toBe(200);
     expect((await signIn(OLD)).json<ProblemDetails>().code).toBe('INVALID_CREDENTIALS');
   });
+
+  it('ties each code to its address: an earlier code cannot confirm a later request', async () => {
+    // A fresh account: the earlier tests used this hour's requests for the first one.
+    token = (await signUp('tunde.codes@example.com')).json<{ tokens: { accessToken: string } }>()
+      .tokens.accessToken;
+    await testApp.deliverEvents();
+    await call('POST', '/v1/me/email', { newEmail: 'bisi.first@example.com', password: PASSWORD });
+    await testApp.deliverEvents();
+    const firstCode = testApp.email.lastCodeFor('bisi.first@example.com') ?? '';
+    testApp.clock.advanceSeconds(120);
+    await call('POST', '/v1/me/email', { newEmail: 'bisi.second@example.com', password: PASSWORD });
+    const reused = await call('POST', '/v1/me/email/confirm', { code: firstCode });
+    expect(reused.json<ProblemDetails>().code).toBe('VERIFICATION_CODE_EXPIRED');
+    expect((await call('GET', '/v1/me')).json<MeResponse>().email).toBe('tunde.codes@example.com');
+
+    await testApp.deliverEvents();
+    const secondCode = testApp.email.lastCodeFor('bisi.second@example.com') ?? '';
+    const moved = await call('POST', '/v1/me/email/confirm', { code: secondCode });
+    expect(moved.json<MeResponse>().email).toBe('bisi.second@example.com');
+  });
 });

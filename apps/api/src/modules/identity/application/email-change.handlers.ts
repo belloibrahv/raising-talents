@@ -109,6 +109,12 @@ export class RequestEmailChangeHandler {
       confirmedAt: null,
     };
     await this.uow.run(async () => {
+      // A code proves one address. Any code still out for an earlier request dies now, so
+      // it cannot confirm this one before the worker sends a new code.
+      if (latest?.isActive(now)) {
+        latest.invalidate(now);
+        await this.codes.save(latest);
+      }
       await this.changes.save(change);
       await this.events.record([
         {

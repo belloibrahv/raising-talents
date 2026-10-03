@@ -492,6 +492,8 @@ module "web" {
   api_url         = "https://${local.api_domain}"
   media_url       = module.media.media_url
   upload_origins  = [module.media.upload_origin]
+
+  error_reporting_origin = var.web_error_reporting_origin
 }
 
 # ---------- Alerts and cost ----------

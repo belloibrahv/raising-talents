@@ -7,7 +7,7 @@ import { isApiError } from '../../shared/api/api-error';
 import { Button, buttonLink } from '../../shared/ui/Button';
 import { ChoiceGroup } from '../../shared/ui/ChoiceGroup';
 import { FormMessage } from '../../shared/ui/FormMessage';
-import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
+import { PageSkeleton } from '../../shared/ui/PageSkeleton';
 import { Page } from '../../shared/ui/Page';
 import { Select } from '../../shared/ui/Select';
 import { TextField } from '../../shared/ui/TextField';
@@ -20,7 +20,7 @@ export function AgentOnboardingPage() {
   const taxonomy = useTaxonomy();
   // Owned here so the saved confirmation survives the form reloading the new version.
   const update = useUpdateAgentProfile();
-  if (profile.isPending || taxonomy.isPending) return <FullScreenStatus />;
+  if (profile.isPending || taxonomy.isPending) return <PageSkeleton />;
   return (
     <Page
       title={t('onboarding.agent.title')}

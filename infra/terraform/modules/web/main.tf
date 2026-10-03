@@ -5,7 +5,8 @@ data "aws_cloudfront_cache_policy" "optimized" {
 }
 
 locals {
-  # The page may only talk to our API, our media CDN, the upload bucket and Mux.
+  # The page may only talk to our API, our media CDN, the upload bucket, Mux and, when set,
+  # the error tracker's ingest address.
   # Mux streams from *.mux.com and takes direct uploads on Google Cloud Storage.
   content_security_policy = join("; ", [
     "default-src 'self'",
@@ -14,7 +15,7 @@ locals {
     "font-src 'self'",
     "img-src 'self' data: blob: ${var.media_url} https://image.mux.com",
     "media-src 'self' blob: https://stream.mux.com https://*.mux.com",
-    "connect-src 'self' ${var.api_url} ${var.media_url} ${join(" ", var.upload_origins)} https://stream.mux.com https://*.mux.com https://storage.googleapis.com",
+    "connect-src 'self' ${var.api_url} ${var.media_url} ${join(" ", var.upload_origins)} https://stream.mux.com https://*.mux.com https://storage.googleapis.com ${var.error_reporting_origin}",
     "worker-src 'self' blob:",
     "manifest-src 'self'",
     "object-src 'none'",

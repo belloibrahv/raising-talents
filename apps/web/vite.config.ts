@@ -64,7 +64,8 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         // Latin and Latin Extended cover English and Nigerian names (ẹ, ọ, ṣ). The rest load only if used.
         // hls.js is only for browsers without native HLS, and only once a video plays.
-        globIgnores: ['**/*vietnamese*', '**/hls-*.js'],
+        // The error tracker loads only in builds that report errors, so it is not precached.
+        globIgnores: ['**/*vietnamese*', '**/hls-*.js', '**/sentry-client-*.js'],
         navigateFallback: '/index.html',
         // API calls are personal and must never come from a cache.
         navigateFallbackDenylist: [/^\/v1\//],

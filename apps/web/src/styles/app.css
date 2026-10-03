@@ -150,6 +150,8 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    /* Or a looping animation would flicker for the people who asked for less motion. */
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }

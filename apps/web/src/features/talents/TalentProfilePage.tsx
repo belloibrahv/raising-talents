@@ -6,7 +6,7 @@ import { isApiError } from '../../shared/api/api-error';
 import { api } from '../../shared/api/client';
 import { VideoPlayer } from '../../shared/media/VideoPlayer';
 import { FormMessage } from '../../shared/ui/FormMessage';
-import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
+import { PageSkeleton } from '../../shared/ui/PageSkeleton';
 import { Page } from '../../shared/ui/Page';
 import { ReportProfile } from './ReportProfile';
 import { useSession } from '../auth/use-auth';
@@ -31,7 +31,7 @@ export function TalentProfilePage() {
     enabled: profile.isSuccess,
   });
 
-  if (profile.isPending) return <FullScreenStatus />;
+  if (profile.isPending) return <PageSkeleton variant="profile" />;
   if (profile.isError) {
     return (
       <Page title={t('talent.notAvailable')}>

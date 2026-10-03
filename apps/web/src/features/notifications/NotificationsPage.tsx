@@ -20,7 +20,7 @@ import { errorMessage } from '../../i18n/error-message';
 import { Button } from '../../shared/ui/Button';
 import { EmptyState } from '../../shared/ui/EmptyState';
 import { FormMessage } from '../../shared/ui/FormMessage';
-import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
+import { PageSkeleton } from '../../shared/ui/PageSkeleton';
 import { Page } from '../../shared/ui/Page';
 import { useMarkAllRead, useNotifications } from './queries';
 
@@ -148,7 +148,7 @@ export function NotificationsPage() {
     }
   }, [unread, markRead]);
 
-  if (notifications.isPending) return <FullScreenStatus />;
+  if (notifications.isPending) return <PageSkeleton />;
   const items = notifications.data?.pages.flatMap((page) => page.items) ?? [];
   return (
     <Page title={t('notifications.title')} documentTitle={t('titles.notifications')}>

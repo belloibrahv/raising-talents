@@ -12,7 +12,7 @@ import {
 import { VideoPlayer } from '../../shared/media/VideoPlayer';
 import { Button } from '../../shared/ui/Button';
 import { FormMessage } from '../../shared/ui/FormMessage';
-import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
+import { PageSkeleton } from '../../shared/ui/PageSkeleton';
 import { Page } from '../../shared/ui/Page';
 import { TextField } from '../../shared/ui/TextField';
 import {
@@ -48,7 +48,7 @@ export function PortfolioPage() {
   // One polite live region for every change, so screen readers hear what happened.
   const [announcement, setAnnouncement] = useState('');
 
-  if (portfolio.isPending) return <FullScreenStatus />;
+  if (portfolio.isPending) return <PageSkeleton />;
   if (portfolio.isError) {
     return (
       <Page title={t('portfolio.title')}>

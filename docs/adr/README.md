@@ -38,3 +38,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-032](032-in-app-notification-inbox.md)                             | An in-app notification inbox                                         | Accepted                          |
 | [ADR-033](033-lighthouse-budget-for-the-pwa.md)                         | A Lighthouse budget for the PWA                                      | Accepted                          |
 | [ADR-034](034-changing-the-email-address.md)                            | Changing the email address                                           | Accepted                          |
+| [ADR-035](035-web-error-reporting-and-recovery.md)                      | Error reporting and recovery in the web app                          | Accepted                          |

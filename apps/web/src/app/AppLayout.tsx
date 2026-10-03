@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import { Bookmark, House, Images, LogOut, Search, ShieldCheck, UserRound } from 'lucide-react';
+import { Suspense } from 'react';
 import { NavLink, Outlet } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -9,6 +10,7 @@ import { t } from '../i18n';
 import { NotificationBell } from '../features/notifications/NotificationBell';
 import { InstallCard } from '../shared/pwa/InstallCard';
 import { BrandMark } from '../shared/ui/BrandMark';
+import { PageSkeleton } from '../shared/ui/PageSkeleton';
 
 interface Destination {
   readonly to: string;
@@ -102,7 +104,10 @@ export function AppLayout() {
         </div>
       </header>
       <DeletionBanner />
-      <Outlet />
+      {/* Screens load their code on demand; the header and tabs stay while they do. */}
+      <Suspense fallback={<PageSkeleton />}>
+        <Outlet />
+      </Suspense>
       {onboarding ? null : (
         <aside className="mx-auto w-full max-w-xl px-4 pb-28 md:pb-10">
           <InstallCard />

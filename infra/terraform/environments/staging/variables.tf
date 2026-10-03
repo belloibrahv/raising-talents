@@ -105,3 +105,9 @@ variable "monthly_budget_usd" {
   description = "Monthly spend that triggers a warning."
   type        = number
 }
+
+variable "web_error_reporting_origin" {
+  description = "Sentry ingest origin for the web app's browser errors. Empty until a web Sentry project exists."
+  type        = string
+  default     = ""
+}

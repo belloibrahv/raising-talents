@@ -31,6 +31,11 @@ export const AccountErrors = {
       ErrorCode.EmailNotVerified,
       'Verify your email before choosing how you will use Raising Talents.',
     ),
+  memberCannotBeStaff: () =>
+    domainError(
+      ErrorCode.RoleAlreadyLocked,
+      'This account is a talent or agent account. Staff need their own account.',
+    ),
   noRoleChosen: () =>
     domainError(ErrorCode.Conflict, 'Choose talent or agent before finishing onboarding.'),
   roleLocked: () =>

@@ -27,6 +27,18 @@ export class MediaPresenter {
     };
   }
 
+  /** For moderators only: the processed file whatever its status. Never the original upload. */
+  async preview(asset: MediaAsset): Promise<MediaLinks> {
+    const props = asset.snapshot();
+    if (asset.kind === 'image')
+      return { urls: this.urls.forImage(props.ownerId, props.id), video: null };
+    if (!props.playbackId) return { urls: null, video: null };
+    return {
+      urls: null,
+      video: await this.signer.sign(props.playbackId, props.durationSeconds ?? 0),
+    };
+  }
+
   async view(asset: MediaAsset): Promise<MediaAssetView> {
     const props = asset.snapshot();
     return {

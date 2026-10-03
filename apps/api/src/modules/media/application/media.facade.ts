@@ -60,8 +60,8 @@ export class MediaFacade {
 }
 
 /**
- * Runs in the worker for MediaDeleted, and for MediaRejected on video (images
- * remove their own rejected files). Removing something already gone is not an error.
+ * Runs in the worker for MediaDeleted and MediaRejected: a file nobody may see is not kept.
+ * The scanner already removes the images it rejects; doing it again is harmless.
  */
 export class RemoveDeletedMediaHandler {
   constructor(
@@ -73,8 +73,7 @@ export class RemoveDeletedMediaHandler {
 
   async handle(event: DomainEvent): Promise<void> {
     const asset = await this.assets.findById(event.aggregateId);
-    if (asset?.status !== 'deleted' && !(asset?.status === 'rejected' && asset.kind === 'video'))
-      return;
+    if (asset?.status !== 'deleted' && asset?.status !== 'rejected') return;
     const keys = asset.storedKeys;
     if (keys.length > 0) await this.storage.remove(keys);
     const { providerAssetId, providerUploadId } = asset.snapshot();

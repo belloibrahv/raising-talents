@@ -2,7 +2,7 @@ import type { AccountStatus, MeResponse, Role } from '@rt/contracts';
 import type { Clock } from '../../../platform/clock.js';
 import { ageInYears } from '../domain/age.js';
 import type { DomainError } from '../../../platform/domain-error.js';
-import { err, type Result } from '../../../platform/result.js';
+import { err, ok, type Result } from '../../../platform/result.js';
 import { AccountErrors } from '../domain/account.errors.js';
 import type { AccountRepository } from '../domain/account.repository.js';
 import type { CreateAccountCommand, CreateAccountHandler } from './create-account.handler.js';
@@ -58,6 +58,19 @@ export class AccountsFacade {
   async indexFacts(userId: string): Promise<{ status: AccountStatus; dateOfBirth: string } | null> {
     const account = await this.accounts.findById(userId);
     return account ? { status: account.status, dateOfBirth: account.dateOfBirth } : null;
+  }
+
+  /** For the operator script only. Logged by the caller. */
+  async grantStaffRole(
+    email: string,
+    role: 'moderator' | 'admin',
+  ): Promise<Result<string, DomainError>> {
+    const account = await this.accounts.findByEmail(email);
+    if (!account) return err(AccountErrors.notFound());
+    const granted = account.grantStaffRole(role, this.clock.now());
+    if (!granted.ok) return granted;
+    await this.accounts.save(account);
+    return ok(account.id);
   }
 
   /** Locks the role and activates the account. Joins the caller's transaction. */

@@ -48,6 +48,9 @@ const ForgotPasswordPage = lazy(() =>
 const ResetPasswordPage = lazy(() =>
   import('../features/auth/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })),
 );
+const ModerationPage = lazy(() =>
+  import('../features/moderation/ModerationPage').then((m) => ({ default: m.ModerationPage })),
+);
 const HomePage = lazy(() =>
   import('../features/auth/HomePage').then((m) => ({ default: m.HomePage })),
 );
@@ -112,6 +115,7 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
             { path: 'portfolio', element: <PortfolioPage /> },
             { path: 'talents/:handle', element: <TalentProfilePage /> },
             { path: 'search', element: <SearchPage /> },
+            { path: 'moderation', element: <ModerationPage /> },
           ],
         },
         { path: '*', element: <NotFoundPage /> },

@@ -32,6 +32,11 @@ import {
   reorderPortfolioRequestSchema,
   updatePortfolioItemRequestSchema,
 } from './portfolio.js';
+import {
+  heldMediaPageSchema,
+  moderationDecisionSchema,
+  moderationQueueQuerySchema,
+} from './moderation.js';
 import { searchTalentsQuerySchema, talentSearchResponseSchema } from './search.js';
 import { taxonomyResponseSchema } from './taxonomy.js';
 
@@ -474,6 +479,27 @@ export const endpoints = {
     successStatus: 200,
     errors: [ErrorCode.WrongRole, ErrorCode.Forbidden, ErrorCode.RateLimited, ErrorCode.SearchUnavailable],
     tag: 'Search',
+  }),
+  'moderation.heldMedia': define({
+    method: 'GET',
+    path: '/v1/moderation/media',
+    summary: 'Media the scanner held for a person to check, oldest first. Moderators and admins only',
+    auth: true,
+    query: moderationQueueQuerySchema,
+    response: heldMediaPageSchema,
+    successStatus: 200,
+    errors: [ErrorCode.Forbidden],
+    tag: 'Moderation',
+  }),
+  'moderation.decideMedia': define({
+    method: 'POST',
+    path: '/v1/moderation/media/{mediaId}/decision',
+    summary: 'Approve held media, or reject it for a stated reason. Recorded with the moderator',
+    auth: true,
+    request: moderationDecisionSchema,
+    successStatus: 204,
+    errors: [ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.MediaWrongState],
+    tag: 'Moderation',
   }),
   'webhooks.mux': define({
     method: 'POST',

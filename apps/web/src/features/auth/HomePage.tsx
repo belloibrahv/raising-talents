@@ -13,6 +13,8 @@ export function HomePage() {
       <Navigate to={me.role === 'agent' ? '/onboarding/agent' : '/onboarding/talent'} replace />
     );
   }
+  if (me?.role === 'moderator' || me?.role === 'admin')
+    return <Navigate to="/moderation" replace />;
   return me?.role === 'agent' ? <AgentHome /> : <TalentHome />;
 }
 

@@ -210,6 +210,10 @@ export function buildOpenApiDocument(version: string): JsonObject {
         description: 'Ordered images and videos on a talent profile. Others see ready media only',
       },
       {
+        name: 'Moderation',
+        description: 'Staff tools. Every decision is recorded with who made it',
+      },
+      {
         name: 'Webhooks',
         description: 'Calls from outside services. Not for the app',
       },

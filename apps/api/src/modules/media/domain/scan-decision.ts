@@ -13,7 +13,7 @@ export interface ScanPolicy {
   readonly rejectAt: number;
 }
 
-export type RejectionCategory = 'sexual' | 'violence' | 'hate';
+export type RejectionCategory = 'sexual' | 'violence' | 'hate' | 'other';
 
 export type ScanDecision =
   | { readonly outcome: 'ready' }
@@ -57,6 +57,7 @@ const REJECTION_REASON: Record<RejectionCategory, string> = {
   violence:
     'This image looks like it shows graphic violence, which the Community Guidelines do not allow.',
   hate: 'This image looks like it contains a hate symbol, which the Community Guidelines do not allow.',
+  other: 'This image breaks the Community Guidelines, so it cannot be shown.',
 };
 
 /** For video the scanner sees frames, so the reason talks about the video. */

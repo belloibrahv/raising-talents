@@ -40,6 +40,8 @@ export const MEDIA = {
   VideoEvents: Symbol('HandleVideoProviderEventHandler'),
   WebhookVerifier: Symbol('VideoWebhookVerifier'),
   AbandonedUploads: Symbol('AbandonedUploadsJob'),
+  ListHeld: Symbol('ListHeldMediaQuery'),
+  Decide: Symbol('DecideHeldMediaHandler'),
   CreateIntent: Symbol('CreateUploadIntentHandler'),
   Complete: Symbol('CompleteUploadHandler'),
   Get: Symbol('GetMediaQuery'),

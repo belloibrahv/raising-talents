@@ -169,7 +169,8 @@
     "talentProfile": "{name} on Raising Talents",
     "search": "Find talent",
     "forgotPassword": "Reset your password",
-    "resetPassword": "Choose a new password"
+    "resetPassword": "Choose a new password",
+    "moderation": "Moderation queue"
   },
   "nav": {
     "home": "Home",
@@ -177,7 +178,8 @@
     "myProfile": "My profile",
     "signOut": "Sign out",
     "main": "Main",
-    "search": "Search"
+    "search": "Search",
+    "moderation": "Moderation"
   },
   "onboarding": {
     "stepOf": "Step {current} of {total}",
@@ -349,5 +351,31 @@
     "resend": "Send a new code",
     "resent": "If the email has an account, a new code is on its way.",
     "otherEmail": "Use a different email"
+  },
+  "moderation": {
+    "title": "Moderation queue",
+    "body": "Files the scanner was unsure about, oldest first. Only you and the owner can see them until you decide.",
+    "empty": "Nothing is waiting. Good work.",
+    "item": "{kind} for {purpose}, held {when}",
+    "image": "Photo",
+    "video": "Video",
+    "avatar": "a profile photo",
+    "portfolio": "a portfolio",
+    "labels": "What the scanner saw",
+    "confidence": "{name}: {confidence}%",
+    "approve": "Approve",
+    "reject": "Reject",
+    "reason": "Reason",
+    "chooseReason": "Choose a reason",
+    "sexual": "Nudity or sexual content",
+    "violence": "Graphic violence",
+    "hate": "Hate symbol",
+    "other": "Breaks the Community Guidelines in another way",
+    "confirmReject": "Reject for this reason",
+    "cancel": "Cancel",
+    "approved": "Approved. The owner can use it now.",
+    "rejected": "Rejected. The owner sees the reason.",
+    "loadMore": "Show older items",
+    "previewAlt": "Held photo uploaded by an account"
   }
 }

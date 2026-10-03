@@ -120,6 +120,23 @@ export class Account {
     return ok(undefined);
   }
 
+  /**
+   * Makes a verified account a moderator or admin. Granted by an operator, never chosen in
+   * the app. Staff keep separate accounts, so a talent or agent account cannot be promoted.
+   */
+  grantStaffRole(role: 'moderator' | 'admin', now: Date): Result<void, DomainError> {
+    if (!this.isEmailVerified) return err(AccountErrors.emailNotVerified());
+    const current = this.props.role;
+    if (current === 'talent' || current === 'agent') {
+      if (this.props.roleLockedAt !== null) return err(AccountErrors.memberCannotBeStaff());
+    }
+    if (current === role && this.props.roleLockedAt !== null) return ok(undefined);
+    const status = this.props.status === 'onboarding' ? 'active' : this.props.status;
+    this.props = { ...this.props, role, roleLockedAt: now, status, updatedAt: now };
+    this.raise(AccountEvents.StaffRoleGranted, now, { role });
+    return ok(undefined);
+  }
+
   get role(): Role | null {
     return this.props.role;
   }

@@ -53,8 +53,13 @@ const envSchema = z.object({
   /** Only for an S3-compatible server in development. Unset on AWS. */
   S3_ENDPOINT: z.url().optional(),
   S3_FORCE_PATH_STYLE: booleanFromString.default(false),
-  /** development-allow-all approves every image and is refused outside development and test. */
-  CONTENT_SCANNER: z.enum(['rekognition', 'development-allow-all']).default('rekognition'),
+  /**
+   * development-allow-all approves every image; development-hold-all sends every image to a
+   * moderator, for trying the moderation queue. Both are refused in staging and production.
+   */
+  CONTENT_SCANNER: z
+    .enum(['rekognition', 'development-allow-all', 'development-hold-all'])
+    .default('rekognition'),
   SCAN_REVIEW_AT: z.coerce.number().min(0).max(100).default(50),
   SCAN_REJECT_AT: z.coerce.number().min(0).max(100).default(80),
 

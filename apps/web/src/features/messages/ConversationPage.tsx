@@ -35,12 +35,18 @@ export function ConversationPage() {
   const thread = useThread(conversationId, conversation.isSuccess);
   const markRead = useMarkConversationRead(conversationId);
   const unread = conversation.data?.unread ?? 0;
-  const { mutate: markAsRead, isPending: marking } = markRead;
+  const { mutate: markAsRead, isPending: marking, isError: markFailed } = markRead;
 
   // Opening the conversation reads it; so does a message arriving while it is open.
+  // A failed attempt is tried again when something new arrives, not in a loop.
   useEffect(() => {
-    if (unread > 0 && !marking) markAsRead();
-  }, [unread, marking, markAsRead]);
+    if (unread > 0 && !marking && !markFailed) markAsRead();
+  }, [unread, marking, markFailed, markAsRead]);
+  const { reset: resetMark } = markRead;
+  const updatedAt = conversation.data?.updatedAt;
+  useEffect(() => {
+    resetMark();
+  }, [updatedAt, resetMark]);
 
   if (conversation.isPending) return <PageSkeleton />;
   if (conversation.isError) {

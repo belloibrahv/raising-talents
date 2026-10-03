@@ -12,7 +12,8 @@
       "dependsOn": ["^build"]
     },
     "test": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "passThroughEnv": ["TYPESENSE_URL", "TYPESENSE_API_KEY"]
     },
     "dev": {
       "cache": false,

@@ -106,7 +106,7 @@ describe('portfolio', () => {
       'PUT /v1/me/portfolio/order': fake.reorder,
     });
     renderAt('/portfolio');
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     await user.click(
       await screen.findByRole('button', { name: 'Move Closing look, Lagos Fashion Week down' }),
     );
@@ -127,7 +127,7 @@ describe('portfolio', () => {
       [`DELETE /v1/me/portfolio/items/${ids[1]}`]: fake.remove(ids[1]),
     });
     renderAt('/portfolio');
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const second = (await screen.findAllByRole('article'))[1] as HTMLElement;
     await user.click(within(second).getByRole('button', { name: 'Remove' }));
     const confirm = within(second).getByRole('group', {
@@ -151,7 +151,7 @@ describe('portfolio', () => {
       'GET /v1/me/portfolio': fake.get,
     });
     renderAt('/portfolio');
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const huge = new File(['x'], 'final-match.mp4', { type: 'video/mp4' });
     Object.defineProperty(huge, 'size', { value: 301 * 1024 * 1024 });
     await user.upload(await screen.findByLabelText('Add a photo or video'), huge);

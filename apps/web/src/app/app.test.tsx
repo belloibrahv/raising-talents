@@ -37,7 +37,7 @@ describe('the web app', () => {
       '/v1/taxonomy': () => Response.json(TAXONOMY),
     });
     const router = renderAt('/sign-in');
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     await user.type(await screen.findByLabelText('Email'), ' Ngozi.Adeyemi@example.com ');
     await user.type(screen.getByLabelText('Password'), 'runway-lagos-fashion-week');
     await user.click(screen.getByRole('button', { name: 'Sign in' }));
@@ -58,7 +58,7 @@ describe('the web app', () => {
       '/v1/auth/web/sign-in': () => problem(401, 'INVALID_CREDENTIALS'),
     });
     renderAt('/sign-in');
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     await user.type(await screen.findByLabelText('Email'), 'ngozi.adeyemi@example.com');
     await user.type(screen.getByLabelText('Password'), 'not-the-password');
     await user.click(screen.getByRole('button', { name: 'Sign in' }));
@@ -70,7 +70,7 @@ describe('the web app', () => {
   it('checks the sign-up form before sending it and moves focus to the first problem', async () => {
     const calls = stubApi({ '/v1/auth/web/refresh': () => problem(401, 'UNAUTHENTICATED') });
     renderAt('/sign-up');
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     await user.click(await screen.findByRole('button', { name: 'Create account' }));
 
     const email = screen.getByLabelText('Email');
@@ -91,7 +91,7 @@ describe('the web app', () => {
         problem(422, 'UNDER_MINIMUM_AGE', 'You need to be 18 or older.'),
     });
     renderAt('/sign-up');
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     await user.type(await screen.findByLabelText('Email'), 'tobi.ade@example.com');
     await user.type(screen.getByLabelText('Password'), 'drummer-from-oshogbo');
     const dateOfBirth = screen.getByLabelText('Date of birth');
@@ -127,7 +127,7 @@ describe('the web app', () => {
       '/v1/taxonomy': () => Response.json(TAXONOMY),
     });
     const router = renderAt('/');
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     await user.click(await screen.findByRole('radio', { name: /I am an agent or scout/ }));
     await user.click(screen.getByRole('button', { name: 'Continue' }));
     expect(await screen.findByRole('heading', { level: 1, name: 'Your agency' })).toBeVisible();

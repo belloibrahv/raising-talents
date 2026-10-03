@@ -2,6 +2,7 @@ import { Module, type DynamicModule } from '@nestjs/common';
 import { AccountsModule } from './modules/accounts/accounts.module.js';
 import { IdentityModule } from './modules/identity/identity.module.js';
 import { MediaModule } from './modules/media/media.module.js';
+import { SearchModule } from './modules/search/search.module.js';
 import { TalentProfilesModule } from './modules/talent-profiles/talent-profiles.module.js';
 import { PlatformModule, type PlatformOptions } from './platform/platform.module.js';
 
@@ -17,6 +18,7 @@ export class WorkerModule {
         IdentityModule,
         MediaModule,
         TalentProfilesModule,
+        SearchModule,
       ],
     };
   }

@@ -39,6 +39,9 @@ const PortfolioPage = lazy(() =>
 const TalentProfilePage = lazy(() =>
   import('../features/talents/TalentProfilePage').then((m) => ({ default: m.TalentProfilePage })),
 );
+const SearchPage = lazy(() =>
+  import('../features/search/SearchPage').then((m) => ({ default: m.SearchPage })),
+);
 const HomePage = lazy(() =>
   import('../features/auth/HomePage').then((m) => ({ default: m.HomePage })),
 );
@@ -100,6 +103,7 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
             { path: 'onboarding/agent', element: <AgentOnboardingPage /> },
             { path: 'portfolio', element: <PortfolioPage /> },
             { path: 'talents/:handle', element: <TalentProfilePage /> },
+            { path: 'search', element: <SearchPage /> },
           ],
         },
         { path: '*', element: <NotFoundPage /> },

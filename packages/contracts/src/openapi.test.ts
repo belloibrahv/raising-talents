@@ -50,6 +50,15 @@ describe('buildOpenApiDocument', () => {
     });
   });
 
+  it('documents query parameters as clients send them', () => {
+    const search = document.paths['/v1/search/talents']?.get as unknown as {
+      parameters: { name: string; in: string; schema: { type: string } }[];
+    };
+    const byName = Object.fromEntries(search.parameters.map((p) => [p.name, p]));
+    expect(byName['cities']).toMatchObject({ in: 'query', schema: { type: 'string' } });
+    expect(byName['page']?.schema.type).toBe('integer');
+  });
+
   it('leaves no $id or $schema inside components', () => {
     const text = JSON.stringify(document.components);
     expect(text).not.toContain('"$id"');

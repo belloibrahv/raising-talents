@@ -95,9 +95,13 @@ const AVATAR_URLS = Symbol('AvatarUrls');
     },
     {
       provide: TALENT.Directory,
-      inject: [TALENT.Repository, TALENT.Accounts],
-      useFactory: (repo: TalentProfileRepository, accounts: ProfileAccounts) =>
-        new TalentDirectory(repo, accounts),
+      inject: [TALENT.Repository, TALENT.Accounts, TAXONOMY.Source, AVATAR_URLS],
+      useFactory: (
+        repo: TalentProfileRepository,
+        accounts: ProfileAccounts,
+        taxonomy: TaxonomySource,
+        urls: AvatarUrls,
+      ) => new TalentDirectory(repo, accounts, taxonomy, urls),
     },
     {
       provide: TALENT.EventHandlers,

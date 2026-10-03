@@ -30,6 +30,7 @@ import {
   reorderPortfolioRequestSchema,
   updatePortfolioItemRequestSchema,
 } from './portfolio.js';
+import { searchTalentsQuerySchema, talentSearchResponseSchema } from './search.js';
 import { taxonomyResponseSchema } from './taxonomy.js';
 
 export type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
@@ -42,6 +43,8 @@ export interface EndpointDefinition {
   /** Needs a bearer access token. */
   readonly auth: boolean;
   readonly request?: z.ZodType;
+  /** Query string parameters, as a Zod object. Values arrive as strings. */
+  readonly query?: z.ZodType;
   readonly response?: z.ZodType;
   readonly successStatus: 200 | 201 | 202 | 204;
   /** Business errors this endpoint can return, beyond the ones every endpoint can return. */
@@ -433,6 +436,17 @@ export const endpoints = {
     errors: [ErrorCode.NotFound],
     tag: 'Portfolio',
   }),
+  'search.talents': define({
+    method: 'GET',
+    path: '/v1/search/talents',
+    summary: 'Search complete, active talent by text and filters, with counts per filter option',
+    auth: true,
+    query: searchTalentsQuerySchema,
+    response: talentSearchResponseSchema,
+    successStatus: 200,
+    errors: [ErrorCode.WrongRole, ErrorCode.Forbidden, ErrorCode.RateLimited, ErrorCode.SearchUnavailable],
+    tag: 'Search',
+  }),
   'webhooks.mux': define({
     method: 'POST',
     path: '/v1/webhooks/mux',
@@ -453,6 +467,11 @@ type SchemaOutput<T> = T extends z.ZodType ? z.output<T> : undefined;
 /** What the caller sends. Input type, so the API's own normalising (trim, lowercase) stays on the server. */
 export type EndpointRequest<N extends EndpointName> = SchemaInput<
   Endpoints[N] extends { request: infer R } ? R : undefined
+>;
+
+/** The query string the caller sends, before the API's parsing (so numbers may be numbers or strings). */
+export type EndpointQuery<N extends EndpointName> = SchemaInput<
+  Endpoints[N] extends { query: infer Q } ? Q : undefined
 >;
 
 /** What the caller receives. */

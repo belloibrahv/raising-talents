@@ -15,6 +15,7 @@ import {
 import { IDENTITY } from './modules/identity/application/identity.tokens.js';
 import type { ModuleEventHandlers } from './modules/identity/identity.module.js';
 import { MEDIA } from './modules/media/application/media.use-cases.js';
+import { SEARCH } from './modules/search/application/search.use-cases.js';
 import { TALENT } from './modules/talent-profiles/application/talent-profile.tokens.js';
 import { WorkerModule } from './worker.module.js';
 
@@ -26,7 +27,12 @@ const app = await NestFactory.createApplicationContext(WorkerModule.register({ c
 });
 
 const dispatcher = new EventDispatcher();
-for (const token of [IDENTITY.EventHandlers, MEDIA.EventHandlers, TALENT.EventHandlers]) {
+for (const token of [
+  IDENTITY.EventHandlers,
+  MEDIA.EventHandlers,
+  TALENT.EventHandlers,
+  SEARCH.EventHandlers,
+]) {
   app.get<ModuleEventHandlers>(token).register(dispatcher);
 }
 

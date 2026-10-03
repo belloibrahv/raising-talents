@@ -54,6 +54,9 @@ function AgentHome() {
       subtitle={data?.verified ? t('home.agentVerified') : t('home.agentPending')}
     >
       <p>{t('home.agentSearchSoon')}</p>
+      <Link className="button button--primary" to="/search">
+        {t('home.findTalent')}
+      </Link>
       <Link className="button button--secondary" to="/onboarding/agent">
         {t('home.editProfile')}
       </Link>

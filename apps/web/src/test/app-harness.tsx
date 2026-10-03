@@ -52,6 +52,8 @@ export const problem = (status: number, code: string, detail?: string) =>
 export interface Call {
   readonly method: string;
   readonly path: string;
+  /** The query string, with its leading "?", or empty. */
+  readonly query: string;
   readonly body: unknown;
   readonly headers: Record<string, string>;
 }
@@ -68,6 +70,7 @@ export function stubApi(routes: Record<string, Route>): Call[] {
     const call: Call = {
       method,
       path,
+      query: new URL(url).search,
       body: typeof init?.body === 'string' ? JSON.parse(init.body) : undefined,
       headers: (init?.headers ?? {}) as Record<string, string>,
     };

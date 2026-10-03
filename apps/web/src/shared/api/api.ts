@@ -3,6 +3,7 @@ import {
   endpoints,
   type EndpointDefinition,
   type EndpointName,
+  type EndpointQuery,
   type EndpointRequest,
   type EndpointResponse,
   type Endpoints,
@@ -26,9 +27,15 @@ type IfMatchOption<N extends EndpointName> = Endpoints[N] extends { concurrency:
   ? { readonly ifMatch?: number | null }
   : { readonly ifMatch?: undefined };
 
+/** Query string values, as the endpoint's schema accepts them before parsing. */
+type QueryOption<N extends EndpointName> = Endpoints[N] extends { query: unknown }
+  ? { readonly query?: EndpointQuery<N> }
+  : { readonly query?: undefined };
+
 export type CallOptions<N extends EndpointName> = BodyOption<N> &
   ParamsOption<N> &
-  IfMatchOption<N>;
+  IfMatchOption<N> &
+  QueryOption<N>;
 
 /** Options can be left out only when the endpoint needs neither a body nor path parameters. */
 type CallArgs<N extends EndpointName> =
@@ -56,16 +63,25 @@ export function createApi(http: WebHttpClient): Api {
         body?: unknown;
         params?: Record<string, string>;
         ifMatch?: number | null;
+        query?: Record<string, string | number | undefined>;
       };
-      const result = await http.request(buildPath(endpoint.path, options.params), {
-        method: endpoint.method,
-        authenticated: endpoint.auth,
-        ...(typeof options.ifMatch === 'number'
-          ? { headers: { 'if-match': `"${String(options.ifMatch)}"` } }
-          : {}),
-        ...(options.body === undefined ? {} : { body: options.body }),
-        ...(endpoint.response ? { schema: endpoint.response } : {}),
-      });
+      const search = new URLSearchParams();
+      for (const [key, value] of Object.entries(options.query ?? {})) {
+        if (value !== undefined && value !== '') search.set(key, String(value));
+      }
+      const queryString = search.size > 0 ? `?${search.toString()}` : '';
+      const result = await http.request(
+        `${buildPath(endpoint.path, options.params)}${queryString}`,
+        {
+          method: endpoint.method,
+          authenticated: endpoint.auth,
+          ...(typeof options.ifMatch === 'number'
+            ? { headers: { 'if-match': `"${String(options.ifMatch)}"` } }
+            : {}),
+          ...(options.body === undefined ? {} : { body: options.body }),
+          ...(endpoint.response ? { schema: endpoint.response } : {}),
+        },
+      );
       return result as EndpointResponse<N>;
     },
   };

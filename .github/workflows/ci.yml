@@ -29,8 +29,18 @@ jobs:
           --health-cmd "pg_isready -U raising_talents"
           --health-interval 5s
           --health-retries 10
+      typesense:
+        # Settings come from the environment, since service containers take no arguments.
+        image: typesense/typesense:28.0
+        env:
+          TYPESENSE_API_KEY: ci-typesense-key
+          TYPESENSE_DATA_DIR: /tmp
+        ports: ['8108:8108']
     env:
       DATABASE_URL: postgres://raising_talents:raising_talents@localhost:5432/raising_talents
+      # The search adapter's tests run against this real Typesense.
+      TYPESENSE_URL: http://localhost:8108
+      TYPESENSE_API_KEY: ci-typesense-key
     steps:
       - uses: actions/checkout@v4
         with:
@@ -52,8 +62,15 @@ jobs:
         if: github.event_name == 'pull_request'
         run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}
 
-      - name: Lint, typecheck, test, build
-        run: pnpm turbo run lint typecheck test build
+      - name: Wait for Typesense
+        run: for i in $(seq 1 30); do curl -sf http://localhost:8108/health && exit 0; sleep 2; done; exit 1
+
+      - name: Lint, typecheck, build
+        run: pnpm turbo run lint typecheck build
+
+      # On their own, so screen tests do not compete with builds for the runner's two cores.
+      - name: Test
+        run: pnpm turbo run test
 
       - name: OpenAPI document is up to date
         run: |

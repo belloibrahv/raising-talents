@@ -29,12 +29,48 @@ export class GetMyTalentProfileQuery {
   }
 }
 
+/** A visible talent as the search index needs them: the public view, plus who and when. */
+export interface SearchableTalent {
+  readonly userId: string;
+  readonly profile: PublicTalentProfile;
+  readonly updatedAt: Date;
+}
+
 /** Answers whether other users may see a talent. Other modules ask this instead of reading profiles. */
 export class TalentDirectory {
   constructor(
     private readonly profiles: TalentProfileRepository,
     private readonly accounts: ProfileAccounts,
+    private readonly taxonomy: TaxonomySource,
+    private readonly avatarUrls: AvatarUrls,
   ) {}
+
+  /**
+   * The public view of a complete profile, or null when it is not complete. The account's
+   * status is the caller's to check: search removes anyone who is not active.
+   */
+  async searchable(userId: string): Promise<SearchableTalent | null> {
+    const profile = await this.profiles.findByUserId(userId);
+    if (!profile?.isComplete) return null;
+    const view = toPublicTalentProfile(
+      profile,
+      await this.taxonomy.current(),
+      null,
+      this.avatarUrls,
+    );
+    return view ? { userId, profile: view, updatedAt: profile.snapshot().updatedAt } : null;
+  }
+
+  /** Every complete profile's user id, in pages, for rebuilding the search index. */
+  async *completeUserIds(pageSize = 500): AsyncGenerator<readonly string[]> {
+    let after: string | null = null;
+    for (;;) {
+      const page = await this.profiles.listCompleteUserIds(after, pageSize);
+      if (page.length === 0) return;
+      yield page;
+      after = page[page.length - 1] ?? null;
+    }
+  }
 
   /** The talent's user id when the profile is complete and the account active, otherwise null. */
   async visibleUserId(handle: string): Promise<string | null> {

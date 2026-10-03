@@ -12,6 +12,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx --env-file-if-exists=.env src/platform/database/migrate.ts",
     "keys:generate": "tsx scripts/generate-jwt-keys.ts",
+    "search:rebuild": "tsx --env-file-if-exists=.env scripts/rebuild-search-index.ts",
     "lint": "eslint .",
     "db:check": "drizzle-kit check",
     "start": "node --import ./dist/instrument.js dist/main.api.js",

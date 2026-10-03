@@ -70,11 +70,12 @@
     "agentTitle": "Welcome, {name}",
     "agentPending": "Verification pending. We will email you when your agency is verified; you can then contact talent.",
     "agentVerified": "Your agency is verified.",
-    "agentSearchSoon": "Search for talent arrives next. For now you can open a talent's profile from a link they share.",
+    "agentSearchSoon": "Search by name, discipline, city and age. We verify every agent before they can contact talent.",
     "editProfile": "Edit profile",
     "viewProfile": "See your profile as agents do",
     "managePortfolio": "Manage your portfolio",
-    "finishSetup": "Finish setting up your profile"
+    "finishSetup": "Finish setting up your profile",
+    "findTalent": "Find talent"
   },
   "restore": {
     "offlineTitle": "You are offline",
@@ -128,7 +129,8 @@
     "MEDIA_WRONG_PURPOSE": "That photo was uploaded for something else. Choose it again from your gallery.",
     "MEDIA_ALREADY_USED": "That photo is already in your portfolio.",
     "PORTFOLIO_FULL": "Your portfolio is full. Remove an item to add a new one.",
-    "PORTFOLIO_ORDER_MISMATCH": "Your portfolio changed on another device. We have loaded the latest order; try again."
+    "PORTFOLIO_ORDER_MISMATCH": "Your portfolio changed on another device. We have loaded the latest order; try again.",
+    "SEARCH_UNAVAILABLE": "Search is not available right now. Try again in a few minutes."
   },
   "crash": {
     "title": "Something went wrong",
@@ -162,14 +164,16 @@
     "talentOnboarding": "Set up your profile",
     "agentOnboarding": "Set up your agency profile",
     "portfolio": "Your portfolio",
-    "talentProfile": "{name} on Raising Talents"
+    "talentProfile": "{name} on Raising Talents",
+    "search": "Find talent"
   },
   "nav": {
     "home": "Home",
     "portfolio": "Portfolio",
     "myProfile": "My profile",
     "signOut": "Sign out",
-    "main": "Main"
+    "main": "Main",
+    "search": "Search"
   },
   "onboarding": {
     "stepOf": "Step {current} of {total}",
@@ -297,5 +301,31 @@
     "contactSoon": "Contact requests open when agent verification launches.",
     "photoAlt": "Photo {position} by {name}",
     "videoAlt": "Video {position} by {name}"
+  },
+  "search": {
+    "title": "Find talent",
+    "body": "Search by name, skill or discipline, then narrow it down.",
+    "query": "Search",
+    "queryPlaceholder": "For example: afrobeats singer, striker, runway",
+    "submit": "Search",
+    "filters": "Filters",
+    "category": "Category",
+    "anyCategory": "Any category",
+    "city": "City",
+    "anyCity": "Any city",
+    "ageMin": "Youngest age",
+    "ageMax": "Oldest age",
+    "gender": "Gender",
+    "anyGender": "Any gender",
+    "genderHint": "Only talent who chose to be found by gender are filtered.",
+    "clear": "Clear filters",
+    "results": "{count} talent found",
+    "resultsOne": "1 talent found",
+    "noResults": "No talent matches yet. Try fewer filters or a different word.",
+    "loadMore": "Show more",
+    "optionCount": "{name} ({count})",
+    "age": "{age}",
+    "ageRange": "Ages must be between 18 and 99, youngest first.",
+    "resultsLabel": "Search results"
   }
 }

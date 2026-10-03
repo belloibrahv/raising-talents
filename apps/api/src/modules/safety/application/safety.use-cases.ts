@@ -16,6 +16,7 @@ import { err, ok, type Result } from '../../../platform/result.js';
 import type { UnitOfWork } from '../../../platform/unit-of-work.js';
 import { isActiveStaff } from '../../accounts/application/staff.js';
 import type { ReportRepository } from '../domain/report.js';
+import { decodeCursor, encodeCursor } from '../../../platform/cursor.js';
 
 export const SAFETY = {
   Reports: Symbol('ReportRepository'),
@@ -123,19 +124,10 @@ export class FileReportHandler {
   }
 }
 
-const encodeCursor = (at: Date, id: string) =>
-  Buffer.from(`${at.toISOString()}|${id}`).toString('base64url');
-
-function decodeCursor(
-  cursor: string | undefined,
-): { firstReportedAt: Date; subjectId: string } | null {
-  if (!cursor) return null;
-  const [iso, subjectId] = Buffer.from(cursor, 'base64url').toString().split('|');
-  const firstReportedAt = new Date(iso ?? '');
-  return subjectId && !Number.isNaN(firstReportedAt.getTime())
-    ? { firstReportedAt, subjectId }
-    : null;
-}
+const pageAfter = (cursor: string | undefined) => {
+  const after = decodeCursor(cursor);
+  return after ? { firstReportedAt: after.at, subjectId: after.id } : null;
+};
 
 export class ListReportedAccountsQuery {
   constructor(
@@ -148,7 +140,7 @@ export class ListReportedAccountsQuery {
     if (!isActiveStaff(await this.accounts.profileContext(viewerId))) {
       return err(SafetyErrors.notStaff());
     }
-    const rows = await this.reports.openSubjects(decodeCursor(cursor), MODERATION_PAGE_SIZE + 1);
+    const rows = await this.reports.openSubjects(pageAfter(cursor), MODERATION_PAGE_SIZE + 1);
     const page = rows.slice(0, MODERATION_PAGE_SIZE);
     const items = await Promise.all(
       page.map(async (subject) => {

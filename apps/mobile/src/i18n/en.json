@@ -115,7 +115,8 @@
     "SEARCH_UNAVAILABLE": "Search is not available right now. Try again in a few minutes.",
     "AGENT_PROFILE_INCOMPLETE": "Finish your agency profile before asking to be verified.",
     "VERIFICATION_PENDING": "Your request is with a moderator. We will decide soon.",
-    "ALREADY_VERIFIED": "Your agency is already verified."
+    "ALREADY_VERIFIED": "Your agency is already verified.",
+    "SHORTLIST_FULL": "Your shortlist is full. Remove someone to save another."
   },
   "crash": {
     "title": "Something went wrong",

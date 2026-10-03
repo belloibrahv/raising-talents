@@ -6,6 +6,7 @@ import { MediaModule } from './modules/media/media.module.js';
 import { PortfolioModule } from './modules/portfolio/portfolio.module.js';
 import { PrivacyModule } from './modules/privacy/privacy.module.js';
 import { SafetyModule } from './modules/safety/safety.module.js';
+import { ShortlistsModule } from './modules/shortlists/shortlists.module.js';
 import { SearchModule } from './modules/search/search.module.js';
 import { TalentProfilesModule } from './modules/talent-profiles/talent-profiles.module.js';
 import { TaxonomyModule } from './modules/taxonomy/taxonomy.module.js';
@@ -29,6 +30,7 @@ export class AppModule {
         SearchModule,
         PrivacyModule,
         SafetyModule,
+        ShortlistsModule,
       ],
     };
   }

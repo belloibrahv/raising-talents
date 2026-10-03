@@ -1,4 +1,4 @@
-import type { MyTalentProfile, PublicTalentProfile } from '@rt/contracts';
+import type { MyTalentProfile, PublicTalentProfile, TalentCard } from '@rt/contracts';
 import type { DomainError } from '../../../platform/domain-error.js';
 import { domainError } from '../../../platform/domain-error.js';
 import { err, ok, type Result } from '../../../platform/result.js';
@@ -70,6 +70,43 @@ export class TalentDirectory {
       yield page;
       after = page[page.length - 1] ?? null;
     }
+  }
+
+  /** The card agents see in lists, or null when the talent is not visible to them now. */
+  async cardFor(userId: string): Promise<TalentCard | null> {
+    const [profile, account] = await Promise.all([
+      this.profiles.findByUserId(userId),
+      this.accounts.profileContext(userId),
+    ]);
+    if (!profile?.isComplete || account?.status !== 'active') return null;
+    const view = toPublicTalentProfile(
+      profile,
+      await this.taxonomy.current(),
+      account.ageYears,
+      this.avatarUrls,
+    );
+    return view
+      ? {
+          handle: view.handle,
+          displayName: view.displayName,
+          category: view.category,
+          subcategories: view.subcategories,
+          city: view.city,
+          ageYears: view.ageYears,
+          verified: view.verified,
+          avatarUrls: view.avatarUrls,
+        }
+      : null;
+  }
+
+  /** The user id behind a handle, whatever the account's status. For undoing a saved reference. */
+  async userIdOf(handle: string): Promise<string | null> {
+    return (await this.profiles.findByHandle(handle.toLowerCase()))?.userId ?? null;
+  }
+
+  /** The handle, whatever the account's status. For the owner's data export only. */
+  async handleOf(userId: string): Promise<string | null> {
+    return (await this.profiles.findByUserId(userId))?.snapshot().handle ?? null;
   }
 
   /** The talent's user id when the profile is complete and the account active, otherwise null. */

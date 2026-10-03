@@ -45,6 +45,7 @@ export interface PrivacySources {
   agentProfile(userId: string): Promise<Result<MyAgentProfile, DomainError>>;
   agentVerification(userId: string): Promise<Result<MyAgentVerification, DomainError>>;
   portfolio(userId: string): Promise<Result<MyPortfolio, DomainError>>;
+  shortlist(userId: string): Promise<DataExport['shortlist']>;
 }
 
 export const DELETION_CONFIRM_LIMIT = { perUser: 5, windowSeconds: 900 } as const;
@@ -129,13 +130,15 @@ export class ExportMyDataQuery {
     }
     const account = await this.accounts.exportFacts(userId);
     if (!account) return err(domainError('NOT_FOUND', 'Account not found.'));
-    const [talentProfile, agentProfile, agentVerification, portfolio, media] = await Promise.all([
-      this.sources.talentProfile(userId),
-      this.sources.agentProfile(userId),
-      this.sources.agentVerification(userId),
-      this.sources.portfolio(userId),
-      this.media.listForOwner(userId),
-    ]);
+    const [talentProfile, agentProfile, agentVerification, portfolio, shortlist, media] =
+      await Promise.all([
+        this.sources.talentProfile(userId),
+        this.sources.agentProfile(userId),
+        this.sources.agentVerification(userId),
+        this.sources.portfolio(userId),
+        this.sources.shortlist(userId),
+        this.media.listForOwner(userId),
+      ]);
     return ok({
       exportedAt: this.clock.now().toISOString(),
       account,
@@ -143,6 +146,7 @@ export class ExportMyDataQuery {
       agentProfile: valueOrNull(agentProfile),
       agentVerification: valueOrNull(agentVerification),
       portfolio: valueOrNull(portfolio),
+      shortlist,
       media: media.map((file) => ({
         id: file.id,
         purpose: file.purpose,

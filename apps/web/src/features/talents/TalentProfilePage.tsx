@@ -9,6 +9,8 @@ import { FormMessage } from '../../shared/ui/FormMessage';
 import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
 import { Page } from '../../shared/ui/Page';
 import { ReportProfile } from './ReportProfile';
+import { useSession } from '../auth/use-auth';
+import { SaveToggle } from '../shortlist/SaveToggle';
 import { Badge } from '@/components/ui/badge';
 import { VerifiedBadge } from '../../shared/ui/VerifiedBadge';
 import { ImageOff, MessageCircleMore } from 'lucide-react';
@@ -17,6 +19,7 @@ import { EmptyState } from '../../shared/ui/EmptyState';
 /** A talent as agents see them: ready media only, age in years, never the date of birth. */
 export function TalentProfilePage() {
   const { handle = '' } = useParams();
+  const me = useSession().me;
   const profile = useQuery({
     queryKey: ['talents', handle],
     queryFn: () => api.call('talents.getByHandle', { params: { handle } }),
@@ -40,6 +43,7 @@ export function TalentProfilePage() {
   }
 
   const talent = profile.data;
+  const canSave = me?.role === 'agent' && me.status === 'active';
   const facts = [
     talent.category.name,
     talent.subcategories.map((entry) => entry.name).join(', '),
@@ -75,7 +79,10 @@ export function TalentProfilePage() {
                 {talent.displayName.slice(0, 1)}
               </span>
             )}
-            {talent.verified ? <VerifiedBadge /> : null}
+            <div className="flex flex-col items-end gap-2">
+              {talent.verified ? <VerifiedBadge /> : null}
+              {canSave ? <SaveToggle handle={talent.handle} name={talent.displayName} /> : null}
+            </div>
           </div>
         </div>
       }

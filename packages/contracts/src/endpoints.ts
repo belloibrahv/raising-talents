@@ -38,6 +38,12 @@ import {
   moderationQueueQuerySchema,
 } from './moderation.js';
 import { dataExportSchema, requestDeletionSchema } from './privacy.js';
+import {
+  saveToShortlistSchema,
+  shortlistEntrySchema,
+  shortlistPageSchema,
+  shortlistQuerySchema,
+} from './shortlist.js';
 import { createReportSchema, reportDecisionSchema, reportQueuePageSchema } from './safety.js';
 import { searchTalentsQuerySchema, talentSearchResponseSchema } from './search.js';
 import {
@@ -630,6 +636,47 @@ export const endpoints = {
     successStatus: 204,
     errors: [ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.Conflict],
     tag: 'Moderation',
+  }),
+  'shortlist.list': define({
+    method: 'GET',
+    path: '/v1/me/shortlist',
+    summary: 'The talent the agent saved, newest first, as they are now. Agents only',
+    auth: true,
+    query: shortlistQuerySchema,
+    response: shortlistPageSchema,
+    successStatus: 200,
+    errors: [ErrorCode.WrongRole, ErrorCode.Forbidden],
+    tag: 'Shortlist',
+  }),
+  'shortlist.get': define({
+    method: 'GET',
+    path: '/v1/me/shortlist/{handle}',
+    summary: 'Whether this talent is saved, with the note. 404 when not saved',
+    auth: true,
+    response: shortlistEntrySchema,
+    successStatus: 200,
+    errors: [ErrorCode.WrongRole, ErrorCode.NotFound],
+    tag: 'Shortlist',
+  }),
+  'shortlist.save': define({
+    method: 'PUT',
+    path: '/v1/me/shortlist/{handle}',
+    summary: 'Save a talent, or change the note. Safe to repeat',
+    auth: true,
+    request: saveToShortlistSchema,
+    response: shortlistEntrySchema,
+    successStatus: 200,
+    errors: [ErrorCode.WrongRole, ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.ShortlistFull],
+    tag: 'Shortlist',
+  }),
+  'shortlist.remove': define({
+    method: 'DELETE',
+    path: '/v1/me/shortlist/{handle}',
+    summary: 'Remove a talent from the shortlist. Safe to repeat',
+    auth: true,
+    successStatus: 204,
+    errors: [ErrorCode.WrongRole],
+    tag: 'Shortlist',
   }),
   'webhooks.mux': define({
     method: 'POST',

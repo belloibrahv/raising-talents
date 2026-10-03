@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { House, Images, LogOut, Search, ShieldCheck, UserRound } from 'lucide-react';
+import { Bookmark, House, Images, LogOut, Search, ShieldCheck, UserRound } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -28,7 +28,10 @@ export function AppLayout() {
     ...(onboarding ? [] : [{ to: '/home', label: t('nav.home'), icon: House }]),
     ...(staff ? [{ to: '/moderation', label: t('nav.moderation'), icon: ShieldCheck }] : []),
     ...(me?.role === 'agent' && !onboarding
-      ? [{ to: '/search', label: t('nav.search'), icon: Search }]
+      ? [
+          { to: '/search', label: t('nav.search'), icon: Search },
+          { to: '/shortlist', label: t('nav.shortlist'), icon: Bookmark },
+        ]
       : []),
     ...(me?.role === 'talent' && !onboarding
       ? [{ to: '/portfolio', label: t('nav.portfolio'), icon: Images }]

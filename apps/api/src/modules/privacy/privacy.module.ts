@@ -28,6 +28,8 @@ import {
   type GetMyPortfolioQuery,
 } from '../portfolio/application/portfolio.use-cases.js';
 import { PortfolioModule } from '../portfolio/portfolio.module.js';
+import { SHORTLIST, type ShortlistExport } from '../shortlists/application/shortlist.use-cases.js';
+import { ShortlistsModule } from '../shortlists/shortlists.module.js';
 import type { GetMyTalentProfileQuery } from '../talent-profiles/application/get-talent-profile.queries.js';
 import { TALENT } from '../talent-profiles/application/talent-profile.tokens.js';
 import { TalentProfilesModule } from '../talent-profiles/talent-profiles.module.js';
@@ -52,22 +54,31 @@ const SOURCES = Symbol('PrivacySources');
     TalentProfilesModule,
     AgentProfilesModule,
     PortfolioModule,
+    ShortlistsModule,
   ],
   controllers: [PrivacyController],
   providers: [
     {
       provide: SOURCES,
-      inject: [TALENT.GetMine, AGENT.GetMine, VERIFICATION.GetMine, PORTFOLIO.GetMine],
+      inject: [
+        TALENT.GetMine,
+        AGENT.GetMine,
+        VERIFICATION.GetMine,
+        PORTFOLIO.GetMine,
+        SHORTLIST.Export,
+      ],
       useFactory: (
         talent: GetMyTalentProfileQuery,
         agent: GetMyAgentProfileQuery,
         verification: GetMyVerificationQuery,
         portfolio: GetMyPortfolioQuery,
+        shortlist: ShortlistExport,
       ): PrivacySources => ({
         talentProfile: (userId) => talent.execute(userId),
         agentProfile: (userId) => agent.execute(userId),
         agentVerification: (userId) => verification.execute(userId),
         portfolio: (userId) => portfolio.execute(userId),
+        shortlist: (userId) => shortlist.forAgent(userId),
       }),
     },
     {

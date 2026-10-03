@@ -34,6 +34,8 @@ import { PORTFOLIO } from '../../src/modules/portfolio/application/portfolio.use
 import { InMemoryPortfolioRepository } from '../../src/modules/portfolio/testing/in-memory-portfolio.repository.js';
 import { SAFETY } from '../../src/modules/safety/application/safety.use-cases.js';
 import { InMemoryReportRepository } from '../../src/modules/safety/testing/in-memory-report.repository.js';
+import { SHORTLIST } from '../../src/modules/shortlists/application/shortlist.use-cases.js';
+import { InMemoryShortlistRepository } from '../../src/modules/shortlists/testing/in-memory-shortlist.repository.js';
 import { TALENT } from '../../src/modules/talent-profiles/application/talent-profile.tokens.js';
 import { InMemoryTalentProfileRepository } from '../../src/modules/talent-profiles/testing/in-memory-talent-profile.repository.js';
 import { TAXONOMY } from '../../src/modules/taxonomy/application/taxonomy.tokens.js';
@@ -147,6 +149,8 @@ export async function createTestApp(): Promise<TestApp> {
     .useValue(new InMemoryPortfolioRepository(events))
     .overrideProvider(SAFETY.Reports)
     .useValue(new InMemoryReportRepository())
+    .overrideProvider(SHORTLIST.Entries)
+    .useValue(new InMemoryShortlistRepository())
     .compile();
 
   const dispatcher = new EventDispatcher();

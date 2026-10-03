@@ -44,6 +44,7 @@ describe('account page', () => {
           agentProfile: null,
           agentVerification: null,
           portfolio: null,
+          shortlist: [],
           media: [],
         }),
     });

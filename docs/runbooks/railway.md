@@ -43,6 +43,8 @@ The app runs on Railway (ADR-036): project `raising-talents`, environment `produ
 
 `web` sets `PORT=8080`, `PROXY_SECRET` (as above), `API_UPSTREAM=http://api.railway.internal:8080`, `API_ORIGIN`, `MEDIA_ORIGIN` (both the web address), `UPLOAD_ORIGIN` (the bucket's address, `https://<bucket>.t3.storageapi.dev`) and the build argument `VITE_API_URL` (the web address).
 
+`typesense` sets `TYPESENSE_API_KEY` (shared with `api` and `worker`), `TYPESENSE_DATA_DIR=/data`, `TYPESENSE_THREAD_POOL_SIZE=8` and `TYPESENSE_NUM_COLLECTIONS_PARALLEL_LOAD=2`. Without the thread settings Typesense sizes its pool from the host's CPU count, which a container on Railway sees in full, and crashes at start trying to open more threads than the container allows.
+
 ## Deploy
 
 Name the release first, so error reports and logs say which commit is running:

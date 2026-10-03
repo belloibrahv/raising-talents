@@ -6,6 +6,7 @@ import { FullScreenStatus } from '../shared/ui/FullScreenStatus';
 import { t } from '../i18n';
 import { NetworkBanner } from '../shared/pwa/NetworkBanner';
 import type { AppArea } from '../shared/session/area';
+import { AppLayout } from './AppLayout';
 import { AreaGate } from './AreaGate';
 import { NotFoundPage } from './NotFoundPage';
 
@@ -21,6 +22,22 @@ const VerifyEmailPage = lazy(() =>
 );
 const ChooseRolePage = lazy(() =>
   import('../features/auth/ChooseRolePage').then((m) => ({ default: m.ChooseRolePage })),
+);
+const TalentOnboardingPage = lazy(() =>
+  import('../features/profile/TalentOnboardingPage').then((m) => ({
+    default: m.TalentOnboardingPage,
+  })),
+);
+const AgentOnboardingPage = lazy(() =>
+  import('../features/profile/AgentOnboardingPage').then((m) => ({
+    default: m.AgentOnboardingPage,
+  })),
+);
+const PortfolioPage = lazy(() =>
+  import('../features/portfolio/PortfolioPage').then((m) => ({ default: m.PortfolioPage })),
+);
+const TalentProfilePage = lazy(() =>
+  import('../features/talents/TalentProfilePage').then((m) => ({ default: m.TalentProfilePage })),
 );
 const HomePage = lazy(() =>
   import('../features/auth/HomePage').then((m) => ({ default: m.HomePage })),
@@ -70,7 +87,21 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
         screen('sign-in', 'auth', <SignInPage />),
         screen('verify-email', 'verifyEmail', <VerifyEmailPage />),
         screen('choose-role', 'chooseRole', <ChooseRolePage />),
-        screen('home', 'app', <HomePage />),
+        {
+          // Signed-in screens share the header and navigation.
+          element: (
+            <Gate area="app">
+              <AppLayout />
+            </Gate>
+          ),
+          children: [
+            { path: 'home', element: <HomePage /> },
+            { path: 'onboarding/talent/:step?', element: <TalentOnboardingPage /> },
+            { path: 'onboarding/agent', element: <AgentOnboardingPage /> },
+            { path: 'portfolio', element: <PortfolioPage /> },
+            { path: 'talents/:handle', element: <TalentProfilePage /> },
+          ],
+        },
         { path: '*', element: <NotFoundPage /> },
       ],
     },

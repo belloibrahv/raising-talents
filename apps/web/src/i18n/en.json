@@ -64,7 +64,17 @@
     "bodyTalent": "Next you will add your discipline, a photo and your first clips.",
     "bodyAgent": "Next you will confirm your agency details and get verified.",
     "signedInAs": "Signed in as {email}",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "talentReadyTitle": "Welcome back, {name}",
+    "talentReadyBody": "Keep your portfolio fresh: agents look for recent work.",
+    "agentTitle": "Welcome, {name}",
+    "agentPending": "Verification pending. We will email you when your agency is verified; you can then contact talent.",
+    "agentVerified": "Your agency is verified.",
+    "agentSearchSoon": "Search for talent arrives next. For now you can open a talent's profile from a link they share.",
+    "editProfile": "Edit profile",
+    "viewProfile": "See your profile as agents do",
+    "managePortfolio": "Manage your portfolio",
+    "finishSetup": "Finish setting up your profile"
   },
   "restore": {
     "offlineTitle": "You are offline",
@@ -75,7 +85,10 @@
     "passwordShort": "Use at least 10 characters.",
     "dateInvalid": "Enter your date of birth as DD/MM/YYYY.",
     "termsRequired": "Tick the box to accept the Terms and Community Guidelines.",
-    "codeInvalid": "Enter the 6-digit code from the email."
+    "codeInvalid": "Enter the 6-digit code from the email.",
+    "nameShort": "Enter at least 2 characters.",
+    "chooseOne": "Choose at least one.",
+    "websiteInvalid": "Use a full address starting with https://"
   },
   "errors": {
     "NETWORK": "No connection. Check your data or Wi-Fi and try again.",
@@ -145,6 +158,144 @@
     "verifyEmail": "Verify your email",
     "chooseRole": "Choose how you will use Raising Talents",
     "home": "Home",
-    "notFound": "Page not found"
+    "notFound": "Page not found",
+    "talentOnboarding": "Set up your profile",
+    "agentOnboarding": "Set up your agency profile",
+    "portfolio": "Your portfolio",
+    "talentProfile": "{name} on Raising Talents"
+  },
+  "nav": {
+    "home": "Home",
+    "portfolio": "Portfolio",
+    "myProfile": "My profile",
+    "signOut": "Sign out",
+    "main": "Main"
+  },
+  "onboarding": {
+    "stepOf": "Step {current} of {total}",
+    "save": "Save and continue",
+    "saved": "Saved.",
+    "back": "Back",
+    "finishLater": "Finish later",
+    "staleReloaded": "Your profile was changed on another device. We loaded the latest version; check it and save again.",
+    "about": {
+      "title": "About you",
+      "body": "This is how agents will see you.",
+      "displayName": "Your name",
+      "displayNameHint": "Your real name or the name you perform under.",
+      "handle": "Username",
+      "handleHint": "Agents can open your profile by it. Letters, numbers, dots and underscores.",
+      "gender": "Gender (optional)",
+      "genderNone": "Prefer not to say",
+      "genderFemale": "Female",
+      "genderMale": "Male",
+      "genderNonBinary": "Non-binary",
+      "genderSearchable": "Let agents filter by gender",
+      "genderSearchableHint": "Some castings ask for a specific gender. Leave this off and your gender stays off search."
+    },
+    "discipline": {
+      "title": "Your discipline",
+      "body": "Pick what you do, so the right agents find you.",
+      "category": "Category",
+      "subcategories": "What exactly do you do?",
+      "subcategoriesHint": "Choose up to {max}.",
+      "skills": "Skills (optional)",
+      "skillsHint": "Choose up to {max}.",
+      "pickCategoryFirst": "Choose a category to see the options.",
+      "tooMany": "You can choose up to {max}."
+    },
+    "location": {
+      "title": "Where you are",
+      "body": "Agents often search near them first.",
+      "city": "City",
+      "choose": "Choose your city"
+    },
+    "story": {
+      "title": "Your story",
+      "body": "A few lines about your experience and what you are looking for.",
+      "bio": "About you",
+      "bioHint": "At least {min} characters.",
+      "counter": "{count} of {max} characters",
+      "tooShort": "Write at least {min} characters."
+    },
+    "photo": {
+      "title": "Your profile photo",
+      "body": "A clear, recent photo of your face. Agents see it first.",
+      "choose": "Choose a photo",
+      "replace": "Choose a different photo",
+      "preview": "Your new profile photo",
+      "current": "Your current profile photo",
+      "checking": "Checking your photo. This usually takes a few seconds.",
+      "held": "A moderator is checking your photo. We will let you know when it is approved.",
+      "done": "Your profile is complete. Agents can find you now.",
+      "toPortfolio": "Add to your portfolio"
+    },
+    "agent": {
+      "title": "Your agency",
+      "body": "Talent see this before accepting a contact request.",
+      "agencyName": "Agency or company",
+      "jobTitle": "Your role",
+      "jobTitleHint": "For example Talent scout or Casting director.",
+      "specializations": "Who you scout",
+      "specializationsHint": "Choose up to {max}.",
+      "city": "City",
+      "website": "Website (optional)",
+      "websiteHint": "Must start with https://",
+      "submit": "Save profile",
+      "done": "Your agency profile is saved. We verify every agent before they can contact talent; we will email you when you are verified."
+    }
+  },
+  "media": {
+    "uploading": "Uploading {percent}%",
+    "processing": "Processing",
+    "scanning": "Checking",
+    "ready": "Live",
+    "held_for_review": "With a moderator",
+    "rejected": "Not allowed",
+    "failed": "Upload failed",
+    "awaiting_upload": "Waiting for upload",
+    "deleted": "Removed",
+    "typeNotAllowed": "Use a photo (JPEG, PNG, WebP or HEIC) or a video (MP4 or MOV).",
+    "photoOnly": "Use a photo in JPEG, PNG, WebP or HEIC format.",
+    "imageTooLarge": "That photo is over 15 MB. Choose a smaller one.",
+    "videoTooLarge": "That video is over 300 MB. Choose a shorter clip.",
+    "videoTooLong": "That video is {seconds} seconds long. Clips can be up to 60 seconds; trim it and try again.",
+    "uploadFailed": "The upload did not finish. Check your connection and try again."
+  },
+  "portfolio": {
+    "title": "Your portfolio",
+    "body": "Up to {max} photos and clips of your best work. Agents see them in this order.",
+    "count": "{count} of {max} items",
+    "add": "Add a photo or video",
+    "full": "Your portfolio is full. Remove an item to add another.",
+    "empty": "Nothing here yet. Start with your strongest work.",
+    "caption": "Caption",
+    "captionHint": "Up to {max} characters. Say where and when.",
+    "saveCaption": "Save caption",
+    "captionSaved": "Caption saved.",
+    "moveUp": "Move {name} up",
+    "moveDown": "Move {name} down",
+    "remove": "Remove",
+    "removeConfirm": "Remove this item? Its file is deleted too.",
+    "removeYes": "Yes, remove it",
+    "removeNo": "Keep it",
+    "removed": "Item removed.",
+    "moved": "Moved to position {position}.",
+    "item": "Item {position}",
+    "rejectedReason": "Why: {reason}",
+    "heldBody": "A moderator is checking this item. Only you can see it until then.",
+    "processingBody": "Only you can see this until it is checked.",
+    "videoLabel": "Video, {seconds} seconds"
+  },
+  "talent": {
+    "notAvailable": "This profile is not available.",
+    "age": "{age} years old",
+    "verified": "Verified",
+    "skills": "Skills",
+    "portfolio": "Portfolio",
+    "noPortfolio": "No portfolio items yet.",
+    "contactSoon": "Contact requests open when agent verification launches.",
+    "photoAlt": "Photo {position} by {name}",
+    "videoAlt": "Video {position} by {name}"
   }
 }

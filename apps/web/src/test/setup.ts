@@ -17,6 +17,10 @@ Object.defineProperty(window, 'matchMedia', {
   }),
 });
 
+// jsdom has no object URLs; the photo preview uses one.
+URL.createObjectURL = () => 'blob:preview';
+URL.revokeObjectURL = () => undefined;
+
 afterEach(() => {
   cleanup();
   localStorage.clear();

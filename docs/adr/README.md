@@ -39,3 +39,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-033](033-lighthouse-budget-for-the-pwa.md)                         | A Lighthouse budget for the PWA                                      | Accepted                          |
 | [ADR-034](034-changing-the-email-address.md)                            | Changing the email address                                           | Accepted                          |
 | [ADR-035](035-web-error-reporting-and-recovery.md)                      | Error reporting and recovery in the web app                          | Accepted                          |
+| [ADR-036](036-hosting-on-railway.md)                                    | Hosting on Railway                                                   | Accepted                          |

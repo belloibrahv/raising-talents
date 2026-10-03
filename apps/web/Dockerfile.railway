@@ -1,0 +1,35 @@
+# The web app on Railway (ADR-036): built with Vite, served by the same script that imitates
+# CloudFront, so routes, CSP, compression and cache headers match production on AWS.
+# Build arguments are baked into the bundle; runtime variables configure the server.
+
+ARG NODE_VERSION=22.22
+
+FROM node:${NODE_VERSION}-bookworm-slim AS build
+ENV PNPM_HOME=/pnpm \
+    PATH=/pnpm:$PATH \
+    CI=true
+RUN corepack enable
+WORKDIR /repo
+ARG VITE_API_URL
+ARG VITE_SENTRY_DSN
+ARG VITE_APP_ENV=railway
+ARG RAILWAY_GIT_COMMIT_SHA=dev
+ENV VITE_API_URL=${VITE_API_URL} \
+    VITE_SENTRY_DSN=${VITE_SENTRY_DSN} \
+    VITE_APP_ENV=${VITE_APP_ENV} \
+    VITE_RELEASE=${RAILWAY_GIT_COMMIT_SHA}
+COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+RUN pnpm fetch --frozen-lockfile
+COPY . .
+RUN pnpm install --frozen-lockfile --offline --filter=@rt/web... \
+ && pnpm turbo run build --filter=@rt/web
+
+# Only the server script, the built files and the hosting module it reads.
+FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runtime
+WORKDIR /repo
+COPY --from=build --chown=65532:65532 /repo/apps/web/dist apps/web/dist
+COPY --from=build --chown=65532:65532 /repo/apps/web/scripts/serve-like-cloudfront.mjs apps/web/scripts/
+COPY --from=build --chown=65532:65532 /repo/infra/terraform/modules/web/main.tf infra/terraform/modules/web/
+USER 65532:65532
+EXPOSE 8080
+CMD ["apps/web/scripts/serve-like-cloudfront.mjs"]

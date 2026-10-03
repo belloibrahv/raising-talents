@@ -102,7 +102,7 @@ describe('loadConfig database and cache rules', () => {
     );
   });
 
-  it('refuses staging without Mux, and Mux without every setting', () => {
+  it('lets staging run with video off, but refuses Mux without every setting', () => {
     const staging = {
       ...env,
       NODE_ENV: 'staging',
@@ -110,7 +110,8 @@ describe('loadConfig database and cache rules', () => {
       DATABASE_SSL: 'verify-full',
       DATABASE_CA_FILE: '/etc/ssl/rds/global-bundle.pem',
     };
-    expect(() => loadConfig(staging)).toThrow(/VIDEO_PROVIDER/);
+    // Video off refuses uploads, so nothing goes unprocessed (ADR-036).
+    expect(() => loadConfig({ ...staging, VIDEO_PROVIDER: 'disabled' })).not.toThrow();
     expect(() => loadConfig({ ...staging, ...mux, MUX_WEBHOOK_SECRET: undefined })).toThrow(
       /MUX_WEBHOOK_SECRET/,
     );

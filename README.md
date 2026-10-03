@@ -200,4 +200,5 @@ Milestone 1, foundations.
 | Notification inbox: bell with unread count, inbox page, 180-day retention, in the data export (ADR-032)                 | Done                                     |
 | Quality: Lighthouse in CI (performance 85+, accessibility and best practices 100) on a CloudFront-like server (ADR-033) | Done                                     |
 | Resilience: web error reporting (Sentry, opt-in), error screens per route, loading skeletons (ADR-035)                  | Done, Sentry project needed              |
+| Hosting on Railway: one public origin, private API, bucket media, manual photo review (ADR-036)                         | Code ready; services blocked on plan     |
 | CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                                  | Done                                     |

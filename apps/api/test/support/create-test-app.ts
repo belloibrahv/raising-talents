@@ -76,7 +76,7 @@ export interface TestApp {
  * The real NestJS and Fastify stack (routing, validation, guards, the error filter)
  * with in-memory adapters in place of Postgres, Redis and SMTP.
  */
-export async function createTestApp(): Promise<TestApp> {
+export async function createTestApp(overrides: Record<string, string> = {}): Promise<TestApp> {
   const keys = await generateTestSigningKeys();
   const config = loadConfig({
     NODE_ENV: 'test',
@@ -92,6 +92,7 @@ export async function createTestApp(): Promise<TestApp> {
     MEDIA_CDN_URL: 'https://media.test',
     CONTENT_SCANNER: 'development-allow-all',
     WEB_ORIGINS: E2E_WEB_ORIGIN,
+    ...overrides,
   });
   const logger = pino({ level: 'silent' });
   const events = new InMemoryEventRecorder();

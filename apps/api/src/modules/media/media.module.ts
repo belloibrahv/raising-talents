@@ -40,6 +40,7 @@ import { DrizzleMediaAssetRepository } from './infrastructure/drizzle-media-asse
 import {
   DevelopmentAllowAllScanner,
   DevelopmentHoldAllScanner,
+  ManualReviewScanner,
   RekognitionContentScanner,
 } from './infrastructure/rekognition-content-scanner.js';
 import {
@@ -54,6 +55,7 @@ import { DecideHeldMediaHandler, ListHeldMediaQuery } from './application/modera
 import { MediaController } from './interface/http/media.controller.js';
 import { ModerationController } from './interface/http/moderation.controller.js';
 import { VideoWebhookController } from './interface/http/video-webhook.controller.js';
+import { MediaFilesController } from './interface/http/media-files.controller.js';
 
 /** The provider and its signer share one instance, so the signing key is read once. */
 const VIDEO_PARTS = Symbol('VideoParts');
@@ -65,7 +67,12 @@ interface VideoParts {
 
 @Module({
   imports: [AccountsModule],
-  controllers: [MediaController, VideoWebhookController, ModerationController],
+  controllers: [
+    MediaController,
+    VideoWebhookController,
+    ModerationController,
+    MediaFilesController,
+  ],
   providers: [
     {
       provide: VIDEO_PARTS,
@@ -136,9 +143,11 @@ interface VideoParts {
       useFactory: (config: AppConfig): ContentScanner =>
         config.CONTENT_SCANNER === 'rekognition'
           ? new RekognitionContentScanner(new RekognitionClient({}))
-          : config.CONTENT_SCANNER === 'development-hold-all'
-            ? new DevelopmentHoldAllScanner()
-            : new DevelopmentAllowAllScanner(),
+          : config.CONTENT_SCANNER === 'manual-review'
+            ? new ManualReviewScanner(config.SCAN_REVIEW_AT)
+            : config.CONTENT_SCANNER === 'development-hold-all'
+              ? new DevelopmentHoldAllScanner()
+              : new DevelopmentAllowAllScanner(),
     },
     {
       provide: MEDIA.ScanPolicy,

@@ -8,6 +8,8 @@
 !**/.env.example
 .git
 apps/mobile
-infra
+# The web server reads its CSP and routes from the hosting module; nothing else in infra.
+infra/**
+!infra/terraform/modules/web/main.tf
 docs
 *.log

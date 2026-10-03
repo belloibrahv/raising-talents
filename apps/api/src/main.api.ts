@@ -7,5 +7,5 @@ const config = loadConfig();
 const logger = createLogger(config, 'api');
 
 const app = await createApiApp(config, logger);
-await app.listen({ port: config.PORT, host: '0.0.0.0' });
+await app.listen({ port: config.PORT, host: config.HOST });
 logger.info({ port: config.PORT }, 'api process listening');

@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -67,6 +68,15 @@ export default defineConfig({
       },
     }),
   ],
+  resolve: {
+    // Every import of zod, the API contracts' included, goes through this module first.
+    alias: [
+      {
+        find: /^zod$/,
+        replacement: fileURLToPath(new URL('./src/zod-for-browser.ts', import.meta.url)),
+      },
+    ],
+  },
   server: { port: 5173, strictPort: true },
   preview: { port: 4173, strictPort: true },
   build: { sourcemap: true, target: 'es2022' },

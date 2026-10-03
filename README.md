@@ -187,5 +187,5 @@ Milestone 1, foundations.
 | PWA (ADR-023): browser sessions with an HttpOnly refresh cookie (ADR-024), CORS                               | Done                                    |
 | PWA: installable shell, offline start, update prompt, sign up, sign in, email code, role choice               | Done                                    |
 | PWA: talent wizard, agent profile, profile photo, portfolio (photos and video), public talent page            | Done                                    |
-| PWA: hosting on S3 and CloudFront, deploy pipeline                                                            | Next                                    |
+| PWA: hosting on S3 and CloudFront with a strict CSP, deploy pipeline                                          | Done, not yet applied to an AWS account |
 | CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                        | Done                                    |

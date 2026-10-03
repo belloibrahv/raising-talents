@@ -69,6 +69,8 @@ Then set the remaining variables from the staging outputs (`tofu output deploy`)
 | `STAGING_ECR_REPOSITORY_URL`     | `ecr_repository_url`               |
 | `STAGING_PRIVATE_SUBNETS`        | `migrate_subnets`, comma separated |
 | `STAGING_MIGRATE_SECURITY_GROUP` | `migrate_security_group`           |
+| `STAGING_WEB_BUCKET`             | `web_bucket`                       |
+| `STAGING_WEB_DISTRIBUTION_ID`    | `web_distribution_id`              |
 
 Every address in `alert_emails` receives an email from AWS asking to confirm the alert subscription. Alerts do nothing until it is confirmed.
 
@@ -127,6 +129,19 @@ curl -i https://api.staging.raisingtalents.app/health/ready
 
 Expect `200`, an `x-trace-id` header, and HSTS from the load balancer's HTTPS listener. Then sign up from a development build of the app pointed at staging (`EXPO_PUBLIC_API_URL`), and confirm the code email arrives.
 
+## The web app
+
+The same Deploy staging workflow publishes the web app after the API rolls out. It builds `apps/web` against `https://api.staging.raisingtalents.app`, uploads the hashed files first and `index.html`, `sw.js` and the manifest last, then clears those three from the CloudFront cache. Old hashed files are kept, so a page opened before the release can still load its screens.
+
+Check it:
+
+```bash
+curl -I https://app.staging.raisingtalents.app/sign-in      # 200, with a Content-Security-Policy header
+curl -I https://app.staging.raisingtalents.app/assets/x.js  # 404, not the app page
+```
+
+The API accepts browser calls only from `WEB_ORIGINS`, which staging sets to the app's address, and the media bucket accepts uploads only from there.
+
 ## If something fails
 
 | Symptom                                       | Likely cause                                                                         |
@@ -135,4 +150,6 @@ Expect `200`, an `x-trace-id` header, and HSTS from the load balancer's HTTPS li
 | Migrations fail with a TLS error              | The image is missing the RDS certificate bundle; rebuild from the current Dockerfile |
 | `/health/ready` answers 503                   | The task cannot reach Postgres or Valkey; check security groups in the plan          |
 | No verification email                         | SES sandbox: the recipient is not verified (step 6)                                  |
+| The web app shows an old version              | The invalidation did not run; run the Deploy staging workflow again                  |
+| The web app cannot sign in (CORS error)       | `WEB_ORIGINS` in the API task does not match the address in the browser              |
 | Videos stay processing                        | Mux cannot reach the webhook URL, or the webhook secret in `rt-staging/mux` is wrong |

@@ -23,6 +23,12 @@ variable "hosted_zone_id" {
   type        = string
 }
 
+variable "upload_cors_origins" {
+  description = "Web app origins that upload straight to the bucket with presigned POST."
+  type        = list(string)
+  default     = []
+}
+
 variable "deleted_media_retention_days" {
   description = "Days a replaced or deleted file can still be restored."
   type        = number

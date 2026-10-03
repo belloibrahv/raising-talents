@@ -70,6 +70,19 @@ resource "aws_s3_bucket_lifecycle_configuration" "media" {
   }
 }
 
+# Browsers send uploads straight to the bucket (presigned POST), so the web app's origin
+# must be allowed. The phone app needs no CORS; nothing else may post here.
+resource "aws_s3_bucket_cors_configuration" "media" {
+  count  = length(var.upload_cors_origins) > 0 ? 1 : 0
+  bucket = aws_s3_bucket.media.id
+  cors_rule {
+    allowed_origins = var.upload_cors_origins
+    allowed_methods = ["POST"]
+    allowed_headers = ["*"]
+    max_age_seconds = 600
+  }
+}
+
 resource "aws_cloudfront_origin_access_control" "media" {
   name                              = "${var.name}-media"
   origin_access_control_origin_type = "s3"

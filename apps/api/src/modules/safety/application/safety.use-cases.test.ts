@@ -14,8 +14,11 @@ import {
   FileReportHandler,
   ListReportedAccountsQuery,
   ReinstateAccountHandler,
+  type SafetyConversations,
   type SafetyTalents,
 } from './safety.use-cases.js';
+
+const CONVERSATION = '0192a3b4-0000-7000-8000-0000000000e9';
 
 describe('Reports and enforcement', () => {
   let clock: FixedClock;
@@ -70,14 +73,38 @@ describe('Reports and enforcement', () => {
         ),
     };
     const uow = new InMemoryUnitOfWork();
+    // One conversation, between the first agent and the talent; the agent wrote twice.
+    const conversations: SafetyConversations = {
+      forReport: (conversationId, reporterId) =>
+        Promise.resolve(
+          conversationId === CONVERSATION && (reporterId === talentId || reporterId === agentId)
+            ? {
+                subjectId: reporterId === talentId ? agentId : talentId,
+                evidence:
+                  reporterId === talentId
+                    ? [
+                        { body: 'Pay ₦50,000 to secure your audition slot.', sentAt: clock.now() },
+                        { body: 'Send it today or lose the place.', sentAt: clock.now() },
+                      ]
+                    : [],
+              }
+            : null,
+        ),
+    };
     file = new FileReportHandler(
       reports,
       accounts.facade,
       talents,
+      conversations,
       new InMemoryRateLimiter(),
       clock,
     );
-    list = new ListReportedAccountsQuery(reports, accounts.facade, talents);
+    list = new ListReportedAccountsQuery(reports, accounts.facade, talents, {
+      summaryOf: (userId) =>
+        Promise.resolve(
+          userId === agentId ? { agencyName: 'Fake Stars Agency', verified: true } : null,
+        ),
+    });
     decide = new DecideReportsHandler(
       reports,
       accounts.facade,
@@ -104,11 +131,13 @@ describe('Reports and enforcement', () => {
           role: 'talent',
           status: 'active',
           talent: { handle: 'tobi.adewale', displayName: 'Tobi Adewale' },
+          agent: null,
           openReports: 2,
           categories: [{ category: 'scam_or_harassment', count: 2 }],
           notes: [
             { note: 'Asked me for a registration fee', reportedAt: expect.any(String) as string },
           ],
+          evidence: [],
           firstReportedAt: expect.any(String) as string,
           previousActions: 0,
         },
@@ -116,6 +145,32 @@ describe('Reports and enforcement', () => {
       nextCursor: null,
     });
     expect(JSON.stringify(queue)).not.toContain(agentId);
+  });
+
+  it("reports the other person in a conversation, keeping only that person's messages (ADR-039)", async () => {
+    const filed = await file.execute(talentId, {
+      subject: { kind: 'conversation', conversationId: CONVERSATION },
+      category: 'scam_or_harassment',
+      note: 'Asked for money before any audition.',
+    });
+    expect(filed.ok).toBe(true);
+    const queue = await list.execute(moderatorId);
+    expect(queue.ok && queue.value.items[0]).toMatchObject({
+      accountId: agentId,
+      role: 'agent',
+      talent: null,
+      agent: { agencyName: 'Fake Stars Agency', verified: true },
+      evidence: [
+        { body: 'Pay ₦50,000 to secure your audition slot.' },
+        { body: 'Send it today or lose the place.' },
+      ],
+    });
+
+    const notMine = await file.execute(otherAgentId, {
+      subject: { kind: 'conversation', conversationId: CONVERSATION },
+      category: 'other',
+    });
+    expect(notMine.ok ? null : notMine.error.code).toBe('NOT_FOUND');
   });
 
   it('refuses reports on yourself, on unknown profiles, and from unverified accounts', async () => {

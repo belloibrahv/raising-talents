@@ -26,9 +26,26 @@ import { DrizzleReportRepository } from './infrastructure/drizzle-report.reposit
 import { ReportModerationController } from './interface/http/report-moderation.controller.js';
 import { ReportsController } from './interface/http/reports.controller.js';
 
+import { AgentProfilesModule } from '../agent-profiles/agent-profiles.module.js';
+import {
+  AGENT,
+  type AgentDirectory,
+} from '../agent-profiles/application/agent-profile.use-cases.js';
+import {
+  MESSAGING,
+  type ConversationEvidence,
+} from '../messaging/application/messaging.use-cases.js';
+import { MessagingModule } from '../messaging/messaging.module.js';
+
 /** Reports from members and the suspensions and bans that follow them (ADR-028). */
 @Module({
-  imports: [AccountsModule, IdentityModule, TalentProfilesModule],
+  imports: [
+    AccountsModule,
+    IdentityModule,
+    TalentProfilesModule,
+    AgentProfilesModule,
+    MessagingModule,
+  ],
   controllers: [ReportsController, ReportModerationController],
   providers: [
     {
@@ -42,6 +59,7 @@ import { ReportsController } from './interface/http/reports.controller.js';
         SAFETY.Reports,
         ACCOUNTS.Facade,
         TALENT.Directory,
+        MESSAGING.Evidence,
         PLATFORM.RateLimiter,
         PLATFORM.Clock,
       ],
@@ -49,15 +67,20 @@ import { ReportsController } from './interface/http/reports.controller.js';
         reports: ReportRepository,
         accounts: AccountsFacade,
         talents: TalentDirectory,
+        conversations: ConversationEvidence,
         limiter: RateLimiter,
         clock: Clock,
-      ) => new FileReportHandler(reports, accounts, talents, limiter, clock),
+      ) => new FileReportHandler(reports, accounts, talents, conversations, limiter, clock),
     },
     {
       provide: SAFETY.List,
-      inject: [SAFETY.Reports, ACCOUNTS.Facade, TALENT.Directory],
-      useFactory: (reports: ReportRepository, accounts: AccountsFacade, talents: TalentDirectory) =>
-        new ListReportedAccountsQuery(reports, accounts, talents),
+      inject: [SAFETY.Reports, ACCOUNTS.Facade, TALENT.Directory, AGENT.Directory],
+      useFactory: (
+        reports: ReportRepository,
+        accounts: AccountsFacade,
+        talents: TalentDirectory,
+        agents: AgentDirectory,
+      ) => new ListReportedAccountsQuery(reports, accounts, talents, agents),
     },
     {
       provide: SAFETY.Decide,

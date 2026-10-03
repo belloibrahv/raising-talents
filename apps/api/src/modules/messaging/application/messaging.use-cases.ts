@@ -1,4 +1,5 @@
 import {
+  REPORT_EVIDENCE_MAX,
   CONVERSATIONS_PAGE_SIZE,
   MESSAGES_PAGE_SIZE,
   type AccountStatus,
@@ -44,6 +45,7 @@ export const MESSAGING = {
   Unread: Symbol('MessagingUnreadQuery'),
   Export: Symbol('MessagingExport'),
   Notices: Symbol('ContactNotices'),
+  Evidence: Symbol('ConversationEvidence'),
 } as const;
 
 /** Provisional (ADR-038): generous for real scouting, tight enough to stop a mass mailing. */
@@ -571,6 +573,30 @@ export class ContactNotices {
       status: conversation.status,
       agencyName: agent.agencyName,
       talentName: talent.displayName,
+    };
+  }
+}
+
+/**
+ * For a report from inside a conversation: who is reported, and what they wrote there
+ * (ADR-039). Moderators see only the reported person's own messages, never the reporter's.
+ */
+export class ConversationEvidence {
+  constructor(private readonly conversations: ConversationRepository) {}
+
+  async forReport(
+    conversationId: string,
+    reporterId: string,
+  ): Promise<{ subjectId: string; evidence: { body: string; sentAt: Date }[] } | null> {
+    const conversation = await this.conversations.findById(conversationId);
+    if (!conversation?.sideOf(reporterId)) return null;
+    const subjectId = conversation.otherThan(reporterId);
+    const theirs = await this.conversations.messagesBy(subjectId, conversation.id);
+    return {
+      subjectId,
+      evidence: theirs
+        .slice(-REPORT_EVIDENCE_MAX)
+        .map((message) => ({ body: message.body, sentAt: message.sentAt })),
     };
   }
 }

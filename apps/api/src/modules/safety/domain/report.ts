@@ -10,10 +10,17 @@ export interface Report {
   readonly subjectId: string;
   readonly category: ReportCategory;
   readonly note: string;
+  /** For a conversation report, the reported person's latest messages there (ADR-039). */
+  readonly evidence: readonly ReportEvidence[];
   readonly status: ReportStatus;
   readonly createdAt: Date;
   readonly closedAt: Date | null;
   readonly closedBy: string | null;
+}
+
+export interface ReportEvidence {
+  readonly body: string;
+  readonly sentAt: Date;
 }
 
 /** A change to an account's standing, kept as the audit trail for staff decisions. */
@@ -35,6 +42,8 @@ export interface OpenSubject {
   readonly categories: readonly { category: ReportCategory; count: number }[];
   /** Non-empty notes, newest first, at most NOTES_SHOWN. */
   readonly notes: readonly { note: string; reportedAt: Date }[];
+  /** From the newest open report that has any. */
+  readonly evidence: readonly ReportEvidence[];
 }
 
 export const NOTES_SHOWN = 5;

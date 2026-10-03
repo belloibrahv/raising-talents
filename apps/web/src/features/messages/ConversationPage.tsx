@@ -25,6 +25,7 @@ import {
   useThread,
   useWithdraw,
 } from './queries';
+import { ReportConversation } from '../talents/ReportProfile';
 import { dayHeading, dayKey, timeOfDay } from './time';
 
 /** One conversation: the request and its answer, then the chat (ADR-038). */
@@ -115,6 +116,7 @@ export function ConversationPage() {
         <Thread messages={messages} name={name} />
       </section>
       <NextStep summary={summary} name={name} />
+      <ReportConversation conversationId={summary.id} />
     </Page>
   );
 }

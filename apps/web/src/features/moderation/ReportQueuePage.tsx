@@ -91,7 +91,7 @@ function ReportedAccountCard({
     },
   });
   const headingId = `reported-${item.accountId}`;
-  const name = item.talent?.displayName ?? t('moderation.unnamedAccount');
+  const name = item.talent?.displayName ?? item.agent?.agencyName ?? t('moderation.unnamedAccount');
   return (
     <article
       className="flex flex-col gap-4 rounded-2xl border bg-card p-5 text-card-foreground shadow-sm sm:p-6"
@@ -118,6 +118,10 @@ function ReportedAccountCard({
               <Link to={`/talents/${item.talent.handle}`} target="_blank" rel="noreferrer">
                 {`@${item.talent.handle}`}
               </Link>
+            ) : item.agent ? (
+              t(item.agent.verified ? 'moderation.agencyVerified' : 'moderation.agency', {
+                agency: item.agent.agencyName,
+              })
             ) : (
               t('moderation.none')
             )}
@@ -149,6 +153,24 @@ function ReportedAccountCard({
               <li key={entry.reportedAt + entry.note}>{entry.note}</li>
             ))}
           </ul>
+        </section>
+      ) : null}
+      {item.evidence.length > 0 ? (
+        <section className="stack gap-2" aria-label={t('moderation.conversationEvidence')}>
+          <h3 className="text-sm text-muted-foreground">{t('moderation.conversationEvidence')}</h3>
+          <ol className="m-0 grid list-none gap-2 rounded-xl bg-muted p-3">
+            {item.evidence.map((entry) => (
+              <li
+                key={entry.sentAt + entry.body}
+                className="rounded-xl rounded-bl-sm border bg-card px-3 py-2 text-sm"
+              >
+                <p className="m-0 break-words whitespace-pre-wrap">{entry.body}</p>
+                <time dateTime={entry.sentAt} className="text-xs text-muted-foreground">
+                  {dateFormat.format(new Date(entry.sentAt))}
+                </time>
+              </li>
+            ))}
+          </ol>
         </section>
       ) : null}
       <FormMessage tone="error">{decide.error ? errorMessage(decide.error) : null}</FormMessage>

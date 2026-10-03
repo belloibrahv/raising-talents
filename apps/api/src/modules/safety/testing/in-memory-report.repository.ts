@@ -46,6 +46,10 @@ export class InMemoryReportRepository implements ReportRepository {
           .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
           .slice(0, NOTES_SHOWN)
           .map((report) => ({ note: report.note, reportedAt: report.createdAt })),
+        evidence:
+          [...reports]
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+            .find((report) => report.evidence.length > 0)?.evidence ?? [],
       };
     });
     const key = (subject: { firstReportedAt: Date; subjectId: string }) =>

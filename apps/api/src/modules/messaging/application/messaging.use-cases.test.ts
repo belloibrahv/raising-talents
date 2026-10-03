@@ -11,6 +11,7 @@ import { ConversationEvents } from '../domain/conversation.js';
 import { InMemoryConversationRepository } from '../testing/in-memory-conversation.repository.js';
 import {
   CONTACT_REQUEST_LIMIT,
+  ConversationEvidence,
   ConversationViews,
   GetConversationQuery,
   ListConversationsQuery,
@@ -323,5 +324,18 @@ describe('contact requests and chat (ADR-011, ADR-038)', () => {
         myMessages: [{ body: 'Happy to talk.', sentAt: '2026-10-01T09:00:00.000Z' }],
       },
     ]);
+  });
+
+  it("gives a report the other person's latest messages, and nothing to outsiders (ADR-039)", async () => {
+    const id = await openChat();
+    clock.advanceSeconds(10);
+    await send.execute(talentId, id, { body: 'Who is the client?', clientMessageId: ids.b });
+    const evidence = new ConversationEvidence(conversations);
+    expect(await evidence.forReport(id, talentId)).toEqual({
+      subjectId: agentId,
+      evidence: [{ body: INTRO, sentAt: new Date('2026-10-01T09:00:00.000Z') }],
+    });
+    const stranger = await accounts.createAccount({ email: 'x@example.com', role: 'talent' });
+    expect(await evidence.forReport(id, stranger)).toBeNull();
   });
 });

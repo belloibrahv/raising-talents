@@ -602,6 +602,9 @@
     "reportedFor": "Reported for",
     "categoryCount": "{category} ({count})",
     "firstReported": "First reported",
+    "conversationEvidence": "What they wrote in the reported conversation",
+    "agency": "Agent at {agency}",
+    "agencyVerified": "Agent at {agency} (verified agency)",
     "reporterNotes": "What reporters wrote",
     "previousActions": "Suspended or banned before: {count}",
     "status_onboarding": "Still onboarding",
@@ -671,7 +674,11 @@
     "noteHint": "Do not include your own contact details.",
     "send": "Send report",
     "cancel": "Cancel",
-    "thanks": "Thank you. A moderator will look at this profile."
+    "thanks": "Thank you. A moderator will look at this profile.",
+    "conversationOpen": "Report this conversation",
+    "conversationTitle": "Report this conversation",
+    "conversationBody": "A moderator will see the messages the other person sent here, not yours. They will not know who reported them.",
+    "conversationThanks": "Thank you. A moderator will look at this conversation. You do not have to reply in the meantime."
   },
   "shortlist": {
     "title": "Your shortlist",

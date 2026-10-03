@@ -34,6 +34,8 @@ const reported = {
   role: 'talent',
   status: 'active',
   talent: { handle: 'dayo.guitar', displayName: 'Dayo Ajayi' },
+  agent: null,
+  evidence: [],
   openReports: 3,
   categories: [
     { category: 'fake_or_impersonation', count: 2 },
@@ -101,6 +103,37 @@ describe('the reports queue', () => {
       '/talents/dayo.guitar',
     );
     expect(screen.getByRole('link', { name: 'Reports' })).toHaveAttribute('aria-current', 'page');
+    await expectNoAxeViolations();
+  });
+
+  it('shows a reported agency with what the agent wrote in the conversation', async () => {
+    stubApi({
+      '/v1/auth/web/refresh': () => signedIn(moderator),
+      'GET /v1/moderation/reports': () =>
+        Response.json({
+          items: [
+            {
+              ...reported,
+              role: 'agent',
+              talent: null,
+              agent: { agencyName: 'Fake Stars Agency', verified: false },
+              evidence: [
+                { body: 'Pay a registration fee first.', sentAt: '2026-10-03T08:00:00.000Z' },
+              ],
+            },
+          ],
+          nextCursor: null,
+        }),
+    });
+    renderAt('/moderation/reports');
+    const card = await screen.findByRole('article', {
+      name: 'Fake Stars Agency. Open reports: 3',
+    });
+    expect(within(card).getByText('Agent at Fake Stars Agency')).toBeVisible();
+    const evidence = within(card).getByRole('region', {
+      name: 'What they wrote in the reported conversation',
+    });
+    expect(evidence).toHaveTextContent('Pay a registration fee first.');
     await expectNoAxeViolations();
   });
 

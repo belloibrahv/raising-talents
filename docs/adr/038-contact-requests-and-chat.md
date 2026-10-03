@@ -87,6 +87,6 @@ without changing the API: it only tells clients to refetch.
 
 - An agent can only ever start one thread per talent, so spam is bounded per pair as well as
   per day.
-- Text in messages is not scanned yet. Talent can report the agent from the conversation (a
-  follow-up adds a `conversation` report target to ADR-028).
+- Text in messages is not scanned yet. Talent can report the agent from the conversation
+  (ADR-039).
 - Until the socket arrives, a new message can take a few seconds to appear.

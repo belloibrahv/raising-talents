@@ -15,10 +15,20 @@ export const reportCategorySchema = z.enum([
 ]);
 export type ReportCategory = z.infer<typeof reportCategorySchema>;
 
-/** Talent profiles are the only public pages so far; agents join once they have one. */
+/**
+ * What is reported: a talent's public profile, or the other person in a conversation the
+ * reporter is part of (ADR-039). Agents have no public page, so a conversation is how they
+ * are reported.
+ */
 export const reportSubjectSchema = z
-  .discriminatedUnion('kind', [z.object({ kind: z.literal('talent'), handle: handleSchema })])
+  .discriminatedUnion('kind', [
+    z.object({ kind: z.literal('talent'), handle: handleSchema }),
+    z.object({ kind: z.literal('conversation'), conversationId: idSchema }),
+  ])
   .meta({ id: 'ReportSubject' });
+
+/** How many of the reported person's latest messages a conversation report keeps. */
+export const REPORT_EVIDENCE_MAX = 10;
 
 export const createReportSchema = z
   .object({
@@ -38,6 +48,13 @@ export const reportedAccountSchema = z
     status: accountStatusSchema,
     /** Present while the account has a complete talent profile. */
     talent: z.object({ handle: z.string(), displayName: z.string() }).nullable(),
+    /** Present when the account is an agent with an agency profile. */
+    agent: z.object({ agencyName: z.string(), verified: z.boolean() }).nullable(),
+    /**
+     * From the newest conversation report: the reported person's own latest messages in that
+     * conversation, oldest first. Empty for profile reports.
+     */
+    evidence: z.array(z.object({ body: z.string(), sentAt: isoDateTimeSchema })),
     openReports: z.number().int().positive(),
     categories: z.array(
       z.object({ category: reportCategorySchema, count: z.number().int().positive() }),

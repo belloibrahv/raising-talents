@@ -1,0 +1,1 @@
+ALTER TABLE "safety"."reports" ADD COLUMN "evidence" jsonb DEFAULT '[]'::jsonb NOT NULL;

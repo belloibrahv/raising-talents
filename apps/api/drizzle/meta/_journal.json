@@ -99,6 +99,13 @@
       "when": 1791028466091,
       "tag": "0013_shortlists",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1791030049639,
+      "tag": "0014_session_devices",
+      "breakpoints": true
     }
   ]
 }

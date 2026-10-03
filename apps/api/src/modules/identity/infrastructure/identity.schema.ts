@@ -11,6 +11,7 @@ export const sessionRevokedReasonEnum = identitySchema.enum('session_revoked_rea
   'device_mismatch',
   'account_blocked',
   'password_reset',
+  'password_changed',
 ]);
 
 export const codePurposeEnum = identitySchema.enum('code_purpose', [
@@ -41,6 +42,7 @@ export const sessions = identitySchema.table(
     revokedAt: timestamp('revoked_at', { withTimezone: true }),
     revokedReason: sessionRevokedReasonEnum('revoked_reason'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    deviceLabel: text('device_label'),
   },
   (table) => [
     uniqueIndex('sessions_refresh_token_hash_unique').on(table.refreshTokenHash),

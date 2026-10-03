@@ -20,6 +20,7 @@ export class SessionIssuer {
   async start(
     userId: string,
     deviceId: string,
+    deviceLabel: string | null = null,
   ): Promise<{ session: Session; refreshToken: string }> {
     const { token, hash } = this.refreshTokens.create();
     const session = Session.start({
@@ -29,6 +30,7 @@ export class SessionIssuer {
       refreshTokenHash: hash,
       now: this.clock.now(),
       ttlDays: this.settings.refreshTokenTtlDays,
+      deviceLabel,
     });
     await this.sessions.save(session);
     return { session, refreshToken: token };

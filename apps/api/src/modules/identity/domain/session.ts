@@ -4,7 +4,8 @@ export type SessionRevokedReason =
   | 'reuse_detected'
   | 'device_mismatch'
   | 'account_blocked'
-  | 'password_reset';
+  | 'password_reset'
+  | 'password_changed';
 
 export interface SessionProps {
   readonly id: string;
@@ -17,6 +18,8 @@ export interface SessionProps {
   readonly revokedAt: Date | null;
   readonly revokedReason: SessionRevokedReason | null;
   readonly createdAt: Date;
+  /** "Chrome on Android": enough for the owner to recognise the device, nothing more. */
+  readonly deviceLabel: string | null;
 }
 
 export type RefreshCheck =
@@ -42,6 +45,7 @@ export class Session {
     now: Date;
     ttlDays: number;
     familyId?: string;
+    deviceLabel?: string | null;
   }): Session {
     return new Session({
       id: input.id,
@@ -53,6 +57,7 @@ export class Session {
       revokedAt: null,
       revokedReason: null,
       createdAt: input.now,
+      deviceLabel: input.deviceLabel ?? null,
     });
   }
 
@@ -101,6 +106,7 @@ export class Session {
       refreshTokenHash: input.newRefreshTokenHash,
       now: input.now,
       ttlDays: input.ttlDays,
+      deviceLabel: this.props.deviceLabel,
     });
   }
 

@@ -17,10 +17,10 @@ import { Page } from '../../shared/ui/Page';
 import { Select } from '../../shared/ui/Select';
 import { TextField } from '../../shared/ui/TextField';
 import { useTaxonomy } from '../profile/queries';
-import { VerifiedBadge } from '../../shared/ui/VerifiedBadge';
+import { cn } from '@/lib/utils';
 import {
+  BadgeCheck,
   ChevronDown,
-  ChevronRight,
   Search as SearchIcon,
   SlidersHorizontal,
   UserSearch,
@@ -83,18 +83,25 @@ export function SearchPage() {
       subtitle={t('search.body')}
       width="wide"
     >
-      <form className="stack max-w-2xl" role="search" onSubmit={submit} noValidate>
-        <TextField
-          label={t('search.query')}
-          type="search"
-          enterKeyHint="search"
-          placeholder={t('search.queryPlaceholder')}
-          value={draft.q ?? ''}
-          onChange={(event) => {
-            setDraft({ ...draft, q: event.target.value });
-          }}
-          maxLength={100}
-        />
+      <form className="stack max-w-3xl" role="search" onSubmit={submit} noValidate>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+          <TextField
+            className="flex-1"
+            label={t('search.query')}
+            type="search"
+            enterKeyHint="search"
+            placeholder={t('search.queryPlaceholder')}
+            value={draft.q ?? ''}
+            onChange={(event) => {
+              setDraft({ ...draft, q: event.target.value });
+            }}
+            maxLength={100}
+          />
+          <Button type="submit" className="sm:h-12 sm:px-7">
+            <SearchIcon aria-hidden="true" />
+            {t('search.submit')}
+          </Button>
+        </div>
         <details
           className="group rounded-2xl border bg-card text-card-foreground shadow-sm"
           open={Object.keys(applied).some((key) => key !== 'q')}
@@ -186,11 +193,40 @@ export function SearchPage() {
             </Button>
           </div>
         </details>
-        <Button type="submit">
-          <SearchIcon aria-hidden="true" />
-          {t('search.submit')}
-        </Button>
       </form>
+      <ul
+        className="m-0 -mx-4 flex list-none gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0"
+        aria-label={t('search.quickCategories')}
+      >
+        {[{ slug: '', name: t('search.allTalent') }, ...(taxonomy.data?.categories ?? [])].map(
+          (entry) => {
+            const active = (applied.category ?? '') === entry.slug;
+            return (
+              <li key={entry.slug || 'all'} className="shrink-0">
+                <button
+                  type="button"
+                  aria-pressed={active}
+                  className={cn(
+                    'h-10 cursor-pointer rounded-full border px-4 text-sm font-semibold whitespace-nowrap transition-colors',
+                    active
+                      ? 'border-foreground bg-foreground text-background'
+                      : 'bg-card text-foreground hover:border-input',
+                  )}
+                  onClick={() => {
+                    const next = { ...applied, category: entry.slug };
+                    setDraft(next);
+                    setParams(
+                      Object.fromEntries(Object.entries(next).filter(([, value]) => value.trim())),
+                    );
+                  }}
+                >
+                  {entry.name}
+                </button>
+              </li>
+            );
+          },
+        )}
+      </ul>
 
       <section
         className="stack"
@@ -208,7 +244,7 @@ export function SearchPage() {
         {first && first.total === 0 ? (
           <EmptyState icon={UserSearch} title={t('search.noResults')} />
         ) : null}
-        <ul className="m-0 grid list-none gap-3 p-0 sm:grid-cols-2">
+        <ul className="m-0 grid list-none grid-cols-2 gap-x-4 gap-y-7 p-0 md:grid-cols-3 lg:grid-cols-4">
           {items.map((card) => (
             <li key={card.handle}>
               <ResultCard card={card} />
@@ -231,42 +267,51 @@ export function SearchPage() {
 
 function ResultCard({ card }: { readonly card: TalentCard }) {
   const facts = [
-    [card.category.name, ...card.subcategories.map((entry) => entry.name)].join(', '),
     card.city.name,
     card.ageYears === null ? null : t('talent.age', { age: card.ageYears }),
   ].filter(Boolean);
+  const discipline = card.subcategories[0]?.name ?? card.category.name;
   return (
     <Link
-      className="group flex h-full min-h-12 items-center gap-4 rounded-2xl border bg-card p-4 text-card-foreground no-underline shadow-xs transition-all hover:-translate-y-0.5 hover:border-input hover:shadow-md"
+      className="group flex flex-col gap-3 rounded-2xl no-underline"
       to={`/talents/${card.handle}`}
     >
-      {card.avatarUrls ? (
-        <img
-          className="size-16 shrink-0 rounded-full bg-muted object-cover"
-          src={card.avatarUrls.small}
-          alt=""
-          loading="lazy"
-          decoding="async"
-        />
-      ) : (
-        <span
-          className="grid size-16 shrink-0 place-items-center rounded-full bg-muted font-display text-xl font-bold text-muted-foreground"
-          aria-hidden="true"
-        >
-          {card.displayName.slice(0, 1)}
+      <span className="relative block aspect-[4/5] overflow-hidden rounded-2xl bg-muted">
+        {card.avatarUrls ? (
+          <img
+            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+            src={card.avatarUrls.medium}
+            srcSet={`${card.avatarUrls.small} 256w, ${card.avatarUrls.medium} 1024w`}
+            sizes="(max-width: 48rem) 50vw, 18rem"
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <span
+            className="grid size-full place-items-center bg-stage font-display text-5xl font-bold text-stage-foreground/80"
+            aria-hidden="true"
+          >
+            {card.displayName.slice(0, 1)}
+          </span>
+        )}
+        <span className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/45 to-transparent" />
+        <span className="absolute bottom-3 left-3 rounded-full bg-black/45 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+          {discipline}
         </span>
-      )}
-      <span className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="flex flex-wrap items-center gap-2 text-lg font-semibold">
-          {card.displayName}
-          {card.verified ? <VerifiedBadge /> : null}
-        </span>
-        <span className="text-sm text-muted-foreground">{facts.join(' · ')}</span>
       </span>
-      <ChevronRight
-        aria-hidden="true"
-        className="size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
-      />
+      <span className="flex flex-col gap-0.5 px-0.5">
+        <span className="flex items-center gap-1.5 font-semibold text-foreground">
+          <span className="truncate">{card.displayName}</span>
+          {card.verified ? (
+            <>
+              <BadgeCheck aria-hidden="true" className="size-4 shrink-0 text-success" />
+              <span className="sr-only">{`, ${t('talent.verified')}`}</span>
+            </>
+          ) : null}
+        </span>
+        <span className="truncate text-sm text-muted-foreground">{facts.join(' · ')}</span>
+      </span>
     </Link>
   );
 }

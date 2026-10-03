@@ -11,7 +11,6 @@ import { EmptyState } from '../../shared/ui/EmptyState';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { PageSkeleton } from '../../shared/ui/PageSkeleton';
 import { Page } from '../../shared/ui/Page';
-import { TextArea } from '../../shared/ui/TextArea';
 import {
   counterpartDetail,
   counterpartName,
@@ -149,7 +148,7 @@ function Thread({
                   className={cn(
                     'max-w-[85%] rounded-2xl px-4 py-2.5 shadow-xs sm:max-w-[70%]',
                     message.mine
-                      ? 'rounded-br-md bg-stage text-stage-foreground'
+                      ? 'rounded-br-md bg-primary text-primary-foreground'
                       : 'rounded-bl-md border bg-card text-card-foreground',
                   )}
                 >
@@ -159,7 +158,7 @@ function Thread({
                     dateTime={message.sentAt}
                     className={cn(
                       'mt-1 block text-right text-[11px]',
-                      message.mine ? 'text-stage-foreground/70' : 'text-muted-foreground',
+                      message.mine ? 'text-primary-foreground/70' : 'text-muted-foreground',
                     )}
                   >
                     {timeOfDay(message.sentAt)}
@@ -345,9 +344,10 @@ function Composer({ conversationId }: { readonly conversationId: string }) {
       },
     );
   };
+  const nearLimit = body.length > MESSAGE_MAX * 0.9;
   return (
     <form
-      className="stack gap-3 rounded-2xl border bg-card p-4 shadow-xs"
+      className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-20 -mx-2 grid gap-2 rounded-3xl border bg-card/95 p-2 shadow-lg backdrop-blur md:bottom-4"
       noValidate
       onSubmit={(event: SubmitEvent) => {
         event.preventDefault();
@@ -355,32 +355,49 @@ function Composer({ conversationId }: { readonly conversationId: string }) {
       }}
     >
       <FormMessage tone="error">{send.error ? errorMessage(send.error) : null}</FormMessage>
-      <TextArea
-        label={t('messages.composer')}
-        value={body}
-        maxLength={MESSAGE_MAX}
-        rows={3}
-        onChange={(event) => {
-          setBody(event.target.value);
-          // An edited message is a new message.
-          if (send.isError) {
-            send.reset();
-            setClientMessageId(crypto.randomUUID());
-          }
-        }}
-        onKeyDown={(event) => {
-          if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-            event.preventDefault();
-            submit();
-          }
-        }}
-      />
-      <div className="flex justify-end">
-        <Button type="submit" loading={send.isPending} disabled={body.trim().length === 0}>
-          <Send aria-hidden="true" />
-          {t('messages.send')}
+      <div className="flex items-end gap-2">
+        <label htmlFor="composer" className="sr-only">
+          {t('messages.composer')}
+        </label>
+        <textarea
+          id="composer"
+          value={body}
+          maxLength={MESSAGE_MAX}
+          rows={1}
+          placeholder={t('messages.placeholder')}
+          aria-describedby={nearLimit ? 'composer-count' : undefined}
+          className="field-sizing-content max-h-40 min-h-11 flex-1 resize-none rounded-2xl bg-transparent px-3 py-2.5 text-base outline-none placeholder:text-muted-foreground"
+          onChange={(event) => {
+            setBody(event.target.value);
+            // An edited message is a new message.
+            if (send.isError) {
+              send.reset();
+              setClientMessageId(crypto.randomUUID());
+            }
+          }}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+              event.preventDefault();
+              submit();
+            }
+          }}
+        />
+        <Button
+          type="submit"
+          size="icon"
+          className="size-11 shrink-0 rounded-full"
+          loading={send.isPending}
+          disabled={body.trim().length === 0}
+          aria-label={t('messages.send')}
+        >
+          {send.isPending ? null : <Send aria-hidden="true" />}
         </Button>
       </div>
+      {nearLimit ? (
+        <p id="composer-count" className="px-3 text-right text-xs text-muted-foreground">
+          {t('messages.count', { count: body.length, max: MESSAGE_MAX })}
+        </p>
+      ) : null}
     </form>
   );
 }

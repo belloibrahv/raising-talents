@@ -10,7 +10,7 @@ import {
   UserRound,
 } from 'lucide-react';
 import { Suspense } from 'react';
-import { NavLink, Outlet } from 'react-router';
+import { NavLink, Outlet, useMatch } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { DeletionBanner } from '../features/account/DeletionBanner';
@@ -40,6 +40,8 @@ export function AppLayout() {
   const staff = me?.role === 'moderator' || me?.role === 'admin';
   const talks = (me?.role === 'agent' || me?.role === 'talent') && !onboarding;
   const waiting = useMessagingUnread(talks).data?.unread ?? 0;
+  // A chat keeps the bottom of the screen for its message bar.
+  const inChat = useMatch('/messages/:conversationId') !== null;
   const destinations: Destination[] = [
     ...(onboarding ? [] : [{ to: '/home', label: t('nav.home'), icon: House }]),
     ...(staff ? [{ to: '/moderation', label: t('nav.moderation'), icon: ShieldCheck }] : []),
@@ -143,7 +145,7 @@ export function AppLayout() {
       <Suspense fallback={<PageSkeleton />}>
         <Outlet />
       </Suspense>
-      {onboarding ? null : (
+      {onboarding || inChat ? null : (
         <aside className="mx-auto w-full max-w-xl px-4 pb-28 md:pb-10">
           <InstallCard />
         </aside>

@@ -156,6 +156,7 @@ describe('search for agents', () => {
     renderAt('/home');
     const nav = await screen.findByRole('navigation', { name: 'Main' });
     expect(within(nav).getByRole('link', { name: 'Search' })).toHaveAttribute('href', '/search');
-    expect(await screen.findByRole('link', { name: 'Find talent' })).toBeVisible();
+    const search = await screen.findByRole('search');
+    expect(within(search).getByRole('button', { name: 'Find talent' })).toBeVisible();
   });
 });

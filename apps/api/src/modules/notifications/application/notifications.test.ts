@@ -7,6 +7,7 @@ import { InMemoryNotificationLog } from '../testing/in-memory-notification-log.j
 import { mediaRejectedEmail } from './emails.js';
 import {
   Notifier,
+  type NotificationContacts,
   type NotificationMedia,
   type NotificationVerifications,
 } from './notifications.js';
@@ -21,6 +22,7 @@ describe('Notifier', () => {
   let sent: EmailMessage[];
   let files: Map<string, File>;
   let outcomes: Map<string, { agentId: string; status: string; declineReason: string | null }>;
+  let contacts: Map<string, Awaited<ReturnType<NotificationContacts['describe']>>>;
   let notifier: Notifier;
   let inbox: InMemoryInbox;
   const clock = new FixedClock();
@@ -37,6 +39,7 @@ describe('Notifier', () => {
     inbox = new InMemoryInbox();
     files = new Map();
     outcomes = new Map();
+    contacts = new Map();
     const media: NotificationMedia = {
       describe: async (ids) =>
         new Map(ids.flatMap((id) => (files.has(id) ? [[id, files.get(id) as File]] : []))),
@@ -57,11 +60,57 @@ describe('Notifier', () => {
       },
       media,
       verifications,
+      { describe: async (id) => contacts.get(id) ?? null },
       'https://app.raisingtalents.test',
       'support@raisingtalents.test',
       clock,
       pino({ level: 'silent' }),
     );
+  });
+
+  it('tells the talent about a contact request, and the agent about the answer', async () => {
+    const contact = {
+      agentId: AGENT,
+      talentId: OWNER,
+      status: 'requested',
+      agencyName: 'Eko Talent Partners',
+      talentName: 'Amaka Okafor',
+    };
+    contacts.set('c1', contact);
+    await notifier.contactRequested(event('messaging.ContactRequested', 'c1'));
+    expect(sent[0]).toMatchObject({
+      to: 'amaka.okafor@example.com',
+      subject: 'Eko Talent Partners would like to contact you',
+    });
+    expect(sent[0]?.text).toContain('https://app.raisingtalents.test/messages/c1');
+
+    contacts.set('c1', { ...contact, status: 'accepted' });
+    await notifier.contactAnswered(event('messaging.ContactAccepted', 'c1'), true);
+    expect(sent[1]).toMatchObject({
+      to: 'tunde@eko-talent.example',
+      subject: 'Amaka Okafor accepted your request',
+    });
+    const agentNotices = await inbox.page(AGENT, null, 10);
+    expect(agentNotices.map((notice) => notice.content)).toEqual([
+      { kind: 'contact_accepted', conversationId: 'c1', talentName: 'Amaka Okafor' },
+    ]);
+  });
+
+  it('tells an agent about a decline in the app only, and skips a withdrawn request', async () => {
+    contacts.set('c2', {
+      agentId: AGENT,
+      talentId: OWNER,
+      status: 'withdrawn',
+      agencyName: 'Eko Talent Partners',
+      talentName: 'Amaka Okafor',
+    });
+    await notifier.contactRequested(event('messaging.ContactRequested', 'c2'));
+    await notifier.contactAnswered(event('messaging.ContactDeclined', 'c2'), false);
+    expect(sent).toEqual([]);
+    expect((await inbox.page(OWNER, null, 10)).length).toBe(0);
+    expect((await inbox.page(AGENT, null, 10)).map((notice) => notice.content.kind)).toEqual([
+      'contact_declined',
+    ]);
   });
 
   it('tells the owner once when a moderator approves held media, even if the event arrives twice', async () => {

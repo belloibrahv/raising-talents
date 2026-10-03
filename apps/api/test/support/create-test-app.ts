@@ -38,6 +38,8 @@ import { InMemoryReportRepository } from '../../src/modules/safety/testing/in-me
 import { InMemoryNotificationLog } from '../../src/modules/notifications/testing/in-memory-notification-log.js';
 import { NOTIFICATIONS } from '../../src/modules/notifications/application/notifications.js';
 import { InMemoryInbox } from '../../src/modules/notifications/testing/in-memory-inbox.js';
+import { MESSAGING } from '../../src/modules/messaging/application/messaging.use-cases.js';
+import { InMemoryConversationRepository } from '../../src/modules/messaging/testing/in-memory-conversation.repository.js';
 import { SHORTLIST } from '../../src/modules/shortlists/application/shortlist.use-cases.js';
 import { InMemoryShortlistRepository } from '../../src/modules/shortlists/testing/in-memory-shortlist.repository.js';
 import { TALENT } from '../../src/modules/talent-profiles/application/talent-profile.tokens.js';
@@ -64,6 +66,7 @@ export interface TestApp {
   readonly events: InMemoryEventRecorder;
   readonly email: CapturingEmailSender;
   readonly talentProfiles: InMemoryTalentProfileRepository;
+  readonly agentProfiles: InMemoryAgentProfileRepository;
   readonly storage: InMemoryObjectStorage;
   readonly mediaAssets: InMemoryMediaAssetRepository;
   readonly video: FakeVideoProvider;
@@ -98,6 +101,7 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
   const events = new InMemoryEventRecorder();
   const email = new CapturingEmailSender();
   const talentProfiles = new InMemoryTalentProfileRepository(events);
+  const agentProfiles = new InMemoryAgentProfileRepository(events);
   const storage = new InMemoryObjectStorage();
   const mediaAssets = new InMemoryMediaAssetRepository(events);
   const video = new FakeVideoProvider();
@@ -137,7 +141,7 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
     .overrideProvider(TALENT.Repository)
     .useValue(talentProfiles)
     .overrideProvider(AGENT.Repository)
-    .useValue(new InMemoryAgentProfileRepository(events))
+    .useValue(agentProfiles)
     .overrideProvider(VERIFICATION.Requests)
     .useValue(new InMemoryVerificationRequestRepository(events))
     .overrideProvider(MEDIA.Repository)
@@ -158,6 +162,8 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
     .useValue(new InMemoryReportRepository())
     .overrideProvider(SHORTLIST.Entries)
     .useValue(new InMemoryShortlistRepository())
+    .overrideProvider(MESSAGING.Conversations)
+    .useValue(new InMemoryConversationRepository(events))
     .overrideProvider(NOTIFICATIONS.Inbox)
     .useValue(new InMemoryInbox())
     .overrideProvider(NOTIFICATIONS.Log)
@@ -188,6 +194,7 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
     events,
     email,
     talentProfiles,
+    agentProfiles,
     storage,
     mediaAssets,
     video,

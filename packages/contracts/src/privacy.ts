@@ -8,6 +8,7 @@ import {
   videoPlaybackSchema,
 } from './media.js';
 import { notificationSchema } from './notifications.js';
+import { conversationStatusSchema } from './messaging.js';
 import { myPortfolioSchema } from './portfolio.js';
 import { myAgentProfileSchema, myTalentProfileSchema } from './profiles.js';
 import { accountStatusSchema, roleSchema } from './accounts.js';
@@ -43,6 +44,19 @@ export const dataExportSchema = z
     /** Agents only: who they saved and their private notes. Empty for everyone else. */
     shortlist: z.array(
       z.object({ handle: z.string().nullable(), note: z.string(), savedAt: isoDateTimeSchema }),
+    ),
+    /**
+     * Requests and chats the person is in, with the messages they wrote. The other person's
+     * messages are theirs, so only the count is included.
+     */
+    conversations: z.array(
+      z.object({
+        with: z.string(),
+        status: conversationStatusSchema,
+        requestedAt: isoDateTimeSchema,
+        messagesFromOthers: z.number().int().nonnegative(),
+        myMessages: z.array(z.object({ body: z.string(), sentAt: isoDateTimeSchema })),
+      }),
     ),
     media: z.array(
       z.object({

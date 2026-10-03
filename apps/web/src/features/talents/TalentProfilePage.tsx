@@ -13,7 +13,8 @@ import { useSession } from '../auth/use-auth';
 import { SaveToggle } from '../shortlist/SaveToggle';
 import { Badge } from '@/components/ui/badge';
 import { VerifiedBadge } from '../../shared/ui/VerifiedBadge';
-import { ImageOff, MessageCircleMore } from 'lucide-react';
+import { ImageOff } from 'lucide-react';
+import { ContactPanel } from '../messages/ContactPanel';
 import { EmptyState } from '../../shared/ui/EmptyState';
 
 /** A talent as agents see them: ready media only, age in years, never the date of birth. */
@@ -147,10 +148,7 @@ export function TalentProfilePage() {
           })}
         </ul>
       </section>
-      <p className="flex items-start gap-3 rounded-2xl bg-muted p-4 text-sm text-muted-foreground">
-        <MessageCircleMore aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-foreground" />
-        {t('talent.contactSoon')}
-      </p>
+      {canSave ? <ContactPanel handle={talent.handle} name={talent.displayName} /> : null}
       <ReportProfile handle={talent.handle} />
     </Page>
   );

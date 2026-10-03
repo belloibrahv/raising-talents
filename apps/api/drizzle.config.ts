@@ -15,6 +15,8 @@ export default defineConfig({
     'portfolio',
     'notifications',
     'safety',
+    'shortlist',
+    'messaging',
   ],
   dbCredentials: {
     url:

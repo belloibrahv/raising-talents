@@ -1,4 +1,72 @@
 {
+  "messages": {
+    "title": "Messages",
+    "subtitleTalent": "Requests from verified agents, and your chats with the ones you accepted.",
+    "subtitleAgent": "Your contact requests and chats with talent.",
+    "emptyTalent": "No messages yet",
+    "emptyTalentBody": "When a verified agent wants to contact you, their request appears here. You choose who you talk to.",
+    "emptyAgent": "No conversations yet",
+    "emptyAgentBody": "Find talent you like and send a contact request from their profile.",
+    "loadMore": "Show older conversations",
+    "unreadCount": "{count} unread",
+    "you": "You: ",
+    "status": {
+      "requested": "Request",
+      "waiting": "Waiting for an answer",
+      "accepted": "Chat open",
+      "declined": "Declined",
+      "withdrawn": "Withdrawn"
+    },
+    "unavailable": "Profile not available",
+    "verifiedAgency": "Verified agency",
+    "notFound": "This conversation is not available",
+    "notFoundBody": "It may have been withdrawn, or the account may no longer exist.",
+    "back": "All messages",
+    "viewProfile": "View profile",
+    "requestTitle": "{agency} would like to contact you",
+    "requestBody": "Read their message. If you accept, you can chat here. They never see your email address or phone number unless you share them.",
+    "accept": "Accept and reply",
+    "decline": "Decline",
+    "declineConfirm": "Decline this request? {agency} will be told, and cannot ask again for 30 days.",
+    "declineYes": "Yes, decline",
+    "keep": "Keep it",
+    "safety": "Stay safe: keep conversations on Raising Talents, and never pay a fee to be represented or auditioned.",
+    "waitingTitle": "Waiting for {name} to answer",
+    "waitingBody": "We told them about your request. You will hear from us as soon as they answer.",
+    "withdraw": "Withdraw request",
+    "withdrawnTitle": "You withdrew this request",
+    "withdrawnBody": "You can send a new one from their profile at any time.",
+    "declinedTitle": "{name} declined your request",
+    "declinedBody": "You can ask again 30 days after they declined. Many talented people are waiting to be discovered.",
+    "closed": "This conversation is closed, so new messages cannot be sent.",
+    "earlier": "Show earlier messages",
+    "thread": "Messages with {name}",
+    "composer": "Your message",
+    "send": "Send",
+    "sent": "Sent",
+    "today": "Today",
+    "yesterday": "Yesterday"
+  },
+  "contact": {
+    "title": "Contact {name}",
+    "body": "Introduce yourself and say what the opportunity is. {name} will read it and choose whether to chat.",
+    "message": "Your introduction",
+    "messageHint": "At least 20 characters. Say who you are, your agency and why you are reaching out.",
+    "tooShort": "Write at least 20 characters so they know who you are.",
+    "send": "Send request",
+    "sentTitle": "Request sent",
+    "sentBody": "We will tell you when {name} answers.",
+    "open": "Open conversation",
+    "chatOpen": "You are in touch with {name}",
+    "waiting": "Your request is waiting for {name} to answer",
+    "declined": "{name} declined your last request. You can ask again 30 days after they declined.",
+    "needVerified": "Only verified agencies can contact talent",
+    "needVerifiedBody": "This keeps talent safe from fake agents. Ask us to verify your agency; it usually takes a day or two.",
+    "getVerified": "Get verified",
+    "pending": "Your agency verification is with a moderator. You can contact talent once it is approved.",
+    "needEmail": "Verify your email to contact talent",
+    "verifyEmail": "Verify email"
+  },
   "common": {
     "continue": "Continue",
     "tryAgain": "Try again",
@@ -155,7 +223,11 @@
     "AGENT_PROFILE_INCOMPLETE": "Finish your agency profile before asking to be verified.",
     "VERIFICATION_PENDING": "Your request is with a moderator. We will decide soon.",
     "ALREADY_VERIFIED": "Your agency is already verified.",
-    "SHORTLIST_FULL": "Your shortlist is full. Remove someone to save another."
+    "SHORTLIST_FULL": "Your shortlist is full. Remove someone to save another.",
+    "AGENT_NOT_VERIFIED": "Only verified agencies can contact talent. Ask us to verify your agency first.",
+    "CONTACT_REQUEST_PENDING": "You have already asked. The talent has not answered yet.",
+    "CONTACT_DECLINED_RECENTLY": "This talent declined your request recently. You can ask again later.",
+    "CONVERSATION_CLOSED": "This conversation is closed, so new messages cannot be sent."
   },
   "crash": {
     "title": "Something went wrong",
@@ -199,7 +271,9 @@
     "account": "Your account",
     "moderationReports": "Reports queue",
     "shortlist": "Your shortlist",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "messages": "Messages",
+    "conversation": "Conversation with {name}"
   },
   "nav": {
     "home": "Home",
@@ -210,7 +284,9 @@
     "search": "Search",
     "moderation": "Moderation",
     "account": "Account",
-    "shortlist": "Shortlist"
+    "shortlist": "Shortlist",
+    "messages": "Messages",
+    "messagesUnread": "{count} need your attention"
   },
   "onboarding": {
     "stepOf": "Step {current} of {total}",
@@ -335,7 +411,6 @@
     "skills": "Skills",
     "portfolio": "Portfolio",
     "noPortfolio": "No portfolio items yet.",
-    "contactSoon": "Contact requests open when agent verification launches.",
     "photoAlt": "Photo {position} by {name}",
     "videoAlt": "Video {position} by {name}",
     "about": "About"
@@ -578,7 +653,13 @@
     "passwordChanged": "Your password was changed",
     "passwordChangedBody": "If this was not you, change your password and sign out your other devices.",
     "emailChanged": "Your email address was changed",
-    "emailChangedBody": "Emails from us now go to your new address. If this was not you, contact support straight away."
+    "emailChangedBody": "Emails from us now go to your new address. If this was not you, contact support straight away.",
+    "contactRequested": "{agency} would like to contact you",
+    "contactRequestedBody": "Read their message, then accept to start chatting or decline.",
+    "contactAccepted": "{name} accepted your request",
+    "contactAcceptedBody": "You can chat now.",
+    "contactDeclined": "{name} declined your request",
+    "contactDeclinedBody": "Keep searching: there are many more talented people to discover."
   },
   "emailChange": {
     "title": "Email address",

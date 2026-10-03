@@ -16,3 +16,4 @@ export * from './safety.js';
 export * from './shortlist.js';
 export * from './security.js';
 export * from './notifications.js';
+export * from './messaging.js';

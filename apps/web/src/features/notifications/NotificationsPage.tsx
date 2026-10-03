@@ -9,6 +9,9 @@ import {
   Images,
   KeyRound,
   Mail,
+  MessageCircleHeart,
+  MessageCircleX,
+  MessageSquareText,
   UserCheck,
   type LucideIcon,
 } from 'lucide-react';
@@ -109,6 +112,30 @@ function show(notice: Notification): Shown {
         title: t('notifications.passwordChanged'),
         body: t('notifications.passwordChangedBody'),
         to: '/account',
+      };
+    case 'contact_requested':
+      return {
+        icon: MessageSquareText,
+        tone: 'neutral',
+        title: t('notifications.contactRequested', { agency: notice.agencyName }),
+        body: t('notifications.contactRequestedBody'),
+        to: `/messages/${notice.conversationId}`,
+      };
+    case 'contact_accepted':
+      return {
+        icon: MessageCircleHeart,
+        tone: 'good',
+        title: t('notifications.contactAccepted', { name: notice.talentName }),
+        body: t('notifications.contactAcceptedBody'),
+        to: `/messages/${notice.conversationId}`,
+      };
+    case 'contact_declined':
+      return {
+        icon: MessageCircleX,
+        tone: 'neutral',
+        title: t('notifications.contactDeclined', { name: notice.talentName }),
+        body: t('notifications.contactDeclinedBody'),
+        to: '/search',
       };
   }
 }

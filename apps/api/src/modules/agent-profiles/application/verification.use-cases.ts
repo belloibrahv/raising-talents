@@ -55,6 +55,7 @@ const notStaff = () => domainError('FORBIDDEN', 'Only moderators can do this.');
 function viewFor(
   profile: AgentProfile | null,
   latest: VerificationRequest | null,
+  emailVerified: boolean,
 ): MyAgentVerification {
   const request = latest?.snapshot();
   const state = profile?.isVerified
@@ -74,7 +75,8 @@ function viewFor(
       request && state !== 'not_requested' && state !== 'verified'
         ? request.submittedAt.toISOString()
         : null,
-    canRequest: Boolean(profile?.isComplete) && state !== 'verified' && state !== 'pending',
+    canRequest:
+      Boolean(profile?.isComplete) && emailVerified && state !== 'verified' && state !== 'pending',
   };
 }
 
@@ -112,7 +114,7 @@ export class GetMyVerificationQuery {
       this.profiles.findByUserId(agentId),
       this.requests.findLatestForAgent(agentId),
     ]);
-    return ok(viewFor(profile, latest));
+    return ok(viewFor(profile, latest, account.emailVerified));
   }
 }
 
@@ -176,7 +178,7 @@ export class RequestVerificationHandler {
       if (error instanceof PendingVerificationExistsError) return err(VerificationErrors.pending());
       throw error;
     }
-    return ok(viewFor(profile, request));
+    return ok(viewFor(profile, request, true));
   }
 }
 

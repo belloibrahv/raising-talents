@@ -111,6 +111,8 @@ describe('Agent verification', () => {
       verified: false,
     });
     await completeProfile(unverified);
+    const status = await getMine.execute(unverified);
+    expect(status.ok && status.value).toMatchObject({ state: 'not_requested', canRequest: false });
     const asked = await ask.execute(unverified, EVIDENCE);
     expect(asked.ok ? null : asked.error.code).toBe('EMAIL_NOT_VERIFIED');
   });

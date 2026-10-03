@@ -31,6 +31,27 @@ const requestId = '0192a3b4-0000-7000-8000-0000000000e1';
 describe('agent verification', () => {
   beforeEach(resetSession);
 
+  it('asks an unverified agent to verify their email before asking for the badge', async () => {
+    stubApi({
+      '/v1/auth/web/refresh': () => signedIn({ ...agent, emailVerified: false }),
+      'GET /v1/me/agent-profile': () => Response.json(agentProfile),
+      'GET /v1/me/agent-verification': () =>
+        Response.json({
+          state: 'not_requested',
+          declineReason: null,
+          submittedAt: null,
+          canRequest: false,
+        }),
+    });
+    renderAt('/home');
+    const card = await screen.findByRole('region', { name: 'Get verified' });
+    expect(card).toHaveTextContent('Verify your email first.');
+    expect(within(card).getByRole('link', { name: 'Verify email' })).toHaveAttribute(
+      'href',
+      '/verify-email',
+    );
+  });
+
   it('shows a declined reason on the home screen and sends new evidence', async () => {
     let state: MyAgentVerification = {
       state: 'declined',

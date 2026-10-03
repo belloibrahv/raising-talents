@@ -35,6 +35,8 @@ export const INDEXING_EVENTS = [
   'talent.TalentProfileUpdated',
   'accounts.OnboardingCompleted',
   'accounts.EmailVerified',
+  // Confirming a new address also verifies it.
+  'accounts.EmailChanged',
   'accounts.DeletionRequested',
   'accounts.DeletionCancelled',
   'accounts.AccountDeleted',

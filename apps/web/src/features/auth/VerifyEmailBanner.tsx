@@ -7,9 +7,10 @@ import { useSession } from './use-auth';
 
 const HIDDEN_KEY = 'rt:verify-banner-hidden';
 
-const wasHidden = (): boolean => {
+/** Remembers who hid it, so someone else signing in on this tab still sees their own. */
+const wasHiddenBy = (userId: string): boolean => {
   try {
-    return sessionStorage.getItem(HIDDEN_KEY) === '1';
+    return sessionStorage.getItem(HIDDEN_KEY) === userId;
   } catch {
     return false;
   }
@@ -22,8 +23,8 @@ const wasHidden = (): boolean => {
  */
 export function VerifyEmailBanner() {
   const me = useSession().me;
-  const [hidden, setHidden] = useState(wasHidden);
-  if (!me || me.emailVerified || hidden) return null;
+  const [hiddenFor, setHiddenFor] = useState<string | null>(null);
+  if (!me || me.emailVerified || hiddenFor === me.id || wasHiddenBy(me.id)) return null;
   const message =
     me.role === 'talent'
       ? t('verifyBanner.talent')
@@ -53,11 +54,11 @@ export function VerifyEmailBanner() {
           aria-label={t('verifyBanner.dismiss')}
           onClick={() => {
             try {
-              sessionStorage.setItem(HIDDEN_KEY, '1');
+              sessionStorage.setItem(HIDDEN_KEY, me.id);
             } catch {
               // Private mode without storage: hidden for this page only.
             }
-            setHidden(true);
+            setHiddenFor(me.id);
           }}
         >
           <X aria-hidden="true" className="size-4" />

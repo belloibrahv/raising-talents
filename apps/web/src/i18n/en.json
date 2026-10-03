@@ -474,7 +474,9 @@
     "declined": "Not verified yet: {reason}",
     "start": "Get verified",
     "tryAgain": "Send new evidence",
-    "notReady": "Finish your agency profile first, then ask to be verified."
+    "notReady": "Finish your agency profile first, then ask to be verified.",
+    "verifyEmailFirst": "Verify your email first. We use it to check that you work for the agency.",
+    "verifyEmail": "Verify email"
   },
   "account": {
     "title": "Your account",

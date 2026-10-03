@@ -32,6 +32,12 @@ import { SignUpHandler } from './application/sign-up.handler.js';
 import { VerifyEmailHandler } from './application/verify-email.handler.js';
 import type { CredentialRepository } from './domain/credential.repository.js';
 import { IdentityEvents } from './domain/identity.events.js';
+import {
+  IssuePasswordResetCodeHandler,
+  NotifyPasswordChangedHandler,
+  RequestPasswordResetHandler,
+  ResetPasswordHandler,
+} from './application/password-reset.handlers.js';
 import type { OneTimeCodeRepository } from './domain/one-time-code.repository.js';
 import type { SessionRepository } from './domain/session.repository.js';
 import { accountsDirectory } from './infrastructure/accounts-directory.adapter.js';
@@ -271,12 +277,111 @@ const applicationProviders: Provider[] = [
     ) => new IssueEmailVerificationCodeHandler(directory, codes, codeFactory, email, clock),
   },
   {
+    provide: IDENTITY.RequestPasswordReset,
+    inject: [
+      IDENTITY.AccountDirectory,
+      IDENTITY.Codes,
+      PLATFORM.EventRecorder,
+      PLATFORM.RateLimiter,
+      PLATFORM.Clock,
+    ],
+    useFactory: (
+      directory: AccountDirectory,
+      codes: OneTimeCodeRepository,
+      events: EventRecorder,
+      limiter: RateLimiter,
+      clock: Clock,
+    ) => new RequestPasswordResetHandler(directory, codes, events, limiter, clock),
+  },
+  {
+    provide: IDENTITY.IssuePasswordResetCode,
+    inject: [
+      IDENTITY.AccountDirectory,
+      IDENTITY.Codes,
+      IDENTITY.VerificationCodes,
+      IDENTITY.EmailSender,
+      PLATFORM.Clock,
+    ],
+    useFactory: (
+      directory: AccountDirectory,
+      codes: OneTimeCodeRepository,
+      codeFactory: VerificationCodeFactory,
+      email: EmailSender,
+      clock: Clock,
+    ) => new IssuePasswordResetCodeHandler(directory, codes, codeFactory, email, clock),
+  },
+  {
+    provide: IDENTITY.ResetPassword,
+    inject: [
+      IDENTITY.AccountDirectory,
+      IDENTITY.Codes,
+      IDENTITY.VerificationCodes,
+      IDENTITY.Credentials,
+      IDENTITY.Sessions,
+      IDENTITY.PasswordHasher,
+      IDENTITY.BreachedPasswords,
+      PLATFORM.EventRecorder,
+      PLATFORM.RateLimiter,
+      PLATFORM.UnitOfWork,
+      PLATFORM.Clock,
+      IDENTITY.Settings,
+    ],
+    useFactory: (
+      directory: AccountDirectory,
+      codes: OneTimeCodeRepository,
+      codeFactory: VerificationCodeFactory,
+      credentials: CredentialRepository,
+      sessions: SessionRepository,
+      hasher: PasswordHasher,
+      breached: BreachedPasswordChecker,
+      events: EventRecorder,
+      limiter: RateLimiter,
+      uow: UnitOfWork,
+      clock: Clock,
+      settings: IdentitySettings,
+    ) =>
+      new ResetPasswordHandler(
+        directory,
+        codes,
+        codeFactory,
+        credentials,
+        sessions,
+        hasher,
+        breached,
+        events,
+        limiter,
+        uow,
+        clock,
+        settings,
+      ),
+  },
+  {
+    provide: IDENTITY.NotifyPasswordChanged,
+    inject: [IDENTITY.AccountDirectory, IDENTITY.EmailSender],
+    useFactory: (directory: AccountDirectory, email: EmailSender) =>
+      new NotifyPasswordChangedHandler(directory, email),
+  },
+  {
     provide: IDENTITY.EventHandlers,
-    inject: [IDENTITY.IssueEmailVerificationCode],
-    useFactory: (issueCode: IssueEmailVerificationCodeHandler): ModuleEventHandlers => ({
+    inject: [
+      IDENTITY.IssueEmailVerificationCode,
+      IDENTITY.IssuePasswordResetCode,
+      IDENTITY.NotifyPasswordChanged,
+    ],
+    useFactory: (
+      issueCode: IssueEmailVerificationCodeHandler,
+      issueResetCode: IssuePasswordResetCodeHandler,
+      notifyPasswordChanged: NotifyPasswordChangedHandler,
+    ): ModuleEventHandlers => ({
       register: (dispatcher) => {
         dispatcher.on(IdentityEvents.EmailVerificationRequested, (event) =>
           issueCode.handle(event),
+        );
+        dispatcher.on(IdentityEvents.PasswordResetRequested, (event) =>
+          issueResetCode.handle(event),
+        );
+        dispatcher.on(IdentityEvents.PasswordChanged, (event) =>
+          notifyPasswordChanged.handle(event),
         );
       },
     }),

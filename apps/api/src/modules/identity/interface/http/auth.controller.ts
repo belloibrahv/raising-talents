@@ -1,5 +1,7 @@
 import { Body, Controller, HttpCode, Inject, Post, UseGuards } from '@nestjs/common';
 import {
+  passwordResetConfirmSchema,
+  passwordResetRequestSchema,
   refreshRequestSchema,
   signInRequestSchema,
   signOutRequestSchema,
@@ -7,6 +9,8 @@ import {
   verifyEmailRequestSchema,
   type AuthResponse,
   type MeResponse,
+  type PasswordResetConfirm,
+  type PasswordResetRequest,
   type RefreshRequest,
   type SignInRequest,
   type SignOutRequest,
@@ -22,6 +26,10 @@ import { body } from '../../../../platform/http/zod-validation.pipe.js';
 import type { AccountsFacade } from '../../../accounts/application/accounts.facade.js';
 import { ACCOUNTS } from '../../../accounts/application/accounts.tokens.js';
 import { IDENTITY } from '../../application/identity.tokens.js';
+import type {
+  RequestPasswordResetHandler,
+  ResetPasswordHandler,
+} from '../../application/password-reset.handlers.js';
 import type { RefreshSessionHandler } from '../../application/refresh-session.handler.js';
 import type { RequestEmailVerificationHandler } from '../../application/request-email-verification.handler.js';
 import type { SignInHandler } from '../../application/sign-in.handler.js';
@@ -40,7 +48,27 @@ export class AuthController {
     @Inject(IDENTITY.RequestEmailVerification)
     private readonly resendHandler: RequestEmailVerificationHandler,
     @Inject(ACCOUNTS.Facade) private readonly accounts: AccountsFacade,
+    @Inject(IDENTITY.RequestPasswordReset)
+    private readonly requestReset: RequestPasswordResetHandler,
+    @Inject(IDENTITY.ResetPassword) private readonly resetPassword: ResetPasswordHandler,
   ) {}
+
+  @Post('password-reset')
+  @HttpCode(202)
+  async requestPasswordReset(
+    @Body(body(passwordResetRequestSchema)) request: PasswordResetRequest,
+    @ClientIp() ip: string,
+  ): Promise<void> {
+    unwrap(await this.requestReset.execute({ email: request.email, ip }));
+  }
+
+  @Post('password-reset/confirm')
+  @HttpCode(204)
+  async confirmPasswordReset(
+    @Body(body(passwordResetConfirmSchema)) request: PasswordResetConfirm,
+  ): Promise<void> {
+    unwrap(await this.resetPassword.execute(request));
+  }
 
   @Post('sign-up')
   @HttpCode(201)

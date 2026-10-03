@@ -17,5 +17,9 @@ export const IDENTITY = {
   RequestEmailVerification: Symbol('RequestEmailVerificationHandler'),
   IssueEmailVerificationCode: Symbol('IssueEmailVerificationCodeHandler'),
   VerifyEmail: Symbol('VerifyEmailHandler'),
+  RequestPasswordReset: Symbol('RequestPasswordResetHandler'),
+  IssuePasswordResetCode: Symbol('IssuePasswordResetCodeHandler'),
+  ResetPassword: Symbol('ResetPasswordHandler'),
+  NotifyPasswordChanged: Symbol('NotifyPasswordChangedHandler'),
   EventHandlers: Symbol('IdentityEventHandlers'),
 } as const;

@@ -10,9 +10,13 @@ export const sessionRevokedReasonEnum = identitySchema.enum('session_revoked_rea
   'reuse_detected',
   'device_mismatch',
   'account_blocked',
+  'password_reset',
 ]);
 
-export const codePurposeEnum = identitySchema.enum('code_purpose', ['email_verification']);
+export const codePurposeEnum = identitySchema.enum('code_purpose', [
+  'email_verification',
+  'password_reset',
+]);
 
 export const credentials = identitySchema.table('credentials', {
   userId: uuid('user_id')

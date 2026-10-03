@@ -1,3 +1,9 @@
+import {
+  IssuePasswordResetCodeHandler,
+  NotifyPasswordChangedHandler,
+  RequestPasswordResetHandler,
+  ResetPasswordHandler,
+} from '../application/password-reset.handlers.js';
 import { exportPKCS8, exportSPKI, generateKeyPair } from 'jose';
 import { JoseAccessTokens } from '../../../platform/auth/jose-access-tokens.js';
 import {
@@ -129,6 +135,23 @@ export async function createIdentityHarness(settings: Partial<IdentitySettings> 
     ),
     issueCode: new IssueEmailVerificationCodeHandler(directory, codes, codeFactory, email, clock),
     verifyEmail: new VerifyEmailHandler(directory, codes, codeFactory, rateLimiter, uow, clock),
+    requestReset: new RequestPasswordResetHandler(directory, codes, events, rateLimiter, clock),
+    issueResetCode: new IssuePasswordResetCodeHandler(directory, codes, codeFactory, email, clock),
+    resetPassword: new ResetPasswordHandler(
+      directory,
+      codes,
+      codeFactory,
+      credentials,
+      sessions,
+      hasher,
+      breached,
+      events,
+      rateLimiter,
+      uow,
+      clock,
+      fullSettings,
+    ),
+    notifyPasswordChanged: new NotifyPasswordChangedHandler(directory, email),
   };
 }
 

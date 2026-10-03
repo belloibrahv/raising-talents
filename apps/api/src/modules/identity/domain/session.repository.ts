@@ -5,4 +5,6 @@ export interface SessionRepository {
   findByRefreshTokenHash(hash: string, options?: { lock?: boolean }): Promise<Session | null>;
   save(session: Session): Promise<void>;
   revokeFamily(familyId: string, reason: SessionRevokedReason, now: Date): Promise<void>;
+  /** Ends every session the person has, on every device. */
+  revokeAllForUser(userId: string, reason: SessionRevokedReason, now: Date): Promise<void>;
 }

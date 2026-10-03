@@ -37,7 +37,9 @@
     "email": "Email",
     "password": "Password",
     "submit": "Sign in",
-    "noAccount": "New here? Create an account"
+    "noAccount": "New here? Create an account",
+    "forgot": "Forgot your password?",
+    "passwordChanged": "Your password was changed. Sign in with the new one."
   },
   "verifyEmail": {
     "title": "Check your email",
@@ -165,7 +167,9 @@
     "agentOnboarding": "Set up your agency profile",
     "portfolio": "Your portfolio",
     "talentProfile": "{name} on Raising Talents",
-    "search": "Find talent"
+    "search": "Find talent",
+    "forgotPassword": "Reset your password",
+    "resetPassword": "Choose a new password"
   },
   "nav": {
     "home": "Home",
@@ -327,5 +331,23 @@
     "age": "{age}",
     "ageRange": "Ages must be between 18 and 99, youngest first.",
     "resultsLabel": "Search results"
+  },
+  "forgotPassword": {
+    "title": "Reset your password",
+    "body": "Enter the email you signed up with. If it has an account, we will send a 6-digit code.",
+    "email": "Email",
+    "submit": "Send the code",
+    "back": "Back to sign in"
+  },
+  "resetPassword": {
+    "title": "Choose a new password",
+    "body": "If {email} has an account, a 6-digit code is on its way. It expires in 10 minutes.",
+    "code": "Code from the email",
+    "password": "New password",
+    "passwordHint": "At least 10 characters. Every device will be signed out.",
+    "submit": "Save new password",
+    "resend": "Send a new code",
+    "resent": "If the email has an account, a new code is on its way.",
+    "otherEmail": "Use a different email"
   }
 }

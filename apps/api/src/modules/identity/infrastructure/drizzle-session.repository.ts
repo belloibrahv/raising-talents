@@ -40,4 +40,12 @@ export class DrizzleSessionRepository implements SessionRepository {
       .set({ revokedAt: now, revokedReason: reason })
       .where(and(eq(sessions.familyId, familyId), isNull(sessions.revokedAt)));
   }
+
+  async revokeAllForUser(userId: string, reason: SessionRevokedReason, now: Date): Promise<void> {
+    await this.uow
+      .executor()
+      .update(sessions)
+      .set({ revokedAt: now, revokedReason: reason })
+      .where(and(eq(sessions.userId, userId), isNull(sessions.revokedAt)));
+  }
 }

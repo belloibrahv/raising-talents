@@ -2,7 +2,7 @@ import type { DomainError } from '../../../platform/domain-error.js';
 import { err, ok, type Result } from '../../../platform/result.js';
 import { IdentityErrors } from './identity.errors.js';
 
-export type OneTimeCodePurpose = 'email_verification';
+export type OneTimeCodePurpose = 'email_verification' | 'password_reset';
 
 export const CODE_TTL_MINUTES = 10;
 export const CODE_MAX_ATTEMPTS = 5;

@@ -57,6 +57,13 @@
       "when": 1790949369267,
       "tag": "0007_video_media",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790973756427,
+      "tag": "0008_password_reset",
+      "breakpoints": true
     }
   ]
 }

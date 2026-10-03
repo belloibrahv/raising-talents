@@ -8,6 +8,7 @@ import { VideoPlayer } from '../../shared/media/VideoPlayer';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
 import { Page } from '../../shared/ui/Page';
+import { ReportProfile } from './ReportProfile';
 
 /** A talent as agents see them: ready media only, age in years, never the date of birth. */
 export function TalentProfilePage() {
@@ -100,6 +101,7 @@ export function TalentProfilePage() {
         </ul>
       </section>
       <p className="field__hint">{t('talent.contactSoon')}</p>
+      <ReportProfile handle={talent.handle} />
     </Page>
   );
 }

@@ -12,3 +12,4 @@ export * from './search.js';
 export * from './moderation.js';
 export * from './verification.js';
 export * from './privacy.js';
+export * from './safety.js';

@@ -54,6 +54,7 @@ describe('Notifier', () => {
       media,
       verifications,
       'https://app.raisingtalents.test',
+      'support@raisingtalents.test',
       clock,
       pino({ level: 'silent' }),
     );
@@ -117,6 +118,26 @@ describe('Notifier', () => {
       ['tunde@eko-talent.example', 'We could not verify your agency yet'],
     ]);
     expect(sent[1]?.html).toContain('https://app.raisingtalents.test/verification');
+  });
+
+  it('tells a restricted member why and how to appeal, and when they are back', async () => {
+    const restricted = (type: string, reason: string) => ({
+      ...event(type, OWNER),
+      payload: { reason },
+    });
+    await notifier.accountRestricted(
+      restricted('accounts.AccountSuspended', 'scam_or_harassment'),
+      'suspend',
+    );
+    await notifier.accountRestricted(restricted('accounts.AccountBanned', 'not-a-reason'), 'ban');
+    clock.advanceSeconds(1);
+    await notifier.accountReinstated(event('accounts.AccountReinstated', OWNER));
+    expect(sent.map((message) => message.subject)).toEqual([
+      'Your Raising Talents account is suspended',
+      'Your Raising Talents account is back',
+    ]);
+    expect(sent[0]?.text).toContain('ask people for money');
+    expect(sent[0]?.html).toContain('mailto:support@raisingtalents.test?subject=Appeal');
   });
 
   it('escapes anything inserted into the HTML', () => {

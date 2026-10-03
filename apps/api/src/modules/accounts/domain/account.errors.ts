@@ -40,4 +40,12 @@ export const AccountErrors = {
     domainError(ErrorCode.Conflict, 'Choose talent or agent before finishing onboarding.'),
   roleLocked: () =>
     domainError(ErrorCode.RoleAlreadyLocked, 'Your role is set. Contact support to change it.'),
+  alreadyBanned: () =>
+    domainError(ErrorCode.Conflict, 'This account is banned. Lift the ban before suspending it.'),
+  notRestricted: () => domainError(ErrorCode.Conflict, 'This account is not suspended or banned.'),
+  staffAccount: () =>
+    domainError(
+      ErrorCode.Forbidden,
+      'Staff accounts are handled by an operator, not through reports.',
+    ),
 };

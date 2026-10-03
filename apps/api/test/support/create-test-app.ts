@@ -32,6 +32,8 @@ import { FakeVideoProvider } from '../../src/modules/media/testing/fake-video-pr
 import { MuxWebhookVerifier } from '../../src/modules/media/infrastructure/mux-video-provider.js';
 import { PORTFOLIO } from '../../src/modules/portfolio/application/portfolio.use-cases.js';
 import { InMemoryPortfolioRepository } from '../../src/modules/portfolio/testing/in-memory-portfolio.repository.js';
+import { SAFETY } from '../../src/modules/safety/application/safety.use-cases.js';
+import { InMemoryReportRepository } from '../../src/modules/safety/testing/in-memory-report.repository.js';
 import { TALENT } from '../../src/modules/talent-profiles/application/talent-profile.tokens.js';
 import { InMemoryTalentProfileRepository } from '../../src/modules/talent-profiles/testing/in-memory-talent-profile.repository.js';
 import { TAXONOMY } from '../../src/modules/taxonomy/application/taxonomy.tokens.js';
@@ -143,6 +145,8 @@ export async function createTestApp(): Promise<TestApp> {
     .useValue(new MuxWebhookVerifier(E2E_WEBHOOK_SECRET, clock))
     .overrideProvider(PORTFOLIO.Repository)
     .useValue(new InMemoryPortfolioRepository(events))
+    .overrideProvider(SAFETY.Reports)
+    .useValue(new InMemoryReportRepository())
     .compile();
 
   const dispatcher = new EventDispatcher();

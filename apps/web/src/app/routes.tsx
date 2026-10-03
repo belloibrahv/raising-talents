@@ -57,6 +57,9 @@ const VerificationPage = lazy(() =>
 const AgentQueuePage = lazy(() =>
   import('../features/moderation/AgentQueuePage').then((m) => ({ default: m.AgentQueuePage })),
 );
+const ReportQueuePage = lazy(() =>
+  import('../features/moderation/ReportQueuePage').then((m) => ({ default: m.ReportQueuePage })),
+);
 const AccountPage = lazy(() =>
   import('../features/account/AccountPage').then((m) => ({ default: m.AccountPage })),
 );
@@ -126,6 +129,7 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
             { path: 'search', element: <SearchPage /> },
             { path: 'moderation', element: <ModerationPage /> },
             { path: 'moderation/agents', element: <AgentQueuePage /> },
+            { path: 'moderation/reports', element: <ReportQueuePage /> },
             { path: 'verification', element: <VerificationPage /> },
             { path: 'account', element: <AccountPage /> },
           ],

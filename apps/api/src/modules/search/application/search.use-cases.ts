@@ -37,6 +37,9 @@ export const INDEXING_EVENTS = [
   'accounts.DeletionRequested',
   'accounts.DeletionCancelled',
   'accounts.AccountDeleted',
+  'accounts.AccountSuspended',
+  'accounts.AccountBanned',
+  'accounts.AccountReinstated',
 ] as const;
 
 /** Roles that may search. Talent find each other through links, not search, in the MVP. */

@@ -31,3 +31,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-025](025-talent-search-rules-and-hosting.md)                       | Talent search: who appears, who can search, and where Typesense runs | Proposed                          |
 | [ADR-026](026-how-agents-are-verified.md)                               | How agents are verified                                              | Proposed                          |
 | [ADR-027](027-account-deletion-and-data-export.md)                      | Account deletion and data export                                     | Proposed                          |
+| [ADR-028](028-reports-and-account-enforcement.md)                       | Reports and account enforcement                                      | Proposed                          |

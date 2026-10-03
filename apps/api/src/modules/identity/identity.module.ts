@@ -342,9 +342,13 @@ const applicationProviders: Provider[] = [
   },
   {
     provide: IDENTITY.Facade,
-    inject: [IDENTITY.Credentials, IDENTITY.PasswordHasher],
-    useFactory: (credentials: CredentialRepository, hasher: PasswordHasher) =>
-      new IdentityFacade(credentials, hasher),
+    inject: [IDENTITY.Credentials, IDENTITY.PasswordHasher, IDENTITY.Sessions, PLATFORM.Clock],
+    useFactory: (
+      credentials: CredentialRepository,
+      hasher: PasswordHasher,
+      sessions: SessionRepository,
+      clock: Clock,
+    ) => new IdentityFacade(credentials, hasher, sessions, clock),
   },
   {
     provide: IDENTITY.NotifyPasswordChanged,

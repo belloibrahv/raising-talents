@@ -96,6 +96,8 @@ const envSchema = z.object({
   ACCOUNT_DELETION_GRACE_DAYS: z.coerce.number().int().min(1).max(90).default(30),
   /** The web app's address, for links in emails. */
   WEB_APP_URL: z.url().default('http://localhost:5173'),
+  /** A monitored inbox. Suspension and ban emails send appeals here (ADR-028). */
+  SUPPORT_EMAIL: z.email().default('support@raisingtalents.app'),
   /** Secure cookies need HTTPS. Only a laptop on plain http://localhost may turn it off. */
   WEB_COOKIE_SECURE: booleanFromString.default(true),
 });

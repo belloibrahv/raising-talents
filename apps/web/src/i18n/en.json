@@ -176,7 +176,8 @@
     "moderation": "Moderation queue",
     "verification": "Get verified",
     "moderationAgents": "Agent verification queue",
-    "account": "Your account"
+    "account": "Your account",
+    "moderationReports": "Reports queue"
   },
   "nav": {
     "home": "Home",
@@ -406,7 +407,33 @@
     "evidence_unreachable": "Evidence page would not open",
     "agentVerified": "Verified. The agent now has the badge.",
     "agentDeclined": "Declined. The agent sees the reason and can try again.",
-    "none": "None given"
+    "none": "None given",
+    "reportsTab": "Reports",
+    "reportsTitle": "Reports",
+    "reportsBody": "Accounts members reported, longest waiting first. Reporters stay anonymous. Every decision is recorded with your name.",
+    "reportsEmpty": "No open reports.",
+    "reportedHeading": "{name}. Open reports: {count}",
+    "unnamedAccount": "Account without a public profile",
+    "profile": "Profile",
+    "reportedFor": "Reported for",
+    "categoryCount": "{category} ({count})",
+    "firstReported": "First reported",
+    "reporterNotes": "What reporters wrote",
+    "previousActions": "Suspended or banned before: {count}",
+    "status_onboarding": "Still onboarding",
+    "status_suspended": "Suspended",
+    "status_banned": "Banned",
+    "status_pending_deletion": "Deletion requested",
+    "dismiss": "Dismiss reports",
+    "suspend": "Suspend",
+    "ban": "Ban",
+    "suspendExplain": "Suspending signs them out, hides their profile and emails them the reason with a way to appeal. An operator can lift it.",
+    "banExplain": "Banning closes the account for good. Use it for scams, impersonation, under 18s and repeated harm.",
+    "confirmSuspend": "Suspend account",
+    "confirmBan": "Ban account",
+    "reports_dismiss": "Reports dismissed.",
+    "reports_suspend": "Account suspended.",
+    "reports_ban": "Account banned."
   },
   "verification": {
     "title": "Get verified",
@@ -442,5 +469,22 @@
     "keep": "Keep my account",
     "kept": "Your account is back. Nothing will be deleted.",
     "wrongPassword": "That password is not right."
+  },
+  "report": {
+    "open": "Report this profile",
+    "title": "Report this profile",
+    "body": "A moderator will look at it. The person will not know who reported them.",
+    "category": "What is wrong?",
+    "chooseCategory": "Choose what is wrong.",
+    "fake_or_impersonation": "Fake, or pretending to be someone else",
+    "inappropriate_content": "Inappropriate photos, video or text",
+    "scam_or_harassment": "Asking for money, scamming or harassing",
+    "underage": "May be under 18",
+    "other": "Something else",
+    "note": "Anything else we should know? (optional)",
+    "noteHint": "Do not include your own contact details.",
+    "send": "Send report",
+    "cancel": "Cancel",
+    "thanks": "Thank you. A moderator will look at this profile."
   }
 }

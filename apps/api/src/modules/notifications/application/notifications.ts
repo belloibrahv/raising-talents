@@ -9,6 +9,8 @@ import {
   accountRestrictedEmail,
   deletionScheduledEmail,
   agentVerifiedEmail,
+  contactAcceptedEmail,
+  contactRequestedEmail,
   mediaApprovedEmail,
   mediaRejectedEmail,
 } from './emails.js';
@@ -58,6 +60,16 @@ export interface NotificationVerifications {
   ): Promise<{ agentId: string; status: string; declineReason: string | null } | null>;
 }
 
+export interface NotificationContacts {
+  describe(conversationId: string): Promise<{
+    agentId: string;
+    talentId: string;
+    status: string;
+    agencyName: string;
+    talentName: string;
+  } | null>;
+}
+
 const isReportCategory = (value: unknown): value is ReportCategory =>
   reportCategorySchema.safeParse(value).success;
 
@@ -78,6 +90,7 @@ export class Notifier {
     private readonly recipients: NotificationRecipients,
     private readonly media: NotificationMedia,
     private readonly verifications: NotificationVerifications,
+    private readonly contacts: NotificationContacts,
     private readonly appUrl: string,
     private readonly supportEmail: string,
     private readonly clock: Clock,
@@ -129,6 +142,52 @@ export class Notifier {
         : outcome.status === 'declined' && outcome.declineReason
           ? agentDeclinedEmail({ to, reason: outcome.declineReason, appUrl: this.appUrl })
           : null,
+    );
+  }
+
+  /** A verified agent asked to contact a talent. Skipped if they withdrew before it went out. */
+  async contactRequested(event: DomainEvent): Promise<void> {
+    const contact = await this.contacts.describe(event.aggregateId);
+    if (contact?.status !== 'requested') return;
+    const notice: NoticeContent = {
+      kind: 'contact_requested',
+      conversationId: event.aggregateId,
+      agencyName: contact.agencyName,
+    };
+    await this.deliver(event, contact.talentId, notice, (to) =>
+      contactRequestedEmail({
+        to,
+        agencyName: contact.agencyName,
+        conversationId: event.aggregateId,
+        appUrl: this.appUrl,
+      }),
+    );
+  }
+
+  /** The talent answered. A decline is told in the app only, which is gentler. */
+  async contactAnswered(event: DomainEvent, accepted: boolean): Promise<void> {
+    const contact = await this.contacts.describe(event.aggregateId);
+    if (!contact) return;
+    const notice: NoticeContent = accepted
+      ? {
+          kind: 'contact_accepted',
+          conversationId: event.aggregateId,
+          talentName: contact.talentName,
+        }
+      : { kind: 'contact_declined', talentName: contact.talentName };
+    await this.deliver(
+      event,
+      contact.agentId,
+      notice,
+      accepted
+        ? (to) =>
+            contactAcceptedEmail({
+              to,
+              talentName: contact.talentName,
+              conversationId: event.aggregateId,
+              appUrl: this.appUrl,
+            })
+        : null,
     );
   }
 

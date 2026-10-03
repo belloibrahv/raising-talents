@@ -12,6 +12,7 @@ import { TAXONOMY } from '../taxonomy/application/taxonomy.tokens.js';
 import { TaxonomyModule } from '../taxonomy/taxonomy.module.js';
 import {
   AGENT,
+  AgentDirectory,
   GetMyAgentProfileQuery,
   UpdateMyAgentProfileHandler,
 } from './application/agent-profile.use-cases.js';
@@ -58,6 +59,12 @@ import type { RateLimiter } from '../../platform/rate-limit/rate-limiter.js';
         uow: UnitOfWork,
         clock: Clock,
       ) => new UpdateMyAgentProfileHandler(repo, accounts, taxonomy, uow, clock),
+    },
+    {
+      provide: AGENT.Directory,
+      inject: [AGENT.Repository, TAXONOMY.Source],
+      useFactory: (repo: AgentProfileRepository, taxonomy: TaxonomySource) =>
+        new AgentDirectory(repo, taxonomy),
     },
     {
       provide: AGENT.GetMine,
@@ -137,6 +144,6 @@ import type { RateLimiter } from '../../platform/rate-limit/rate-limiter.js';
       ) => new DecideVerificationHandler(repo, requests, accounts, uow, clock, logger),
     },
   ],
-  exports: [VERIFICATION.Outcomes, VERIFICATION.GetMine, AGENT.GetMine],
+  exports: [VERIFICATION.Outcomes, VERIFICATION.GetMine, AGENT.GetMine, AGENT.Directory],
 })
 export class AgentProfilesModule {}

@@ -20,6 +20,9 @@ import { MEDIA } from '../media/application/media.use-cases.js';
 import { MediaEvents } from '../media/domain/media-asset.js';
 import { MediaModule } from '../media/media.module.js';
 import { VerificationEvents } from '../agent-profiles/domain/verification-request.js';
+import { MESSAGING, type ContactNotices } from '../messaging/application/messaging.use-cases.js';
+import { ConversationEvents } from '../messaging/domain/conversation.js';
+import { MessagingModule } from '../messaging/messaging.module.js';
 import { NOTIFICATIONS, Notifier, type NotificationLog } from './application/notifications.js';
 import { DrizzleNotificationLog } from './infrastructure/drizzle-notification-log.js';
 import { IdentityEvents } from '../identity/domain/identity.events.js';
@@ -36,7 +39,7 @@ import { NotificationsController } from './interface/http/notifications.controll
 
 /** Tells people about decisions made on their behalf: by email, and in the app's inbox (ADR-032). */
 @Module({
-  imports: [AccountsModule, MediaModule, AgentProfilesModule],
+  imports: [AccountsModule, MediaModule, AgentProfilesModule, MessagingModule],
   controllers: [NotificationsController],
   providers: [
     {
@@ -84,6 +87,7 @@ import { NotificationsController } from './interface/http/notifications.controll
         ACCOUNTS.Facade,
         MEDIA.Facade,
         VERIFICATION.Outcomes,
+        MESSAGING.Notices,
         PLATFORM.Config,
         PLATFORM.Clock,
         PLATFORM.Logger,
@@ -95,6 +99,7 @@ import { NotificationsController } from './interface/http/notifications.controll
         accounts: AccountsFacade,
         media: MediaFacade,
         verifications: VerificationOutcomes,
+        contacts: ContactNotices,
         config: AppConfig,
         clock: Clock,
         logger: Logger,
@@ -106,6 +111,7 @@ import { NotificationsController } from './interface/http/notifications.controll
           accounts,
           media,
           verifications,
+          contacts,
           config.WEB_APP_URL.replace(/\/$/, ''),
           config.SUPPORT_EMAIL,
           clock,
@@ -137,6 +143,15 @@ import { NotificationsController } from './interface/http/notifications.controll
               notifier.passwordChanged(event),
             );
             dispatcher.on(AccountEvents.EmailChanged, (event) => notifier.emailChanged(event));
+            dispatcher.on(ConversationEvents.ContactRequested, (event) =>
+              notifier.contactRequested(event),
+            );
+            dispatcher.on(ConversationEvents.ContactAccepted, (event) =>
+              notifier.contactAnswered(event, true),
+            );
+            dispatcher.on(ConversationEvents.ContactDeclined, (event) =>
+              notifier.contactAnswered(event, false),
+            );
           },
         };
       },

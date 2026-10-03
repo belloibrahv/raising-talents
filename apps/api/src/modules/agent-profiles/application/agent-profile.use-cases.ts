@@ -19,6 +19,7 @@ export const AGENT = {
   Repository: Symbol('AgentProfileRepository'),
   UpdateMine: Symbol('UpdateMyAgentProfileHandler'),
   GetMine: Symbol('GetMyAgentProfileQuery'),
+  Directory: Symbol('AgentDirectory'),
 } as const;
 
 export function toMyAgentProfile(profile: AgentProfile, catalog: TaxonomyCatalog): MyAgentProfile {
@@ -99,5 +100,30 @@ export class GetMyAgentProfileQuery {
     const profile = await this.profiles.findByUserId(userId);
     if (!profile) return err(AgentProfileErrors.notFound());
     return ok(toMyAgentProfile(profile, await this.taxonomy.current()));
+  }
+}
+
+/** How an agent is introduced to talent. Other modules ask this instead of reading profiles. */
+export class AgentDirectory {
+  constructor(
+    private readonly profiles: AgentProfileRepository,
+    private readonly taxonomy: TaxonomySource,
+  ) {}
+
+  async summaryOf(agentId: string): Promise<{
+    agencyName: string;
+    jobTitle: string;
+    city: string | null;
+    verified: boolean;
+  } | null> {
+    const profile = await this.profiles.findByUserId(agentId);
+    const props = profile?.snapshot();
+    if (!props?.agencyName) return null;
+    return {
+      agencyName: props.agencyName,
+      jobTitle: props.jobTitle ?? '',
+      city: (await this.taxonomy.current()).city(props.citySlug)?.name ?? null,
+      verified: props.verifiedAt !== null,
+    };
   }
 }

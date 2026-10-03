@@ -70,6 +70,12 @@ const NotificationsPage = lazy(() =>
     default: m.NotificationsPage,
   })),
 );
+const MessagesPage = lazy(() =>
+  import('../features/messages/MessagesPage').then((m) => ({ default: m.MessagesPage })),
+);
+const ConversationPage = lazy(() =>
+  import('../features/messages/ConversationPage').then((m) => ({ default: m.ConversationPage })),
+);
 const AccountPage = lazy(() =>
   import('../features/account/AccountPage').then((m) => ({ default: m.AccountPage })),
 );
@@ -196,6 +202,8 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
                 { path: 'verification', element: <VerificationPage /> },
                 { path: 'account', element: <AccountPage /> },
                 { path: 'notifications', element: <NotificationsPage /> },
+                { path: 'messages', element: <MessagesPage /> },
+                { path: 'messages/:conversationId', element: <ConversationPage /> },
               ],
             },
           ],

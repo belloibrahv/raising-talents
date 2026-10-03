@@ -111,6 +111,14 @@ export class TalentDirectory {
     return (await this.profiles.findByHandle(handle.toLowerCase()))?.userId ?? null;
   }
 
+  /** The name and handle, whatever the account's status, for someone they already talk to. */
+  async nameOf(userId: string): Promise<{ handle: string; displayName: string } | null> {
+    const props = (await this.profiles.findByUserId(userId))?.snapshot();
+    return props?.handle && props.displayName
+      ? { handle: props.handle, displayName: props.displayName }
+      : null;
+  }
+
   /** The handle, whatever the account's status. For the owner's data export only. */
   async handleOf(userId: string): Promise<string | null> {
     return (await this.profiles.findByUserId(userId))?.snapshot().handle ?? null;

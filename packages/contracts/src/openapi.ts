@@ -223,6 +223,11 @@ export function buildOpenApiDocument(version: string): JsonObject {
         description: 'Talent an agent saved, with private notes. Talent are never told',
       },
       {
+        name: 'Messaging',
+        description:
+          'Contact requests and chat. Only verified agents can ask; chat opens when the talent accepts',
+      },
+      {
         name: 'Safety',
         description: 'Reports from members. Reporters stay anonymous to the reported person',
       },

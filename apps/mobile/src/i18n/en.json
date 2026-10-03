@@ -116,7 +116,11 @@
     "AGENT_PROFILE_INCOMPLETE": "Finish your agency profile before asking to be verified.",
     "VERIFICATION_PENDING": "Your request is with a moderator. We will decide soon.",
     "ALREADY_VERIFIED": "Your agency is already verified.",
-    "SHORTLIST_FULL": "Your shortlist is full. Remove someone to save another."
+    "SHORTLIST_FULL": "Your shortlist is full. Remove someone to save another.",
+    "AGENT_NOT_VERIFIED": "Only verified agencies can contact talent. Ask us to verify your agency first.",
+    "CONTACT_REQUEST_PENDING": "You have already asked. The talent has not answered yet.",
+    "CONTACT_DECLINED_RECENTLY": "This talent declined your request recently. You can ask again later.",
+    "CONVERSATION_CLOSED": "This conversation is closed, so new messages cannot be sent."
   },
   "crash": {
     "title": "Something went wrong",

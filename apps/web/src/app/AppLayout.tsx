@@ -1,5 +1,14 @@
 import type { LucideIcon } from 'lucide-react';
-import { Bookmark, House, Images, LogOut, Search, ShieldCheck, UserRound } from 'lucide-react';
+import {
+  Bookmark,
+  House,
+  Images,
+  LogOut,
+  MessagesSquare,
+  Search,
+  ShieldCheck,
+  UserRound,
+} from 'lucide-react';
 import { Suspense } from 'react';
 import { NavLink, Outlet } from 'react-router';
 import { Button } from '@/components/ui/button';
@@ -9,6 +18,7 @@ import { VerifyEmailBanner } from '../features/auth/VerifyEmailBanner';
 import { useSession, useSignOut } from '../features/auth/use-auth';
 import { t } from '../i18n';
 import { NotificationBell } from '../features/notifications/NotificationBell';
+import { useMessagingUnread } from '../features/messages/queries';
 import { InstallCard } from '../shared/pwa/InstallCard';
 import { BrandMark } from '../shared/ui/BrandMark';
 import { PageSkeleton } from '../shared/ui/PageSkeleton';
@@ -28,6 +38,8 @@ export function AppLayout() {
   const signOut = useSignOut();
   const onboarding = me?.status === 'onboarding';
   const staff = me?.role === 'moderator' || me?.role === 'admin';
+  const talks = (me?.role === 'agent' || me?.role === 'talent') && !onboarding;
+  const waiting = useMessagingUnread(talks).data?.unread ?? 0;
   const destinations: Destination[] = [
     ...(onboarding ? [] : [{ to: '/home', label: t('nav.home'), icon: House }]),
     ...(staff ? [{ to: '/moderation', label: t('nav.moderation'), icon: ShieldCheck }] : []),
@@ -40,6 +52,7 @@ export function AppLayout() {
     ...(me?.role === 'talent' && !onboarding
       ? [{ to: '/portfolio', label: t('nav.portfolio'), icon: Images }]
       : []),
+    ...(talks ? [{ to: '/messages', label: t('nav.messages'), icon: MessagesSquare }] : []),
     { to: '/account', label: t('nav.account'), icon: UserRound },
   ];
   return (
@@ -86,10 +99,21 @@ export function AppLayout() {
                               className="absolute top-0.5 right-2.5 size-2.5 rounded-full bg-destructive ring-2 ring-background md:-top-0.5 md:-right-1"
                             />
                           ) : null}
+                          {to === '/messages' && waiting > 0 ? (
+                            <span
+                              aria-hidden="true"
+                              className="absolute -top-1 right-0.5 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-destructive px-1 text-[10px] leading-none font-bold text-destructive-foreground ring-2 ring-background md:-top-2 md:-right-3"
+                            >
+                              {waiting > 9 ? '9+' : waiting}
+                            </span>
+                          ) : null}
                         </span>
                         {label}
                         {to === '/account' && me && !me.emailVerified ? (
                           <span className="sr-only">{`, ${t('verifyBanner.dot')}`}</span>
+                        ) : null}
+                        {to === '/messages' && waiting > 0 ? (
+                          <span className="sr-only">{`, ${t('nav.messagesUnread', { count: waiting })}`}</span>
                         ) : null}
                       </>
                     )}

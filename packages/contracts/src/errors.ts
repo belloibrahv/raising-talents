@@ -55,6 +55,11 @@ export const ErrorCode = {
   AlreadyVerified: 'ALREADY_VERIFIED',
 
   ShortlistFull: 'SHORTLIST_FULL',
+
+  AgentNotVerified: 'AGENT_NOT_VERIFIED',
+  ContactRequestPending: 'CONTACT_REQUEST_PENDING',
+  ContactDeclinedRecently: 'CONTACT_DECLINED_RECENTLY',
+  ConversationClosed: 'CONVERSATION_CLOSED',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -112,6 +117,10 @@ export const ERROR_STATUS: Record<ErrorCode, number> = {
   [ErrorCode.AlreadyVerified]: 409,
 
   [ErrorCode.ShortlistFull]: 409,
+  [ErrorCode.AgentNotVerified]: 403,
+  [ErrorCode.ContactRequestPending]: 409,
+  [ErrorCode.ContactDeclinedRecently]: 409,
+  [ErrorCode.ConversationClosed]: 409,
 };
 
 export const fieldProblemSchema = z

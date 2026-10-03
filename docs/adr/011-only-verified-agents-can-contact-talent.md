@@ -16,4 +16,4 @@ Open messaging; connection requests from any agent.
 
 ## Consequences
 
-Safer for talent, slower growth on the agent side. Awaiting client sign-off before milestone 4.
+Safer for talent, slower growth on the agent side. Awaiting client sign-off before milestone 4. Built as described in ADR-038.

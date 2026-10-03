@@ -41,3 +41,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-035](035-web-error-reporting-and-recovery.md)                      | Error reporting and recovery in the web app                          | Accepted                          |
 | [ADR-036](036-hosting-on-railway.md)                                    | Hosting on Railway                                                   | Accepted                          |
 | [ADR-037](037-soft-email-verification.md)                               | Soft email verification                                              | Accepted                          |
+| [ADR-038](038-contact-requests-and-chat.md)                             | Contact requests and chat                                            | Accepted                          |

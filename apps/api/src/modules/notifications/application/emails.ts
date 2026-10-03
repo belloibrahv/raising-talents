@@ -175,3 +175,35 @@ export function accountReinstatedEmail(input: { to: string; appUrl: string }): E
     link: { href: `${input.appUrl}/sign-in`, label: 'Sign in' },
   });
 }
+
+/** The request's text stays in the app: people read it signed in, where they can report it. */
+export function contactRequestedEmail(input: {
+  to: string;
+  agencyName: string;
+  conversationId: string;
+  appUrl: string;
+}): EmailMessage {
+  return email({
+    to: input.to,
+    subject: `${input.agencyName} would like to contact you`,
+    paragraphs: [
+      `A verified agent from ${input.agencyName} sent you a contact request on Raising Talents.`,
+      'Read it in the app, then accept to start chatting, or decline. They only see your answer, never your email address.',
+    ],
+    link: { href: `${input.appUrl}/messages/${input.conversationId}`, label: 'Read the request' },
+  });
+}
+
+export function contactAcceptedEmail(input: {
+  to: string;
+  talentName: string;
+  conversationId: string;
+  appUrl: string;
+}): EmailMessage {
+  return email({
+    to: input.to,
+    subject: `${input.talentName} accepted your request`,
+    paragraphs: [`${input.talentName} accepted your contact request. You can chat now.`],
+    link: { href: `${input.appUrl}/messages/${input.conversationId}`, label: 'Open the chat' },
+  });
+}

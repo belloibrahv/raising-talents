@@ -21,3 +21,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-015](015-aws-region-chosen-by-latency-test.md)                     | AWS region chosen by latency test                       | Proposed |
 | [ADR-016](016-pin-typescript-5.9-for-now.md)                            | Pin TypeScript 5.9 for now                              | Accepted |
 | [ADR-017](017-shared-endpoint-catalogue-instead-of-generated-client.md) | Shared endpoint catalogue instead of a generated client | Accepted |
+| [ADR-018](018-opentofu-for-infrastructure.md)                           | OpenTofu for infrastructure                             | Accepted |

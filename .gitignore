@@ -11,3 +11,9 @@ coverage/
 .bundle-check/
 apps/mobile/ios/
 apps/mobile/android/
+
+# OpenTofu working files. Lock files are committed; see docs/runbooks/staging-first-deploy.md.
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan

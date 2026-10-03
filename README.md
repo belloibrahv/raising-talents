@@ -15,6 +15,7 @@ packages/
   config/           Shared TypeScript, lint and writing-check configuration
 infra/
   docker/           Local Postgres, Redis, Typesense and Mailpit
+  terraform/        AWS infrastructure, written for OpenTofu (see infra/terraform/README.md)
 docs/
   adr/              Architecture decision records
   runbooks/         What to do when an alert fires
@@ -120,12 +121,15 @@ Onboarding is a strict order: sign up, verify email, choose a role, then the app
 
 ## Tests
 
-| Level            | Where                                    | Runs against                                              |
-| ---------------- | ---------------------------------------- | --------------------------------------------------------- |
-| Domain           | `src/modules/*/domain/*.test.ts`         | Plain objects                                             |
-| Use case         | `src/modules/*/application/*.test.ts`    | In-memory adapters from each module's `testing` folder    |
-| Adapter contract | `src/modules/*/infrastructure/*.test.ts` | Real Argon2, real JWT signing, real crypto                |
-| HTTP end to end  | `test/*.e2e.test.ts`                     | The real NestJS and Fastify stack with in-memory adapters |
+| Level            | Where                                    | Runs against                                                                        |
+| ---------------- | ---------------------------------------- | ----------------------------------------------------------------------------------- |
+| Domain           | `src/modules/*/domain/*.test.ts`         | Plain objects                                                                       |
+| Use case         | `src/modules/*/application/*.test.ts`    | In-memory adapters from each module's `testing` folder                              |
+| Adapter contract | `src/modules/*/infrastructure/*.test.ts` | Real Argon2, real JWT signing, real crypto                                          |
+| HTTP end to end  | `test/*.e2e.test.ts`                     | The real NestJS and Fastify stack with in-memory adapters                           |
+| Mobile logic     | `apps/mobile/src/**/*.test.ts`           | HTTP client against a fake API with single-use refresh tokens, routing, forms, copy |
+| Mobile bundle    | `pnpm --filter @rt/mobile bundle:check`  | Metro builds the iOS and Android bundles, as EAS does                               |
+| Route contract   | `apps/api/test/routes.contract.test.ts`  | Every served route matches the endpoint catalogue                                   |
 
 ## How we work
 
@@ -138,14 +142,14 @@ Onboarding is a strict order: sign up, verify email, choose a role, then the app
 
 Milestone 1, foundations.
 
-| Area                                                                                              | State |
-| ------------------------------------------------------------------------------------------------- | ----- |
-| Monorepo, contracts, shared config                                                                | Done  |
-| Backend platform: config, logging, errors, unit of work, outbox with backoff, rate limits, health | Done  |
-| Accounts: age gate, account status, role choice                                                   | Done  |
-| Identity: sign up, sign in, refresh rotation with reuse detection, sign out, email codes          | Done  |
-| CI: lint, types, tests, build, migration drift, audit, secret scan                                | Done  |
-| Mobile app shell wired to auth                                                                    | Next  |
-| OpenAPI generation and typed client                                                               | Next  |
-| Sentry and OpenTelemetry                                                                          | Next  |
-| Terraform for staging                                                                             | Next  |
+| Area                                                                                              | State                                   |
+| ------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| Monorepo, contracts, shared config                                                                | Done                                    |
+| Backend platform: config, logging, errors, unit of work, outbox with backoff, rate limits, health | Done                                    |
+| Accounts: age gate, account status, role choice                                                   | Done                                    |
+| Identity: sign up, sign in, refresh rotation with reuse detection, sign out, email codes          | Done                                    |
+| Mobile app shell: welcome, sign up, sign in, email code, role choice, session restore             | Done                                    |
+| Endpoint catalogue, OpenAPI document and typed app client                                         | Done                                    |
+| Tracing across API and worker, error tracking for API, worker and app                             | Done                                    |
+| Staging infrastructure, container image and deploy pipeline                                       | Done, not yet applied to an AWS account |
+| CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks            | Done                                    |

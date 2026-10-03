@@ -4,3 +4,6 @@
 export * from '../outbox/outbox.schema.js';
 export * from '../../modules/accounts/infrastructure/account.schema.js';
 export * from '../../modules/identity/infrastructure/identity.schema.js';
+export * from '../../modules/taxonomy/infrastructure/taxonomy.schema.js';
+export * from '../../modules/talent-profiles/infrastructure/talent-profile.schema.js';
+export * from '../../modules/agent-profiles/infrastructure/agent-profile.schema.js';

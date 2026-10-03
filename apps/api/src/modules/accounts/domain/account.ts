@@ -106,6 +106,32 @@ export class Account {
     return ok(undefined);
   }
 
+  /**
+   * Called when the first complete profile is saved. Locks the role (only an admin can
+   * change it afterwards) and activates the account. Safe to call again.
+   */
+  completeOnboarding(now: Date): Result<void, DomainError> {
+    if (this.props.roleLockedAt !== null) return ok(undefined);
+    if (!this.isEmailVerified) return err(AccountErrors.emailNotVerified());
+    if (this.props.role === null) return err(AccountErrors.noRoleChosen());
+    const status = this.props.status === 'onboarding' ? 'active' : this.props.status;
+    this.props = { ...this.props, roleLockedAt: now, status, updatedAt: now };
+    this.raise(AccountEvents.OnboardingCompleted, now, { role: this.props.role });
+    return ok(undefined);
+  }
+
+  get role(): Role | null {
+    return this.props.role;
+  }
+
+  get status(): AccountStatus {
+    return this.props.status;
+  }
+
+  get dateOfBirth(): string {
+    return this.props.dateOfBirth;
+  }
+
   pullEvents(): DomainEvent[] {
     const events = this.pendingEvents;
     this.pendingEvents = [];

@@ -44,6 +44,7 @@ import { ACCOUNTS_HTTP } from './interface/http/me.tokens.js';
           new CreateAccountHandler(accounts),
           new MarkEmailVerifiedHandler(accounts, clock),
           getMe,
+          clock,
         ),
     },
   ],

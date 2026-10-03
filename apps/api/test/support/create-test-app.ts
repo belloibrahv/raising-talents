@@ -18,6 +18,12 @@ import {
   InMemorySessionRepository,
 } from '../../src/modules/identity/testing/fakes.js';
 import { generateTestSigningKeys } from '../../src/modules/identity/testing/identity-test-harness.js';
+import { AGENT } from '../../src/modules/agent-profiles/application/agent-profile.use-cases.js';
+import { InMemoryAgentProfileRepository } from '../../src/modules/agent-profiles/testing/in-memory-agent-profile.repository.js';
+import { TALENT } from '../../src/modules/talent-profiles/application/talent-profile.tokens.js';
+import { InMemoryTalentProfileRepository } from '../../src/modules/talent-profiles/testing/in-memory-talent-profile.repository.js';
+import { TAXONOMY } from '../../src/modules/taxonomy/application/taxonomy.tokens.js';
+import { sampleTaxonomySource } from '../../src/modules/taxonomy/testing/sample-taxonomy.js';
 import { EventDispatcher } from '../../src/platform/outbox/event-dispatcher.js';
 import { PLATFORM } from '../../src/platform/platform.tokens.js';
 import {
@@ -34,6 +40,7 @@ export interface TestApp {
   readonly moduleRef: TestingModule;
   readonly events: InMemoryEventRecorder;
   readonly email: CapturingEmailSender;
+  readonly talentProfiles: InMemoryTalentProfileRepository;
   /** Publishes recorded events the way the worker would. */
   deliverEvents(): Promise<void>;
 }
@@ -58,6 +65,7 @@ export async function createTestApp(): Promise<TestApp> {
   const logger = pino({ level: 'silent' });
   const events = new InMemoryEventRecorder();
   const email = new CapturingEmailSender();
+  const talentProfiles = new InMemoryTalentProfileRepository(events);
 
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule.register({ config, logger }), DiscoveryModule],
@@ -86,6 +94,12 @@ export async function createTestApp(): Promise<TestApp> {
     .useValue(new FakeBreachedPasswordChecker())
     .overrideProvider(IDENTITY.EmailSender)
     .useValue(email)
+    .overrideProvider(TAXONOMY.Source)
+    .useValue(sampleTaxonomySource)
+    .overrideProvider(TALENT.Repository)
+    .useValue(talentProfiles)
+    .overrideProvider(AGENT.Repository)
+    .useValue(new InMemoryAgentProfileRepository(events))
     .compile();
 
   const dispatcher = new EventDispatcher();
@@ -102,6 +116,7 @@ export async function createTestApp(): Promise<TestApp> {
     moduleRef,
     events,
     email,
+    talentProfiles,
     deliverEvents: async () => {
       for (const event of events.events.splice(0)) await dispatcher.dispatch(event);
     },

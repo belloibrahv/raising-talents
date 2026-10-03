@@ -4,3 +4,5 @@ export * from './accounts.js';
 export * from './auth.js';
 export * from './endpoints.js';
 export * from './openapi.js';
+export * from './taxonomy.js';
+export * from './profiles.js';

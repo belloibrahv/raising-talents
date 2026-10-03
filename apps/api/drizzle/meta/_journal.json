@@ -22,6 +22,20 @@
       "when": 1790895161630,
       "tag": "0002_outbox_trace_headers",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790915762226,
+      "tag": "0003_profiles_and_taxonomy",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1790915783105,
+      "tag": "0004_seed_provisional_taxonomy",
+      "breakpoints": true
     }
   ]
 }

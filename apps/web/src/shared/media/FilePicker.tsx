@@ -1,4 +1,7 @@
+import { ImagePlus } from 'lucide-react';
 import { useId, useRef } from 'react';
+import { cn } from '@/lib/utils';
+import { buttonLink } from '../ui/Button';
 
 interface FilePickerProps {
   readonly label: string;
@@ -28,7 +31,7 @@ export function FilePicker({
         id={id}
         type="file"
         accept={accept}
-        className="visually-hidden file-picker__input"
+        className="peer sr-only"
         disabled={disabled}
         onChange={(event) => {
           const file = event.target.files?.[0];
@@ -39,9 +42,13 @@ export function FilePicker({
       />
       <label
         htmlFor={id}
-        className={`button button--${variant}`}
+        className={cn(
+          buttonLink(variant),
+          'peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring aria-disabled:pointer-events-none aria-disabled:opacity-50',
+        )}
         aria-disabled={disabled || undefined}
       >
+        <ImagePlus aria-hidden="true" />
         {label}
       </label>
     </div>

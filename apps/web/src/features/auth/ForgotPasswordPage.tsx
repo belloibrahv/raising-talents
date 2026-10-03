@@ -5,7 +5,7 @@ import { z } from 'zod';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { api } from '../../shared/api/client';
-import { Button } from '../../shared/ui/Button';
+import { Button, buttonLink } from '../../shared/ui/Button';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { Page } from '../../shared/ui/Page';
 import { TextField } from '../../shared/ui/TextField';
@@ -60,7 +60,7 @@ export function ForgotPasswordPage() {
         <Button type="submit" loading={request.isPending}>
           {t('forgotPassword.submit')}
         </Button>
-        <Link className="button button--text" to="/sign-in" replace>
+        <Link className={buttonLink('text')} to="/sign-in" replace>
           {t('forgotPassword.back')}
         </Link>
       </form>

@@ -1,5 +1,9 @@
 import { useId, useState, type InputHTMLAttributes, type ReactNode, type Ref } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { t } from '../../i18n';
+import { FieldError, FieldHint, labelClass } from './field-text';
 
 interface TextFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id'> {
   readonly label: string;
@@ -26,33 +30,26 @@ export function TextField({
   const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
   const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;
-  const inputClasses = ['field__input', action ? 'field__input--with-action' : '', inputClassName];
   return (
-    <div className={['field', className].filter(Boolean).join(' ')}>
-      <label className="field__label" htmlFor={id}>
+    <div className={cn('grid gap-2', className)}>
+      <label className={labelClass} htmlFor={id}>
         {label}
       </label>
-      <div className="field__control">
-        <input
+      <div className="relative">
+        <Input
           {...input}
           ref={ref}
           id={id}
-          className={inputClasses.filter(Boolean).join(' ')}
+          className={cn(action && 'pr-24', inputClassName)}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
         />
-        {action}
+        {action ? (
+          <div className="absolute inset-y-0 right-1 flex items-center">{action}</div>
+        ) : null}
       </div>
-      {hint ? (
-        <p id={hintId} className="field__hint">
-          {hint}
-        </p>
-      ) : null}
-      {error ? (
-        <p id={errorId} className="field__error">
-          {error}
-        </p>
-      ) : null}
+      {hintId ? <FieldHint id={hintId}>{hint}</FieldHint> : null}
+      {errorId ? <FieldError id={errorId}>{error}</FieldError> : null}
     </div>
   );
 }
@@ -67,13 +64,18 @@ export function PasswordField(props: Omit<TextFieldProps, 'type' | 'action'>) {
       action={
         <button
           type="button"
-          className="field__action"
+          className="inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-foreground hover:bg-accent"
           aria-pressed={visible}
           aria-label={visible ? t('common.hidePassword') : t('common.showPassword')}
           onClick={() => {
             setVisible((value) => !value);
           }}
         >
+          {visible ? (
+            <EyeOff aria-hidden="true" className="size-4" />
+          ) : (
+            <Eye aria-hidden="true" className="size-4" />
+          )}
           {visible ? t('common.hide') : t('common.show')}
         </button>
       }

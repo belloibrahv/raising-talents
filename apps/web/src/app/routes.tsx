@@ -7,6 +7,7 @@ import { t } from '../i18n';
 import { NetworkBanner } from '../shared/pwa/NetworkBanner';
 import type { AppArea } from '../shared/session/area';
 import { AppLayout } from './AppLayout';
+import { AuthFrame } from './AuthFrame';
 import { AreaGate } from './AreaGate';
 import { NotFoundPage } from './NotFoundPage';
 
@@ -107,12 +108,48 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
         // The root sends everyone to the start of their area.
         { index: true, element: <Gate /> },
         screen('welcome', 'auth', <WelcomePage />),
-        screen('sign-up', 'auth', <SignUpPage />),
-        screen('sign-in', 'auth', <SignInPage />),
-        screen('forgot-password', 'auth', <ForgotPasswordPage />),
-        screen('reset-password', 'auth', <ResetPasswordPage />),
-        screen('verify-email', 'verifyEmail', <VerifyEmailPage />),
-        screen('choose-role', 'chooseRole', <ChooseRolePage />),
+        screen(
+          'sign-up',
+          'auth',
+          <AuthFrame>
+            <SignUpPage />
+          </AuthFrame>,
+        ),
+        screen(
+          'sign-in',
+          'auth',
+          <AuthFrame>
+            <SignInPage />
+          </AuthFrame>,
+        ),
+        screen(
+          'forgot-password',
+          'auth',
+          <AuthFrame>
+            <ForgotPasswordPage />
+          </AuthFrame>,
+        ),
+        screen(
+          'reset-password',
+          'auth',
+          <AuthFrame>
+            <ResetPasswordPage />
+          </AuthFrame>,
+        ),
+        screen(
+          'verify-email',
+          'verifyEmail',
+          <AuthFrame>
+            <VerifyEmailPage />
+          </AuthFrame>,
+        ),
+        screen(
+          'choose-role',
+          'chooseRole',
+          <AuthFrame>
+            <ChooseRolePage />
+          </AuthFrame>,
+        ),
         {
           // Signed-in screens share the header and navigation.
           element: (

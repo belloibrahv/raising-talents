@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import { CalendarClock } from 'lucide-react';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { api, session } from '../../shared/api/client';
@@ -19,18 +20,27 @@ export function DeletionBanner() {
     new Date(scheduledAt),
   );
   return (
-    <section className="deletion-banner" role="region" aria-label={t('account.deleteTitle')}>
-      <p>{t('account.scheduled', { date })}</p>
-      {keep.error ? <p role="alert">{errorMessage(keep.error)}</p> : null}
-      <Button
-        className="button--small"
-        loading={keep.isPending}
-        onClick={() => {
-          keep.mutate();
-        }}
-      >
-        {t('account.keep')}
-      </Button>
+    <section
+      className="border-b border-destructive/30 bg-destructive-surface text-destructive"
+      role="region"
+      aria-label={t('account.deleteTitle')}
+    >
+      <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:px-6">
+        <p className="flex flex-1 items-start gap-2 font-medium">
+          <CalendarClock aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
+          {t('account.scheduled', { date })}
+        </p>
+        {keep.error ? <p role="alert">{errorMessage(keep.error)}</p> : null}
+        <Button
+          size="sm"
+          loading={keep.isPending}
+          onClick={() => {
+            keep.mutate();
+          }}
+        >
+          {t('account.keep')}
+        </Button>
+      </div>
     </section>
   );
 }

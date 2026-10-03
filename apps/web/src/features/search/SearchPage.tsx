@@ -17,6 +17,15 @@ import { Page } from '../../shared/ui/Page';
 import { Select } from '../../shared/ui/Select';
 import { TextField } from '../../shared/ui/TextField';
 import { useTaxonomy } from '../profile/queries';
+import { VerifiedBadge } from '../../shared/ui/VerifiedBadge';
+import {
+  ChevronDown,
+  ChevronRight,
+  Search as SearchIcon,
+  SlidersHorizontal,
+  UserSearch,
+} from 'lucide-react';
+import { EmptyState } from '../../shared/ui/EmptyState';
 
 /** The filters that live in the address, so back, refresh and sharing a search all work. */
 const FILTER_KEYS = ['q', 'category', 'cities', 'gender', 'ageMin', 'ageMax'] as const;
@@ -68,8 +77,13 @@ export function SearchPage() {
     total === undefined ? name : t('search.optionCount', { name, count: total });
 
   return (
-    <Page title={t('search.title')} documentTitle={t('titles.search')} subtitle={t('search.body')}>
-      <form className="stack" role="search" onSubmit={submit} noValidate>
+    <Page
+      title={t('search.title')}
+      documentTitle={t('titles.search')}
+      subtitle={t('search.body')}
+      width="wide"
+    >
+      <form className="stack max-w-2xl" role="search" onSubmit={submit} noValidate>
         <TextField
           label={t('search.query')}
           type="search"
@@ -81,9 +95,19 @@ export function SearchPage() {
           }}
           maxLength={100}
         />
-        <details className="card" open={Object.keys(applied).some((key) => key !== 'q')}>
-          <summary className="field__label">{t('search.filters')}</summary>
-          <div className="stack" style={{ marginTop: 'var(--space-md)' }}>
+        <details
+          className="group rounded-2xl border bg-card text-card-foreground shadow-sm"
+          open={Object.keys(applied).some((key) => key !== 'q')}
+        >
+          <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 rounded-2xl px-5 font-semibold [&::-webkit-details-marker]:hidden">
+            <SlidersHorizontal aria-hidden="true" className="size-5" />
+            <span className="flex-1">{t('search.filters')}</span>
+            <ChevronDown
+              aria-hidden="true"
+              className="size-5 text-muted-foreground transition-transform group-open:rotate-180"
+            />
+          </summary>
+          <div className="stack border-t px-5 py-5">
             <Select
               label={t('search.category')}
               placeholder={t('search.anyCategory')}
@@ -108,7 +132,7 @@ export function SearchPage() {
                 label: label(entry.name, count(first?.facets.cities, entry.slug)),
               }))}
             />
-            <div className="row" style={{ alignItems: 'flex-start' }}>
+            <div className="row items-start">
               <TextField
                 label={t('search.ageMin')}
                 type="number"
@@ -120,7 +144,7 @@ export function SearchPage() {
                   setDraft({ ...draft, ageMin: event.target.value });
                 }}
                 error={ageProblem ? t('search.ageRange') : undefined}
-                className="field--half"
+                className="min-w-32 flex-1"
               />
               <TextField
                 label={t('search.ageMax')}
@@ -132,10 +156,10 @@ export function SearchPage() {
                 onChange={(event) => {
                   setDraft({ ...draft, ageMax: event.target.value });
                 }}
-                className="field--half"
+                className="min-w-32 flex-1"
               />
             </div>
-            <div className="stack" style={{ gap: 'var(--space-xs)' }}>
+            <div className="flex flex-col gap-1.5">
               <Select
                 label={t('search.gender')}
                 placeholder={t('search.anyGender')}
@@ -149,7 +173,7 @@ export function SearchPage() {
                   { value: 'non_binary', label: t('onboarding.about.genderNonBinary') },
                 ]}
               />
-              <p className="field__hint">{t('search.genderHint')}</p>
+              <p className="text-sm text-muted-foreground">{t('search.genderHint')}</p>
             </div>
             <Button
               variant="text"
@@ -162,7 +186,10 @@ export function SearchPage() {
             </Button>
           </div>
         </details>
-        <Button type="submit">{t('search.submit')}</Button>
+        <Button type="submit">
+          <SearchIcon aria-hidden="true" />
+          {t('search.submit')}
+        </Button>
       </form>
 
       <section
@@ -171,7 +198,7 @@ export function SearchPage() {
         aria-busy={results.isPending}
       >
         <FormMessage tone="error">{results.error ? errorMessage(results.error) : null}</FormMessage>
-        <p role="status" className="field__hint">
+        <p role="status" className="text-sm text-muted-foreground">
           {first
             ? first.total === 1
               ? t('search.resultsOne')
@@ -179,9 +206,9 @@ export function SearchPage() {
             : null}
         </p>
         {first && first.total === 0 ? (
-          <p className="page__subtitle">{t('search.noResults')}</p>
+          <EmptyState icon={UserSearch} title={t('search.noResults')} />
         ) : null}
-        <ul className="results">
+        <ul className="m-0 grid list-none gap-3 p-0 sm:grid-cols-2">
           {items.map((card) => (
             <li key={card.handle}>
               <ResultCard card={card} />
@@ -209,27 +236,37 @@ function ResultCard({ card }: { readonly card: TalentCard }) {
     card.ageYears === null ? null : t('talent.age', { age: card.ageYears }),
   ].filter(Boolean);
   return (
-    <Link className="result" to={`/talents/${card.handle}`}>
+    <Link
+      className="group flex h-full min-h-12 items-center gap-4 rounded-2xl border bg-card p-4 text-card-foreground no-underline shadow-xs transition-all hover:-translate-y-0.5 hover:border-input hover:shadow-md"
+      to={`/talents/${card.handle}`}
+    >
       {card.avatarUrls ? (
         <img
-          className="result__avatar"
+          className="size-16 shrink-0 rounded-full bg-muted object-cover"
           src={card.avatarUrls.small}
           alt=""
           loading="lazy"
           decoding="async"
         />
       ) : (
-        <span className="result__avatar" aria-hidden="true" />
-      )}
-      <span className="stack" style={{ gap: 2 }}>
-        <span className="choice__title">
-          {card.displayName}
-          {card.verified ? (
-            <span className="badge badge--ready">{t('talent.verified')}</span>
-          ) : null}
+        <span
+          className="grid size-16 shrink-0 place-items-center rounded-full bg-muted font-display text-xl font-bold text-muted-foreground"
+          aria-hidden="true"
+        >
+          {card.displayName.slice(0, 1)}
         </span>
-        <span className="field__hint">{facts.join(' · ')}</span>
+      )}
+      <span className="flex min-w-0 flex-1 flex-col gap-1">
+        <span className="flex flex-wrap items-center gap-2 text-lg font-semibold">
+          {card.displayName}
+          {card.verified ? <VerifiedBadge /> : null}
+        </span>
+        <span className="text-sm text-muted-foreground">{facts.join(' · ')}</span>
       </span>
+      <ChevronRight
+        aria-hidden="true"
+        className="size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+      />
     </Link>
   );
 }

@@ -14,7 +14,7 @@ import { Link, Navigate, useNavigate, useParams } from 'react-router';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { isApiError } from '../../shared/api/api-error';
-import { Button } from '../../shared/ui/Button';
+import { Button, buttonLink } from '../../shared/ui/Button';
 import { Checkbox } from '../../shared/ui/Checkbox';
 import { ChoiceGroup } from '../../shared/ui/ChoiceGroup';
 import { FormMessage } from '../../shared/ui/FormMessage';
@@ -35,6 +35,7 @@ import {
   TALENT_STEPS,
   type TalentStep,
 } from './steps';
+import { Progress } from '@/components/ui/progress';
 
 type Errors = Record<string, string>;
 
@@ -106,23 +107,15 @@ function StepScreen({ step, profile, taxonomy }: StepProps) {
       documentTitle={`${STEP_TITLE[step]}, ${t('onboarding.stepOf', { current: position, total: TALENT_STEPS.length })}`}
       subtitle={STEP_BODY[step]}
       hero={
-        <div className="stack" style={{ gap: 'var(--space-sm)' }}>
-          <p className="steps">
+        <div className="grid gap-2">
+          <p className="text-sm font-semibold text-muted-foreground">
             {t('onboarding.stepOf', { current: position, total: TALENT_STEPS.length })}
           </p>
-          <div
-            className="progress"
-            role="progressbar"
+          <Progress
             aria-label={t('titles.talentOnboarding')}
-            aria-valuemin={1}
-            aria-valuemax={TALENT_STEPS.length}
-            aria-valuenow={position}
-          >
-            <div
-              className="progress__bar"
-              style={{ width: `${String((position / TALENT_STEPS.length) * 100)}%` }}
-            />
-          </div>
+            value={position}
+            max={TALENT_STEPS.length}
+          />
         </div>
       }
     >
@@ -153,7 +146,7 @@ function StepScreen({ step, profile, taxonomy }: StepProps) {
       ) : null}
       {step === 'photo' && profile ? <AvatarStep profile={profile} /> : null}
       {back ? (
-        <Link className="button button--text" to={`/onboarding/talent/${back}`}>
+        <Link className={buttonLink('text')} to={`/onboarding/talent/${back}`}>
           {t('onboarding.back')}
         </Link>
       ) : null}
@@ -262,7 +255,7 @@ function AboutStep({
         ]}
       />
       {gender ? (
-        <div className="stack" style={{ gap: 'var(--space-xs)' }}>
+        <div className="flex flex-col gap-1.5">
           <Checkbox
             label={t('onboarding.about.genderSearchable')}
             checked={genderSearchable}
@@ -270,7 +263,9 @@ function AboutStep({
               setGenderSearchable(event.target.checked);
             }}
           />
-          <p className="field__hint">{t('onboarding.about.genderSearchableHint')}</p>
+          <p className="text-sm text-muted-foreground">
+            {t('onboarding.about.genderSearchableHint')}
+          </p>
         </div>
       ) : null}
       <Button type="submit" loading={pending}>
@@ -344,7 +339,9 @@ function DisciplineStep({
           error={errors['subcategories']}
         />
       ) : (
-        <p className="field__hint">{t('onboarding.discipline.pickCategoryFirst')}</p>
+        <p className="text-sm text-muted-foreground">
+          {t('onboarding.discipline.pickCategoryFirst')}
+        </p>
       )}
       {chosen && skillOptions.length > 0 ? (
         <ChoiceGroup

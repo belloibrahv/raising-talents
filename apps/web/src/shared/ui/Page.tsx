@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, type ReactNode } from 'react';
+import { cn } from '@/lib/utils';
 import { t } from '../../i18n';
 
 interface PageProps {
@@ -10,6 +11,8 @@ interface PageProps {
   readonly hero?: ReactNode;
   readonly className?: string;
   readonly titleClassName?: string;
+  /** Forms and reading stay narrow; lists and queues use more of a wide screen. */
+  readonly width?: 'narrow' | 'wide';
   readonly children: ReactNode;
 }
 
@@ -24,6 +27,7 @@ export function Page({
   hero,
   className,
   titleClassName,
+  width = 'narrow',
   children,
 }: PageProps) {
   const heading = useRef<HTMLHeadingElement>(null);
@@ -36,14 +40,25 @@ export function Page({
   }, [title, documentTitle]);
 
   return (
-    <main id="main" className={['page', className].filter(Boolean).join(' ')}>
-      <div className="page__inner">
+    <main id="main" className={cn('flex-1 px-4 pt-6 pb-28 sm:px-6 sm:pt-10 md:pb-16', className)}>
+      <div
+        className={cn(
+          'mx-auto flex w-full flex-col gap-6',
+          width === 'wide' ? 'max-w-5xl' : 'max-w-xl',
+        )}
+      >
         {hero}
-        <header className="page__header">
-          <h1 ref={heading} tabIndex={-1} className={titleClassName}>
+        <header className="grid gap-2">
+          <h1
+            ref={heading}
+            tabIndex={-1}
+            className={cn('text-3xl font-bold text-balance sm:text-4xl', titleClassName)}
+          >
             {title}
           </h1>
-          {subtitle ? <p className="page__subtitle">{subtitle}</p> : null}
+          {subtitle ? (
+            <p className="text-base text-pretty text-muted-foreground">{subtitle}</p>
+          ) : null}
         </header>
         {children}
       </div>

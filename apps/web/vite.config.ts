@@ -1,3 +1,4 @@
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
@@ -8,6 +9,7 @@ const BRAND_INK = '#1C1A3D';
 export default defineConfig({
   plugins: [
     react(),
+    tailwindcss(),
     VitePWA({
       // The app asks before switching to a new version, so nobody loses a half-filled form.
       registerType: 'prompt',
@@ -71,6 +73,7 @@ export default defineConfig({
   resolve: {
     // Every import of zod, the API contracts' included, goes through this module first.
     alias: [
+      { find: /^@\//, replacement: fileURLToPath(new URL('./src/', import.meta.url)) },
       {
         find: /^zod$/,
         replacement: fileURLToPath(new URL('./src/zod-for-browser.ts', import.meta.url)),

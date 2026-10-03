@@ -10,6 +10,9 @@ import { FormMessage } from '../../shared/ui/FormMessage';
 import { Page } from '../../shared/ui/Page';
 import { Select } from '../../shared/ui/Select';
 import { ModerationTabs } from './ModerationTabs';
+import { Badge } from '@/components/ui/badge';
+import { CircleCheckBig } from 'lucide-react';
+import { EmptyState } from '../../shared/ui/EmptyState';
 
 const QUEUE_KEY = ['moderation', 'media'] as const;
 const REASONS: readonly RejectionCategory[] = ['sexual', 'violence', 'hate', 'other'];
@@ -37,9 +40,9 @@ export function ModerationPage() {
       </div>
       <FormMessage tone="error">{queue.error ? errorMessage(queue.error) : null}</FormMessage>
       {queue.data && items.length === 0 ? (
-        <p className="page__subtitle">{t('moderation.empty')}</p>
+        <EmptyState icon={CircleCheckBig} title={t('moderation.empty')} />
       ) : null}
-      <ul className="stack" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+      <ul className="stack m-0 list-none p-0">
         {items.map((item) => (
           <li key={item.id}>
             <HeldItem item={item} onDecided={setAnnouncement} />
@@ -86,8 +89,11 @@ function HeldItem({
   );
 
   return (
-    <article className="card" aria-labelledby={headingId}>
-      <h2 id={headingId} className="field__label">
+    <article
+      className="flex flex-col gap-4 rounded-2xl border bg-card p-5 text-card-foreground shadow-sm sm:p-6"
+      aria-labelledby={headingId}
+    >
+      <h2 id={headingId} className="text-base font-semibold">
         {t('moderation.item', {
           kind: t(`moderation.${item.kind}`),
           purpose: t(`moderation.${item.purpose}`),
@@ -97,17 +103,23 @@ function HeldItem({
       {item.video ? (
         <VideoPlayer playback={item.video} label={t('moderation.video')} />
       ) : item.urls ? (
-        <img className="media-frame" src={item.urls.medium} alt={t('moderation.previewAlt')} />
+        <img
+          className="aspect-[4/5] w-full rounded-xl bg-muted object-cover"
+          src={item.urls.medium}
+          alt={t('moderation.previewAlt')}
+        />
       ) : null}
       <section aria-label={t('moderation.labels')}>
-        <p className="field__label">{t('moderation.labels')}</p>
-        <ul className="row" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+        <p className="text-base font-semibold">{t('moderation.labels')}</p>
+        <ul className="row m-0 list-none gap-2 p-0">
           {item.labels.map((label) => (
-            <li key={label.name} className="badge">
-              {t('moderation.confidence', {
-                name: label.name,
-                confidence: Math.round(label.confidence),
-              })}
+            <li key={label.name}>
+              <Badge variant="secondary" className="text-sm">
+                {t('moderation.confidence', {
+                  name: label.name,
+                  confidence: Math.round(label.confidence),
+                })}
+              </Badge>
             </li>
           ))}
         </ul>
@@ -135,17 +147,12 @@ function HeldItem({
             required
           />
           <div className="row">
-            <Button
-              type="submit"
-              className="button--small"
-              disabled={!reason}
-              loading={decide.isPending}
-            >
+            <Button type="submit" size="sm" disabled={!reason} loading={decide.isPending}>
               {t('moderation.confirmReject')}
             </Button>
             <Button
               variant="text"
-              className="button--small"
+              size="sm"
               onClick={() => {
                 setRejecting(false);
               }}
@@ -157,7 +164,7 @@ function HeldItem({
       ) : (
         <div className="row">
           <Button
-            className="button--small"
+            size="sm"
             loading={decide.isPending}
             onClick={() => {
               decide.mutate({ decision: 'approve' });
@@ -167,7 +174,7 @@ function HeldItem({
           </Button>
           <Button
             variant="secondary"
-            className="button--small"
+            size="sm"
             onClick={() => {
               setRejecting(true);
             }}

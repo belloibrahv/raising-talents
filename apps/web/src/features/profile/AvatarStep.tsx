@@ -15,6 +15,8 @@ import {
 import { useMediaStatus } from '../../shared/media/use-media';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { keys, refreshMe } from './queries';
+import { buttonLink } from '../../shared/ui/Button';
+import { Progress } from '@/components/ui/progress';
 
 type Phase =
   | { kind: 'idle' }
@@ -91,17 +93,15 @@ export function AvatarStep({ profile }: { readonly profile: MyTalentProfile }) {
     <div className="stack">
       {shown ? (
         <img
-          className="avatar"
+          className="size-32 rounded-full bg-muted object-cover shadow-md ring-4 ring-background"
           src={shown}
           alt={preview ? t('onboarding.photo.preview') : t('onboarding.photo.current')}
         />
       ) : null}
       {phase.kind === 'uploading' ? (
-        <div className="stack" style={{ gap: 'var(--space-xs)' }}>
+        <div className="flex flex-col gap-1.5">
           <p role="status">{t('media.uploading', { percent: Math.round(phase.fraction * 100) })}</p>
-          <div className="progress" aria-hidden="true">
-            <div className="progress__bar" style={{ width: `${String(phase.fraction * 100)}%` }} />
-          </div>
+          <Progress aria-hidden="true" value={phase.fraction * 100} />
         </div>
       ) : null}
       {phase.kind === 'checking' &&
@@ -124,7 +124,7 @@ export function AvatarStep({ profile }: { readonly profile: MyTalentProfile }) {
       {done ? (
         <>
           <FormMessage tone="success">{t('onboarding.photo.done')}</FormMessage>
-          <Link className="button button--primary" to="/portfolio">
+          <Link className={buttonLink('primary')} to="/portfolio">
             {t('onboarding.photo.toPortfolio')}
           </Link>
         </>

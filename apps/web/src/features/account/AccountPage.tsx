@@ -41,7 +41,10 @@ export function AccountPage() {
       documentTitle={t('titles.account')}
       subtitle={t('account.signedInAs', { email: me?.email ?? '' })}
     >
-      <section className="card" aria-labelledby="data-heading">
+      <section
+        className="flex flex-col gap-4 rounded-2xl border bg-card p-5 text-card-foreground shadow-sm sm:p-6"
+        aria-labelledby="data-heading"
+      >
         <h2 id="data-heading">{t('account.dataTitle')}</h2>
         <p>{t('account.dataBody')}</p>
         <FormMessage tone="error">
@@ -94,7 +97,10 @@ function DeleteAccount() {
   };
 
   return (
-    <section className="card" aria-labelledby="delete-heading">
+    <section
+      className="flex flex-col gap-4 rounded-2xl border bg-card p-5 text-card-foreground shadow-sm sm:p-6"
+      aria-labelledby="delete-heading"
+    >
       <h2 id="delete-heading">{t('account.deleteTitle')}</h2>
       <p>{t('account.deleteBody', { days: GRACE_DAYS })}</p>
       <form ref={form} className="stack" onSubmit={submit} noValidate>
@@ -121,7 +127,7 @@ function DeleteAccount() {
           }}
           error={errors.confirm}
         />
-        <Button type="submit" className="button--danger" loading={remove.isPending}>
+        <Button type="submit" variant="danger" loading={remove.isPending}>
           {t('account.delete')}
         </Button>
       </form>

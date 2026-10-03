@@ -74,7 +74,7 @@ export function VerifyEmailPage() {
           inputMode="numeric"
           autoComplete="one-time-code"
           maxLength={VERIFICATION_CODE_LENGTH}
-          inputClassName="field__input--code"
+          inputClassName="h-16 text-center font-mono text-3xl tracking-[0.5em] tabular-nums"
           required
         />
         <Button

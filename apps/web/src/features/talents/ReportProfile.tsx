@@ -1,5 +1,6 @@
 import { REPORT_NOTE_MAX, type ReportCategory } from '@rt/contracts';
 import { useMutation } from '@tanstack/react-query';
+import { Flag } from 'lucide-react';
 import { useState } from 'react';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
@@ -40,19 +41,21 @@ export function ReportProfile({ handle }: { readonly handle: string }) {
   if (!open) {
     return (
       <Button
-        variant="text"
-        className="button--small"
+        variant="quiet"
+        size="sm"
+        className="self-start text-muted-foreground"
         onClick={() => {
           setOpen(true);
         }}
       >
+        <Flag aria-hidden="true" />
         {t('report.open')}
       </Button>
     );
   }
   return (
     <form
-      className="card stack"
+      className="flex flex-col gap-5 rounded-2xl border bg-card p-5 text-card-foreground shadow-sm sm:p-6"
       aria-labelledby="report-heading"
       noValidate
       onSubmit={(event) => {
@@ -64,10 +67,10 @@ export function ReportProfile({ handle }: { readonly handle: string }) {
         report.mutate({ category, note });
       }}
     >
-      <h2 id="report-heading" className="field__label">
+      <h2 id="report-heading" className="text-base font-semibold">
         {t('report.title')}
       </h2>
-      <p className="field__hint">{t('report.body')}</p>
+      <p className="text-sm text-muted-foreground">{t('report.body')}</p>
       <ChoiceGroup
         legend={t('report.category')}
         value={category}
@@ -90,12 +93,12 @@ export function ReportProfile({ handle }: { readonly handle: string }) {
       />
       <FormMessage tone="error">{report.error ? errorMessage(report.error) : null}</FormMessage>
       <div className="row">
-        <Button type="submit" className="button--small" loading={report.isPending}>
+        <Button type="submit" size="sm" loading={report.isPending}>
           {t('report.send')}
         </Button>
         <Button
           variant="text"
-          className="button--small"
+          size="sm"
           onClick={() => {
             setOpen(false);
           }}

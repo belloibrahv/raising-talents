@@ -13,6 +13,9 @@ import { FormMessage } from '../../shared/ui/FormMessage';
 import { Page } from '../../shared/ui/Page';
 import { Select } from '../../shared/ui/Select';
 import { ModerationTabs } from './ModerationTabs';
+import { Badge } from '@/components/ui/badge';
+import { ShieldCheck } from 'lucide-react';
+import { EmptyState } from '../../shared/ui/EmptyState';
 
 const QUEUE_KEY = ['moderation', 'agents'] as const;
 const REASONS: readonly VerificationDeclineCategory[] = [
@@ -44,9 +47,9 @@ export function AgentQueuePage() {
       </div>
       <FormMessage tone="error">{queue.error ? errorMessage(queue.error) : null}</FormMessage>
       {queue.data && items.length === 0 ? (
-        <p className="page__subtitle">{t('moderation.agentsEmpty')}</p>
+        <EmptyState icon={ShieldCheck} title={t('moderation.agentsEmpty')} />
       ) : null}
-      <ul className="stack" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+      <ul className="stack m-0 list-none p-0">
         {items.map((item) => (
           <li key={item.id}>
             <AgentRequest item={item} onDecided={setAnnouncement} />
@@ -109,19 +112,22 @@ function AgentRequest({
     [t('moderation.noteLabel'), item.note || t('moderation.none')],
   ];
   return (
-    <article className="card" aria-labelledby={headingId}>
-      <h2 id={headingId} className="field__label">
+    <article
+      className="flex flex-col gap-4 rounded-2xl border bg-card p-5 text-card-foreground shadow-sm sm:p-6"
+      aria-labelledby={headingId}
+    >
+      <h2 id={headingId} className="text-base font-semibold">
         {t('moderation.agentHeading', { agency: item.agencyName, name: item.city?.name ?? '' })}
       </h2>
       {item.previouslyDeclined > 0 ? (
-        <p className="badge badge--rejected">
+        <Badge variant="destructive">
           {t('moderation.previouslyDeclined', { count: item.previouslyDeclined })}
-        </p>
+        </Badge>
       ) : null}
-      <dl className="facts">
+      <dl className="m-0 grid gap-x-6 gap-y-3 sm:grid-cols-2 [&_dd]:m-0 [&_dd]:break-words">
         {facts.map(([label, value]) => (
           <div key={label}>
-            <dt className="field__hint">{label}</dt>
+            <dt className="text-sm text-muted-foreground">{label}</dt>
             <dd>{value}</dd>
           </div>
         ))}
@@ -149,17 +155,12 @@ function AgentRequest({
             required
           />
           <div className="row">
-            <Button
-              type="submit"
-              className="button--small"
-              disabled={!reason}
-              loading={decide.isPending}
-            >
+            <Button type="submit" size="sm" disabled={!reason} loading={decide.isPending}>
               {t('moderation.confirmDecline')}
             </Button>
             <Button
               variant="text"
-              className="button--small"
+              size="sm"
               onClick={() => {
                 setDeclining(false);
               }}
@@ -171,7 +172,7 @@ function AgentRequest({
       ) : (
         <div className="row">
           <Button
-            className="button--small"
+            size="sm"
             loading={decide.isPending}
             onClick={() => {
               decide.mutate({ decision: 'approve' });
@@ -181,7 +182,7 @@ function AgentRequest({
           </Button>
           <Button
             variant="secondary"
-            className="button--small"
+            size="sm"
             onClick={() => {
               setDeclining(true);
             }}

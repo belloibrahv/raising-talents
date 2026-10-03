@@ -1,0 +1,168 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import '@fontsource-variable/figtree';
+@import '@fontsource-variable/bricolage-grotesque';
+
+/* Dark follows the phone's setting. There is no in-app switch yet. */
+@custom-variant dark (@media (prefers-color-scheme: dark));
+
+/*
+ * Raising Talents on shadcn/ui tokens. A casting call, not a dashboard: ink on white, with
+ * Stagelight yellow kept for the spotlight moment only. Text and control borders meet
+ * WCAG AA (4.5:1 text, 3:1 for the outline of a control) in both schemes.
+ */
+:root {
+  --radius: 0.875rem;
+  --background: #ffffff;
+  --foreground: #1c1a3d;
+  --card: #ffffff;
+  --card-foreground: #1c1a3d;
+  --popover: #ffffff;
+  --popover-foreground: #1c1a3d;
+  --primary: #1c1a3d;
+  --primary-foreground: #ffffff;
+  --secondary: #f2f1f7;
+  --secondary-foreground: #1c1a3d;
+  --muted: #f2f1f7;
+  --muted-foreground: #5e5b78;
+  --accent: #ebe9f4;
+  --accent-foreground: #1c1a3d;
+  --destructive: #b3261e;
+  --destructive-foreground: #ffffff;
+  --destructive-surface: #fbedec;
+  --success: #1e7a4c;
+  --success-surface: #e9f5ee;
+  --spotlight: #ffc93c;
+  --spotlight-foreground: #1c1a3d;
+  /* The stage is ink in both schemes: it is the brand moment, not a surface. */
+  --stage: #1c1a3d;
+  --stage-foreground: #ffffff;
+  --border: #dddbe8;
+  --input: #86839c;
+  --ring: #3b5bdb;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #121120;
+    --foreground: #f4f3fa;
+    --card: #1b1a2e;
+    --card-foreground: #f4f3fa;
+    --popover: #1b1a2e;
+    --popover-foreground: #f4f3fa;
+    --primary: #f4f3fa;
+    --primary-foreground: #1c1a3d;
+    --secondary: #26243b;
+    --secondary-foreground: #f4f3fa;
+    --muted: #26243b;
+    --muted-foreground: #b6b3cf;
+    --accent: #2e2c47;
+    --accent-foreground: #f4f3fa;
+    --destructive: #c4322b;
+    --destructive-foreground: #ffffff;
+    --destructive-surface: #3a1d22;
+    --success: #6fd3a0;
+    --success-surface: #173326;
+    --border: #34324d;
+    --input: #7a7799;
+    --ring: #8ea2ff;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --font-sans: 'Figtree Variable', system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-surface: var(--destructive-surface);
+  --color-success: var(--success);
+  --color-success-surface: var(--success-surface);
+  --color-spotlight: var(--spotlight);
+  --color-spotlight-foreground: var(--spotlight-foreground);
+  --color-stage: var(--stage);
+  --color-stage-foreground: var(--stage-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 6px);
+  --radius-md: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    @apply min-h-dvh bg-background font-sans text-foreground antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-tight;
+  }
+  h2 {
+    @apply text-xl font-semibold;
+  }
+  h3 {
+    @apply text-lg font-semibold;
+  }
+  a {
+    @apply underline-offset-4;
+  }
+  /* Keyboard focus is always visible; pointer clicks do not leave a ring behind. */
+  :focus-visible {
+    @apply outline-3 outline-offset-2 outline-ring;
+  }
+  /* Headings take focus on each new screen so screen readers announce it; no ring for that. */
+  [tabindex='-1']:focus {
+    outline: none;
+  }
+}
+
+@utility visually-hidden {
+  @apply sr-only;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Layout helpers used across screens: a vertical rhythm and a wrapping row of actions. */
+@utility stack {
+  @apply flex flex-col gap-5;
+}
+
+@utility row {
+  @apply flex flex-wrap items-center gap-3;
+}
+
+@utility skip-link {
+  @apply absolute -top-24 left-4 z-50 rounded-full bg-primary px-4 py-2 font-semibold text-primary-foreground focus:top-4;
+}

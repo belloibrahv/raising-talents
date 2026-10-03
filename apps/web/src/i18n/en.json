@@ -587,5 +587,16 @@
     "confirm": "Use this address",
     "keepCurrent": "Keep my current address",
     "done": "Your email address is changed. Use it next time you sign in."
+  },
+  "routeError": {
+    "title": "Something went wrong",
+    "body": "This screen could not be shown. We have been told, and trying again usually works.",
+    "retry": "Try again",
+    "home": "Go to the start",
+    "updateTitle": "A new version is ready",
+    "updateBody": "Raising Talents was updated while this page was open. Reload to carry on.",
+    "update": "Reload",
+    "offlineTitle": "You are offline",
+    "offlineBody": "This screen needs a connection. Check your signal, then try again."
   }
 }

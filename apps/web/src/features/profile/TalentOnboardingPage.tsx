@@ -18,7 +18,7 @@ import { Button, buttonLink } from '../../shared/ui/Button';
 import { Checkbox } from '../../shared/ui/Checkbox';
 import { ChoiceGroup } from '../../shared/ui/ChoiceGroup';
 import { FormMessage } from '../../shared/ui/FormMessage';
-import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
+import { PageSkeleton } from '../../shared/ui/PageSkeleton';
 import { Page } from '../../shared/ui/Page';
 import { Select } from '../../shared/ui/Select';
 import { TextArea } from '../../shared/ui/TextArea';
@@ -45,7 +45,7 @@ export function TalentOnboardingPage() {
   const profile = useMyTalentProfile();
   const taxonomy = useTaxonomy();
 
-  if (profile.isPending || taxonomy.isPending) return <FullScreenStatus />;
+  if (profile.isPending || taxonomy.isPending) return <PageSkeleton />;
   if (profile.isError || taxonomy.isError) {
     return (
       <Page title={t('titles.talentOnboarding')}>

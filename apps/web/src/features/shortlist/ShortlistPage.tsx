@@ -7,7 +7,7 @@ import { errorMessage } from '../../i18n/error-message';
 import { Button, buttonLink } from '../../shared/ui/Button';
 import { EmptyState } from '../../shared/ui/EmptyState';
 import { FormMessage } from '../../shared/ui/FormMessage';
-import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
+import { PageSkeleton } from '../../shared/ui/PageSkeleton';
 import { Page } from '../../shared/ui/Page';
 import { TextArea } from '../../shared/ui/TextArea';
 import { VerifiedBadge } from '../../shared/ui/VerifiedBadge';
@@ -17,7 +17,7 @@ import { useRemoveFromShortlist, useSaveToShortlist, useShortlist } from './quer
 export function ShortlistPage() {
   const shortlist = useShortlist();
   const [announcement, setAnnouncement] = useState('');
-  if (shortlist.isPending) return <FullScreenStatus />;
+  if (shortlist.isPending) return <PageSkeleton />;
   const first = shortlist.data?.pages[0];
   const items = shortlist.data?.pages.flatMap((page) => page.items) ?? [];
   return (

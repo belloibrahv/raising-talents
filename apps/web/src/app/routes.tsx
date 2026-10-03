@@ -8,6 +8,7 @@ import { NetworkBanner } from '../shared/pwa/NetworkBanner';
 import type { AppArea } from '../shared/session/area';
 import { AppLayout } from './AppLayout';
 import { AuthFrame } from './AuthFrame';
+import { RouteError } from './RouteError';
 import { AreaGate } from './AreaGate';
 import { NotFoundPage } from './NotFoundPage';
 
@@ -112,6 +113,7 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
   return [
     {
       element: <Shell updatePrompt={updatePrompt} />,
+      errorElement: <RouteError />,
       children: [
         // The root sends everyone to the start of their area.
         { index: true, element: <Gate /> },
@@ -165,20 +167,26 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
               <AppLayout />
             </Gate>
           ),
+          // A pathless layer, so a failing screen is replaced but the header and tabs stay.
           children: [
-            { path: 'home', element: <HomePage /> },
-            { path: 'onboarding/talent/:step?', element: <TalentOnboardingPage /> },
-            { path: 'onboarding/agent', element: <AgentOnboardingPage /> },
-            { path: 'portfolio', element: <PortfolioPage /> },
-            { path: 'talents/:handle', element: <TalentProfilePage /> },
-            { path: 'search', element: <SearchPage /> },
-            { path: 'shortlist', element: <ShortlistPage /> },
-            { path: 'moderation', element: <ModerationPage /> },
-            { path: 'moderation/agents', element: <AgentQueuePage /> },
-            { path: 'moderation/reports', element: <ReportQueuePage /> },
-            { path: 'verification', element: <VerificationPage /> },
-            { path: 'account', element: <AccountPage /> },
-            { path: 'notifications', element: <NotificationsPage /> },
+            {
+              errorElement: <RouteError />,
+              children: [
+                { path: 'home', element: <HomePage /> },
+                { path: 'onboarding/talent/:step?', element: <TalentOnboardingPage /> },
+                { path: 'onboarding/agent', element: <AgentOnboardingPage /> },
+                { path: 'portfolio', element: <PortfolioPage /> },
+                { path: 'talents/:handle', element: <TalentProfilePage /> },
+                { path: 'search', element: <SearchPage /> },
+                { path: 'shortlist', element: <ShortlistPage /> },
+                { path: 'moderation', element: <ModerationPage /> },
+                { path: 'moderation/agents', element: <AgentQueuePage /> },
+                { path: 'moderation/reports', element: <ReportQueuePage /> },
+                { path: 'verification', element: <VerificationPage /> },
+                { path: 'account', element: <AccountPage /> },
+                { path: 'notifications', element: <NotificationsPage /> },
+              ],
+            },
           ],
         },
         { path: '*', element: <NotFoundPage /> },

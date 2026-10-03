@@ -36,6 +36,7 @@ const csp = policyLines
   .replaceAll('${var.media_url}', media)
   .replaceAll('${var.api_url}', api)
   .replace('${join(" ", var.upload_origins)}', media)
+  .replace('${var.error_reporting_origin}', process.env.ERROR_REPORTING_ORIGIN ?? '')
   // Local runs are plain http.
   .replace('upgrade-insecure-requests', '');
 
@@ -51,6 +52,21 @@ const types = {
   '.json': 'application/json',
 };
 const compressible = new Set(['.html', '.js', '.css', '.svg', '.webmanifest', '.txt', '.json']);
+
+// Compressed once and kept, as the CDN keeps its compressed copies; compressing on every
+// request would make the first page measured look slower than it is.
+const cache = new Map();
+function compressed(file, encoding) {
+  const key = `${file}|${encoding ?? 'identity'}`;
+  if (!cache.has(key)) {
+    const raw = readFileSync(file);
+    cache.set(
+      key,
+      encoding === 'br' ? brotliCompressSync(raw) : encoding === 'gzip' ? gzipSync(raw) : raw,
+    );
+  }
+  return cache.get(key);
+}
 
 createServer((request, response) => {
   const pathname = new URL(request.url ?? '/', 'http://localhost').pathname;
@@ -71,19 +87,17 @@ createServer((request, response) => {
     'cache-control',
     uri.startsWith('/assets/') ? 'public, max-age=31536000, immutable' : 'no-cache',
   );
-  let body = readFileSync(file);
   const accepts = String(request.headers['accept-encoding'] ?? '');
-  if (compressible.has(extension)) {
-    response.setHeader('vary', 'accept-encoding');
-    if (accepts.includes('br')) {
-      body = brotliCompressSync(body);
-      response.setHeader('content-encoding', 'br');
-    } else if (accepts.includes('gzip')) {
-      body = gzipSync(body);
-      response.setHeader('content-encoding', 'gzip');
-    }
-  }
-  response.end(body);
+  const encoding = !compressible.has(extension)
+    ? null
+    : accepts.includes('br')
+      ? 'br'
+      : accepts.includes('gzip')
+        ? 'gzip'
+        : null;
+  if (compressible.has(extension)) response.setHeader('vary', 'accept-encoding');
+  if (encoding) response.setHeader('content-encoding', encoding);
+  response.end(compressed(file, encoding));
 }).listen(port, () => {
   console.log(`Serving dist/ like CloudFront on http://localhost:${String(port)}`);
 });

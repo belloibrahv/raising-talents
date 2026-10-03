@@ -72,6 +72,8 @@ Then set the remaining variables from the staging outputs (`tofu output deploy`)
 | `STAGING_WEB_BUCKET`             | `web_bucket`                       |
 | `STAGING_WEB_DISTRIBUTION_ID`    | `web_distribution_id`              |
 
+Browser error reporting for the web app is optional and stays off until both of these are set: create a Sentry project for the web app, set the repository variable `STAGING_WEB_SENTRY_DSN` to its DSN (a browser DSN is public by design), and set `web_error_reporting_origin` in `staging.tfvars` to the DSN's ingest origin (for example `https://o123.ingest.de.sentry.io`) so the CSP lets the page send to it.
+
 Every address in `alert_emails` receives an email from AWS asking to confirm the alert subscription. Alerts do nothing until it is confirmed.
 
 ## 5. Fill the application secrets

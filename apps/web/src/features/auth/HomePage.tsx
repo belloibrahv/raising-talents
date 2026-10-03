@@ -1,7 +1,7 @@
 import { Building2, Eye, Images, PenLine, Search } from 'lucide-react';
 import { Navigate } from 'react-router';
 import { t } from '../../i18n';
-import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
+import { PageSkeleton } from '../../shared/ui/PageSkeleton';
 import { Page } from '../../shared/ui/Page';
 import { useMyAgentProfile, useMyTalentProfile } from '../profile/queries';
 import { VerificationCard } from '../profile/VerificationCard';
@@ -23,7 +23,7 @@ export function HomePage() {
 
 function TalentHome() {
   const profile = useMyTalentProfile();
-  if (profile.isPending) return <FullScreenStatus />;
+  if (profile.isPending) return <PageSkeleton />;
   const data = profile.data;
   return (
     <Page
@@ -68,7 +68,7 @@ function TalentHome() {
 
 function AgentHome() {
   const profile = useMyAgentProfile();
-  if (profile.isPending) return <FullScreenStatus />;
+  if (profile.isPending) return <PageSkeleton />;
   const data = profile.data;
   return (
     <Page

@@ -37,3 +37,9 @@ variable "upload_origins" {
   description = "Where the browser sends uploads: the media bucket's regional address, for presigned POST."
   type        = list(string)
 }
+
+variable "error_reporting_origin" {
+  description = "The error tracker's ingest origin, such as https://o123.ingest.de.sentry.io. Empty turns reporting off in the CSP."
+  type        = string
+  default     = ""
+}

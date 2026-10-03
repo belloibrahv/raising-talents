@@ -18,7 +18,13 @@ export class DrizzleReportRepository implements ReportRepository {
     const inserted = await this.uow
       .executor()
       .insert(reports)
-      .values(report)
+      .values({
+        ...report,
+        evidence: report.evidence.map((entry) => ({
+          body: entry.body,
+          sentAt: entry.sentAt.toISOString(),
+        })),
+      })
       .onConflictDoNothing({
         target: [reports.reporterId, reports.subjectId],
         where: sql`status = 'open'`,
@@ -48,7 +54,7 @@ export class DrizzleReportRepository implements ReportRepository {
     if (subjects.length === 0) return [];
 
     const ids = subjects.map((subject) => subject.subjectId);
-    const [categoryRows, noteRows] = await Promise.all([
+    const [categoryRows, noteRows, evidenceRows] = await Promise.all([
       db
         .select({ subjectId: reports.subjectId, category: reports.category, count: count() })
         .from(reports)
@@ -63,6 +69,18 @@ export class DrizzleReportRepository implements ReportRepository {
         })
         .from(reports)
         .where(and(isOpen, inArray(reports.subjectId, ids), ne(reports.note, '')))
+        .orderBy(desc(reports.createdAt)),
+      // Newest first; each account keeps the first one that has any.
+      db
+        .select({ subjectId: reports.subjectId, evidence: reports.evidence })
+        .from(reports)
+        .where(
+          and(
+            isOpen,
+            inArray(reports.subjectId, ids),
+            sql`jsonb_array_length(${reports.evidence}) > 0`,
+          ),
+        )
         .orderBy(desc(reports.createdAt)),
     ]);
 
@@ -79,6 +97,9 @@ export class DrizzleReportRepository implements ReportRepository {
         .filter((row) => row.subjectId === subject.subjectId)
         .slice(0, NOTES_SHOWN)
         .map((row) => ({ note: row.note, reportedAt: row.reportedAt })),
+      evidence: (
+        evidenceRows.find((row) => row.subjectId === subject.subjectId)?.evidence ?? []
+      ).map((entry) => ({ body: entry.body, sentAt: new Date(entry.sentAt) })),
     }));
   }
 

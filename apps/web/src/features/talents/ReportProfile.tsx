@@ -1,4 +1,4 @@
-import { REPORT_NOTE_MAX, type ReportCategory } from '@rt/contracts';
+import { REPORT_NOTE_MAX, type CreateReport, type ReportCategory } from '@rt/contracts';
 import { useMutation } from '@tanstack/react-query';
 import { Flag } from 'lucide-react';
 import { useState } from 'react';
@@ -18,8 +18,32 @@ export const REPORT_CATEGORIES: readonly ReportCategory[] = [
   'other',
 ];
 
-/** A quiet link that opens a short form. The reported person never learns who sent it. */
+/** A talent's public profile. */
 export function ReportProfile({ handle }: { readonly handle: string }) {
+  return <ReportForm subject={{ kind: 'talent', handle }} about="profile" />;
+}
+
+/** The other person in a conversation (ADR-039). */
+export function ReportConversation({ conversationId }: { readonly conversationId: string }) {
+  return <ReportForm subject={{ kind: 'conversation', conversationId }} about="conversation" />;
+}
+
+/** A quiet link that opens a short form. The reported person never learns who sent it. */
+function ReportForm({
+  subject,
+  about,
+}: {
+  readonly subject: CreateReport['subject'];
+  readonly about: 'profile' | 'conversation';
+}) {
+  const copy =
+    about === 'profile'
+      ? { open: t('report.open'), title: t('report.title'), thanks: t('report.thanks') }
+      : {
+          open: t('report.conversationOpen'),
+          title: t('report.conversationTitle'),
+          thanks: t('report.conversationThanks'),
+        };
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<ReportCategory | null>(null);
   const [note, setNote] = useState('');
@@ -28,7 +52,7 @@ export function ReportProfile({ handle }: { readonly handle: string }) {
     mutationFn: (input: { category: ReportCategory; note: string }) =>
       api.call('reports.create', {
         body: {
-          subject: { kind: 'talent', handle },
+          subject,
           category: input.category,
           ...(input.note.trim() ? { note: input.note.trim() } : {}),
         },
@@ -36,7 +60,7 @@ export function ReportProfile({ handle }: { readonly handle: string }) {
   });
 
   if (report.isSuccess) {
-    return <FormMessage tone="success">{t('report.thanks')}</FormMessage>;
+    return <FormMessage tone="success">{copy.thanks}</FormMessage>;
   }
   if (!open) {
     return (
@@ -49,7 +73,7 @@ export function ReportProfile({ handle }: { readonly handle: string }) {
         }}
       >
         <Flag aria-hidden="true" />
-        {t('report.open')}
+        {copy.open}
       </Button>
     );
   }
@@ -68,9 +92,11 @@ export function ReportProfile({ handle }: { readonly handle: string }) {
       }}
     >
       <h2 id="report-heading" className="text-base font-semibold">
-        {t('report.title')}
+        {copy.title}
       </h2>
-      <p className="text-sm text-muted-foreground">{t('report.body')}</p>
+      <p className="text-sm text-muted-foreground">
+        {about === 'profile' ? t('report.body') : t('report.conversationBody')}
+      </p>
       <ChoiceGroup
         legend={t('report.category')}
         value={category}

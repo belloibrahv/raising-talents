@@ -59,10 +59,27 @@ export interface SafetyTalents {
   searchable(userId: string): Promise<{ profile: { handle: string; displayName: string } } | null>;
 }
 
+/** What safety needs from messaging. Implemented by ConversationEvidence (ADR-039). */
+export interface SafetyConversations {
+  /**
+   * The other person in a conversation the reporter is part of, with that person's latest
+   * messages there. Null when the conversation does not exist or is not the reporter's.
+   */
+  forReport(
+    conversationId: string,
+    reporterId: string,
+  ): Promise<{ subjectId: string; evidence: { body: string; sentAt: Date }[] } | null>;
+}
+
+/** What safety needs from agent profiles. Implemented by AgentDirectory. */
+export interface SafetyAgents {
+  summaryOf(agentId: string): Promise<{ agencyName: string; verified: boolean } | null>;
+}
+
 export const SafetyErrors = {
   cannotReport: () => domainError('FORBIDDEN', 'Verify your email before reporting a profile.'),
   ownProfile: () => domainError('FORBIDDEN', 'You cannot report your own profile.'),
-  subjectNotFound: () => domainError('NOT_FOUND', 'This profile is not available.'),
+  subjectNotFound: () => domainError('NOT_FOUND', 'This profile or conversation is not available.'),
   noOpenReports: () =>
     domainError(
       'NOT_FOUND',
@@ -81,6 +98,7 @@ export class FileReportHandler {
     private readonly reports: ReportRepository,
     private readonly accounts: SafetyAccounts,
     private readonly talents: SafetyTalents,
+    private readonly conversations: SafetyConversations,
     private readonly rateLimiter: RateLimiter,
     private readonly clock: Clock,
   ) {}
@@ -89,8 +107,14 @@ export class FileReportHandler {
     if (!canReport(await this.accounts.profileContext(reporterId))) {
       return err(SafetyErrors.cannotReport());
     }
-    const subjectId = await this.talents.visibleUserId(input.subject.handle);
-    if (!subjectId) return err(SafetyErrors.subjectNotFound());
+    const subject =
+      input.subject.kind === 'talent'
+        ? await this.talents
+            .visibleUserId(input.subject.handle)
+            .then((subjectId) => (subjectId ? { subjectId, evidence: [] } : null))
+        : await this.conversations.forReport(input.subject.conversationId, reporterId);
+    if (!subject) return err(SafetyErrors.subjectNotFound());
+    const { subjectId, evidence } = subject;
     if (subjectId === reporterId) return err(SafetyErrors.ownProfile());
 
     const limit = await this.rateLimiter.consume(
@@ -115,6 +139,7 @@ export class FileReportHandler {
       subjectId,
       category: input.category,
       note: input.note ?? '',
+      evidence,
       status: 'open',
       createdAt: this.clock.now(),
       closedAt: null,
@@ -134,6 +159,7 @@ export class ListReportedAccountsQuery {
     private readonly reports: ReportRepository,
     private readonly accounts: SafetyAccounts,
     private readonly talents: SafetyTalents,
+    private readonly agents: SafetyAgents,
   ) {}
 
   async execute(viewerId: string, cursor?: string): Promise<Result<ReportQueuePage, DomainError>> {
@@ -144,9 +170,10 @@ export class ListReportedAccountsQuery {
     const page = rows.slice(0, MODERATION_PAGE_SIZE);
     const items = await Promise.all(
       page.map(async (subject) => {
-        const [account, talent, previousActions] = await Promise.all([
+        const [account, talent, agent, previousActions] = await Promise.all([
           this.accounts.profileContext(subject.subjectId),
           this.talents.searchable(subject.subjectId),
+          this.agents.summaryOf(subject.subjectId),
           this.reports.countRestrictions(subject.subjectId),
         ]);
         return {
@@ -156,11 +183,16 @@ export class ListReportedAccountsQuery {
           talent: talent
             ? { handle: talent.profile.handle, displayName: talent.profile.displayName }
             : null,
+          agent: agent ? { agencyName: agent.agencyName, verified: agent.verified } : null,
           openReports: subject.total,
           categories: [...subject.categories],
           notes: subject.notes.map((entry) => ({
             note: entry.note,
             reportedAt: entry.reportedAt.toISOString(),
+          })),
+          evidence: subject.evidence.map((entry) => ({
+            body: entry.body,
+            sentAt: entry.sentAt.toISOString(),
           })),
           firstReportedAt: subject.firstReportedAt.toISOString(),
           previousActions,

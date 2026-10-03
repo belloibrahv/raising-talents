@@ -287,4 +287,29 @@ describe('messages', () => {
     expect(await screen.findByText('No conversations yet')).toBeVisible();
     expect(screen.getByRole('link', { name: 'Find talent' })).toHaveAttribute('href', '/search');
   });
+
+  it("lets a talent report the agent from the conversation, sending only the conversation's id", async () => {
+    const calls = stubApi({
+      '/v1/auth/web/refresh': () => signedIn(talent),
+      'GET /v1/me/notifications/unread': () => Response.json({ unread: 0 }),
+      'GET /v1/me/conversations/unread': () => Response.json({ unread: 0 }),
+      [`GET /v1/me/conversations/${ID}`]: () => Response.json(summary({ unread: 0 })),
+      [`GET /v1/me/conversations/${ID}/messages`]: () =>
+        Response.json({ items: [intro(false)], nextCursor: null }),
+      'POST /v1/reports': () => new Response(null, { status: 204 }),
+    });
+    renderAt(`/messages/${ID}`);
+    const user = userEvent.setup({ delay: null });
+    await user.click(await screen.findByRole('button', { name: 'Report this conversation' }));
+    expect(
+      screen.getByText(/will see the messages the other person sent here, not yours/),
+    ).toBeVisible();
+    await user.click(screen.getByLabelText('Asking for money, scamming or harassing'));
+    await user.click(screen.getByRole('button', { name: 'Send report' }));
+    expect(await screen.findByText(/A moderator will look at this conversation/)).toBeVisible();
+    expect(calls.find((call) => call.path === '/v1/reports')?.body).toEqual({
+      subject: { kind: 'conversation', conversationId: ID },
+      category: 'scam_or_harassment',
+    });
+  });
 });

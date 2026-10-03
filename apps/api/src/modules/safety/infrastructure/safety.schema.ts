@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm';
-import { index, pgSchema, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
+import { index, jsonb, pgSchema, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core';
 import { users } from '../../accounts/infrastructure/account.schema.js';
 
 export const safetySchema = pgSchema('safety');
@@ -33,6 +33,8 @@ export const reports = safetySchema.table(
       .references(() => users.id, { onDelete: 'cascade' }),
     category: reportCategoryEnum('category').notNull(),
     note: text('note').notNull().default(''),
+    /** Messages kept from a conversation report, as { body, sentAt } with ISO times. */
+    evidence: jsonb('evidence').$type<{ body: string; sentAt: string }[]>().notNull().default([]),
     status: reportStatusEnum('status').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
     closedAt: timestamp('closed_at', { withTimezone: true }),

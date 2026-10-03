@@ -18,6 +18,7 @@ import { TALENT } from '../talent-profiles/application/talent-profile.tokens.js'
 import { TalentProfilesModule } from '../talent-profiles/talent-profiles.module.js';
 import {
   ContactNotices,
+  ConversationEvidence,
   ConversationViews,
   ConversationWithTalentQuery,
   GetConversationQuery,
@@ -187,7 +188,13 @@ const Views = Symbol('ConversationViews');
       useFactory: (conversations: ConversationRepository, views: ConversationViews) =>
         new ContactNotices(conversations, views),
     },
+    {
+      provide: MESSAGING.Evidence,
+      inject: [MESSAGING.Conversations],
+      useFactory: (conversations: ConversationRepository) =>
+        new ConversationEvidence(conversations),
+    },
   ],
-  exports: [MESSAGING.Export, MESSAGING.Notices],
+  exports: [MESSAGING.Export, MESSAGING.Notices, MESSAGING.Evidence],
 })
 export class MessagingModule {}

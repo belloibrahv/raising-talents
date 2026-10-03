@@ -42,3 +42,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-036](036-hosting-on-railway.md)                                    | Hosting on Railway                                                   | Accepted                          |
 | [ADR-037](037-soft-email-verification.md)                               | Soft email verification                                              | Accepted                          |
 | [ADR-038](038-contact-requests-and-chat.md)                             | Contact requests and chat                                            | Accepted                          |
+| [ADR-039](039-reporting-from-a-conversation.md)                         | Reporting from a conversation                                        | Accepted                          |

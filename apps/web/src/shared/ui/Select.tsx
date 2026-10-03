@@ -1,6 +1,8 @@
 import { useId, type Ref, type SelectHTMLAttributes } from 'react';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
+import { FieldError, labelClass } from './field-text';
 
-interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'id'> {
+interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'id' | 'size'> {
   readonly label: string;
   readonly placeholder: string;
   readonly options: readonly { value: string; label: string }[];
@@ -12,30 +14,25 @@ interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'id'
 export function Select({ label, placeholder, options, error, ref, ...select }: SelectProps) {
   const id = useId();
   return (
-    <div className="field">
-      <label className="field__label" htmlFor={id}>
+    <div className="grid gap-2">
+      <label className={labelClass} htmlFor={id}>
         {label}
       </label>
-      <select
+      <NativeSelect
         {...select}
         ref={ref}
         id={id}
-        className="field__input field__select"
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : undefined}
       >
-        <option value="">{placeholder}</option>
+        <NativeSelectOption value="">{placeholder}</NativeSelectOption>
         {options.map((option) => (
-          <option key={option.value} value={option.value}>
+          <NativeSelectOption key={option.value} value={option.value}>
             {option.label}
-          </option>
+          </NativeSelectOption>
         ))}
-      </select>
-      {error ? (
-        <p id={`${id}-error`} className="field__error">
-          {error}
-        </p>
-      ) : null}
+      </NativeSelect>
+      {error ? <FieldError id={`${id}-error`}>{error}</FieldError> : null}
     </div>
   );
 }

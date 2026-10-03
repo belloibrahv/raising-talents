@@ -16,6 +16,9 @@ import { Page } from '../../shared/ui/Page';
 import { Select } from '../../shared/ui/Select';
 import { REPORT_CATEGORIES } from '../talents/ReportProfile';
 import { ModerationTabs } from './ModerationTabs';
+import { Badge } from '@/components/ui/badge';
+import { CircleCheckBig } from 'lucide-react';
+import { EmptyState } from '../../shared/ui/EmptyState';
 
 const QUEUE_KEY = ['moderation', 'reports'] as const;
 
@@ -41,9 +44,9 @@ export function ReportQueuePage() {
       </div>
       <FormMessage tone="error">{queue.error ? errorMessage(queue.error) : null}</FormMessage>
       {queue.data && items.length === 0 ? (
-        <p className="page__subtitle">{t('moderation.reportsEmpty')}</p>
+        <EmptyState icon={CircleCheckBig} title={t('moderation.reportsEmpty')} />
       ) : null}
-      <ul className="stack" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+      <ul className="stack m-0 list-none p-0">
         {items.map((item) => (
           <li key={item.accountId}>
             <ReportedAccountCard item={item} onDecided={setAnnouncement} />
@@ -90,23 +93,26 @@ function ReportedAccountCard({
   const headingId = `reported-${item.accountId}`;
   const name = item.talent?.displayName ?? t('moderation.unnamedAccount');
   return (
-    <article className="card" aria-labelledby={headingId}>
-      <h2 id={headingId} className="field__label">
+    <article
+      className="flex flex-col gap-4 rounded-2xl border bg-card p-5 text-card-foreground shadow-sm sm:p-6"
+      aria-labelledby={headingId}
+    >
+      <h2 id={headingId} className="text-base font-semibold">
         {t('moderation.reportedHeading', { name, count: item.openReports })}
       </h2>
       <div className="row">
         {item.status === 'active' ? null : (
-          <span className="badge">{t(`moderation.status_${item.status}`)}</span>
+          <Badge variant="secondary">{t(`moderation.status_${item.status}`)}</Badge>
         )}
         {item.previousActions > 0 ? (
-          <span className="badge badge--rejected">
+          <Badge variant="destructive">
             {t('moderation.previousActions', { count: item.previousActions })}
-          </span>
+          </Badge>
         ) : null}
       </div>
-      <dl className="facts">
+      <dl className="m-0 grid gap-x-6 gap-y-3 sm:grid-cols-2 [&_dd]:m-0 [&_dd]:break-words">
         <div>
-          <dt className="field__hint">{t('moderation.profile')}</dt>
+          <dt className="text-sm text-muted-foreground">{t('moderation.profile')}</dt>
           <dd>
             {item.talent ? (
               <Link to={`/talents/${item.talent.handle}`} target="_blank" rel="noreferrer">
@@ -118,7 +124,7 @@ function ReportedAccountCard({
           </dd>
         </div>
         <div>
-          <dt className="field__hint">{t('moderation.reportedFor')}</dt>
+          <dt className="text-sm text-muted-foreground">{t('moderation.reportedFor')}</dt>
           <dd>
             {item.categories
               .map((entry) =>
@@ -131,14 +137,14 @@ function ReportedAccountCard({
           </dd>
         </div>
         <div>
-          <dt className="field__hint">{t('moderation.firstReported')}</dt>
+          <dt className="text-sm text-muted-foreground">{t('moderation.firstReported')}</dt>
           <dd>{dateFormat.format(new Date(item.firstReportedAt))}</dd>
         </div>
       </dl>
       {item.notes.length > 0 ? (
         <section className="stack" aria-label={t('moderation.reporterNotes')}>
-          <h3 className="field__hint">{t('moderation.reporterNotes')}</h3>
-          <ul className="stack" style={{ margin: 0, paddingInlineStart: 'var(--space-md)' }}>
+          <h3 className="text-sm text-muted-foreground">{t('moderation.reporterNotes')}</h3>
+          <ul className="m-0 grid list-disc gap-1.5 ps-5">
             {item.notes.map((entry) => (
               <li key={entry.reportedAt + entry.note}>{entry.note}</li>
             ))}
@@ -154,7 +160,7 @@ function ReportedAccountCard({
             if (reason) decide.mutate({ decision: restricting, reason });
           }}
         >
-          <p className="field__hint">
+          <p className="text-sm text-muted-foreground">
             {t(restricting === 'ban' ? 'moderation.banExplain' : 'moderation.suspendExplain')}
           </p>
           <Select
@@ -173,7 +179,8 @@ function ReportedAccountCard({
           <div className="row">
             <Button
               type="submit"
-              className={`button--small${restricting === 'ban' ? ' button--danger' : ''}`}
+              size="sm"
+              variant={restricting === 'ban' ? 'danger' : 'primary'}
               disabled={!reason}
               loading={decide.isPending}
             >
@@ -181,7 +188,7 @@ function ReportedAccountCard({
             </Button>
             <Button
               variant="text"
-              className="button--small"
+              size="sm"
               onClick={() => {
                 setRestricting(null);
               }}
@@ -194,7 +201,7 @@ function ReportedAccountCard({
         <div className="row">
           <Button
             variant="secondary"
-            className="button--small"
+            size="sm"
             loading={decide.isPending}
             onClick={() => {
               decide.mutate({ decision: 'dismiss' });
@@ -203,7 +210,7 @@ function ReportedAccountCard({
             {t('moderation.dismiss')}
           </Button>
           <Button
-            className="button--small"
+            size="sm"
             onClick={() => {
               setRestricting('suspend');
             }}
@@ -212,7 +219,7 @@ function ReportedAccountCard({
           </Button>
           <Button
             variant="secondary"
-            className="button--small"
+            size="sm"
             onClick={() => {
               setRestricting('ban');
             }}

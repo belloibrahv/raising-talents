@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router';
 import { z } from 'zod';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
-import { Button } from '../../shared/ui/Button';
+import { Button, buttonLink } from '../../shared/ui/Button';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { Page } from '../../shared/ui/Page';
 import { PasswordField, TextField } from '../../shared/ui/TextField';
@@ -67,10 +67,10 @@ export function SignInPage() {
         <Button type="submit" loading={signIn.isPending}>
           {t('signIn.submit')}
         </Button>
-        <Link className="button button--text" to="/forgot-password">
+        <Link className={buttonLink('text')} to="/forgot-password">
           {t('signIn.forgot')}
         </Link>
-        <Link className="button button--text" to="/sign-up" replace>
+        <Link className={buttonLink('text')} to="/sign-up" replace>
           {t('signIn.noAccount')}
         </Link>
       </form>

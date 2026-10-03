@@ -6,7 +6,7 @@ import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { isApiError } from '../../shared/api/api-error';
 import { api } from '../../shared/api/client';
-import { Button } from '../../shared/ui/Button';
+import { Button, buttonLink } from '../../shared/ui/Button';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { Page } from '../../shared/ui/Page';
 import { PasswordField, TextField } from '../../shared/ui/TextField';
@@ -93,7 +93,7 @@ function ResetForm({ email }: { readonly email: string }) {
           inputMode="numeric"
           autoComplete="one-time-code"
           maxLength={VERIFICATION_CODE_LENGTH}
-          inputClassName="field__input--code"
+          inputClassName="h-16 text-center font-mono text-3xl tracking-[0.5em] tabular-nums"
           required
         />
         <PasswordField
@@ -123,7 +123,7 @@ function ResetForm({ email }: { readonly email: string }) {
             ? t('verifyEmail.resendIn', { seconds: secondsLeft })
             : t('resetPassword.resend')}
         </Button>
-        <Link className="button button--text" to="/forgot-password" replace>
+        <Link className={buttonLink('text')} to="/forgot-password" replace>
           {t('resetPassword.otherEmail')}
         </Link>
       </form>

@@ -6,7 +6,7 @@ import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { isApiError } from '../../shared/api/api-error';
 import { api } from '../../shared/api/client';
-import { Button } from '../../shared/ui/Button';
+import { Button, buttonLink } from '../../shared/ui/Button';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { Page } from '../../shared/ui/Page';
 import { TextArea } from '../../shared/ui/TextArea';
@@ -59,7 +59,7 @@ export function VerificationPage() {
       {request.isSuccess ? (
         <>
           <FormMessage tone="success">{t('verification.sent')}</FormMessage>
-          <Link className="button button--primary" to="/home">
+          <Link className={buttonLink('primary')} to="/home">
             {t('nav.home')}
           </Link>
         </>

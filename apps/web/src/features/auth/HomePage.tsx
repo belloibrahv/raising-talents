@@ -1,10 +1,12 @@
-import { Link, Navigate } from 'react-router';
+import { Building2, Eye, Images, PenLine, Search } from 'lucide-react';
+import { Navigate } from 'react-router';
 import { t } from '../../i18n';
 import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
 import { Page } from '../../shared/ui/Page';
 import { useMyAgentProfile, useMyTalentProfile } from '../profile/queries';
 import { VerificationCard } from '../profile/VerificationCard';
 import { useSession } from './use-auth';
+import { ActionCard } from '../../shared/ui/ActionCard';
 
 /** The signed-in start: finishes onboarding first, then a short dashboard for each role. */
 export function HomePage() {
@@ -29,18 +31,36 @@ function TalentHome() {
       documentTitle={t('titles.home')}
       subtitle={t('home.talentReadyBody')}
     >
-      <nav className="stack" aria-label={t('titles.home')}>
-        <Link className="button button--primary" to="/portfolio">
-          {t('home.managePortfolio')}
-        </Link>
-        {data ? (
-          <Link className="button button--secondary" to={`/talents/${data.handle}`}>
-            {t('home.viewProfile')}
-          </Link>
-        ) : null}
-        <Link className="button button--text" to="/onboarding/talent/about">
-          {t('home.editProfile')}
-        </Link>
+      <nav aria-label={t('titles.home')}>
+        <ul className="m-0 grid list-none gap-3 p-0">
+          <li>
+            <ActionCard
+              featured
+              to="/portfolio"
+              icon={Images}
+              title={t('home.managePortfolio')}
+              description={t('home.managePortfolioBody')}
+            />
+          </li>
+          {data ? (
+            <li>
+              <ActionCard
+                to={`/talents/${data.handle}`}
+                icon={Eye}
+                title={t('home.viewProfile')}
+                description={t('home.viewProfileBody')}
+              />
+            </li>
+          ) : null}
+          <li>
+            <ActionCard
+              to="/onboarding/talent/about"
+              icon={PenLine}
+              title={t('home.editProfile')}
+              description={t('home.editProfileBody')}
+            />
+          </li>
+        </ul>
       </nav>
     </Page>
   );
@@ -56,14 +76,28 @@ function AgentHome() {
       documentTitle={t('titles.home')}
       subtitle={data?.verified ? t('home.agentVerified') : t('home.agentPending')}
     >
+      <nav aria-label={t('titles.home')}>
+        <ul className="m-0 grid list-none gap-3 p-0">
+          <li>
+            <ActionCard
+              featured
+              to="/search"
+              icon={Search}
+              title={t('home.findTalent')}
+              description={t('home.findTalentBody')}
+            />
+          </li>
+          <li>
+            <ActionCard
+              to="/onboarding/agent"
+              icon={Building2}
+              title={t('home.editProfile')}
+              description={t('home.editAgencyBody')}
+            />
+          </li>
+        </ul>
+      </nav>
       <VerificationCard />
-      <p>{t('home.agentSearchSoon')}</p>
-      <Link className="button button--primary" to="/search">
-        {t('home.findTalent')}
-      </Link>
-      <Link className="button button--secondary" to="/onboarding/agent">
-        {t('home.editProfile')}
-      </Link>
     </Page>
   );
 }

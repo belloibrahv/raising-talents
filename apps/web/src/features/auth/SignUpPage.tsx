@@ -6,7 +6,7 @@ import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { isApiError } from '../../shared/api/api-error';
 import { LAUNCH_COUNTRY_CODE, LEGAL_URLS } from '../../shared/config';
-import { Button } from '../../shared/ui/Button';
+import { Button, buttonLink } from '../../shared/ui/Button';
 import { Checkbox } from '../../shared/ui/Checkbox';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { Page } from '../../shared/ui/Page';
@@ -121,7 +121,7 @@ export function SignUpPage() {
           label={t('signUp.terms')}
           required
         />
-        <p className="links">
+        <p className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
           <a href={LEGAL_URLS.terms} target="_blank" rel="noreferrer">
             {t('signUp.readTerms')}
           </a>
@@ -132,7 +132,7 @@ export function SignUpPage() {
         <Button type="submit" loading={signUp.isPending}>
           {t('signUp.submit')}
         </Button>
-        <Link className="button button--text" to="/sign-in" replace>
+        <Link className={buttonLink('text')} to="/sign-in" replace>
           {t('signUp.haveAccount')}
         </Link>
       </form>

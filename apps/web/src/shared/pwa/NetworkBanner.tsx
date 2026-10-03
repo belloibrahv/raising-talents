@@ -1,3 +1,4 @@
+import { WifiOff } from 'lucide-react';
 import { useSyncExternalStore } from 'react';
 import { t } from '../../i18n';
 
@@ -19,7 +20,12 @@ export function NetworkBanner() {
   const online = useOnline();
   return (
     <div role="status" aria-live="polite">
-      {online ? null : <p className="banner">{t('pwa.offline')}</p>}
+      {online ? null : (
+        <p className="flex items-center justify-center gap-2 bg-primary px-4 py-2 text-center text-sm font-semibold text-primary-foreground">
+          <WifiOff aria-hidden="true" className="size-4" />
+          {t('pwa.offline')}
+        </p>
+      )}
     </div>
   );
 }

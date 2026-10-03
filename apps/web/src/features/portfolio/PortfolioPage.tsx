@@ -1,4 +1,4 @@
-import { PORTFOLIO_CAPTION_MAX, type MyPortfolioItem } from '@rt/contracts';
+import { PORTFOLIO_CAPTION_MAX, type MediaStatus, type MyPortfolioItem } from '@rt/contracts';
 import { useState } from 'react';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
@@ -22,6 +22,22 @@ import {
   useRemoveItem,
   useUpdateCaption,
 } from './queries';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { ImagePlus } from 'lucide-react';
+import { EmptyState } from '../../shared/ui/EmptyState';
+
+/** Ready is good news, held and in progress are neutral, rejected and failed need the owner. */
+const STATUS_BADGE: Record<MediaStatus, 'success' | 'secondary' | 'destructive'> = {
+  awaiting_upload: 'secondary',
+  processing: 'secondary',
+  scanning: 'secondary',
+  ready: 'success',
+  held_for_review: 'secondary',
+  rejected: 'destructive',
+  failed: 'destructive',
+  deleted: 'secondary',
+};
 
 export function PortfolioPage() {
   const portfolio = useMyPortfolio();
@@ -69,7 +85,9 @@ export function PortfolioPage() {
       documentTitle={t('titles.portfolio')}
       subtitle={t('portfolio.body', { max: maxItems })}
     >
-      <p className="field__hint">{t('portfolio.count', { count: items.length, max: maxItems })}</p>
+      <p className="text-sm text-muted-foreground">
+        {t('portfolio.count', { count: items.length, max: maxItems })}
+      </p>
       <div className="visually-hidden" role="status" aria-live="polite">
         {announcement}
       </div>
@@ -77,16 +95,16 @@ export function PortfolioPage() {
         {problem ?? (move.error ? errorMessage(move.error) : null)}
       </FormMessage>
       {upload ? (
-        <div className="stack" style={{ gap: 'var(--space-xs)' }}>
+        <div className="flex flex-col gap-1.5">
           <p role="status">
             {t('media.uploading', { percent: Math.round(upload.fraction * 100) })}
           </p>
-          <div className="progress" aria-hidden="true">
-            <div className="progress__bar" style={{ width: `${String(upload.fraction * 100)}%` }} />
-          </div>
+          <Progress aria-hidden="true" value={upload.fraction * 100} />
         </div>
       ) : full ? (
-        <p className="message message--success">{t('portfolio.full')}</p>
+        <FormMessage announce={false} tone="success">
+          {t('portfolio.full')}
+        </FormMessage>
       ) : (
         <FilePicker
           label={t('portfolio.add')}
@@ -95,9 +113,9 @@ export function PortfolioPage() {
         />
       )}
       {items.length === 0 ? (
-        <p className="page__subtitle">{t('portfolio.empty')}</p>
+        <EmptyState icon={ImagePlus} title={t('portfolio.empty')} />
       ) : (
-        <ol className="stack" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+        <ol className="stack m-0 list-none p-0">
           {items.map((item, index) => (
             <li key={item.id}>
               <PortfolioItemCard
@@ -155,22 +173,25 @@ function PortfolioItemCard({
   const headingId = `item-${item.id}`;
 
   return (
-    <article className="card" aria-labelledby={headingId}>
-      <div className="row" style={{ justifyContent: 'space-between' }}>
-        <h2 id={headingId} className="field__label">
+    <article
+      className="flex flex-col gap-4 rounded-2xl border bg-card p-5 text-card-foreground shadow-sm sm:p-6"
+      aria-labelledby={headingId}
+    >
+      <div className="row justify-between">
+        <h2 id={headingId} className="text-base font-semibold">
           {t('portfolio.item', { position })}
         </h2>
-        <span className={`badge badge--${item.mediaStatus}`}>{t(`media.${item.mediaStatus}`)}</span>
+        <Badge variant={STATUS_BADGE[item.mediaStatus]}>{t(`media.${item.mediaStatus}`)}</Badge>
       </div>
       <ItemMedia item={item} name={name} />
       {item.mediaStatus === 'rejected' && item.rejectionReason ? (
-        <p className="message message--error">
+        <FormMessage announce={false} tone="error">
           {t('portfolio.rejectedReason', { reason: item.rejectionReason })}
-        </p>
+        </FormMessage>
       ) : item.mediaStatus === 'held_for_review' ? (
-        <p className="field__hint">{t('portfolio.heldBody')}</p>
+        <p className="text-sm text-muted-foreground">{t('portfolio.heldBody')}</p>
       ) : item.mediaStatus !== 'ready' ? (
-        <p className="field__hint">{t('portfolio.processingBody')}</p>
+        <p className="text-sm text-muted-foreground">{t('portfolio.processingBody')}</p>
       ) : null}
       <form
         className="stack"
@@ -192,7 +213,7 @@ function PortfolioItemCard({
           <Button
             type="submit"
             variant="secondary"
-            className="button--small"
+            size="sm"
             loading={updateCaption.isPending}
             disabled={caption.trim() === item.caption}
           >
@@ -206,7 +227,7 @@ function PortfolioItemCard({
       <div className="row">
         <Button
           variant="secondary"
-          className="button--small"
+          size="sm"
           disabled={isFirst || moving}
           aria-label={t('portfolio.moveUp', { name })}
           onClick={() => {
@@ -217,7 +238,7 @@ function PortfolioItemCard({
         </Button>
         <Button
           variant="secondary"
-          className="button--small"
+          size="sm"
           disabled={isLast || moving}
           aria-label={t('portfolio.moveDown', { name })}
           onClick={() => {
@@ -229,7 +250,7 @@ function PortfolioItemCard({
         {confirming ? null : (
           <Button
             variant="text"
-            className="button--small"
+            size="sm"
             onClick={() => {
               setConfirming(true);
             }}
@@ -243,7 +264,7 @@ function PortfolioItemCard({
           <p>{t('portfolio.removeConfirm')}</p>
           <div className="row">
             <Button
-              className="button--small"
+              size="sm"
               loading={remove.isPending}
               onClick={() => {
                 remove.mutate(item.id, { onSuccess: onRemoved });
@@ -253,7 +274,7 @@ function PortfolioItemCard({
             </Button>
             <Button
               variant="text"
-              className="button--small"
+              size="sm"
               onClick={() => {
                 setConfirming(false);
               }}
@@ -279,7 +300,7 @@ function ItemMedia({ item, name }: { item: MyPortfolioItem; name: string }) {
   if (item.urls) {
     return (
       <img
-        className="media-frame"
+        className="aspect-[4/5] w-full rounded-xl bg-muted object-cover"
         src={item.urls.medium}
         srcSet={`${item.urls.small} 256w, ${item.urls.medium} 1024w, ${item.urls.large} 2048w`}
         sizes="(max-width: 30rem) 100vw, 30rem"
@@ -289,5 +310,7 @@ function ItemMedia({ item, name }: { item: MyPortfolioItem; name: string }) {
       />
     );
   }
-  return <div className="media-frame" aria-hidden="true" />;
+  return (
+    <div className="aspect-[4/5] w-full rounded-xl bg-muted object-cover" aria-hidden="true" />
+  );
 }

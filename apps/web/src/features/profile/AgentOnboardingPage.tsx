@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { isApiError } from '../../shared/api/api-error';
-import { Button } from '../../shared/ui/Button';
+import { Button, buttonLink } from '../../shared/ui/Button';
 import { ChoiceGroup } from '../../shared/ui/ChoiceGroup';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
@@ -160,7 +160,7 @@ function AgentForm({
       {saved ? (
         <>
           <FormMessage tone="success">{t('onboarding.agent.done')}</FormMessage>
-          <Link className="button button--primary" to="/home">
+          <Link className={buttonLink('primary')} to="/home">
             {t('nav.home')}
           </Link>
         </>

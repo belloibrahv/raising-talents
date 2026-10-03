@@ -32,3 +32,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-026](026-how-agents-are-verified.md)                               | How agents are verified                                              | Proposed                          |
 | [ADR-027](027-account-deletion-and-data-export.md)                      | Account deletion and data export                                     | Proposed                          |
 | [ADR-028](028-reports-and-account-enforcement.md)                       | Reports and account enforcement                                      | Proposed                          |
+| [ADR-029](029-shadcn-ui-on-tailwind-for-the-web-app.md)                 | shadcn/ui on Tailwind CSS for the web app                            | Accepted                          |

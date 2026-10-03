@@ -194,4 +194,5 @@ Milestone 1, foundations.
 | Notifications: emails for moderation and verification decisions, sent once per event                           | Done                                     |
 | Privacy: data export, account deletion with a grace period and scheduled erasure (ADR-027)                     | Done, grace period provisional           |
 | Safety: member reports, moderator queue, suspend and ban with sign-out and email, operator reinstate (ADR-028) | Done, categories provisional             |
+| PWA design system: shadcn/ui on Tailwind, brand tokens, dark scheme, bottom tab bar on phones (ADR-029)        | Done                                     |
 | CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                         | Done                                     |

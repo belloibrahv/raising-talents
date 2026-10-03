@@ -1,5 +1,8 @@
 import { useId, type Ref, type TextareaHTMLAttributes } from 'react';
+import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import { t } from '../../i18n';
+import { FieldError, FieldHint, labelClass } from './field-text';
 
 interface TextAreaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'id' | 'value'> {
   readonly label: string;
@@ -16,34 +19,34 @@ export function TextArea({ label, hint, error, maxLength, value, ref, ...input }
   const describedBy = [hint ? `${id}-hint` : '', `${id}-count`, error ? `${id}-error` : '']
     .filter(Boolean)
     .join(' ');
+  const nearLimit = value.length >= maxLength * 0.9;
   return (
-    <div className="field">
-      <label className="field__label" htmlFor={id}>
+    <div className="grid gap-2">
+      <label className={labelClass} htmlFor={id}>
         {label}
       </label>
-      <textarea
+      <Textarea
         {...input}
         ref={ref}
         id={id}
         value={value}
         maxLength={maxLength}
-        className="field__input field__textarea"
+        className="min-h-28"
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
       />
-      {hint ? (
-        <p id={`${id}-hint`} className="field__hint">
-          {hint}
-        </p>
-      ) : null}
-      <p id={`${id}-count`} className="field__hint" aria-live="polite">
+      {hint ? <FieldHint id={`${id}-hint`}>{hint}</FieldHint> : null}
+      <p
+        id={`${id}-count`}
+        className={cn(
+          'text-right text-xs tabular-nums text-muted-foreground',
+          nearLimit && 'font-semibold text-foreground',
+        )}
+        aria-live="polite"
+      >
         {t('onboarding.story.counter', { count: value.length, max: maxLength })}
       </p>
-      {error ? (
-        <p id={`${id}-error`} className="field__error">
-          {error}
-        </p>
-      ) : null}
+      {error ? <FieldError id={`${id}-error`}>{error}</FieldError> : null}
     </div>
   );
 }

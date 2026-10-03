@@ -191,4 +191,5 @@ Milestone 1, foundations.
 | Milestone 3: talent search (Typesense, event-driven indexing, rebuild, agent search screen)                   | Done; hosting needs a decision (ADR-025) |
 | Moderation: staff accounts, held media queue, approve or reject with an audit trail                           | Done                                     |
 | Agent verification: request with evidence, moderator queue, badge (ADR-026)                                   | Done, evidence rules provisional         |
+| Notifications: emails for moderation and verification decisions, sent once per event                          | Done                                     |
 | CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                        | Done                                     |

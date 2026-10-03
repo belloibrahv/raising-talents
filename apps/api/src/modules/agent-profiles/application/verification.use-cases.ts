@@ -34,6 +34,7 @@ export const VERIFICATION = {
   Request: Symbol('RequestVerificationHandler'),
   List: Symbol('ListPendingVerificationsQuery'),
   Decide: Symbol('DecideVerificationHandler'),
+  Outcomes: Symbol('VerificationOutcomes'),
 } as const;
 
 export const VERIFICATION_REQUEST_LIMIT = { perDay: 3, windowSeconds: 86_400 } as const;
@@ -70,6 +71,26 @@ function viewFor(
         : null,
     canRequest: Boolean(profile?.isComplete) && state !== 'verified' && state !== 'pending',
   };
+}
+
+/** Read by other modules (notifications) to learn how a request ended. */
+export class VerificationOutcomes {
+  constructor(private readonly requests: VerificationRequestRepository) {}
+
+  async outcome(requestId: string): Promise<{
+    agentId: string;
+    status: 'pending' | 'approved' | 'declined';
+    declineReason: string | null;
+  } | null> {
+    const request = await this.requests.findById(requestId);
+    if (!request) return null;
+    const props = request.snapshot();
+    return {
+      agentId: props.agentId,
+      status: props.status,
+      declineReason: props.declineCategory ? DECLINE_REASON[props.declineCategory] : null,
+    };
+  }
 }
 
 export class GetMyVerificationQuery {

@@ -119,7 +119,7 @@ export async function createTestApp(): Promise<TestApp> {
     .useValue(new FakePasswordHasher())
     .overrideProvider(IDENTITY.BreachedPasswords)
     .useValue(new FakeBreachedPasswordChecker())
-    .overrideProvider(IDENTITY.EmailSender)
+    .overrideProvider(PLATFORM.EmailSender)
     .useValue(email)
     .overrideProvider(TAXONOMY.Source)
     .useValue(sampleTaxonomySource)

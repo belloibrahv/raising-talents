@@ -1,6 +1,6 @@
 import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
 import nodemailer, { type Transporter } from 'nodemailer';
-import type { EmailMessage, EmailSender } from '../application/ports.js';
+import type { EmailMessage, EmailSender } from './email-sender.js';
 
 export interface SmtpSettings {
   readonly host: string;

@@ -22,6 +22,7 @@ import { VerificationController } from './interface/http/verification.controller
 import {
   DecideVerificationHandler,
   GetMyVerificationQuery,
+  VerificationOutcomes,
   ListPendingVerificationsQuery,
   RequestVerificationHandler,
   VERIFICATION,
@@ -72,6 +73,11 @@ import type { RateLimiter } from '../../platform/rate-limit/rate-limiter.js';
       inject: [PLATFORM.UnitOfWork, PLATFORM.EventRecorder],
       useFactory: (uow: DrizzleUnitOfWork, events: EventRecorder) =>
         new DrizzleVerificationRequestRepository(uow, events),
+    },
+    {
+      provide: VERIFICATION.Outcomes,
+      inject: [VERIFICATION.Requests],
+      useFactory: (requests: VerificationRequestRepository) => new VerificationOutcomes(requests),
     },
     {
       provide: VERIFICATION.GetMine,
@@ -131,5 +137,6 @@ import type { RateLimiter } from '../../platform/rate-limit/rate-limiter.js';
       ) => new DecideVerificationHandler(repo, requests, accounts, uow, clock, logger),
     },
   ],
+  exports: [VERIFICATION.Outcomes],
 })
 export class AgentProfilesModule {}

@@ -1,6 +1,6 @@
 import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
 import { SendEmailCommand, type SESv2Client } from '@aws-sdk/client-sesv2';
-import type { EmailMessage, EmailSender } from '../application/ports.js';
+import type { EmailMessage, EmailSender } from './email-sender.js';
 
 /**
  * Amazon SES through its API, authenticated by the ECS task's IAM role.

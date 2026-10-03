@@ -27,6 +27,9 @@ import {
   PORTFOLIO,
   type GetMyPortfolioQuery,
 } from '../portfolio/application/portfolio.use-cases.js';
+import type { NotificationsExport } from '../notifications/application/inbox.js';
+import { NOTIFICATIONS } from '../notifications/application/notifications.js';
+import { NotificationsModule } from '../notifications/notifications.module.js';
 import { PortfolioModule } from '../portfolio/portfolio.module.js';
 import { SHORTLIST, type ShortlistExport } from '../shortlists/application/shortlist.use-cases.js';
 import { ShortlistsModule } from '../shortlists/shortlists.module.js';
@@ -55,6 +58,7 @@ const SOURCES = Symbol('PrivacySources');
     AgentProfilesModule,
     PortfolioModule,
     ShortlistsModule,
+    NotificationsModule,
   ],
   controllers: [PrivacyController],
   providers: [
@@ -66,6 +70,7 @@ const SOURCES = Symbol('PrivacySources');
         VERIFICATION.GetMine,
         PORTFOLIO.GetMine,
         SHORTLIST.Export,
+        NOTIFICATIONS.Export,
       ],
       useFactory: (
         talent: GetMyTalentProfileQuery,
@@ -73,12 +78,14 @@ const SOURCES = Symbol('PrivacySources');
         verification: GetMyVerificationQuery,
         portfolio: GetMyPortfolioQuery,
         shortlist: ShortlistExport,
+        notifications: NotificationsExport,
       ): PrivacySources => ({
         talentProfile: (userId) => talent.execute(userId),
         agentProfile: (userId) => agent.execute(userId),
         agentVerification: (userId) => verification.execute(userId),
         portfolio: (userId) => portfolio.execute(userId),
         shortlist: (userId) => shortlist.forAgent(userId),
+        notifications: (userId) => notifications.forUser(userId),
       }),
     },
     {

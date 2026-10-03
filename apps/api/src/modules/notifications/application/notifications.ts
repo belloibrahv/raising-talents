@@ -12,9 +12,17 @@ import {
   mediaApprovedEmail,
   mediaRejectedEmail,
 } from './emails.js';
+import { newId } from '../../../platform/ids.js';
+import type { Inbox, NoticeContent } from './inbox.js';
 
 export const NOTIFICATIONS = {
   Log: Symbol('NotificationLog'),
+  Inbox: Symbol('Inbox'),
+  List: Symbol('ListNotificationsQuery'),
+  Unread: Symbol('UnreadCountQuery'),
+  MarkRead: Symbol('MarkNotificationsReadHandler'),
+  Export: Symbol('NotificationsExport'),
+  Prune: Symbol('InboxPruneJob'),
   EventHandlers: Symbol('NotificationEventHandlers'),
 } as const;
 
@@ -66,6 +74,7 @@ export class Notifier {
   constructor(
     private readonly email: EmailSender,
     private readonly log: NotificationLog,
+    private readonly inbox: Inbox,
     private readonly recipients: NotificationRecipients,
     private readonly media: NotificationMedia,
     private readonly verifications: NotificationVerifications,
@@ -79,7 +88,18 @@ export class Notifier {
   async mediaDecided(event: DomainEvent): Promise<void> {
     const file = (await this.media.describe([event.aggregateId])).get(event.aggregateId);
     if (!file?.reviewed) return;
-    await this.sendOnce(event, file.ownerId, (to) =>
+    const notice: NoticeContent | null =
+      file.status === 'ready'
+        ? { kind: 'media_approved', mediaKind: file.kind, purpose: file.purpose }
+        : file.status === 'rejected' && file.rejectionReason
+          ? {
+              kind: 'media_rejected',
+              mediaKind: file.kind,
+              purpose: file.purpose,
+              reason: file.rejectionReason,
+            }
+          : null;
+    await this.deliver(event, file.ownerId, notice, (to) =>
       file.status === 'ready'
         ? mediaApprovedEmail({ to, kind: file.kind, purpose: file.purpose, appUrl: this.appUrl })
         : file.status === 'rejected' && file.rejectionReason
@@ -97,7 +117,13 @@ export class Notifier {
   async verificationDecided(event: DomainEvent): Promise<void> {
     const outcome = await this.verifications.outcome(event.aggregateId);
     if (!outcome) return;
-    await this.sendOnce(event, outcome.agentId, (to) =>
+    const notice: NoticeContent | null =
+      outcome.status === 'approved'
+        ? { kind: 'agent_verified' }
+        : outcome.status === 'declined' && outcome.declineReason
+          ? { kind: 'agent_declined', reason: outcome.declineReason }
+          : null;
+    await this.deliver(event, outcome.agentId, notice, (to) =>
       outcome.status === 'approved'
         ? agentVerifiedEmail({ to, appUrl: this.appUrl })
         : outcome.status === 'declined' && outcome.declineReason
@@ -110,7 +136,11 @@ export class Notifier {
   async deletionScheduled(event: DomainEvent): Promise<void> {
     const scheduledFor = new Date(String(event.payload['scheduledFor']));
     if (Number.isNaN(scheduledFor.getTime())) return;
-    await this.sendOnce(event, event.aggregateId, (to) =>
+    const notice: NoticeContent = {
+      kind: 'deletion_scheduled',
+      scheduledFor: scheduledFor.toISOString(),
+    };
+    await this.deliver(event, event.aggregateId, notice, (to) =>
       deletionScheduledEmail({ to, scheduledFor, appUrl: this.appUrl }),
     );
   }
@@ -119,24 +149,45 @@ export class Notifier {
   async accountRestricted(event: DomainEvent, action: 'suspend' | 'ban'): Promise<void> {
     const reason = event.payload['reason'];
     if (!isReportCategory(reason)) return;
-    await this.sendOnce(event, event.aggregateId, (to) =>
+    // Email only: a restricted member cannot sign in to read the inbox.
+    await this.deliver(event, event.aggregateId, null, (to) =>
       accountRestrictedEmail({ to, action, reason, supportEmail: this.supportEmail }),
     );
   }
 
   async accountReinstated(event: DomainEvent): Promise<void> {
-    await this.sendOnce(event, event.aggregateId, (to) =>
+    await this.deliver(event, event.aggregateId, { kind: 'account_reinstated' }, (to) =>
       accountReinstatedEmail({ to, appUrl: this.appUrl }),
     );
   }
 
-  private async sendOnce(
+  /** The inbox only: identity already emails the owner when their password changes. */
+  async passwordChanged(event: DomainEvent): Promise<void> {
+    await this.deliver(event, event.aggregateId, { kind: 'password_changed' }, null);
+  }
+
+  /**
+   * The inbox first, then the email. Each is idempotent on its own (the inbox by key, the
+   * email by the sent log), so a retried event fills in whichever part failed.
+   */
+  private async deliver(
     event: DomainEvent,
     userId: string,
-    build: (to: string) => EmailMessage | null,
+    notice: NoticeContent | null,
+    build: ((to: string) => EmailMessage | null) | null,
   ): Promise<void> {
     const key = keyFor(event);
-    if (await this.log.wasSent(key)) return;
+    if (notice) {
+      await this.inbox.add({
+        id: newId(),
+        key,
+        userId,
+        content: notice,
+        createdAt: event.occurredAt,
+        readAt: null,
+      });
+    }
+    if (!build || (await this.log.wasSent(key))) return;
     const recipient = await this.recipients.findSummaryById(userId);
     const message = recipient ? build(recipient.email) : null;
     if (!message) return;

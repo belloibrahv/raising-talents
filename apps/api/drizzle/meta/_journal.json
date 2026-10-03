@@ -106,6 +106,13 @@
       "when": 1791030049639,
       "tag": "0014_session_devices",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1791031580960,
+      "tag": "0015_notification_inbox",
+      "breakpoints": true
     }
   ]
 }

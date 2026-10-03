@@ -22,11 +22,54 @@ import { MediaModule } from '../media/media.module.js';
 import { VerificationEvents } from '../agent-profiles/domain/verification-request.js';
 import { NOTIFICATIONS, Notifier, type NotificationLog } from './application/notifications.js';
 import { DrizzleNotificationLog } from './infrastructure/drizzle-notification-log.js';
+import { IdentityEvents } from '../identity/domain/identity.events.js';
+import {
+  InboxPruneJob,
+  ListNotificationsQuery,
+  MarkNotificationsReadHandler,
+  NotificationsExport,
+  UnreadCountQuery,
+  type Inbox,
+} from './application/inbox.js';
+import { DrizzleInbox } from './infrastructure/drizzle-inbox.js';
+import { NotificationsController } from './interface/http/notifications.controller.js';
 
-/** Emails people about decisions made on their behalf. Worker only; it has no HTTP routes. */
+/** Tells people about decisions made on their behalf: by email, and in the app's inbox (ADR-032). */
 @Module({
   imports: [AccountsModule, MediaModule, AgentProfilesModule],
+  controllers: [NotificationsController],
   providers: [
+    {
+      provide: NOTIFICATIONS.Inbox,
+      inject: [PLATFORM.UnitOfWork],
+      useFactory: (uow: DrizzleUnitOfWork) => new DrizzleInbox(uow),
+    },
+    {
+      provide: NOTIFICATIONS.List,
+      inject: [NOTIFICATIONS.Inbox],
+      useFactory: (inbox: Inbox) => new ListNotificationsQuery(inbox),
+    },
+    {
+      provide: NOTIFICATIONS.Unread,
+      inject: [NOTIFICATIONS.Inbox],
+      useFactory: (inbox: Inbox) => new UnreadCountQuery(inbox),
+    },
+    {
+      provide: NOTIFICATIONS.MarkRead,
+      inject: [NOTIFICATIONS.Inbox, PLATFORM.Clock],
+      useFactory: (inbox: Inbox, clock: Clock) => new MarkNotificationsReadHandler(inbox, clock),
+    },
+    {
+      provide: NOTIFICATIONS.Export,
+      inject: [NOTIFICATIONS.Inbox],
+      useFactory: (inbox: Inbox) => new NotificationsExport(inbox),
+    },
+    {
+      provide: NOTIFICATIONS.Prune,
+      inject: [NOTIFICATIONS.Inbox, PLATFORM.Clock, PLATFORM.Logger],
+      useFactory: (inbox: Inbox, clock: Clock, logger: Logger) =>
+        new InboxPruneJob(inbox, clock, logger),
+    },
     {
       provide: NOTIFICATIONS.Log,
       inject: [PLATFORM.UnitOfWork],
@@ -37,6 +80,7 @@ import { DrizzleNotificationLog } from './infrastructure/drizzle-notification-lo
       inject: [
         PLATFORM.EmailSender,
         NOTIFICATIONS.Log,
+        NOTIFICATIONS.Inbox,
         ACCOUNTS.Facade,
         MEDIA.Facade,
         VERIFICATION.Outcomes,
@@ -47,6 +91,7 @@ import { DrizzleNotificationLog } from './infrastructure/drizzle-notification-lo
       useFactory: (
         email: EmailSender,
         log: NotificationLog,
+        inbox: Inbox,
         accounts: AccountsFacade,
         media: MediaFacade,
         verifications: VerificationOutcomes,
@@ -57,6 +102,7 @@ import { DrizzleNotificationLog } from './infrastructure/drizzle-notification-lo
         const notifier = new Notifier(
           email,
           log,
+          inbox,
           accounts,
           media,
           verifications,
@@ -87,11 +133,14 @@ import { DrizzleNotificationLog } from './infrastructure/drizzle-notification-lo
             dispatcher.on(AccountEvents.AccountReinstated, (event) =>
               notifier.accountReinstated(event),
             );
+            dispatcher.on(IdentityEvents.PasswordChanged, (event) =>
+              notifier.passwordChanged(event),
+            );
           },
         };
       },
     },
   ],
-  exports: [NOTIFICATIONS.EventHandlers],
+  exports: [NOTIFICATIONS.EventHandlers, NOTIFICATIONS.Export, NOTIFICATIONS.Prune],
 })
 export class NotificationsModule {}

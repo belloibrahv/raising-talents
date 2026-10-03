@@ -192,7 +192,8 @@
     "moderationAgents": "Agent verification queue",
     "account": "Your account",
     "moderationReports": "Reports queue",
-    "shortlist": "Your shortlist"
+    "shortlist": "Your shortlist",
+    "notifications": "Notifications"
   },
   "nav": {
     "home": "Home",
@@ -541,5 +542,32 @@
     "signOut": "Sign out",
     "signOutDevice": "Sign out {name}",
     "signOutOthers": "Sign out everywhere else"
+  },
+  "notifications": {
+    "bell": "Notifications",
+    "bellUnread": "Notifications, {count} unread",
+    "title": "Notifications",
+    "empty": "Nothing new",
+    "emptyBody": "Decisions about your photos, videos, verification and account will appear here.",
+    "loadMore": "Show older",
+    "unread": "New:",
+    "justNow": "just now",
+    "file": {
+      "avatar": "profile photo",
+      "photo": "portfolio photo",
+      "video": "portfolio video"
+    },
+    "mediaApproved": "Your {file} is approved",
+    "mediaApprovedBody": "It is on your profile now.",
+    "mediaRejected": "Your {file} was not approved",
+    "agentVerified": "Your agency is verified",
+    "agentVerifiedBody": "Your profile now shows the verified badge.",
+    "agentDeclined": "We could not verify your agency yet",
+    "deletionScheduled": "Your account will be deleted on {date}",
+    "deletionScheduledBody": "Changed your mind? Keep your account from your account page.",
+    "reinstated": "Your account is back",
+    "reinstatedBody": "You can use Raising Talents again, and agents can see your profile.",
+    "passwordChanged": "Your password was changed",
+    "passwordChangedBody": "If this was not you, change your password and sign out your other devices."
   }
 }

@@ -64,6 +64,11 @@ const ReportQueuePage = lazy(() =>
 const ShortlistPage = lazy(() =>
   import('../features/shortlist/ShortlistPage').then((m) => ({ default: m.ShortlistPage })),
 );
+const NotificationsPage = lazy(() =>
+  import('../features/notifications/NotificationsPage').then((m) => ({
+    default: m.NotificationsPage,
+  })),
+);
 const AccountPage = lazy(() =>
   import('../features/account/AccountPage').then((m) => ({ default: m.AccountPage })),
 );
@@ -173,6 +178,7 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
             { path: 'moderation/reports', element: <ReportQueuePage /> },
             { path: 'verification', element: <VerificationPage /> },
             { path: 'account', element: <AccountPage /> },
+            { path: 'notifications', element: <NotificationsPage /> },
           ],
         },
         { path: '*', element: <NotFoundPage /> },

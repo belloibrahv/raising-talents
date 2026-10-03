@@ -2,6 +2,7 @@ import { pino } from 'pino';
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { EmailMessage } from '../../../platform/email/email-sender.js';
 import { FixedClock } from '../../../platform/testing/fakes.js';
+import { InMemoryInbox } from '../testing/in-memory-inbox.js';
 import { InMemoryNotificationLog } from '../testing/in-memory-notification-log.js';
 import { mediaRejectedEmail } from './emails.js';
 import {
@@ -21,6 +22,7 @@ describe('Notifier', () => {
   let files: Map<string, File>;
   let outcomes: Map<string, { agentId: string; status: string; declineReason: string | null }>;
   let notifier: Notifier;
+  let inbox: InMemoryInbox;
   const clock = new FixedClock();
 
   const event = (type: string, aggregateId: string) => ({
@@ -32,6 +34,7 @@ describe('Notifier', () => {
 
   beforeEach(() => {
     sent = [];
+    inbox = new InMemoryInbox();
     files = new Map();
     outcomes = new Map();
     const media: NotificationMedia = {
@@ -44,6 +47,7 @@ describe('Notifier', () => {
     notifier = new Notifier(
       { send: async (message) => void sent.push(message) },
       new InMemoryNotificationLog(),
+      inbox,
       {
         findSummaryById: async (id) =>
           ({
@@ -152,5 +156,43 @@ describe('Notifier', () => {
       '&lt;script&gt;alert(1)&lt;/script&gt; &amp; &quot;quotes&quot;',
     );
     expect(message.html).not.toContain('<script>');
+  });
+
+  it('puts each decision in the inbox once, even when the event arrives twice', async () => {
+    files.set('m1', {
+      ownerId: OWNER,
+      kind: 'image',
+      purpose: 'portfolio',
+      status: 'rejected',
+      reviewed: true,
+      rejectionReason: 'This image breaks the Community Guidelines, so it cannot be shown.',
+    });
+    const rejected = event('media.MediaRejected', 'm1');
+    await notifier.mediaDecided(rejected);
+    await notifier.mediaDecided(rejected);
+    expect(inbox.entries.map((entry) => [entry.userId, entry.content])).toEqual([
+      [
+        OWNER,
+        {
+          kind: 'media_rejected',
+          mediaKind: 'image',
+          purpose: 'portfolio',
+          reason: 'This image breaks the Community Guidelines, so it cannot be shown.',
+        },
+      ],
+    ]);
+    expect(sent).toHaveLength(1);
+  });
+
+  it('keeps restrictions out of the inbox, and notes password changes without an email', async () => {
+    await notifier.accountRestricted(
+      { ...event('accounts.AccountSuspended', OWNER), payload: { reason: 'other' } },
+      'suspend',
+    );
+    await notifier.passwordChanged(event('identity.PasswordChanged', OWNER));
+    expect(inbox.entries.map((entry) => entry.content.kind)).toEqual(['password_changed']);
+    expect(sent.map((message) => message.subject)).toEqual([
+      'Your Raising Talents account is suspended',
+    ]);
   });
 });

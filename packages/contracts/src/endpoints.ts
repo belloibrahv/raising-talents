@@ -38,6 +38,11 @@ import {
   moderationQueueQuerySchema,
 } from './moderation.js';
 import { dataExportSchema, requestDeletionSchema } from './privacy.js';
+import {
+  notificationPageSchema,
+  notificationsQuerySchema,
+  unreadCountSchema,
+} from './notifications.js';
 import { changePasswordSchema, signedInDevicesSchema } from './security.js';
 import {
   saveToShortlistSchema,
@@ -712,6 +717,36 @@ export const endpoints = {
     method: 'POST',
     path: '/v1/me/sessions/sign-out-others',
     summary: 'Sign out every device except this one',
+    auth: true,
+    successStatus: 204,
+    errors: [],
+    tag: 'Me',
+  }),
+  'notifications.list': define({
+    method: 'GET',
+    path: '/v1/me/notifications',
+    summary: "Notices about things done on the person's behalf, newest first",
+    auth: true,
+    query: notificationsQuerySchema,
+    response: notificationPageSchema,
+    successStatus: 200,
+    errors: [],
+    tag: 'Me',
+  }),
+  'notifications.unread': define({
+    method: 'GET',
+    path: '/v1/me/notifications/unread',
+    summary: 'How many notices are unread, for the badge',
+    auth: true,
+    response: unreadCountSchema,
+    successStatus: 200,
+    errors: [],
+    tag: 'Me',
+  }),
+  'notifications.markRead': define({
+    method: 'POST',
+    path: '/v1/me/notifications/read',
+    summary: 'Mark every notice read',
     auth: true,
     successStatus: 204,
     errors: [],

@@ -61,6 +61,9 @@ const AgentQueuePage = lazy(() =>
 const ReportQueuePage = lazy(() =>
   import('../features/moderation/ReportQueuePage').then((m) => ({ default: m.ReportQueuePage })),
 );
+const ShortlistPage = lazy(() =>
+  import('../features/shortlist/ShortlistPage').then((m) => ({ default: m.ShortlistPage })),
+);
 const AccountPage = lazy(() =>
   import('../features/account/AccountPage').then((m) => ({ default: m.AccountPage })),
 );
@@ -164,6 +167,7 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
             { path: 'portfolio', element: <PortfolioPage /> },
             { path: 'talents/:handle', element: <TalentProfilePage /> },
             { path: 'search', element: <SearchPage /> },
+            { path: 'shortlist', element: <ShortlistPage /> },
             { path: 'moderation', element: <ModerationPage /> },
             { path: 'moderation/agents', element: <AgentQueuePage /> },
             { path: 'moderation/reports', element: <ReportQueuePage /> },

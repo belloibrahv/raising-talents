@@ -218,6 +218,10 @@ export function buildOpenApiDocument(version: string): JsonObject {
         description: 'Staff tools. Every decision is recorded with who made it',
       },
       {
+        name: 'Shortlist',
+        description: 'Talent an agent saved, with private notes. Talent are never told',
+      },
+      {
         name: 'Safety',
         description: 'Reports from members. Reporters stay anonymous to the reported person',
       },

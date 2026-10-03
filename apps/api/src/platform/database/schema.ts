@@ -11,3 +11,4 @@ export * from '../../modules/media/infrastructure/media.schema.js';
 export * from '../../modules/portfolio/infrastructure/portfolio.schema.js';
 export * from '../../modules/notifications/infrastructure/notification.schema.js';
 export * from '../../modules/safety/infrastructure/safety.schema.js';
+export * from '../../modules/shortlists/infrastructure/shortlist.schema.js';

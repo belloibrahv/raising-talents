@@ -66,6 +66,7 @@ describe('Account deletion and data export', () => {
       agentProfile: async () => err(domainError('WRONG_ROLE', 'not an agent')),
       agentVerification: async () => err(domainError('WRONG_ROLE', 'not an agent')),
       portfolio: async () => ok({ items: [], maxItems: 30, version: 0 }),
+      shortlist: async () => [],
     };
     requestDeletion = new RequestDeletionHandler(
       accounts.facade,

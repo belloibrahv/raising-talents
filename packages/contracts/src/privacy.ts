@@ -37,6 +37,10 @@ export const dataExportSchema = z
     agentProfile: myAgentProfileSchema.nullable(),
     agentVerification: myAgentVerificationSchema.nullable(),
     portfolio: myPortfolioSchema.nullable(),
+    /** Agents only: who they saved and their private notes. Empty for everyone else. */
+    shortlist: z.array(
+      z.object({ handle: z.string().nullable(), note: z.string(), savedAt: isoDateTimeSchema }),
+    ),
     media: z.array(
       z.object({
         id: z.string(),

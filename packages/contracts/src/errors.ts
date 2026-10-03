@@ -53,6 +53,8 @@ export const ErrorCode = {
   AgentProfileIncomplete: 'AGENT_PROFILE_INCOMPLETE',
   VerificationPending: 'VERIFICATION_PENDING',
   AlreadyVerified: 'ALREADY_VERIFIED',
+
+  ShortlistFull: 'SHORTLIST_FULL',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -108,6 +110,8 @@ export const ERROR_STATUS: Record<ErrorCode, number> = {
   [ErrorCode.AgentProfileIncomplete]: 409,
   [ErrorCode.VerificationPending]: 409,
   [ErrorCode.AlreadyVerified]: 409,
+
+  [ErrorCode.ShortlistFull]: 409,
 };
 
 export const fieldProblemSchema = z

@@ -38,7 +38,7 @@ export function VideoPlayer({ playback, label }: VideoPlayerProps) {
   return (
     <video
       ref={video}
-      className="aspect-[4/5] w-full rounded-xl bg-muted object-cover"
+      className="aspect-[4/5] w-full rounded-xl bg-black object-contain"
       controls
       playsInline
       preload="none"

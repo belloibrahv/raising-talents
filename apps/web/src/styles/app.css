@@ -58,8 +58,9 @@
     --muted-foreground: #b6b3cf;
     --accent: #2e2c47;
     --accent-foreground: #f4f3fa;
-    --destructive: #c4322b;
-    --destructive-foreground: #ffffff;
+    /* Light red, so error text reads at 6.9:1 or better on every dark surface; buttons take ink text. */
+    --destructive: #ff8f87;
+    --destructive-foreground: #1c1a3d;
     --destructive-surface: #3a1d22;
     --success: #6fd3a0;
     --success-surface: #173326;

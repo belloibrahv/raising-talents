@@ -11,6 +11,7 @@ import { Page } from '../../shared/ui/Page';
 import { PasswordField } from '../../shared/ui/TextField';
 import { useFocusFirstError } from '../../shared/ui/use-focus-first-error';
 import { useSession } from '../auth/use-auth';
+import { SecuritySection } from './SecuritySection';
 
 /** Shown before deletion; the API decides the real date, from ACCOUNT_DELETION_GRACE_DAYS. */
 const GRACE_DAYS = 30;
@@ -41,6 +42,7 @@ export function AccountPage() {
       documentTitle={t('titles.account')}
       subtitle={t('account.signedInAs', { email: me?.email ?? '' })}
     >
+      <SecuritySection />
       <section
         className="flex flex-col gap-4 rounded-2xl border bg-card p-5 text-card-foreground shadow-sm sm:p-6"
         aria-labelledby="data-heading"

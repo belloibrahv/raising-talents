@@ -13,6 +13,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import type { AppConfig } from '../../../../config/env.js';
 import type { Clock } from '../../../../platform/clock.js';
 import { ClientIp } from '../../../../platform/http/client-ip.decorator.js';
+import { DeviceLabel } from '../../../../platform/http/device-label.js';
 import { ProblemException, unwrap } from '../../../../platform/http/problem.js';
 import {
   clearedRefreshCookie,
@@ -53,6 +54,7 @@ export class WebAuthController {
   async signUp(
     @Body(body(signUpRequestSchema)) request: SignUpRequest,
     @ClientIp() ip: string,
+    @DeviceLabel() deviceLabel: string | null,
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<WebAuthResponse> {
     const signedIn = unwrap(
@@ -63,6 +65,7 @@ export class WebAuthController {
         countryCode: request.countryCode,
         deviceId: request.deviceId,
         ip,
+        deviceLabel,
       }),
     );
     return this.respond(signedIn, reply);
@@ -73,9 +76,13 @@ export class WebAuthController {
   async signIn(
     @Body(body(signInRequestSchema)) request: SignInRequest,
     @ClientIp() ip: string,
+    @DeviceLabel() deviceLabel: string | null,
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<WebAuthResponse> {
-    return this.respond(unwrap(await this.signInHandler.execute({ ...request, ip })), reply);
+    return this.respond(
+      unwrap(await this.signInHandler.execute({ ...request, ip, deviceLabel })),
+      reply,
+    );
   }
 
   @Post('refresh')

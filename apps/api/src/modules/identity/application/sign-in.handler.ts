@@ -12,6 +12,7 @@ export interface SignInCommand {
   readonly password: string;
   readonly deviceId: string;
   readonly ip: string;
+  readonly deviceLabel?: string | null;
 }
 
 export const SIGN_IN_LIMITS = { perIp: 50, perEmail: 10, windowSeconds: 900 } as const;
@@ -55,7 +56,11 @@ export class SignInHandler {
     const allowed = await this.directory.ensureCanSignIn(account.id);
     if (!allowed.ok) return allowed;
 
-    const { session, refreshToken } = await this.issuer.start(account.id, command.deviceId);
+    const { session, refreshToken } = await this.issuer.start(
+      account.id,
+      command.deviceId,
+      command.deviceLabel,
+    );
     return ok({ userId: account.id, tokens: await this.issuer.tokensFor(session, refreshToken) });
   }
 

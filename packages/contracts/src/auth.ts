@@ -20,7 +20,7 @@ const emailSchema = z
     description: 'Compared without case or surrounding spaces.',
   });
 
-const passwordSchema = z
+export const passwordSchema = z
   .string()
   .min(PASSWORD_MIN_LENGTH, `Use at least ${PASSWORD_MIN_LENGTH} characters`)
   .max(PASSWORD_MAX_LENGTH);

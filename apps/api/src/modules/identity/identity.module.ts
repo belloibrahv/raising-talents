@@ -53,6 +53,13 @@ import { DrizzleSessionRepository } from './infrastructure/drizzle-session.repos
 import { HibpBreachedPasswordChecker } from './infrastructure/hibp-breached-password-checker.js';
 import { AuthController } from './interface/http/auth.controller.js';
 import { WebAuthController } from './interface/http/web-auth.controller.js';
+import {
+  ChangePasswordHandler,
+  ListDevicesQuery,
+  SignOutDeviceHandler,
+  SignOutOtherDevicesHandler,
+} from './application/account-security.handlers.js';
+import { SecurityController } from './interface/http/security.controller.js';
 
 /** Registers identity's reactions to published events. Called by the worker. */
 export interface ModuleEventHandlers {
@@ -341,6 +348,63 @@ const applicationProviders: Provider[] = [
       ),
   },
   {
+    provide: IDENTITY.ChangePassword,
+    inject: [
+      IDENTITY.AccountDirectory,
+      IDENTITY.Credentials,
+      IDENTITY.Sessions,
+      IDENTITY.PasswordHasher,
+      IDENTITY.BreachedPasswords,
+      PLATFORM.EventRecorder,
+      PLATFORM.RateLimiter,
+      PLATFORM.UnitOfWork,
+      PLATFORM.Clock,
+      IDENTITY.Settings,
+    ],
+    useFactory: (
+      directory: AccountDirectory,
+      credentials: CredentialRepository,
+      sessions: SessionRepository,
+      hasher: PasswordHasher,
+      breached: BreachedPasswordChecker,
+      events: EventRecorder,
+      limiter: RateLimiter,
+      uow: UnitOfWork,
+      clock: Clock,
+      settings: IdentitySettings,
+    ) =>
+      new ChangePasswordHandler(
+        directory,
+        credentials,
+        sessions,
+        hasher,
+        breached,
+        events,
+        limiter,
+        uow,
+        clock,
+        settings,
+      ),
+  },
+  {
+    provide: IDENTITY.ListDevices,
+    inject: [IDENTITY.Sessions, PLATFORM.Clock],
+    useFactory: (sessions: SessionRepository, clock: Clock) =>
+      new ListDevicesQuery(sessions, clock),
+  },
+  {
+    provide: IDENTITY.SignOutDevice,
+    inject: [IDENTITY.Sessions, PLATFORM.Clock],
+    useFactory: (sessions: SessionRepository, clock: Clock) =>
+      new SignOutDeviceHandler(sessions, clock),
+  },
+  {
+    provide: IDENTITY.SignOutOthers,
+    inject: [IDENTITY.Sessions, PLATFORM.Clock],
+    useFactory: (sessions: SessionRepository, clock: Clock) =>
+      new SignOutOtherDevicesHandler(sessions, clock),
+  },
+  {
     provide: IDENTITY.Facade,
     inject: [IDENTITY.Credentials, IDENTITY.PasswordHasher, IDENTITY.Sessions, PLATFORM.Clock],
     useFactory: (
@@ -385,7 +449,7 @@ const applicationProviders: Provider[] = [
 
 @Module({
   imports: [AccountsModule],
-  controllers: [AuthController, WebAuthController],
+  controllers: [AuthController, WebAuthController, SecurityController],
   providers: [...infrastructureProviders, ...applicationProviders],
   exports: [IDENTITY.EventHandlers, IDENTITY.Facade],
 })

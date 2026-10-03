@@ -523,5 +523,23 @@
     "removed": "{name} removed from your shortlist.",
     "allHidden": "Your saved talent are hidden right now",
     "allHiddenBody": "They stay on your shortlist and come back here if their profiles return."
+  },
+  "security": {
+    "passwordTitle": "Password",
+    "passwordBody": "Change it whenever you like. Every other device is signed out, and we email you to confirm.",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "changePassword": "Change password",
+    "passwordChanged": "Password changed. Other devices are signed out.",
+    "enterCurrent": "Enter your current password.",
+    "wrongCurrent": "That is not your current password.",
+    "devicesTitle": "Where you are signed in",
+    "devicesBody": "Sign out any device you do not recognise, then change your password.",
+    "thisDevice": "This device",
+    "unknownDevice": "Unknown device",
+    "lastActive": "Last used {when}",
+    "signOut": "Sign out",
+    "signOutDevice": "Sign out {name}",
+    "signOutOthers": "Sign out everywhere else"
   }
 }

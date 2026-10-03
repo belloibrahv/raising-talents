@@ -25,6 +25,7 @@ export interface SignUpCommand {
   readonly countryCode: string;
   readonly deviceId: string;
   readonly ip: string;
+  readonly deviceLabel?: string | null;
 }
 
 export interface SignedIn {
@@ -81,7 +82,11 @@ export class SignUpHandler {
       if (!created.ok) return created;
 
       await this.credentials.savePasswordHash(created.value.id, passwordHash, now);
-      const session = await this.issuer.start(created.value.id, command.deviceId);
+      const session = await this.issuer.start(
+        created.value.id,
+        command.deviceId,
+        command.deviceLabel,
+      );
       await this.events.record([
         {
           type: IdentityEvents.EmailVerificationRequested,

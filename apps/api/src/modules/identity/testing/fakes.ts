@@ -8,7 +8,7 @@ import type { CredentialRepository } from '../domain/credential.repository.js';
 import { OneTimeCode, type OneTimeCodePurpose } from '../domain/one-time-code.js';
 import type { OneTimeCodeRepository } from '../domain/one-time-code.repository.js';
 import { Session, type SessionRevokedReason } from '../domain/session.js';
-import type { SessionRepository } from '../domain/session.repository.js';
+import type { ActiveDevice, SessionRepository } from '../domain/session.repository.js';
 
 export class InMemorySessionRepository implements SessionRepository {
   readonly rows = new Map<string, ReturnType<Session['snapshot']>>();
@@ -36,6 +36,43 @@ export class InMemorySessionRepository implements SessionRepository {
         this.rows.set(id, { ...row, revokedAt: now, revokedReason: reason });
       }
     }
+  }
+
+  async findById(id: string): Promise<Session | null> {
+    const row = this.rows.get(id);
+    return row ? Session.restore(row) : null;
+  }
+
+  async revokeOtherFamilies(
+    userId: string,
+    keepFamilyId: string,
+    reason: SessionRevokedReason,
+    now: Date,
+  ): Promise<void> {
+    for (const [id, row] of this.rows) {
+      if (row.userId === userId && row.familyId !== keepFamilyId && row.revokedAt === null) {
+        this.rows.set(id, { ...row, revokedAt: now, revokedReason: reason });
+      }
+    }
+  }
+
+  async activeDevices(userId: string, now: Date): Promise<ActiveDevice[]> {
+    const mine = [...this.rows.values()].filter((row) => row.userId === userId);
+    return mine
+      .filter((row) => row.revokedAt === null && row.expiresAt > now)
+      .map((row) => ({
+        familyId: row.familyId,
+        deviceLabel: row.deviceLabel,
+        signedInAt: new Date(
+          Math.min(
+            ...mine
+              .filter((other) => other.familyId === row.familyId)
+              .map((other) => other.createdAt.getTime()),
+          ),
+        ),
+        lastActiveAt: row.createdAt,
+      }))
+      .sort((a, b) => b.lastActiveAt.getTime() - a.lastActiveAt.getTime());
   }
 
   activeSessionsFor(userId: string) {

@@ -196,4 +196,5 @@ Milestone 1, foundations.
 | Safety: member reports, moderator queue, suspend and ban with sign-out and email, operator reinstate (ADR-028) | Done, categories provisional             |
 | PWA design system: shadcn/ui on Tailwind, brand tokens, dark scheme, bottom tab bar on phones (ADR-029)        | Done                                     |
 | Shortlists: agents save talent with private notes, in the data export (ADR-030)                                | Done, limit provisional                  |
+| Account security: change password, signed-in devices, sign out one or every other device (ADR-031)             | Done                                     |
 | CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                         | Done                                     |

@@ -20,6 +20,7 @@ import {
 import { AuthGuard } from '../../../../platform/http/auth.guard.js';
 import type { Principal } from '../../../../platform/http/authenticated-request.js';
 import { ClientIp } from '../../../../platform/http/client-ip.decorator.js';
+import { DeviceLabel } from '../../../../platform/http/device-label.js';
 import { CurrentPrincipal } from '../../../../platform/http/current-principal.decorator.js';
 import { unwrap } from '../../../../platform/http/problem.js';
 import { body } from '../../../../platform/http/zod-validation.pipe.js';
@@ -75,6 +76,7 @@ export class AuthController {
   async signUp(
     @Body(body(signUpRequestSchema)) request: SignUpRequest,
     @ClientIp() ip: string,
+    @DeviceLabel() deviceLabel: string | null,
   ): Promise<AuthResponse> {
     const signedIn = unwrap(
       await this.signUpHandler.execute({
@@ -84,6 +86,7 @@ export class AuthController {
         countryCode: request.countryCode,
         deviceId: request.deviceId,
         ip,
+        deviceLabel,
       }),
     );
     return this.withMe(signedIn);
@@ -94,8 +97,9 @@ export class AuthController {
   async signIn(
     @Body(body(signInRequestSchema)) request: SignInRequest,
     @ClientIp() ip: string,
+    @DeviceLabel() deviceLabel: string | null,
   ): Promise<AuthResponse> {
-    return this.withMe(unwrap(await this.signInHandler.execute({ ...request, ip })));
+    return this.withMe(unwrap(await this.signInHandler.execute({ ...request, ip, deviceLabel })));
   }
 
   @Post('refresh')

@@ -38,6 +38,7 @@ import {
   moderationQueueQuerySchema,
 } from './moderation.js';
 import { dataExportSchema, requestDeletionSchema } from './privacy.js';
+import { changePasswordSchema, signedInDevicesSchema } from './security.js';
 import {
   saveToShortlistSchema,
   shortlistEntrySchema,
@@ -677,6 +678,44 @@ export const endpoints = {
     successStatus: 204,
     errors: [ErrorCode.WrongRole],
     tag: 'Shortlist',
+  }),
+  'security.changePassword': define({
+    method: 'POST',
+    path: '/v1/me/password',
+    summary: 'Change the password. Needs the current one; signs out every other device',
+    auth: true,
+    request: changePasswordSchema,
+    successStatus: 204,
+    errors: [ErrorCode.InvalidCredentials, ErrorCode.WeakPassword, ErrorCode.RateLimited],
+    tag: 'Me',
+  }),
+  'security.devices': define({
+    method: 'GET',
+    path: '/v1/me/sessions',
+    summary: 'The devices this account is signed in on, most recently used first',
+    auth: true,
+    response: signedInDevicesSchema,
+    successStatus: 200,
+    errors: [],
+    tag: 'Me',
+  }),
+  'security.signOutDevice': define({
+    method: 'DELETE',
+    path: '/v1/me/sessions/{sessionId}',
+    summary: 'Sign out one device. Safe to repeat',
+    auth: true,
+    successStatus: 204,
+    errors: [],
+    tag: 'Me',
+  }),
+  'security.signOutOthers': define({
+    method: 'POST',
+    path: '/v1/me/sessions/sign-out-others',
+    summary: 'Sign out every device except this one',
+    auth: true,
+    successStatus: 204,
+    errors: [],
+    tag: 'Me',
   }),
   'webhooks.mux': define({
     method: 'POST',

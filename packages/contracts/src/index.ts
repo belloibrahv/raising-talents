@@ -11,3 +11,4 @@ export * from './portfolio.js';
 export * from './search.js';
 export * from './moderation.js';
 export * from './verification.js';
+export * from './privacy.js';

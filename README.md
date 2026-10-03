@@ -192,4 +192,5 @@ Milestone 1, foundations.
 | Moderation: staff accounts, held media queue, approve or reject with an audit trail                           | Done                                     |
 | Agent verification: request with evidence, moderator queue, badge (ADR-026)                                   | Done, evidence rules provisional         |
 | Notifications: emails for moderation and verification decisions, sent once per event                          | Done                                     |
+| Privacy: data export, account deletion with a grace period and scheduled erasure (ADR-027)                    | Done, grace period provisional           |
 | CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                        | Done                                     |

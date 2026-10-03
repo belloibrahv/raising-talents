@@ -17,6 +17,7 @@ export const meFor = (overrides: Record<string, unknown> = {}) => ({
   roleLocked: false,
   status: 'onboarding',
   countryCode: 'NG',
+  deletionScheduledAt: null,
   createdAt: '2026-10-01T09:00:00.000Z',
   ...overrides,
 });

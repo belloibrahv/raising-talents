@@ -34,6 +34,9 @@ export const SEARCH = {
 export const INDEXING_EVENTS = [
   'talent.TalentProfileUpdated',
   'accounts.OnboardingCompleted',
+  'accounts.DeletionRequested',
+  'accounts.DeletionCancelled',
+  'accounts.AccountDeleted',
 ] as const;
 
 /** Roles that may search. Talent find each other through links, not search, in the MVP. */

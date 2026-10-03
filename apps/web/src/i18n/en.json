@@ -175,7 +175,8 @@
     "resetPassword": "Choose a new password",
     "moderation": "Moderation queue",
     "verification": "Get verified",
-    "moderationAgents": "Agent verification queue"
+    "moderationAgents": "Agent verification queue",
+    "account": "Your account"
   },
   "nav": {
     "home": "Home",
@@ -184,7 +185,8 @@
     "signOut": "Sign out",
     "main": "Main",
     "search": "Search",
-    "moderation": "Moderation"
+    "moderation": "Moderation",
+    "account": "Account"
   },
   "onboarding": {
     "stepOf": "Step {current} of {total}",
@@ -422,5 +424,23 @@
     "start": "Get verified",
     "tryAgain": "Send new evidence",
     "notReady": "Finish your agency profile first, then ask to be verified."
+  },
+  "account": {
+    "title": "Your account",
+    "signedInAs": "Signed in as {email}",
+    "dataTitle": "Your data",
+    "dataBody": "Download everything Raising Talents holds about you: your account, profile, portfolio and files, as one JSON file.",
+    "download": "Download my data",
+    "downloaded": "Your data is downloading.",
+    "deleteTitle": "Delete your account",
+    "deleteBody": "Your profile and portfolio are hidden from agents at once. After {days} days we erase the account and every file for good. Until then you can change your mind.",
+    "password": "Your password",
+    "confirm": "I understand my profile, portfolio and files will be erased.",
+    "confirmRequired": "Tick the box to confirm.",
+    "delete": "Delete my account",
+    "scheduled": "Your account will be deleted on {date}. It is hidden from agents until then.",
+    "keep": "Keep my account",
+    "kept": "Your account is back. Nothing will be deleted.",
+    "wrongPassword": "That password is not right."
   }
 }

@@ -8,6 +8,7 @@ import { PLATFORM } from '../../platform/platform.tokens.js';
 import type { AccountsFacade } from '../accounts/application/accounts.facade.js';
 import { ACCOUNTS } from '../accounts/application/accounts.tokens.js';
 import { AccountsModule } from '../accounts/accounts.module.js';
+import { AccountEvents } from '../accounts/domain/account.events.js';
 import {
   VERIFICATION,
   type VerificationOutcomes,
@@ -72,6 +73,9 @@ import { DrizzleNotificationLog } from './infrastructure/drizzle-notification-lo
             );
             dispatcher.on(VerificationEvents.Declined, (event) =>
               notifier.verificationDecided(event),
+            );
+            dispatcher.on(AccountEvents.DeletionRequested, (event) =>
+              notifier.deletionScheduled(event),
             );
           },
         };

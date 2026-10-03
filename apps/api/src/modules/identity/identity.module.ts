@@ -32,6 +32,7 @@ import { SignUpHandler } from './application/sign-up.handler.js';
 import { VerifyEmailHandler } from './application/verify-email.handler.js';
 import type { CredentialRepository } from './domain/credential.repository.js';
 import { IdentityEvents } from './domain/identity.events.js';
+import { IdentityFacade } from './application/identity.facade.js';
 import {
   IssuePasswordResetCodeHandler,
   NotifyPasswordChangedHandler,
@@ -340,6 +341,12 @@ const applicationProviders: Provider[] = [
       ),
   },
   {
+    provide: IDENTITY.Facade,
+    inject: [IDENTITY.Credentials, IDENTITY.PasswordHasher],
+    useFactory: (credentials: CredentialRepository, hasher: PasswordHasher) =>
+      new IdentityFacade(credentials, hasher),
+  },
+  {
     provide: IDENTITY.NotifyPasswordChanged,
     inject: [IDENTITY.AccountDirectory, IDENTITY.EmailSender],
     useFactory: (directory: AccountDirectory, email: EmailSender) =>
@@ -376,6 +383,6 @@ const applicationProviders: Provider[] = [
   imports: [AccountsModule],
   controllers: [AuthController, WebAuthController],
   providers: [...infrastructureProviders, ...applicationProviders],
-  exports: [IDENTITY.EventHandlers],
+  exports: [IDENTITY.EventHandlers, IDENTITY.Facade],
 })
 export class IdentityModule {}

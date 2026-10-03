@@ -121,6 +121,6 @@ const AVATAR_URLS = Symbol('AvatarUrls');
       },
     },
   ],
-  exports: [TALENT.Repository, TALENT.Directory, TALENT.EventHandlers],
+  exports: [TALENT.Repository, TALENT.Directory, TALENT.GetMine, TALENT.EventHandlers],
 })
 export class TalentProfilesModule {}

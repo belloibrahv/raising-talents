@@ -92,6 +92,8 @@ const envSchema = z.object({
         .filter(Boolean),
     )
     .pipe(z.array(z.url())),
+  /** Days between asking to delete an account and erasing it, so a change of mind is possible. */
+  ACCOUNT_DELETION_GRACE_DAYS: z.coerce.number().int().min(1).max(90).default(30),
   /** The web app's address, for links in emails. */
   WEB_APP_URL: z.url().default('http://localhost:5173'),
   /** Secure cookies need HTTPS. Only a laptop on plain http://localhost may turn it off. */

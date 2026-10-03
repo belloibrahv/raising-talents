@@ -1,4 +1,5 @@
-import { eq } from 'drizzle-orm';
+import { and, asc, eq, lte } from 'drizzle-orm';
+import { AccountEvents } from '../domain/account.events.js';
 import type { EventRecorder } from '../../../platform/domain-event.js';
 import type { DrizzleUnitOfWork } from '../../../platform/database/drizzle-unit-of-work.js';
 import { Account } from '../domain/account.js';
@@ -15,6 +16,7 @@ const toDomain = (row: UserRow): Account =>
     status: row.status,
     dateOfBirth: row.dateOfBirth,
     countryCode: row.countryCode,
+    deletionScheduledAt: row.deletionScheduledAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   });
@@ -61,6 +63,7 @@ export class DrizzleAccountRepository implements AccountRepository {
       status: props.status,
       dateOfBirth: props.dateOfBirth,
       countryCode: props.countryCode,
+      deletionScheduledAt: props.deletionScheduledAt,
       createdAt: props.createdAt,
       updatedAt: props.updatedAt,
     };
@@ -75,9 +78,28 @@ export class DrizzleAccountRepository implements AccountRepository {
           role: row.role,
           roleLockedAt: row.roleLockedAt,
           status: row.status,
+          deletionScheduledAt: row.deletionScheduledAt,
           updatedAt: row.updatedAt,
         },
       });
     await this.events.record(account.pullEvents());
+  }
+
+  async findDueForDeletion(now: Date, limit: number): Promise<Account[]> {
+    const rows = await this.uow
+      .executor()
+      .select()
+      .from(users)
+      .where(and(eq(users.status, 'pending_deletion'), lte(users.deletionScheduledAt, now)))
+      .orderBy(asc(users.deletionScheduledAt))
+      .limit(limit);
+    return rows.map(toDomain);
+  }
+
+  async erase(id: string, now: Date): Promise<void> {
+    await this.events.record([
+      { type: AccountEvents.AccountDeleted, aggregateId: id, occurredAt: now, payload: {} },
+    ]);
+    await this.uow.executor().delete(users).where(eq(users.id, id));
   }
 }

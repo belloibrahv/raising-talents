@@ -4,6 +4,7 @@ import type { DomainEvent } from '../../../platform/domain-event.js';
 import type { EmailMessage, EmailSender } from '../../../platform/email/email-sender.js';
 import {
   agentDeclinedEmail,
+  deletionScheduledEmail,
   agentVerifiedEmail,
   mediaApprovedEmail,
   mediaRejectedEmail,
@@ -95,6 +96,15 @@ export class Notifier {
         : outcome.status === 'declined' && outcome.declineReason
           ? agentDeclinedEmail({ to, reason: outcome.declineReason, appUrl: this.appUrl })
           : null,
+    );
+  }
+
+  /** Confirms a deletion request, with the date and how to undo it. */
+  async deletionScheduled(event: DomainEvent): Promise<void> {
+    const scheduledFor = new Date(String(event.payload['scheduledFor']));
+    if (Number.isNaN(scheduledFor.getTime())) return;
+    await this.sendOnce(event, event.aggregateId, (to) =>
+      deletionScheduledEmail({ to, scheduledFor, appUrl: this.appUrl }),
     );
   }
 

@@ -26,6 +26,8 @@ export const meResponseSchema = z
     roleLocked: z.boolean(),
     status: accountStatusSchema,
     countryCode: z.string().length(2).nullable(),
+    /** When the account will be erased, if the owner asked to delete it. */
+    deletionScheduledAt: isoDateTimeSchema.nullable(),
     createdAt: isoDateTimeSchema,
   })
   .meta({ id: 'Me' });

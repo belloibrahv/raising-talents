@@ -37,6 +37,7 @@ import {
   moderationDecisionSchema,
   moderationQueueQuerySchema,
 } from './moderation.js';
+import { dataExportSchema, requestDeletionSchema } from './privacy.js';
 import { searchTalentsQuerySchema, talentSearchResponseSchema } from './search.js';
 import {
   myAgentVerificationSchema,
@@ -560,6 +561,42 @@ export const endpoints = {
     successStatus: 204,
     errors: [ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.Conflict],
     tag: 'Moderation',
+  }),
+  'privacy.requestDeletion': define({
+    method: 'POST',
+    path: '/v1/me/deletion',
+    summary: 'Delete the account after a grace period. Needs the current password',
+    auth: true,
+    request: requestDeletionSchema,
+    response: meResponseSchema,
+    successStatus: 200,
+    errors: [
+      ErrorCode.InvalidCredentials,
+      ErrorCode.AccountSuspended,
+      ErrorCode.AccountBanned,
+      ErrorCode.RateLimited,
+    ],
+    tag: 'Me',
+  }),
+  'privacy.cancelDeletion': define({
+    method: 'POST',
+    path: '/v1/me/deletion/cancel',
+    summary: 'Keep the account: cancels a deletion that has not happened yet',
+    auth: true,
+    response: meResponseSchema,
+    successStatus: 200,
+    errors: [],
+    tag: 'Me',
+  }),
+  'privacy.export': define({
+    method: 'GET',
+    path: '/v1/me/export',
+    summary: 'Everything held about the signed-in person, as one JSON document',
+    auth: true,
+    response: dataExportSchema,
+    successStatus: 200,
+    errors: [ErrorCode.RateLimited],
+    tag: 'Me',
   }),
   'webhooks.mux': define({
     method: 'POST',

@@ -226,7 +226,7 @@ describe('Image pipeline', () => {
   });
 
   it('does not bring back a file the owner deleted while it was being scanned', async () => {
-    const facade = new MediaFacade(assets, presenter, clock);
+    const facade = new MediaFacade(assets, presenter, clock, storage, video);
     const mediaId = await upload();
     const scan = scanner.scanImage.bind(scanner);
     scanner.scanImage = async () => {
@@ -240,7 +240,7 @@ describe('Image pipeline', () => {
   });
 
   it('lets other modules read an asset and discard only their own user’s files', async () => {
-    const facade = new MediaFacade(assets, presenter, clock);
+    const facade = new MediaFacade(assets, presenter, clock, storage, video);
     const mediaId = await upload();
     await runWorker();
     const described = (await facade.describe([mediaId, 'missing'])).get(mediaId);

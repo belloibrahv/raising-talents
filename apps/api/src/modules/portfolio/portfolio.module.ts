@@ -100,5 +100,6 @@ type OwnerDeps = [PortfolioRepository, PortfolioAccounts, PortfolioMedia, UnitOf
         new GetPublicPortfolioQuery(repo, talents, media),
     },
   ],
+  exports: [PORTFOLIO.GetMine],
 })
 export class PortfolioModule {}

@@ -60,6 +60,51 @@ export class AccountsFacade {
     return account ? { status: account.status, dateOfBirth: account.dateOfBirth } : null;
   }
 
+  /** Schedules erasure after the grace period. Joins the caller's transaction. */
+  async requestDeletion(userId: string, graceDays: number): Promise<Result<Date, DomainError>> {
+    const account = await this.accounts.findById(userId);
+    if (!account) return err(AccountErrors.notFound());
+    const scheduled = account.requestDeletion(this.clock.now(), graceDays);
+    if (scheduled.ok) await this.accounts.save(account);
+    return scheduled;
+  }
+
+  async cancelDeletion(userId: string): Promise<Result<void, DomainError>> {
+    const account = await this.accounts.findById(userId);
+    if (!account) return err(AccountErrors.notFound());
+    account.cancelDeletion(this.clock.now());
+    await this.accounts.save(account);
+    return ok(undefined);
+  }
+
+  async dueForDeletion(limit: number): Promise<string[]> {
+    return (await this.accounts.findDueForDeletion(this.clock.now(), limit)).map(
+      (account) => account.id,
+    );
+  }
+
+  /** Erases the account and, through the database, everything that belongs to it. */
+  async erase(userId: string): Promise<void> {
+    await this.accounts.erase(userId, this.clock.now());
+  }
+
+  /** Everything the account holds about the person, for their data export. */
+  async exportFacts(userId: string) {
+    const account = await this.accounts.findById(userId);
+    if (!account) return null;
+    const props = account.snapshot();
+    return {
+      email: props.email,
+      emailVerifiedAt: props.emailVerifiedAt?.toISOString() ?? null,
+      dateOfBirth: props.dateOfBirth,
+      countryCode: props.countryCode,
+      role: props.role,
+      status: props.status,
+      deletionScheduledAt: props.deletionScheduledAt?.toISOString() ?? null,
+      createdAt: props.createdAt.toISOString(),
+    };
+  }
+
   /** For the operator script only. Logged by the caller. */
   async grantStaffRole(
     email: string,

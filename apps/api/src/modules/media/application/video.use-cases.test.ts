@@ -108,7 +108,7 @@ describe('Video pipeline', () => {
     );
     remove = new RemoveDeletedMediaHandler(assets, storage, video, logger);
     abandoned = new AbandonedUploadsJob(assets, storage, video, uow, clock, logger);
-    facade = new MediaFacade(assets, presenter, clock);
+    facade = new MediaFacade(assets, presenter, clock, storage, video);
     talentId = await accounts.createAccount({ email: 'chidi.eze@example.com', role: 'talent' });
     events.events.length = 0;
   });

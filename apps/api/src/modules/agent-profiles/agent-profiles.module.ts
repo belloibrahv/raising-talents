@@ -137,6 +137,6 @@ import type { RateLimiter } from '../../platform/rate-limit/rate-limiter.js';
       ) => new DecideVerificationHandler(repo, requests, accounts, uow, clock, logger),
     },
   ],
-  exports: [VERIFICATION.Outcomes],
+  exports: [VERIFICATION.Outcomes, VERIFICATION.GetMine, AGENT.GetMine],
 })
 export class AgentProfilesModule {}

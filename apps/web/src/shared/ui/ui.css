@@ -577,3 +577,24 @@ nav .button[aria-current='page'] {
   background: var(--ink);
   color: var(--paper);
 }
+
+.button--danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--paper);
+}
+
+.deletion-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--danger-surface);
+  color: var(--danger);
+}
+
+.deletion-banner .button {
+  width: auto;
+}

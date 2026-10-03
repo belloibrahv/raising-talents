@@ -329,6 +329,7 @@ export class MediaAsset {
 export interface MediaAssetRepository {
   findById(id: string, options?: { lock?: boolean }): Promise<MediaAsset | null>;
   findByIds(ids: readonly string[]): Promise<MediaAsset[]>;
+  findByOwner(ownerId: string): Promise<MediaAsset[]>;
   /** Held media, oldest first, after the given position in that order. */
   findHeld(after: { heldAt: Date; id: string } | null, limit: number): Promise<MediaAsset[]>;
   /** Intents older than the cutoff that never got a file, oldest first. */

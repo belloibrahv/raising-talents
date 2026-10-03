@@ -25,6 +25,13 @@ export const IDENTITY = {
   ListDevices: Symbol('ListDevicesQuery'),
   SignOutDevice: Symbol('SignOutDeviceHandler'),
   SignOutOthers: Symbol('SignOutOtherDevicesHandler'),
+  EmailChanges: Symbol('EmailChangeRepository'),
+  RequestEmailChange: Symbol('RequestEmailChangeHandler'),
+  IssueEmailChangeCode: Symbol('IssueEmailChangeCodeHandler'),
+  PendingEmailChange: Symbol('GetPendingEmailChangeQuery'),
+  CancelEmailChange: Symbol('CancelEmailChangeHandler'),
+  ConfirmEmailChange: Symbol('ConfirmEmailChangeHandler'),
+  NotifyEmailChanged: Symbol('NotifyEmailChangedHandler'),
   EventHandlers: Symbol('IdentityEventHandlers'),
   Facade: Symbol('IdentityFacade'),
 } as const;

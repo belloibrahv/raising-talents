@@ -4,7 +4,7 @@ import { ageInYears } from '../domain/age.js';
 import type { DomainError } from '../../../platform/domain-error.js';
 import { err, ok, type Result } from '../../../platform/result.js';
 import { AccountErrors } from '../domain/account.errors.js';
-import type { AccountRepository } from '../domain/account.repository.js';
+import { EmailTakenError, type AccountRepository } from '../domain/account.repository.js';
 import type { CreateAccountCommand, CreateAccountHandler } from './create-account.handler.js';
 import type { GetMeQuery } from './get-me.query.js';
 import type { MarkEmailVerifiedHandler } from './mark-email-verified.handler.js';
@@ -120,6 +120,26 @@ export class AccountsFacade {
     const result = action === 'suspend' ? account.suspend(reason, now) : account.ban(reason, now);
     if (result.ok) await this.accounts.save(account);
     return result;
+  }
+
+  /** Whether another account already uses the address. */
+  async emailTaken(email: string): Promise<boolean> {
+    return this.accounts.emailExists(email);
+  }
+
+  /** Moves the account to a proven address. Joins the caller's transaction. */
+  async changeEmail(userId: string, email: string): Promise<Result<void, DomainError>> {
+    const account = await this.accounts.findById(userId);
+    if (!account) return err(AccountErrors.notFound());
+    const changed = account.changeEmail(email, this.clock.now());
+    if (!changed.ok) return changed;
+    try {
+      await this.accounts.save(account);
+    } catch (error) {
+      if (error instanceof EmailTakenError) return err(AccountErrors.emailAlreadyRegistered());
+      throw error;
+    }
+    return ok(undefined);
   }
 
   /** For the operator script only. Returns the account id; logged by the caller. */

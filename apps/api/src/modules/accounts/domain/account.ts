@@ -206,6 +206,17 @@ export class Account {
     return ok(undefined);
   }
 
+  /**
+   * Moves the account to an address the owner proved with a code, so it counts as verified.
+   * Uniqueness is the database's to enforce, since two changes can race.
+   */
+  changeEmail(email: string, now: Date): Result<void, DomainError> {
+    if (email === this.props.email) return err(AccountErrors.sameEmail());
+    this.props = { ...this.props, email, emailVerifiedAt: now, updatedAt: now };
+    this.raise(AccountEvents.EmailChanged, now, {});
+    return ok(undefined);
+  }
+
   /** Staff keep separate accounts and are removed by an operator, not by a colleague. */
   private ensureMember(): Result<void, DomainError> {
     const role = this.props.role;

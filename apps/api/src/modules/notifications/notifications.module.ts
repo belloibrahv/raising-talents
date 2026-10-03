@@ -136,6 +136,7 @@ import { NotificationsController } from './interface/http/notifications.controll
             dispatcher.on(IdentityEvents.PasswordChanged, (event) =>
               notifier.passwordChanged(event),
             );
+            dispatcher.on(AccountEvents.EmailChanged, (event) => notifier.emailChanged(event));
           },
         };
       },

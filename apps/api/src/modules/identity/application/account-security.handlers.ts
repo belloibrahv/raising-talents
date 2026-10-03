@@ -147,7 +147,7 @@ export class ChangePasswordHandler {
           type: IdentityEvents.PasswordChanged,
           aggregateId: principal.userId,
           occurredAt: now,
-          payload: {},
+          payload: { signedOut: keep ? 'others' : 'all' },
         },
       ]);
       return ok(undefined);

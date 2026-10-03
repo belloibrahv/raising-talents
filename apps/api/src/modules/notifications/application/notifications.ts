@@ -161,6 +161,11 @@ export class Notifier {
     );
   }
 
+  /** The inbox only: identity emails the old address itself. */
+  async emailChanged(event: DomainEvent): Promise<void> {
+    await this.deliver(event, event.aggregateId, { kind: 'email_changed' }, null);
+  }
+
   /** The inbox only: identity already emails the owner when their password changes. */
   async passwordChanged(event: DomainEvent): Promise<void> {
     await this.deliver(event, event.aggregateId, { kind: 'password_changed' }, null);

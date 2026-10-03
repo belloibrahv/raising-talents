@@ -60,6 +60,17 @@ import {
   SignOutOtherDevicesHandler,
 } from './application/account-security.handlers.js';
 import { SecurityController } from './interface/http/security.controller.js';
+import { AccountEvents } from '../accounts/domain/account.events.js';
+import {
+  CancelEmailChangeHandler,
+  ConfirmEmailChangeHandler,
+  GetPendingEmailChangeQuery,
+  IssueEmailChangeCodeHandler,
+  NotifyEmailChangedHandler,
+  RequestEmailChangeHandler,
+} from './application/email-change.handlers.js';
+import type { EmailChangeRepository } from './domain/email-change.js';
+import { DrizzleEmailChangeRepository } from './infrastructure/drizzle-email-change.repository.js';
 
 /** Registers identity's reactions to published events. Called by the worker. */
 export interface ModuleEventHandlers {
@@ -110,6 +121,11 @@ const infrastructureProviders: Provider[] = [
     provide: IDENTITY.AccountDirectory,
     inject: [ACCOUNTS.Facade],
     useFactory: (facade: AccountsFacade) => accountsDirectory(facade),
+  },
+  {
+    provide: IDENTITY.EmailChanges,
+    inject: [PLATFORM.UnitOfWork],
+    useFactory: (uow: DrizzleUnitOfWork) => new DrizzleEmailChangeRepository(uow),
   },
 ];
 
@@ -421,18 +437,130 @@ const applicationProviders: Provider[] = [
       new NotifyPasswordChangedHandler(directory, email),
   },
   {
+    provide: IDENTITY.RequestEmailChange,
+    inject: [
+      IDENTITY.AccountDirectory,
+      IDENTITY.Credentials,
+      IDENTITY.PasswordHasher,
+      IDENTITY.EmailChanges,
+      IDENTITY.Codes,
+      PLATFORM.EventRecorder,
+      PLATFORM.RateLimiter,
+      PLATFORM.UnitOfWork,
+      PLATFORM.Clock,
+    ],
+    useFactory: (
+      directory: AccountDirectory,
+      credentials: CredentialRepository,
+      hasher: PasswordHasher,
+      changes: EmailChangeRepository,
+      codes: OneTimeCodeRepository,
+      events: EventRecorder,
+      limiter: RateLimiter,
+      uow: UnitOfWork,
+      clock: Clock,
+    ) =>
+      new RequestEmailChangeHandler(
+        directory,
+        credentials,
+        hasher,
+        changes,
+        codes,
+        events,
+        limiter,
+        uow,
+        clock,
+      ),
+  },
+  {
+    provide: IDENTITY.IssueEmailChangeCode,
+    inject: [
+      IDENTITY.EmailChanges,
+      IDENTITY.Codes,
+      IDENTITY.VerificationCodes,
+      IDENTITY.EmailSender,
+      PLATFORM.Clock,
+    ],
+    useFactory: (
+      changes: EmailChangeRepository,
+      codes: OneTimeCodeRepository,
+      codeFactory: VerificationCodeFactory,
+      email: EmailSender,
+      clock: Clock,
+    ) => new IssueEmailChangeCodeHandler(changes, codes, codeFactory, email, clock),
+  },
+  {
+    provide: IDENTITY.PendingEmailChange,
+    inject: [IDENTITY.EmailChanges, PLATFORM.Clock],
+    useFactory: (changes: EmailChangeRepository, clock: Clock) =>
+      new GetPendingEmailChangeQuery(changes, clock),
+  },
+  {
+    provide: IDENTITY.CancelEmailChange,
+    inject: [IDENTITY.EmailChanges, PLATFORM.Clock],
+    useFactory: (changes: EmailChangeRepository, clock: Clock) =>
+      new CancelEmailChangeHandler(changes, clock),
+  },
+  {
+    provide: IDENTITY.ConfirmEmailChange,
+    inject: [
+      IDENTITY.EmailChanges,
+      IDENTITY.Codes,
+      IDENTITY.VerificationCodes,
+      IDENTITY.AccountDirectory,
+      ACCOUNTS.Facade,
+      PLATFORM.RateLimiter,
+      PLATFORM.UnitOfWork,
+      PLATFORM.Clock,
+    ],
+    useFactory: (
+      changes: EmailChangeRepository,
+      codes: OneTimeCodeRepository,
+      codeFactory: VerificationCodeFactory,
+      directory: AccountDirectory,
+      accounts: AccountsFacade,
+      limiter: RateLimiter,
+      uow: UnitOfWork,
+      clock: Clock,
+    ) =>
+      new ConfirmEmailChangeHandler(
+        changes,
+        codes,
+        codeFactory,
+        directory,
+        accounts,
+        limiter,
+        uow,
+        clock,
+      ),
+  },
+  {
+    provide: IDENTITY.NotifyEmailChanged,
+    inject: [IDENTITY.EmailChanges, IDENTITY.EmailSender],
+    useFactory: (changes: EmailChangeRepository, email: EmailSender) =>
+      new NotifyEmailChangedHandler(changes, email),
+  },
+  {
     provide: IDENTITY.EventHandlers,
     inject: [
       IDENTITY.IssueEmailVerificationCode,
       IDENTITY.IssuePasswordResetCode,
       IDENTITY.NotifyPasswordChanged,
+      IDENTITY.IssueEmailChangeCode,
+      IDENTITY.NotifyEmailChanged,
     ],
     useFactory: (
       issueCode: IssueEmailVerificationCodeHandler,
       issueResetCode: IssuePasswordResetCodeHandler,
       notifyPasswordChanged: NotifyPasswordChangedHandler,
+      issueEmailChangeCode: IssueEmailChangeCodeHandler,
+      notifyEmailChanged: NotifyEmailChangedHandler,
     ): ModuleEventHandlers => ({
       register: (dispatcher) => {
+        dispatcher.on(IdentityEvents.EmailChangeRequested, (event) =>
+          issueEmailChangeCode.handle(event),
+        );
+        dispatcher.on(AccountEvents.EmailChanged, (event) => notifyEmailChanged.handle(event));
         dispatcher.on(IdentityEvents.EmailVerificationRequested, (event) =>
           issueCode.handle(event),
         );

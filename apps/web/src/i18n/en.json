@@ -568,6 +568,24 @@
     "reinstated": "Your account is back",
     "reinstatedBody": "You can use Raising Talents again, and agents can see your profile.",
     "passwordChanged": "Your password was changed",
-    "passwordChangedBody": "If this was not you, change your password and sign out your other devices."
+    "passwordChangedBody": "If this was not you, change your password and sign out your other devices.",
+    "emailChanged": "Your email address was changed",
+    "emailChangedBody": "Emails from us now go to your new address. If this was not you, contact support straight away."
+  },
+  "emailChange": {
+    "title": "Email address",
+    "change": "Change",
+    "body": "We will send a code to the new address. Nothing changes until you enter it, and we tell your current address either way.",
+    "newEmail": "New email address",
+    "password": "Your password",
+    "enterPassword": "Enter your password.",
+    "wrongPassword": "That password is not right.",
+    "sendCode": "Send code",
+    "cancel": "Cancel",
+    "codeSent": "We sent a 6-digit code to {email}. It expires in 10 minutes.",
+    "code": "Code from the new address",
+    "confirm": "Use this address",
+    "keepCurrent": "Keep my current address",
+    "done": "Your email address is changed. Use it next time you sign in."
   }
 }

@@ -198,6 +198,8 @@ export class NotifyPasswordChangedHandler {
 
   async handle(event: DomainEvent): Promise<void> {
     const account = await this.directory.findById(event.aggregateId);
-    if (account) await this.email.send(passwordChangedEmail({ to: account.email }));
+    if (!account) return;
+    const signedOut = event.payload['signedOut'] === 'others' ? 'others' : 'all';
+    await this.email.send(passwordChangedEmail({ to: account.email, signedOut }));
   }
 }

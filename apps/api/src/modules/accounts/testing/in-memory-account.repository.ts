@@ -1,6 +1,6 @@
 import type { DomainEvent, EventRecorder } from '../../../platform/domain-event.js';
 import { Account } from '../domain/account.js';
-import type { AccountRepository } from '../domain/account.repository.js';
+import { EmailTakenError, type AccountRepository } from '../domain/account.repository.js';
 
 export class InMemoryAccountRepository implements AccountRepository {
   readonly rows = new Map<string, ReturnType<Account['snapshot']>>();
@@ -22,7 +22,12 @@ export class InMemoryAccountRepository implements AccountRepository {
   }
 
   async save(account: Account): Promise<void> {
-    this.rows.set(account.id, account.snapshot());
+    const props = account.snapshot();
+    // The database's unique index, as an in-memory check.
+    if ([...this.rows.values()].some((row) => row.email === props.email && row.id !== props.id)) {
+      throw new EmailTakenError();
+    }
+    this.rows.set(account.id, props);
     const events: DomainEvent[] = account.pullEvents();
     await this.events.record(events);
   }

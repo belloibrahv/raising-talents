@@ -11,6 +11,7 @@ import { Button } from '../../shared/ui/Button';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { PasswordField } from '../../shared/ui/TextField';
 import { useFocusFirstError } from '../../shared/ui/use-focus-first-error';
+import { EmailCard } from './EmailCard';
 
 const devicesKey = ['security', 'devices'] as const;
 const cardClass =
@@ -20,6 +21,7 @@ const cardClass =
 export function SecuritySection() {
   return (
     <>
+      <EmailCard />
       <ChangePasswordCard />
       <DevicesCard />
     </>

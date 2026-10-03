@@ -8,9 +8,21 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Res,
   UseGuards,
 } from '@nestjs/common';
-import { changePasswordSchema, type ChangePassword, type SignedInDevices } from '@rt/contracts';
+import {
+  changePasswordSchema,
+  confirmEmailChangeSchema,
+  requestEmailChangeSchema,
+  type ChangePassword,
+  type ConfirmEmailChange,
+  type MeResponse,
+  type PendingEmailChange,
+  type RequestEmailChange,
+  type SignedInDevices,
+} from '@rt/contracts';
+import type { FastifyReply } from 'fastify';
 import { AuthGuard } from '../../../../platform/http/auth.guard.js';
 import type { Principal } from '../../../../platform/http/authenticated-request.js';
 import { CurrentPrincipal } from '../../../../platform/http/current-principal.decorator.js';
@@ -22,6 +34,12 @@ import type {
   SignOutDeviceHandler,
   SignOutOtherDevicesHandler,
 } from '../../application/account-security.handlers.js';
+import type {
+  CancelEmailChangeHandler,
+  ConfirmEmailChangeHandler,
+  GetPendingEmailChangeQuery,
+  RequestEmailChangeHandler,
+} from '../../application/email-change.handlers.js';
 import { IDENTITY } from '../../application/identity.tokens.js';
 
 @Controller('v1/me')
@@ -32,7 +50,45 @@ export class SecurityController {
     @Inject(IDENTITY.ListDevices) private readonly listDevices: ListDevicesQuery,
     @Inject(IDENTITY.SignOutDevice) private readonly signOutDevice: SignOutDeviceHandler,
     @Inject(IDENTITY.SignOutOthers) private readonly signOutOthers: SignOutOtherDevicesHandler,
+    @Inject(IDENTITY.RequestEmailChange) private readonly requestEmail: RequestEmailChangeHandler,
+    @Inject(IDENTITY.PendingEmailChange) private readonly pendingEmail: GetPendingEmailChangeQuery,
+    @Inject(IDENTITY.CancelEmailChange) private readonly cancelEmail: CancelEmailChangeHandler,
+    @Inject(IDENTITY.ConfirmEmailChange) private readonly confirmEmail: ConfirmEmailChangeHandler,
   ) {}
+
+  @Post('email')
+  @HttpCode(202)
+  async changeEmail(
+    @CurrentPrincipal() principal: Principal,
+    @Body(body(requestEmailChangeSchema)) input: RequestEmailChange,
+  ): Promise<PendingEmailChange> {
+    return unwrap(await this.requestEmail.execute(principal.userId, input));
+  }
+
+  @Get('email/change')
+  async pending(
+    @CurrentPrincipal() principal: Principal,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ): Promise<PendingEmailChange | undefined> {
+    const pending = await this.pendingEmail.execute(principal.userId);
+    if (!pending) void reply.status(204);
+    return pending ?? undefined;
+  }
+
+  @Delete('email/change')
+  @HttpCode(204)
+  async cancel(@CurrentPrincipal() principal: Principal): Promise<void> {
+    await this.cancelEmail.execute(principal.userId);
+  }
+
+  @Post('email/confirm')
+  @HttpCode(200)
+  async confirm(
+    @CurrentPrincipal() principal: Principal,
+    @Body(body(confirmEmailChangeSchema)) input: ConfirmEmailChange,
+  ): Promise<MeResponse> {
+    return unwrap(await this.confirmEmail.execute(principal.userId, input.code));
+  }
 
   @Post('password')
   @HttpCode(204)

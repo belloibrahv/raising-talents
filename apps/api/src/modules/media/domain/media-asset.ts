@@ -10,6 +10,7 @@ export const MediaEvents = {
   Held: 'media.MediaHeldForReview',
   Rejected: 'media.MediaRejected',
   Failed: 'media.MediaFailed',
+  Deleted: 'media.MediaDeleted',
 } as const;
 
 export const MediaErrors = {
@@ -169,6 +170,23 @@ export class MediaAsset {
     this.raise(MediaEvents.Failed, now);
   }
 
+  /** The owner no longer wants it. The worker removes the stored files once this commits. */
+  discard(now: Date): void {
+    if (this.props.status === 'deleted') return;
+    this.props = { ...this.props, status: 'deleted', updatedAt: now };
+    this.raise(MediaEvents.Deleted, now);
+  }
+
+  /** Every object this asset can have in storage, whatever state it reached. */
+  get storedKeys(): string[] {
+    return [
+      this.originalKey,
+      ...(Object.keys(IMAGE_SIZES) as (keyof typeof IMAGE_SIZES)[]).map((size) =>
+        this.variantKey(size),
+      ),
+    ];
+  }
+
   pullEvents(): DomainEvent[] {
     const events = this.pendingEvents;
     this.pendingEvents = [];
@@ -187,5 +205,6 @@ export class MediaAsset {
 
 export interface MediaAssetRepository {
   findById(id: string, options?: { lock?: boolean }): Promise<MediaAsset | null>;
+  findByIds(ids: readonly string[]): Promise<MediaAsset[]>;
   save(asset: MediaAsset): Promise<void>;
 }

@@ -29,6 +29,22 @@ export class GetMyTalentProfileQuery {
   }
 }
 
+/** Answers whether other users may see a talent. Other modules ask this instead of reading profiles. */
+export class TalentDirectory {
+  constructor(
+    private readonly profiles: TalentProfileRepository,
+    private readonly accounts: ProfileAccounts,
+  ) {}
+
+  /** The talent's user id when the profile is complete and the account active, otherwise null. */
+  async visibleUserId(handle: string): Promise<string | null> {
+    const profile = await this.profiles.findByHandle(handle.toLowerCase());
+    if (!profile?.isComplete) return null;
+    const account = await this.accounts.profileContext(profile.userId);
+    return account?.status === 'active' ? profile.userId : null;
+  }
+}
+
 /**
  * The profile agents see. Incomplete, suspended, banned and deleted profiles all
  * answer the same 404, so a viewer cannot tell which (design section 6.7).

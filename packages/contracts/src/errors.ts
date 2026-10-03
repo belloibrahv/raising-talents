@@ -42,6 +42,11 @@ export const ErrorCode = {
   MediaNotUploaded: 'MEDIA_NOT_UPLOADED',
   MediaUploadMismatch: 'MEDIA_UPLOAD_MISMATCH',
   MediaWrongState: 'MEDIA_WRONG_STATE',
+  MediaWrongPurpose: 'MEDIA_WRONG_PURPOSE',
+  MediaAlreadyUsed: 'MEDIA_ALREADY_USED',
+
+  PortfolioFull: 'PORTFOLIO_FULL',
+  PortfolioOrderMismatch: 'PORTFOLIO_ORDER_MISMATCH',
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
@@ -86,6 +91,11 @@ export const ERROR_STATUS: Record<ErrorCode, number> = {
   [ErrorCode.MediaNotUploaded]: 409,
   [ErrorCode.MediaUploadMismatch]: 422,
   [ErrorCode.MediaWrongState]: 409,
+  [ErrorCode.MediaWrongPurpose]: 422,
+  [ErrorCode.MediaAlreadyUsed]: 409,
+
+  [ErrorCode.PortfolioFull]: 409,
+  [ErrorCode.PortfolioOrderMismatch]: 409,
 };
 
 export const fieldProblemSchema = z

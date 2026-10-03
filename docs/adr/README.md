@@ -23,3 +23,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-017](017-shared-endpoint-catalogue-instead-of-generated-client.md) | Shared endpoint catalogue instead of a generated client | Accepted |
 | [ADR-018](018-opentofu-for-infrastructure.md)                           | OpenTofu for infrastructure                             | Accepted |
 | [ADR-019](019-slugs-as-taxonomy-keys.md)                                | Slugs as taxonomy keys, seeded by migration             | Accepted |
+| [ADR-020](020-portfolio-as-one-ordered-aggregate.md)                    | Portfolio as one ordered aggregate per talent           | Proposed |

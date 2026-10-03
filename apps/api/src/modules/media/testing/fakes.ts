@@ -18,6 +18,13 @@ export class InMemoryMediaAssetRepository implements MediaAssetRepository {
     return row ? MediaAsset.restore(row) : null;
   }
 
+  async findByIds(ids: readonly string[]): Promise<MediaAsset[]> {
+    return ids.flatMap((id) => {
+      const row = this.rows.get(id);
+      return row ? [MediaAsset.restore(row)] : [];
+    });
+  }
+
   async save(asset: MediaAsset): Promise<void> {
     this.rows.set(asset.id, asset.snapshot());
     await this.events.record(asset.pullEvents());

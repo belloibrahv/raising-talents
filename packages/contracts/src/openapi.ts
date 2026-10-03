@@ -179,6 +179,10 @@ export function buildOpenApiDocument(version: string): JsonObject {
         description:
           'Uploads, processing and scanning. Nothing is visible before it passes the scan',
       },
+      {
+        name: 'Portfolio',
+        description: 'Ordered images on a talent profile. Others see ready media only',
+      },
     ],
     paths,
     components: {

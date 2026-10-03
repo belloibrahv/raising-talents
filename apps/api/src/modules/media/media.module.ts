@@ -13,6 +13,7 @@ import type { AccountsFacade } from '../accounts/application/accounts.facade.js'
 import { ACCOUNTS } from '../accounts/application/accounts.tokens.js';
 import { AccountsModule } from '../accounts/accounts.module.js';
 import type { ModuleEventHandlers } from '../identity/identity.module.js';
+import { MediaFacade, RemoveDeletedMediaHandler } from './application/media.facade.js';
 import { MediaUrls } from './application/media-urls.js';
 import {
   CompleteUploadHandler,
@@ -134,15 +135,31 @@ import { MediaController } from './interface/http/media.controller.js';
       ) => new ProcessImageHandler(repo, storage, processor, scanner, policy, uow, clock, logger),
     },
     {
+      provide: MEDIA.Facade,
+      inject: [MEDIA.Repository, MEDIA.Urls, PLATFORM.Clock],
+      useFactory: (repo: MediaAssetRepository, urls: MediaUrls, clock: Clock) =>
+        new MediaFacade(repo, urls, clock),
+    },
+    {
+      provide: MEDIA.RemoveDeleted,
+      inject: [MEDIA.Repository, MEDIA.Storage, PLATFORM.Logger],
+      useFactory: (repo: MediaAssetRepository, storage: ObjectStorage, logger: Logger) =>
+        new RemoveDeletedMediaHandler(repo, storage, logger),
+    },
+    {
       provide: MEDIA.EventHandlers,
-      inject: [MEDIA.Process],
-      useFactory: (processImage: ProcessImageHandler): ModuleEventHandlers => ({
+      inject: [MEDIA.Process, MEDIA.RemoveDeleted],
+      useFactory: (
+        processImage: ProcessImageHandler,
+        removeDeleted: RemoveDeletedMediaHandler,
+      ): ModuleEventHandlers => ({
         register: (dispatcher) => {
           dispatcher.on(MediaEvents.Uploaded, (event) => processImage.handle(event));
+          dispatcher.on(MediaEvents.Deleted, (event) => removeDeleted.handle(event));
         },
       }),
     },
   ],
-  exports: [MEDIA.Urls, MEDIA.EventHandlers],
+  exports: [MEDIA.Urls, MEDIA.Facade, MEDIA.EventHandlers],
 })
 export class MediaModule {}

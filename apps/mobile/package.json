@@ -16,6 +16,7 @@
     "@expo-google-fonts/bricolage-grotesque": "^0.4.1",
     "@expo-google-fonts/figtree": "^0.4.1",
     "@rt/contracts": "workspace:*",
+    "@sentry/react-native": "~7.11.0",
     "@tanstack/react-query": "^5.104.0",
     "expo": "^57.0.26",
     "expo-constants": "~57.0.20",

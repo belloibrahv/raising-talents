@@ -1,6 +1,7 @@
 import type { DomainEvent, EventRecorder } from '../domain-event.js';
 import type { DrizzleUnitOfWork } from '../database/drizzle-unit-of-work.js';
 import { newId } from '../ids.js';
+import { captureTraceHeaders } from '../observability/trace-context.js';
 import { outbox } from './outbox.schema.js';
 
 /** Writes events to the outbox inside the caller's transaction. */
@@ -9,6 +10,7 @@ export class DrizzleEventRecorder implements EventRecorder {
 
   async record(events: readonly DomainEvent[]): Promise<void> {
     if (events.length === 0) return;
+    const headers = captureTraceHeaders();
     await this.uow
       .executor()
       .insert(outbox)
@@ -18,6 +20,7 @@ export class DrizzleEventRecorder implements EventRecorder {
           eventType: event.type,
           aggregateId: event.aggregateId,
           payload: event.payload,
+          headers,
           occurredAt: event.occurredAt,
         })),
       );

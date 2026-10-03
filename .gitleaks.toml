@@ -1,0 +1,13 @@
+# Keeps the default rules and allows only fixed values that tests use on purpose.
+# Add a value here only when it is not a credential anywhere, and say what it is.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Fixed test values that look like keys"
+regexes = [
+  # Example W3C trace id in the mobile error reporting tests.
+  '''a3321e65da36d002df4c794cc6226586''',
+  # Throwaway password in the profile end-to-end tests.
+  '''relay-baton-ikorodu-26''',
+]

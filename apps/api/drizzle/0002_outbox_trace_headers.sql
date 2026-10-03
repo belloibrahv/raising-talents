@@ -1,0 +1,1 @@
+ALTER TABLE "platform"."outbox" ADD COLUMN "headers" jsonb DEFAULT '{}'::jsonb NOT NULL;

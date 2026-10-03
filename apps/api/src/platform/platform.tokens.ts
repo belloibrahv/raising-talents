@@ -7,4 +7,5 @@ export const PLATFORM = {
   Redis: Symbol('Redis'),
   RateLimiter: Symbol('RateLimiter'),
   Logger: Symbol('Logger'),
+  ErrorReporter: Symbol('ErrorReporter'),
 } as const;

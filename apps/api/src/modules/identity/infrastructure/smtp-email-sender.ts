@@ -1,3 +1,4 @@
+import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api';
 import nodemailer, { type Transporter } from 'nodemailer';
 import type { EmailMessage, EmailSender } from '../application/ports.js';
 
@@ -25,7 +26,25 @@ export class SmtpEmailSender implements EmailSender {
     });
   }
 
+  /** Traced as one span. The recipient is left out: an email address is personal data. */
   async send(message: EmailMessage): Promise<void> {
-    await this.transporter.sendMail({ from: this.settings.from, ...message });
+    await trace.getTracer('raising-talents.email').startActiveSpan(
+      'email send',
+      {
+        kind: SpanKind.CLIENT,
+        attributes: { 'email.provider': 'smtp', 'server.address': this.settings.host },
+      },
+      async (span) => {
+        try {
+          await this.transporter.sendMail({ from: this.settings.from, ...message });
+        } catch (error) {
+          span.recordException(error instanceof Error ? error : new Error(String(error)));
+          span.setStatus({ code: SpanStatusCode.ERROR });
+          throw error;
+        } finally {
+          span.end();
+        }
+      },
+    );
   }
 }

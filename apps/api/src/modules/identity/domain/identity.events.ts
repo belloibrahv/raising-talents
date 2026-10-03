@@ -6,4 +6,6 @@ export const IdentityEvents = {
   PasswordResetRequested: 'identity.PasswordResetRequested',
   /** Handled in the worker: tells the owner, in case it was not them. */
   PasswordChanged: 'identity.PasswordChanged',
+  /** Handled in the worker: sends the code to the new address and warns the old one. */
+  EmailChangeRequested: 'identity.EmailChangeRequested',
 } as const;

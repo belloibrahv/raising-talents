@@ -44,6 +44,8 @@ export interface AccountDirectory {
   findById(id: string): Promise<DirectoryAccount | null>;
   ensureCanSignIn(userId: string): Promise<Result<void, DomainError>>;
   markEmailVerified(userId: string): Promise<Result<void, DomainError>>;
+  emailTaken(email: string): Promise<boolean>;
+  changeEmail(userId: string, email: string): Promise<Result<void, DomainError>>;
 }
 
 export interface IdentitySettings {

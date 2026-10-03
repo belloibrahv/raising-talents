@@ -1,3 +1,4 @@
+import type { EmailChange, EmailChangeRepository } from '../domain/email-change.js';
 import type {
   BreachedPasswordChecker,
   EmailMessage,
@@ -142,5 +143,21 @@ export class CapturingEmailSender implements EmailSender {
   lastCodeFor(email: string): string | undefined {
     const message = [...this.sent].reverse().find((candidate) => candidate.to === email);
     return message?.text.match(/\b(\d{6})\b/)?.[1];
+  }
+}
+
+export class InMemoryEmailChangeRepository implements EmailChangeRepository {
+  readonly rows = new Map<string, EmailChange>();
+
+  async find(userId: string): Promise<EmailChange | null> {
+    return this.rows.get(userId) ?? null;
+  }
+
+  async save(change: EmailChange): Promise<void> {
+    this.rows.set(change.userId, change);
+  }
+
+  async remove(userId: string): Promise<void> {
+    this.rows.delete(userId);
   }
 }

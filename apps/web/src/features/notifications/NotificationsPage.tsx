@@ -8,6 +8,7 @@ import {
   ImageOff,
   Images,
   KeyRound,
+  Mail,
   UserCheck,
   type LucideIcon,
 } from 'lucide-react';
@@ -92,6 +93,14 @@ function show(notice: Notification): Shown {
         title: t('notifications.reinstated'),
         body: t('notifications.reinstatedBody'),
         to: '/home',
+      };
+    case 'email_changed':
+      return {
+        icon: Mail,
+        tone: 'neutral',
+        title: t('notifications.emailChanged'),
+        body: t('notifications.emailChangedBody'),
+        to: '/account',
       };
     case 'password_changed':
       return {

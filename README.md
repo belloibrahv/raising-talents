@@ -196,7 +196,7 @@ Milestone 1, foundations.
 | Safety: member reports, moderator queue, suspend and ban with sign-out and email, operator reinstate (ADR-028)          | Done, categories provisional             |
 | PWA design system: shadcn/ui on Tailwind, brand tokens, dark scheme, bottom tab bar on phones (ADR-029)                 | Done                                     |
 | Shortlists: agents save talent with private notes, in the data export (ADR-030)                                         | Done, limit provisional                  |
-| Account security: change password, signed-in devices, sign out one or every other device (ADR-031)                      | Done                                     |
+| Account security: change password, signed-in devices, sign out devices, change email (ADR-031, ADR-034)                 | Done                                     |
 | Notification inbox: bell with unread count, inbox page, 180-day retention, in the data export (ADR-032)                 | Done                                     |
 | Quality: Lighthouse in CI (performance 85+, accessibility and best practices 100) on a CloudFront-like server (ADR-033) | Done                                     |
 | CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                                  | Done                                     |

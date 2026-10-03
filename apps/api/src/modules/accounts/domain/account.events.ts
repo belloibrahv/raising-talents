@@ -1,6 +1,8 @@
 export const AccountEvents = {
   AccountCreated: 'accounts.AccountCreated',
   EmailVerified: 'accounts.EmailVerified',
+  /** No payload: the addresses are personal data and stay out of the outbox. */
+  EmailChanged: 'accounts.EmailChanged',
   RoleSelected: 'accounts.RoleSelected',
   OnboardingCompleted: 'accounts.OnboardingCompleted',
   StaffRoleGranted: 'accounts.StaffRoleGranted',

@@ -9,7 +9,7 @@ export const VERIFICATION_CODE_LENGTH = 6;
 
 // Trims and lowercases before checking. The input side of that pipeline is a plain
 // string, so the documented format is stated explicitly for the OpenAPI document.
-const emailSchema = z
+export const emailSchema = z
   .string()
   .trim()
   .toLowerCase()

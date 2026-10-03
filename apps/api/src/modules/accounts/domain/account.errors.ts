@@ -48,4 +48,5 @@ export const AccountErrors = {
       ErrorCode.Forbidden,
       'Staff accounts are handled by an operator, not through reports.',
     ),
+  sameEmail: () => domainError(ErrorCode.Conflict, 'That is already your email address.'),
 };

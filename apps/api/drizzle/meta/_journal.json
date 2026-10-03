@@ -113,6 +113,13 @@
       "when": 1791031580960,
       "tag": "0015_notification_inbox",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1791036078309,
+      "tag": "0016_email_changes",
+      "breakpoints": true
     }
   ]
 }

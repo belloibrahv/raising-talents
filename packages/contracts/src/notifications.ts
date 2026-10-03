@@ -38,6 +38,7 @@ export const notificationSchema = z
     }),
     z.object({ ...common, kind: z.literal('account_reinstated') }),
     z.object({ ...common, kind: z.literal('password_changed') }),
+    z.object({ ...common, kind: z.literal('email_changed') }),
   ])
   .meta({ id: 'Notification' });
 export type Notification = z.infer<typeof notificationSchema>;

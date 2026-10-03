@@ -17,6 +17,7 @@ export const sessionRevokedReasonEnum = identitySchema.enum('session_revoked_rea
 export const codePurposeEnum = identitySchema.enum('code_purpose', [
   'email_verification',
   'password_reset',
+  'email_change',
 ]);
 
 export const credentials = identitySchema.table('credentials', {
@@ -71,3 +72,17 @@ export const oneTimeCodes = identitySchema.table(
     index('one_time_codes_user_purpose_idx').on(table.userId, table.purpose, table.createdAt),
   ],
 );
+
+/**
+ * A move to a new address, waiting for its code. Once confirmed it stays until the worker
+ * has told the old address, then goes: the addresses never travel in events (ADR-034).
+ */
+export const emailChanges = identitySchema.table('email_changes', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  newEmail: text('new_email').notNull(),
+  previousEmail: text('previous_email').notNull(),
+  requestedAt: timestamp('requested_at', { withTimezone: true }).notNull(),
+  confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
+});

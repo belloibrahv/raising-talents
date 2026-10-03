@@ -3,7 +3,7 @@ import { AccountEvents } from '../domain/account.events.js';
 import type { EventRecorder } from '../../../platform/domain-event.js';
 import type { DrizzleUnitOfWork } from '../../../platform/database/drizzle-unit-of-work.js';
 import { Account } from '../domain/account.js';
-import type { AccountRepository } from '../domain/account.repository.js';
+import { EmailTakenError, type AccountRepository } from '../domain/account.repository.js';
 import { users, type UserRow } from './account.schema.js';
 
 const toDomain = (row: UserRow): Account =>
@@ -67,21 +67,32 @@ export class DrizzleAccountRepository implements AccountRepository {
       createdAt: props.createdAt,
       updatedAt: props.updatedAt,
     };
-    await this.uow
-      .executor()
-      .insert(users)
-      .values(row)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          emailVerifiedAt: row.emailVerifiedAt,
-          role: row.role,
-          roleLockedAt: row.roleLockedAt,
-          status: row.status,
-          deletionScheduledAt: row.deletionScheduledAt,
-          updatedAt: row.updatedAt,
-        },
-      });
+    try {
+      await this.uow
+        .executor()
+        .insert(users)
+        .values(row)
+        .onConflictDoUpdate({
+          target: users.id,
+          set: {
+            email: row.email,
+            emailVerifiedAt: row.emailVerifiedAt,
+            role: row.role,
+            roleLockedAt: row.roleLockedAt,
+            status: row.status,
+            deletionScheduledAt: row.deletionScheduledAt,
+            updatedAt: row.updatedAt,
+          },
+        });
+    } catch (error) {
+      const cause =
+        (error as { cause?: { code?: string; constraint?: string } }).cause ??
+        (error as { code?: string; constraint?: string });
+      if (cause.code === '23505' && cause.constraint === 'users_email_unique') {
+        throw new EmailTakenError();
+      }
+      throw error;
+    }
     await this.events.record(account.pullEvents());
   }
 

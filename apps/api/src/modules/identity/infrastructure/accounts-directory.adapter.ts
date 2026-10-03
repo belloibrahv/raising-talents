@@ -9,5 +9,7 @@ export function accountsDirectory(facade: AccountsFacade): AccountDirectory {
     findById: (id) => facade.findSummaryById(id),
     ensureCanSignIn: (userId) => facade.ensureCanSignIn(userId),
     markEmailVerified: (userId) => facade.markEmailVerified(userId),
+    emailTaken: (email) => facade.emailTaken(email),
+    changeEmail: (userId, email) => facade.changeEmail(userId, email),
   };
 }

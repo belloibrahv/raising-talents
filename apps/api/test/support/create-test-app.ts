@@ -14,6 +14,7 @@ import {
   FakeBreachedPasswordChecker,
   FakePasswordHasher,
   InMemoryCredentialRepository,
+  InMemoryEmailChangeRepository,
   InMemoryOneTimeCodeRepository,
   InMemorySessionRepository,
 } from '../../src/modules/identity/testing/fakes.js';
@@ -122,6 +123,8 @@ export async function createTestApp(): Promise<TestApp> {
     .useValue(new InMemoryCredentialRepository())
     .overrideProvider(IDENTITY.Codes)
     .useValue(new InMemoryOneTimeCodeRepository())
+    .overrideProvider(IDENTITY.EmailChanges)
+    .useValue(new InMemoryEmailChangeRepository())
     .overrideProvider(IDENTITY.PasswordHasher)
     .useValue(new FakePasswordHasher())
     .overrideProvider(IDENTITY.BreachedPasswords)

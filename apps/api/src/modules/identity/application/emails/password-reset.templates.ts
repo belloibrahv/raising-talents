@@ -24,17 +24,25 @@ export function passwordResetCodeEmail(input: { to: string; code: string }): Ema
   return { to: input.to, subject, text, html };
 }
 
-export function passwordChangedEmail(input: { to: string }): EmailMessage {
+export function passwordChangedEmail(input: {
+  to: string;
+  /** A reset signs out every device; a change in the app keeps the one that made it. */
+  signedOut?: 'all' | 'others';
+}): EmailMessage {
   const subject = 'Your Raising Talents password was changed';
+  const devices =
+    input.signedOut === 'others'
+      ? 'and your other devices were signed out'
+      : 'and every device was signed out';
   const text = [
-    'The password for your Raising Talents account was just changed, and every device was signed out.',
+    `The password for your Raising Talents account was just changed, ${devices}.`,
     '',
     'If this was you, there is nothing else to do.',
     '',
     'If it was not you, reset your password now from the sign-in screen and reply to this email so we can help.',
   ].join('\n');
   const html =
-    wrap(`    <p>The password for your Raising Talents account was just changed, and every device was signed out.</p>
+    wrap(`    <p>The password for your Raising Talents account was just changed, ${devices}.</p>
     <p>If this was you, there is nothing else to do.</p>
     <p><strong>If it was not you</strong>, reset your password now from the sign-in screen and reply to this email so we can help.</p>`);
   return { to: input.to, subject, text, html };

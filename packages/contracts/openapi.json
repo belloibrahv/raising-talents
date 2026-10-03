@@ -82,7 +82,9 @@
       "post": {
         "operationId": "auth_signUp",
         "summary": "Create an account and start a session",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "security": [],
         "requestBody": {
           "required": true,
@@ -107,7 +109,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -118,7 +122,9 @@
           },
           "409": {
             "description": "Conflict. Codes: EMAIL_ALREADY_REGISTERED.",
-            "x-error-codes": ["EMAIL_ALREADY_REGISTERED"],
+            "x-error-codes": [
+              "EMAIL_ALREADY_REGISTERED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -129,7 +135,10 @@
           },
           "422": {
             "description": "Request cannot be completed. Codes: UNDER_MINIMUM_AGE, WEAK_PASSWORD.",
-            "x-error-codes": ["UNDER_MINIMUM_AGE", "WEAK_PASSWORD"],
+            "x-error-codes": [
+              "UNDER_MINIMUM_AGE",
+              "WEAK_PASSWORD"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -140,7 +149,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -151,7 +162,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -167,7 +180,9 @@
       "post": {
         "operationId": "auth_signIn",
         "summary": "Sign in with email and password",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "security": [],
         "requestBody": {
           "required": true,
@@ -192,7 +207,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -203,7 +220,9 @@
           },
           "401": {
             "description": "Not signed in. Codes: INVALID_CREDENTIALS.",
-            "x-error-codes": ["INVALID_CREDENTIALS"],
+            "x-error-codes": [
+              "INVALID_CREDENTIALS"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -214,7 +233,10 @@
           },
           "403": {
             "description": "Not allowed. Codes: ACCOUNT_SUSPENDED, ACCOUNT_BANNED.",
-            "x-error-codes": ["ACCOUNT_SUSPENDED", "ACCOUNT_BANNED"],
+            "x-error-codes": [
+              "ACCOUNT_SUSPENDED",
+              "ACCOUNT_BANNED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -225,7 +247,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -236,7 +260,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -252,7 +278,9 @@
       "post": {
         "operationId": "auth_refresh",
         "summary": "Swap a refresh token for a new token pair",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "security": [],
         "requestBody": {
           "required": true,
@@ -277,7 +305,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -288,7 +318,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: SESSION_EXPIRED, SESSION_REVOKED.",
-            "x-error-codes": ["SESSION_EXPIRED", "SESSION_REVOKED"],
+            "x-error-codes": [
+              "SESSION_EXPIRED",
+              "SESSION_REVOKED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -299,7 +332,10 @@
           },
           "403": {
             "description": "Not allowed. Codes: ACCOUNT_SUSPENDED, ACCOUNT_BANNED.",
-            "x-error-codes": ["ACCOUNT_SUSPENDED", "ACCOUNT_BANNED"],
+            "x-error-codes": [
+              "ACCOUNT_SUSPENDED",
+              "ACCOUNT_BANNED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -310,7 +346,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -326,7 +364,9 @@
       "post": {
         "operationId": "auth_signOut",
         "summary": "End the session on this device",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "security": [],
         "requestBody": {
           "required": true,
@@ -344,7 +384,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -355,7 +397,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -371,7 +415,9 @@
       "post": {
         "operationId": "authWeb_signUp",
         "summary": "Create an account from the web app; the refresh token is set as an HttpOnly cookie",
-        "tags": ["Auth (web)"],
+        "tags": [
+          "Auth (web)"
+        ],
         "security": [],
         "requestBody": {
           "required": true,
@@ -396,7 +442,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -407,7 +455,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: FORBIDDEN.",
-            "x-error-codes": ["FORBIDDEN"],
+            "x-error-codes": [
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -418,7 +468,9 @@
           },
           "409": {
             "description": "Conflict. Codes: EMAIL_ALREADY_REGISTERED.",
-            "x-error-codes": ["EMAIL_ALREADY_REGISTERED"],
+            "x-error-codes": [
+              "EMAIL_ALREADY_REGISTERED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -429,7 +481,10 @@
           },
           "422": {
             "description": "Request cannot be completed. Codes: UNDER_MINIMUM_AGE, WEAK_PASSWORD.",
-            "x-error-codes": ["UNDER_MINIMUM_AGE", "WEAK_PASSWORD"],
+            "x-error-codes": [
+              "UNDER_MINIMUM_AGE",
+              "WEAK_PASSWORD"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -440,7 +495,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -451,7 +508,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -467,7 +526,9 @@
       "post": {
         "operationId": "authWeb_signIn",
         "summary": "Sign in from the web app; the refresh token is set as an HttpOnly cookie",
-        "tags": ["Auth (web)"],
+        "tags": [
+          "Auth (web)"
+        ],
         "security": [],
         "requestBody": {
           "required": true,
@@ -492,7 +553,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -503,7 +566,9 @@
           },
           "401": {
             "description": "Not signed in. Codes: INVALID_CREDENTIALS.",
-            "x-error-codes": ["INVALID_CREDENTIALS"],
+            "x-error-codes": [
+              "INVALID_CREDENTIALS"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -514,7 +579,11 @@
           },
           "403": {
             "description": "Not allowed. Codes: ACCOUNT_SUSPENDED, ACCOUNT_BANNED, FORBIDDEN.",
-            "x-error-codes": ["ACCOUNT_SUSPENDED", "ACCOUNT_BANNED", "FORBIDDEN"],
+            "x-error-codes": [
+              "ACCOUNT_SUSPENDED",
+              "ACCOUNT_BANNED",
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -525,7 +594,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -536,7 +607,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -552,7 +625,9 @@
       "post": {
         "operationId": "authWeb_refresh",
         "summary": "Swap the refresh cookie for a new access token and a rotated cookie",
-        "tags": ["Auth (web)"],
+        "tags": [
+          "Auth (web)"
+        ],
         "security": [],
         "requestBody": {
           "required": true,
@@ -580,7 +655,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -591,7 +668,11 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED, SESSION_REVOKED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED", "SESSION_REVOKED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED",
+              "SESSION_REVOKED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -602,7 +683,11 @@
           },
           "403": {
             "description": "Not allowed. Codes: ACCOUNT_SUSPENDED, ACCOUNT_BANNED, FORBIDDEN.",
-            "x-error-codes": ["ACCOUNT_SUSPENDED", "ACCOUNT_BANNED", "FORBIDDEN"],
+            "x-error-codes": [
+              "ACCOUNT_SUSPENDED",
+              "ACCOUNT_BANNED",
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -613,7 +698,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -629,7 +716,9 @@
       "post": {
         "operationId": "authWeb_signOut",
         "summary": "End the web session and clear the refresh cookie",
-        "tags": ["Auth (web)"],
+        "tags": [
+          "Auth (web)"
+        ],
         "security": [],
         "responses": {
           "204": {
@@ -637,7 +726,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -648,7 +739,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: FORBIDDEN.",
-            "x-error-codes": ["FORBIDDEN"],
+            "x-error-codes": [
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -659,7 +752,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -675,7 +770,9 @@
       "post": {
         "operationId": "auth_requestPasswordReset",
         "summary": "Email a reset code if the address has an account. The answer is the same either way",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "security": [],
         "requestBody": {
           "required": true,
@@ -693,7 +790,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -704,7 +803,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -715,7 +816,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -731,7 +834,9 @@
       "post": {
         "operationId": "auth_resetPassword",
         "summary": "Set a new password with the emailed code; every session is signed out",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "security": [],
         "requestBody": {
           "required": true,
@@ -749,7 +854,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -776,7 +883,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -787,7 +896,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -803,7 +914,9 @@
       "post": {
         "operationId": "auth_verifyEmail",
         "summary": "Confirm the email address with the emailed code",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -832,7 +945,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -843,7 +958,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -854,7 +972,9 @@
           },
           "409": {
             "description": "Conflict. Codes: EMAIL_ALREADY_VERIFIED.",
-            "x-error-codes": ["EMAIL_ALREADY_VERIFIED"],
+            "x-error-codes": [
+              "EMAIL_ALREADY_VERIFIED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -880,7 +1000,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -891,7 +1013,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -907,7 +1031,9 @@
       "post": {
         "operationId": "auth_resendVerification",
         "summary": "Email a new verification code",
-        "tags": ["Auth"],
+        "tags": [
+          "Auth"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -919,7 +1045,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -930,7 +1058,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -941,7 +1072,9 @@
           },
           "409": {
             "description": "Conflict. Codes: EMAIL_ALREADY_VERIFIED.",
-            "x-error-codes": ["EMAIL_ALREADY_VERIFIED"],
+            "x-error-codes": [
+              "EMAIL_ALREADY_VERIFIED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -952,7 +1085,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: VERIFICATION_RESEND_TOO_SOON.",
-            "x-error-codes": ["VERIFICATION_RESEND_TOO_SOON"],
+            "x-error-codes": [
+              "VERIFICATION_RESEND_TOO_SOON"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -963,7 +1098,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -979,7 +1116,9 @@
       "get": {
         "operationId": "me_get",
         "summary": "The signed-in account",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -998,7 +1137,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1009,7 +1150,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1020,7 +1164,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1036,7 +1182,9 @@
       "post": {
         "operationId": "me_selectRole",
         "summary": "Choose talent or agent",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1065,7 +1213,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1076,7 +1226,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1087,7 +1240,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: EMAIL_NOT_VERIFIED.",
-            "x-error-codes": ["EMAIL_NOT_VERIFIED"],
+            "x-error-codes": [
+              "EMAIL_NOT_VERIFIED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1098,7 +1253,9 @@
           },
           "409": {
             "description": "Conflict. Codes: ROLE_ALREADY_LOCKED.",
-            "x-error-codes": ["ROLE_ALREADY_LOCKED"],
+            "x-error-codes": [
+              "ROLE_ALREADY_LOCKED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1109,7 +1266,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1125,7 +1284,9 @@
       "get": {
         "operationId": "taxonomy_get",
         "summary": "Categories, subcategories, skills and cities",
-        "tags": ["Taxonomy"],
+        "tags": [
+          "Taxonomy"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1144,7 +1305,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1155,7 +1318,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1166,7 +1332,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1182,7 +1350,9 @@
       "get": {
         "operationId": "talentProfile_getMine",
         "summary": "The signed-in talent's profile, with what is still missing",
-        "tags": ["Talent profiles"],
+        "tags": [
+          "Talent profiles"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1209,7 +1379,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1220,7 +1392,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1231,7 +1406,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE.",
-            "x-error-codes": ["WRONG_ROLE"],
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1242,7 +1419,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1253,7 +1432,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1267,7 +1448,9 @@
       "patch": {
         "operationId": "talentProfile_updateMine",
         "summary": "Create or update the talent profile, one onboarding step at a time",
-        "tags": ["Talent profiles"],
+        "tags": [
+          "Talent profiles"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1315,7 +1498,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1326,7 +1511,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1337,7 +1525,10 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE, EMAIL_NOT_VERIFIED.",
-            "x-error-codes": ["WRONG_ROLE", "EMAIL_NOT_VERIFIED"],
+            "x-error-codes": [
+              "WRONG_ROLE",
+              "EMAIL_NOT_VERIFIED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1348,7 +1539,9 @@
           },
           "409": {
             "description": "Conflict. Codes: HANDLE_TAKEN.",
-            "x-error-codes": ["HANDLE_TAKEN"],
+            "x-error-codes": [
+              "HANDLE_TAKEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1359,7 +1552,9 @@
           },
           "412": {
             "description": "Stale version. Codes: PRECONDITION_FAILED.",
-            "x-error-codes": ["PRECONDITION_FAILED"],
+            "x-error-codes": [
+              "PRECONDITION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1370,7 +1565,10 @@
           },
           "422": {
             "description": "Request cannot be completed. Codes: HANDLE_INVALID, UNKNOWN_TAXONOMY.",
-            "x-error-codes": ["HANDLE_INVALID", "UNKNOWN_TAXONOMY"],
+            "x-error-codes": [
+              "HANDLE_INVALID",
+              "UNKNOWN_TAXONOMY"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1381,7 +1579,9 @@
           },
           "428": {
             "description": "If-Match header required. Codes: PRECONDITION_REQUIRED.",
-            "x-error-codes": ["PRECONDITION_REQUIRED"],
+            "x-error-codes": [
+              "PRECONDITION_REQUIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1392,7 +1592,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1408,7 +1610,9 @@
       "get": {
         "operationId": "talents_getByHandle",
         "summary": "A complete talent profile, as agents see it",
-        "tags": ["Talent profiles"],
+        "tags": [
+          "Talent profiles"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1437,7 +1641,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1448,7 +1654,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1459,7 +1668,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1470,7 +1681,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1486,7 +1699,9 @@
       "get": {
         "operationId": "agentProfile_getMine",
         "summary": "The signed-in agent's profile, with what is still missing",
-        "tags": ["Agent profiles"],
+        "tags": [
+          "Agent profiles"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1513,7 +1728,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1524,7 +1741,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1535,7 +1755,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE.",
-            "x-error-codes": ["WRONG_ROLE"],
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1546,7 +1768,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1557,7 +1781,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1571,7 +1797,9 @@
       "patch": {
         "operationId": "agentProfile_updateMine",
         "summary": "Create or update the agent profile",
-        "tags": ["Agent profiles"],
+        "tags": [
+          "Agent profiles"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1619,7 +1847,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1630,7 +1860,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1641,7 +1874,10 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE, EMAIL_NOT_VERIFIED.",
-            "x-error-codes": ["WRONG_ROLE", "EMAIL_NOT_VERIFIED"],
+            "x-error-codes": [
+              "WRONG_ROLE",
+              "EMAIL_NOT_VERIFIED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1652,7 +1888,9 @@
           },
           "412": {
             "description": "Stale version. Codes: PRECONDITION_FAILED.",
-            "x-error-codes": ["PRECONDITION_FAILED"],
+            "x-error-codes": [
+              "PRECONDITION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1663,7 +1901,9 @@
           },
           "422": {
             "description": "Request cannot be completed. Codes: UNKNOWN_TAXONOMY.",
-            "x-error-codes": ["UNKNOWN_TAXONOMY"],
+            "x-error-codes": [
+              "UNKNOWN_TAXONOMY"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1674,7 +1914,9 @@
           },
           "428": {
             "description": "If-Match header required. Codes: PRECONDITION_REQUIRED.",
-            "x-error-codes": ["PRECONDITION_REQUIRED"],
+            "x-error-codes": [
+              "PRECONDITION_REQUIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1685,7 +1927,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1701,7 +1945,9 @@
       "post": {
         "operationId": "media_createUploadIntent",
         "summary": "Get permission to upload one image or video straight to storage",
-        "tags": ["Media"],
+        "tags": [
+          "Media"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1730,7 +1976,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1741,7 +1989,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1752,7 +2003,10 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE, EMAIL_NOT_VERIFIED.",
-            "x-error-codes": ["WRONG_ROLE", "EMAIL_NOT_VERIFIED"],
+            "x-error-codes": [
+              "WRONG_ROLE",
+              "EMAIL_NOT_VERIFIED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1763,7 +2017,10 @@
           },
           "422": {
             "description": "Request cannot be completed. Codes: MEDIA_TYPE_NOT_ALLOWED, MEDIA_TOO_LARGE.",
-            "x-error-codes": ["MEDIA_TYPE_NOT_ALLOWED", "MEDIA_TOO_LARGE"],
+            "x-error-codes": [
+              "MEDIA_TYPE_NOT_ALLOWED",
+              "MEDIA_TOO_LARGE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1774,7 +2031,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1785,7 +2044,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1801,7 +2062,9 @@
       "post": {
         "operationId": "media_complete",
         "summary": "Confirm the upload finished; processing and scanning start",
-        "tags": ["Media"],
+        "tags": [
+          "Media"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1830,7 +2093,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1841,7 +2106,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1852,7 +2120,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1863,7 +2133,10 @@
           },
           "409": {
             "description": "Conflict. Codes: MEDIA_NOT_UPLOADED, MEDIA_WRONG_STATE.",
-            "x-error-codes": ["MEDIA_NOT_UPLOADED", "MEDIA_WRONG_STATE"],
+            "x-error-codes": [
+              "MEDIA_NOT_UPLOADED",
+              "MEDIA_WRONG_STATE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1874,7 +2147,9 @@
           },
           "422": {
             "description": "Request cannot be completed. Codes: MEDIA_UPLOAD_MISMATCH.",
-            "x-error-codes": ["MEDIA_UPLOAD_MISMATCH"],
+            "x-error-codes": [
+              "MEDIA_UPLOAD_MISMATCH"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1885,7 +2160,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1901,7 +2178,9 @@
       "get": {
         "operationId": "media_get",
         "summary": "An asset: every state for its owner, ready assets only for everyone else",
-        "tags": ["Media"],
+        "tags": [
+          "Media"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -1930,7 +2209,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1941,7 +2222,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1952,7 +2236,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1963,7 +2249,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1979,7 +2267,9 @@
       "get": {
         "operationId": "portfolio_getMine",
         "summary": "The signed-in talent's portfolio, every item with its media status",
-        "tags": ["Portfolio"],
+        "tags": [
+          "Portfolio"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2006,7 +2296,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2017,7 +2309,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2028,7 +2323,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE.",
-            "x-error-codes": ["WRONG_ROLE"],
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2039,7 +2336,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2055,7 +2354,9 @@
       "post": {
         "operationId": "portfolio_addItem",
         "summary": "Add an uploaded image to the end of the portfolio",
-        "tags": ["Portfolio"],
+        "tags": [
+          "Portfolio"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2092,7 +2393,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2103,7 +2406,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2114,7 +2420,10 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE, EMAIL_NOT_VERIFIED.",
-            "x-error-codes": ["WRONG_ROLE", "EMAIL_NOT_VERIFIED"],
+            "x-error-codes": [
+              "WRONG_ROLE",
+              "EMAIL_NOT_VERIFIED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2125,7 +2434,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2153,7 +2464,9 @@
           },
           "422": {
             "description": "Request cannot be completed. Codes: MEDIA_WRONG_PURPOSE.",
-            "x-error-codes": ["MEDIA_WRONG_PURPOSE"],
+            "x-error-codes": [
+              "MEDIA_WRONG_PURPOSE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2164,7 +2477,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2180,7 +2495,9 @@
       "patch": {
         "operationId": "portfolio_updateItem",
         "summary": "Change an item's caption",
-        "tags": ["Portfolio"],
+        "tags": [
+          "Portfolio"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2227,7 +2544,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2238,7 +2557,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2249,7 +2571,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE.",
-            "x-error-codes": ["WRONG_ROLE"],
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2260,7 +2584,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2271,7 +2597,9 @@
           },
           "409": {
             "description": "Conflict. Codes: CONFLICT.",
-            "x-error-codes": ["CONFLICT"],
+            "x-error-codes": [
+              "CONFLICT"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2282,7 +2610,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2296,7 +2626,9 @@
       "delete": {
         "operationId": "portfolio_removeItem",
         "summary": "Remove an item; its media is deleted from storage",
-        "tags": ["Portfolio"],
+        "tags": [
+          "Portfolio"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2333,7 +2665,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2344,7 +2678,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2355,7 +2692,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE.",
-            "x-error-codes": ["WRONG_ROLE"],
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2366,7 +2705,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2377,7 +2718,9 @@
           },
           "409": {
             "description": "Conflict. Codes: CONFLICT.",
-            "x-error-codes": ["CONFLICT"],
+            "x-error-codes": [
+              "CONFLICT"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2388,7 +2731,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2404,7 +2749,9 @@
       "put": {
         "operationId": "portfolio_reorder",
         "summary": "Put every item in a new order",
-        "tags": ["Portfolio"],
+        "tags": [
+          "Portfolio"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2452,7 +2799,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2463,7 +2812,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2474,7 +2826,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE.",
-            "x-error-codes": ["WRONG_ROLE"],
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2485,7 +2839,9 @@
           },
           "409": {
             "description": "Conflict. Codes: PORTFOLIO_ORDER_MISMATCH.",
-            "x-error-codes": ["PORTFOLIO_ORDER_MISMATCH"],
+            "x-error-codes": [
+              "PORTFOLIO_ORDER_MISMATCH"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2496,7 +2852,9 @@
           },
           "412": {
             "description": "Stale version. Codes: PRECONDITION_FAILED.",
-            "x-error-codes": ["PRECONDITION_FAILED"],
+            "x-error-codes": [
+              "PRECONDITION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2507,7 +2865,9 @@
           },
           "428": {
             "description": "If-Match header required. Codes: PRECONDITION_REQUIRED.",
-            "x-error-codes": ["PRECONDITION_REQUIRED"],
+            "x-error-codes": [
+              "PRECONDITION_REQUIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2518,7 +2878,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2534,7 +2896,9 @@
       "get": {
         "operationId": "talents_getPortfolio",
         "summary": "A talent's portfolio, as agents see it",
-        "tags": ["Portfolio"],
+        "tags": [
+          "Portfolio"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2563,7 +2927,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2574,7 +2940,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2585,7 +2954,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2596,7 +2967,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2612,7 +2985,9 @@
       "get": {
         "operationId": "search_talents",
         "summary": "Search complete, active talent by text and filters, with counts per filter option",
-        "tags": ["Search"],
+        "tags": [
+          "Search"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2668,7 +3043,11 @@
             "required": false,
             "schema": {
               "type": "string",
-              "enum": ["female", "male", "non_binary"]
+              "enum": [
+                "female",
+                "male",
+                "non_binary"
+              ]
             }
           },
           {
@@ -2716,7 +3095,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2727,7 +3108,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2738,7 +3122,10 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE, FORBIDDEN.",
-            "x-error-codes": ["WRONG_ROLE", "FORBIDDEN"],
+            "x-error-codes": [
+              "WRONG_ROLE",
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2749,7 +3136,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2760,7 +3149,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2771,7 +3162,9 @@
           },
           "503": {
             "description": "Temporarily unavailable. Codes: SEARCH_UNAVAILABLE.",
-            "x-error-codes": ["SEARCH_UNAVAILABLE"],
+            "x-error-codes": [
+              "SEARCH_UNAVAILABLE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2787,7 +3180,9 @@
       "get": {
         "operationId": "moderation_heldMedia",
         "summary": "Media the scanner held for a person to check, oldest first. Moderators and admins only",
-        "tags": ["Moderation"],
+        "tags": [
+          "Moderation"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2817,7 +3212,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2828,7 +3225,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2839,7 +3239,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: FORBIDDEN.",
-            "x-error-codes": ["FORBIDDEN"],
+            "x-error-codes": [
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2850,7 +3252,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2866,7 +3270,9 @@
       "post": {
         "operationId": "moderation_decideMedia",
         "summary": "Approve held media, or reject it for a stated reason. Recorded with the moderator",
-        "tags": ["Moderation"],
+        "tags": [
+          "Moderation"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2898,7 +3304,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2909,7 +3317,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2920,7 +3331,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: FORBIDDEN.",
-            "x-error-codes": ["FORBIDDEN"],
+            "x-error-codes": [
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2931,7 +3344,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2942,7 +3357,9 @@
           },
           "409": {
             "description": "Conflict. Codes: MEDIA_WRONG_STATE.",
-            "x-error-codes": ["MEDIA_WRONG_STATE"],
+            "x-error-codes": [
+              "MEDIA_WRONG_STATE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2953,7 +3370,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2969,7 +3388,9 @@
       "get": {
         "operationId": "agentVerification_getMine",
         "summary": "The signed-in agent's verification: not requested, pending, verified or declined",
-        "tags": ["Agent profiles"],
+        "tags": [
+          "Agent profiles"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -2988,7 +3409,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -2999,7 +3422,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3010,7 +3436,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE.",
-            "x-error-codes": ["WRONG_ROLE"],
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3021,7 +3449,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3035,7 +3465,9 @@
       "post": {
         "operationId": "agentVerification_request",
         "summary": "Ask to be verified, with evidence that you work for your agency",
-        "tags": ["Agent profiles"],
+        "tags": [
+          "Agent profiles"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -3064,7 +3496,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3075,7 +3509,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3086,7 +3523,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE.",
-            "x-error-codes": ["WRONG_ROLE"],
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3112,7 +3551,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3123,7 +3564,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3139,7 +3582,9 @@
       "get": {
         "operationId": "moderation_agentVerifications",
         "summary": "Pending agent verification requests, oldest first. Moderators and admins only",
-        "tags": ["Moderation"],
+        "tags": [
+          "Moderation"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -3169,7 +3614,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3180,7 +3627,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3191,7 +3641,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: FORBIDDEN.",
-            "x-error-codes": ["FORBIDDEN"],
+            "x-error-codes": [
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3202,7 +3654,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3218,7 +3672,9 @@
       "post": {
         "operationId": "moderation_decideAgentVerification",
         "summary": "Verify the agent, or decline for a stated reason. Recorded with the moderator",
-        "tags": ["Moderation"],
+        "tags": [
+          "Moderation"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -3250,7 +3706,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3261,7 +3719,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3272,7 +3733,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: FORBIDDEN.",
-            "x-error-codes": ["FORBIDDEN"],
+            "x-error-codes": [
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3283,7 +3746,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3294,7 +3759,9 @@
           },
           "409": {
             "description": "Conflict. Codes: CONFLICT.",
-            "x-error-codes": ["CONFLICT"],
+            "x-error-codes": [
+              "CONFLICT"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3305,7 +3772,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3321,7 +3790,9 @@
       "post": {
         "operationId": "privacy_requestDeletion",
         "summary": "Delete the account after a grace period. Needs the current password",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -3350,7 +3821,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3361,7 +3834,11 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED, INVALID_CREDENTIALS.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED", "INVALID_CREDENTIALS"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED",
+              "INVALID_CREDENTIALS"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3372,7 +3849,10 @@
           },
           "403": {
             "description": "Not allowed. Codes: ACCOUNT_SUSPENDED, ACCOUNT_BANNED.",
-            "x-error-codes": ["ACCOUNT_SUSPENDED", "ACCOUNT_BANNED"],
+            "x-error-codes": [
+              "ACCOUNT_SUSPENDED",
+              "ACCOUNT_BANNED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3383,7 +3863,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3394,7 +3876,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3410,7 +3894,9 @@
       "post": {
         "operationId": "privacy_cancelDeletion",
         "summary": "Keep the account: cancels a deletion that has not happened yet",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -3429,7 +3915,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3440,7 +3928,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3451,7 +3942,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3467,7 +3960,9 @@
       "get": {
         "operationId": "privacy_export",
         "summary": "Everything held about the signed-in person, as one JSON document",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -3486,7 +3981,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3497,7 +3994,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3508,7 +4008,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3519,7 +4021,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3535,7 +4039,9 @@
       "post": {
         "operationId": "reports_create",
         "summary": "Report a profile to the moderators. Reporting the same profile again changes nothing",
-        "tags": ["Safety"],
+        "tags": [
+          "Safety"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -3557,7 +4063,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3568,7 +4076,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3579,7 +4090,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: FORBIDDEN.",
-            "x-error-codes": ["FORBIDDEN"],
+            "x-error-codes": [
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3590,7 +4103,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3601,7 +4116,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3612,7 +4129,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3628,7 +4147,9 @@
       "get": {
         "operationId": "moderation_reports",
         "summary": "Reported accounts with open reports, longest waiting first. Moderators and admins only",
-        "tags": ["Moderation"],
+        "tags": [
+          "Moderation"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -3658,7 +4179,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3669,7 +4192,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3680,7 +4206,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: FORBIDDEN.",
-            "x-error-codes": ["FORBIDDEN"],
+            "x-error-codes": [
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3691,7 +4219,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3707,7 +4237,9 @@
       "post": {
         "operationId": "moderation_decideReports",
         "summary": "Dismiss the reports, or suspend or ban the account. Recorded with the moderator",
-        "tags": ["Moderation"],
+        "tags": [
+          "Moderation"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -3739,7 +4271,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3750,7 +4284,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3761,7 +4298,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: FORBIDDEN.",
-            "x-error-codes": ["FORBIDDEN"],
+            "x-error-codes": [
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3772,7 +4311,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3783,7 +4324,9 @@
           },
           "409": {
             "description": "Conflict. Codes: CONFLICT.",
-            "x-error-codes": ["CONFLICT"],
+            "x-error-codes": [
+              "CONFLICT"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3794,7 +4337,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3810,7 +4355,9 @@
       "get": {
         "operationId": "shortlist_list",
         "summary": "The talent the agent saved, newest first, as they are now. Agents only",
-        "tags": ["Shortlist"],
+        "tags": [
+          "Shortlist"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -3840,7 +4387,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3851,7 +4400,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3862,7 +4414,10 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE, FORBIDDEN.",
-            "x-error-codes": ["WRONG_ROLE", "FORBIDDEN"],
+            "x-error-codes": [
+              "WRONG_ROLE",
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3873,7 +4428,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3889,7 +4446,9 @@
       "get": {
         "operationId": "shortlist_get",
         "summary": "Whether this talent is saved, with the note. 404 when not saved",
-        "tags": ["Shortlist"],
+        "tags": [
+          "Shortlist"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -3918,7 +4477,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3929,7 +4490,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3940,7 +4504,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE.",
-            "x-error-codes": ["WRONG_ROLE"],
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3951,7 +4517,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3962,7 +4530,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -3976,7 +4546,9 @@
       "put": {
         "operationId": "shortlist_save",
         "summary": "Save a talent, or change the note. Safe to repeat",
-        "tags": ["Shortlist"],
+        "tags": [
+          "Shortlist"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4015,7 +4587,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4026,7 +4600,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4037,7 +4614,10 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE, FORBIDDEN.",
-            "x-error-codes": ["WRONG_ROLE", "FORBIDDEN"],
+            "x-error-codes": [
+              "WRONG_ROLE",
+              "FORBIDDEN"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4048,7 +4628,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4059,7 +4641,9 @@
           },
           "409": {
             "description": "Conflict. Codes: SHORTLIST_FULL.",
-            "x-error-codes": ["SHORTLIST_FULL"],
+            "x-error-codes": [
+              "SHORTLIST_FULL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4070,7 +4654,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4084,7 +4670,9 @@
       "delete": {
         "operationId": "shortlist_remove",
         "summary": "Remove a talent from the shortlist. Safe to repeat",
-        "tags": ["Shortlist"],
+        "tags": [
+          "Shortlist"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4106,7 +4694,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4117,7 +4707,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4128,7 +4721,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE.",
-            "x-error-codes": ["WRONG_ROLE"],
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4139,7 +4734,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4155,7 +4752,9 @@
       "post": {
         "operationId": "security_changePassword",
         "summary": "Change the password. Needs the current one; signs out every other device",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4177,7 +4776,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4188,7 +4789,11 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED, INVALID_CREDENTIALS.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED", "INVALID_CREDENTIALS"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED",
+              "INVALID_CREDENTIALS"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4199,7 +4804,9 @@
           },
           "422": {
             "description": "Request cannot be completed. Codes: WEAK_PASSWORD.",
-            "x-error-codes": ["WEAK_PASSWORD"],
+            "x-error-codes": [
+              "WEAK_PASSWORD"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4210,7 +4817,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4221,7 +4830,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4237,7 +4848,9 @@
       "get": {
         "operationId": "security_devices",
         "summary": "The devices this account is signed in on, most recently used first",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4256,7 +4869,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4267,7 +4882,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4278,7 +4896,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4294,7 +4914,9 @@
       "delete": {
         "operationId": "security_signOutDevice",
         "summary": "Sign out one device. Safe to repeat",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4316,7 +4938,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4327,7 +4951,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4338,7 +4965,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4354,7 +4983,9 @@
       "post": {
         "operationId": "security_signOutOthers",
         "summary": "Sign out every device except this one",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4366,7 +4997,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4377,7 +5010,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4388,7 +5024,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4404,7 +5042,9 @@
       "get": {
         "operationId": "notifications_list",
         "summary": "Notices about things done on the person's behalf, newest first",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4434,7 +5074,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4445,7 +5087,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4456,7 +5101,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4472,7 +5119,9 @@
       "get": {
         "operationId": "notifications_unread",
         "summary": "How many notices are unread, for the badge",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4491,7 +5140,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4502,7 +5153,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4513,7 +5167,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4529,7 +5185,9 @@
       "post": {
         "operationId": "notifications_markRead",
         "summary": "Mark every notice read",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4541,7 +5199,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4552,7 +5212,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4563,7 +5226,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4579,7 +5244,9 @@
       "post": {
         "operationId": "security_requestEmailChange",
         "summary": "Start moving the account to a new address. Needs the password; a code goes to it",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4608,7 +5275,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4619,7 +5288,11 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED, INVALID_CREDENTIALS.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED", "INVALID_CREDENTIALS"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED",
+              "INVALID_CREDENTIALS"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4630,7 +5303,10 @@
           },
           "409": {
             "description": "Conflict. Codes: EMAIL_ALREADY_REGISTERED, CONFLICT.",
-            "x-error-codes": ["EMAIL_ALREADY_REGISTERED", "CONFLICT"],
+            "x-error-codes": [
+              "EMAIL_ALREADY_REGISTERED",
+              "CONFLICT"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4641,7 +5317,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4652,7 +5330,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4668,7 +5348,9 @@
       "get": {
         "operationId": "security_pendingEmailChange",
         "summary": "The change waiting for its code",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4690,7 +5372,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4701,7 +5385,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4712,7 +5399,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4726,7 +5415,9 @@
       "delete": {
         "operationId": "security_cancelEmailChange",
         "summary": "Forget a change that is waiting for its code. Safe to repeat",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4738,7 +5429,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4749,7 +5442,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4760,7 +5456,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4776,7 +5474,9 @@
       "post": {
         "operationId": "security_confirmEmailChange",
         "summary": "Finish the change with the code sent to the new address",
-        "tags": ["Me"],
+        "tags": [
+          "Me"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4805,7 +5505,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4816,7 +5518,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4827,7 +5532,9 @@
           },
           "409": {
             "description": "Conflict. Codes: EMAIL_ALREADY_REGISTERED.",
-            "x-error-codes": ["EMAIL_ALREADY_REGISTERED"],
+            "x-error-codes": [
+              "EMAIL_ALREADY_REGISTERED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4853,7 +5560,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4864,7 +5573,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4880,7 +5591,9 @@
       "post": {
         "operationId": "messaging_requestContact",
         "summary": "Ask to contact a talent, with a first message. Verified agents only. Safe to retry with the same clientMessageId",
-        "tags": ["Messaging"],
+        "tags": [
+          "Messaging"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -4919,7 +5632,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4930,7 +5645,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4957,7 +5675,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4968,7 +5688,11 @@
           },
           "409": {
             "description": "Conflict. Codes: CONTACT_REQUEST_PENDING, CONTACT_DECLINED_RECENTLY, CONFLICT.",
-            "x-error-codes": ["CONTACT_REQUEST_PENDING", "CONTACT_DECLINED_RECENTLY", "CONFLICT"],
+            "x-error-codes": [
+              "CONTACT_REQUEST_PENDING",
+              "CONTACT_DECLINED_RECENTLY",
+              "CONFLICT"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4979,7 +5703,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -4990,7 +5716,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5006,7 +5734,9 @@
       "get": {
         "operationId": "messaging_withTalent",
         "summary": "The agent's conversation with this talent, if there is one. 404 when there is none",
-        "tags": ["Messaging"],
+        "tags": [
+          "Messaging"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -5035,7 +5765,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5046,7 +5778,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5057,7 +5792,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE.",
-            "x-error-codes": ["WRONG_ROLE"],
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5068,7 +5805,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5079,7 +5818,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5095,7 +5836,9 @@
       "get": {
         "operationId": "messaging_list",
         "summary": "Requests and chats, newest activity first",
-        "tags": ["Messaging"],
+        "tags": [
+          "Messaging"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -5125,7 +5868,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5136,7 +5881,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5147,7 +5895,9 @@
           },
           "403": {
             "description": "Not allowed. Codes: WRONG_ROLE.",
-            "x-error-codes": ["WRONG_ROLE"],
+            "x-error-codes": [
+              "WRONG_ROLE"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5158,7 +5908,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5174,7 +5926,9 @@
       "get": {
         "operationId": "messaging_unread",
         "summary": "Requests waiting for an answer plus chats with unread messages, for the badge",
-        "tags": ["Messaging"],
+        "tags": [
+          "Messaging"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -5193,7 +5947,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5204,7 +5960,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5215,7 +5974,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5231,7 +5992,9 @@
       "get": {
         "operationId": "messaging_get",
         "summary": "One conversation, for either person in it",
-        "tags": ["Messaging"],
+        "tags": [
+          "Messaging"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -5260,7 +6023,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5271,7 +6036,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5282,7 +6050,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5293,7 +6063,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5309,7 +6081,9 @@
       "get": {
         "operationId": "messaging_messages",
         "summary": "Messages, newest first. Pass the cursor for older ones",
-        "tags": ["Messaging"],
+        "tags": [
+          "Messaging"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -5347,7 +6121,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5358,7 +6134,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5369,7 +6148,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5380,7 +6161,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5394,7 +6177,9 @@
       "post": {
         "operationId": "messaging_send",
         "summary": "Send a message once the talent has accepted. Safe to retry with the same clientMessageId",
-        "tags": ["Messaging"],
+        "tags": [
+          "Messaging"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -5433,7 +6218,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5444,7 +6231,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5455,7 +6245,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5466,7 +6258,9 @@
           },
           "409": {
             "description": "Conflict. Codes: CONVERSATION_CLOSED.",
-            "x-error-codes": ["CONVERSATION_CLOSED"],
+            "x-error-codes": [
+              "CONVERSATION_CLOSED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5477,7 +6271,9 @@
           },
           "429": {
             "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": ["RATE_LIMITED"],
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5488,7 +6284,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5504,7 +6302,9 @@
       "post": {
         "operationId": "messaging_respond",
         "summary": "The talent accepts or declines a contact request",
-        "tags": ["Messaging"],
+        "tags": [
+          "Messaging"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -5543,7 +6343,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5554,7 +6356,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5565,7 +6370,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5576,7 +6383,9 @@
           },
           "409": {
             "description": "Conflict. Codes: CONFLICT.",
-            "x-error-codes": ["CONFLICT"],
+            "x-error-codes": [
+              "CONFLICT"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5587,7 +6396,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5603,7 +6414,9 @@
       "post": {
         "operationId": "messaging_withdraw",
         "summary": "The agent takes back a request the talent has not answered",
-        "tags": ["Messaging"],
+        "tags": [
+          "Messaging"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -5632,7 +6445,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5643,7 +6458,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5654,7 +6472,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5665,7 +6485,9 @@
           },
           "409": {
             "description": "Conflict. Codes: CONFLICT.",
-            "x-error-codes": ["CONFLICT"],
+            "x-error-codes": [
+              "CONFLICT"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5676,7 +6498,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5692,7 +6516,9 @@
       "post": {
         "operationId": "messaging_markRead",
         "summary": "Mark everything in the conversation as read. Safe to repeat",
-        "tags": ["Messaging"],
+        "tags": [
+          "Messaging"
+        ],
         "security": [
           {
             "bearerAuth": []
@@ -5714,7 +6540,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5725,7 +6553,10 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
-            "x-error-codes": ["UNAUTHENTICATED", "SESSION_EXPIRED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5736,7 +6567,9 @@
           },
           "404": {
             "description": "Not found. Codes: NOT_FOUND.",
-            "x-error-codes": ["NOT_FOUND"],
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5747,7 +6580,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5763,7 +6598,9 @@
       "post": {
         "operationId": "webhooks_mux",
         "summary": "Video processing events from Mux, signed with the shared webhook secret",
-        "tags": ["Webhooks"],
+        "tags": [
+          "Webhooks"
+        ],
         "security": [],
         "responses": {
           "204": {
@@ -5771,7 +6608,9 @@
           },
           "400": {
             "description": "Invalid request. Codes: VALIDATION_FAILED.",
-            "x-error-codes": ["VALIDATION_FAILED"],
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5782,7 +6621,9 @@
           },
           "401": {
             "description": "Not signed in. Codes: UNAUTHENTICATED.",
-            "x-error-codes": ["UNAUTHENTICATED"],
+            "x-error-codes": [
+              "UNAUTHENTICATED"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5793,7 +6634,9 @@
           },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
-            "x-error-codes": ["INTERNAL"],
+            "x-error-codes": [
+              "INTERNAL"
+            ],
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -5818,7 +6661,10 @@
             "type": "string"
           }
         },
-        "required": ["path", "message"],
+        "required": [
+          "path",
+          "message"
+        ],
         "additionalProperties": false
       },
       "Problem": {
@@ -5905,7 +6751,12 @@
             "maximum": 9007199254740991
           }
         },
-        "required": ["type", "title", "status", "code"],
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code"
+        ],
         "additionalProperties": false
       },
       "Me": {
@@ -5928,7 +6779,12 @@
             "anyOf": [
               {
                 "type": "string",
-                "enum": ["talent", "agent", "moderator", "admin"]
+                "enum": [
+                  "talent",
+                  "agent",
+                  "moderator",
+                  "admin"
+                ]
               },
               {
                 "type": "null"
@@ -5940,7 +6796,13 @@
           },
           "status": {
             "type": "string",
-            "enum": ["onboarding", "active", "suspended", "banned", "pending_deletion"]
+            "enum": [
+              "onboarding",
+              "active",
+              "suspended",
+              "banned",
+              "pending_deletion"
+            ]
           },
           "countryCode": {
             "anyOf": [
@@ -5990,10 +6852,15 @@
         "properties": {
           "role": {
             "type": "string",
-            "enum": ["talent", "agent"]
+            "enum": [
+              "talent",
+              "agent"
+            ]
           }
         },
-        "required": ["role"]
+        "required": [
+          "role"
+        ]
       },
       "SignUpRequest": {
         "type": "object",
@@ -6028,7 +6895,14 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           }
         },
-        "required": ["email", "password", "dateOfBirth", "countryCode", "acceptedTerms", "deviceId"]
+        "required": [
+          "email",
+          "password",
+          "dateOfBirth",
+          "countryCode",
+          "acceptedTerms",
+          "deviceId"
+        ]
       },
       "SignInRequest": {
         "type": "object",
@@ -6050,7 +6924,11 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           }
         },
-        "required": ["email", "password", "deviceId"]
+        "required": [
+          "email",
+          "password",
+          "deviceId"
+        ]
       },
       "RefreshRequest": {
         "type": "object",
@@ -6066,7 +6944,10 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           }
         },
-        "required": ["refreshToken", "deviceId"]
+        "required": [
+          "refreshToken",
+          "deviceId"
+        ]
       },
       "SignOutRequest": {
         "type": "object",
@@ -6077,7 +6958,9 @@
             "maxLength": 256
           }
         },
-        "required": ["refreshToken"]
+        "required": [
+          "refreshToken"
+        ]
       },
       "PasswordResetRequest": {
         "type": "object",
@@ -6089,7 +6972,9 @@
             "type": "string"
           }
         },
-        "required": ["email"]
+        "required": [
+          "email"
+        ]
       },
       "PasswordResetConfirm": {
         "type": "object",
@@ -6110,7 +6995,11 @@
             "maxLength": 128
           }
         },
-        "required": ["email", "code", "newPassword"]
+        "required": [
+          "email",
+          "code",
+          "newPassword"
+        ]
       },
       "VerifyEmailRequest": {
         "type": "object",
@@ -6120,7 +7009,9 @@
             "pattern": "^\\d{6}$"
           }
         },
-        "required": ["code"]
+        "required": [
+          "code"
+        ]
       },
       "SessionTokens": {
         "type": "object",
@@ -6160,7 +7051,10 @@
             "$ref": "#/components/schemas/Me"
           }
         },
-        "required": ["tokens", "me"],
+        "required": [
+          "tokens",
+          "me"
+        ],
         "additionalProperties": false
       },
       "WebAuthResponse": {
@@ -6178,7 +7072,11 @@
             "$ref": "#/components/schemas/Me"
           }
         },
-        "required": ["accessToken", "accessTokenExpiresAt", "me"],
+        "required": [
+          "accessToken",
+          "accessTokenExpiresAt",
+          "me"
+        ],
         "additionalProperties": false
       },
       "WebRefreshRequest": {
@@ -6190,14 +7088,19 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           }
         },
-        "required": ["deviceId"]
+        "required": [
+          "deviceId"
+        ]
       },
       "CreateUploadIntentRequest": {
         "type": "object",
         "properties": {
           "purpose": {
             "type": "string",
-            "enum": ["avatar", "portfolio"]
+            "enum": [
+              "avatar",
+              "portfolio"
+            ]
           },
           "contentType": {
             "type": "string",
@@ -6216,7 +7119,11 @@
             "maximum": 9007199254740991
           }
         },
-        "required": ["purpose", "contentType", "bytes"],
+        "required": [
+          "purpose",
+          "contentType",
+          "bytes"
+        ],
         "additionalProperties": false
       },
       "UploadIntent": {
@@ -6232,7 +7139,10 @@
             "properties": {
               "method": {
                 "type": "string",
-                "enum": ["POST", "PUT"]
+                "enum": [
+                  "POST",
+                  "PUT"
+                ]
               },
               "url": {
                 "type": "string",
@@ -6248,7 +7158,11 @@
                 }
               }
             },
-            "required": ["method", "url", "fields"],
+            "required": [
+              "method",
+              "url",
+              "fields"
+            ],
             "additionalProperties": false
           },
           "expiresAt": {
@@ -6257,7 +7171,11 @@
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           }
         },
-        "required": ["mediaId", "upload", "expiresAt"],
+        "required": [
+          "mediaId",
+          "upload",
+          "expiresAt"
+        ],
         "additionalProperties": false
       },
       "ImageUrls": {
@@ -6276,7 +7194,11 @@
             "format": "uri"
           }
         },
-        "required": ["small", "medium", "large"],
+        "required": [
+          "small",
+          "medium",
+          "large"
+        ],
         "additionalProperties": false
       },
       "VideoPlayback": {
@@ -6300,7 +7222,12 @@
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           }
         },
-        "required": ["streamUrl", "posterUrl", "durationSeconds", "expiresAt"],
+        "required": [
+          "streamUrl",
+          "posterUrl",
+          "durationSeconds",
+          "expiresAt"
+        ],
         "additionalProperties": false
       },
       "MediaAsset": {
@@ -6313,11 +7240,17 @@
           },
           "purpose": {
             "type": "string",
-            "enum": ["avatar", "portfolio"]
+            "enum": [
+              "avatar",
+              "portfolio"
+            ]
           },
           "kind": {
             "type": "string",
-            "enum": ["image", "video"]
+            "enum": [
+              "image",
+              "video"
+            ]
           },
           "status": {
             "type": "string",
@@ -6353,7 +7286,10 @@
             ]
           },
           "rejectionReason": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "createdAt": {
             "type": "string",
@@ -6403,12 +7339,19 @@
                         "type": "string"
                       }
                     },
-                    "required": ["slug", "name"],
+                    "required": [
+                      "slug",
+                      "name"
+                    ],
                     "additionalProperties": false
                   }
                 }
               },
-              "required": ["slug", "name", "subcategories"],
+              "required": [
+                "slug",
+                "name",
+                "subcategories"
+              ],
               "additionalProperties": false
             }
           },
@@ -6438,7 +7381,11 @@
                   ]
                 }
               },
-              "required": ["slug", "name", "categorySlug"],
+              "required": [
+                "slug",
+                "name",
+                "categorySlug"
+              ],
               "additionalProperties": false
             }
           },
@@ -6461,12 +7408,20 @@
                   "maxLength": 2
                 }
               },
-              "required": ["slug", "name", "countryCode"],
+              "required": [
+                "slug",
+                "name",
+                "countryCode"
+              ],
               "additionalProperties": false
             }
           }
         },
-        "required": ["categories", "skills", "cities"],
+        "required": [
+          "categories",
+          "skills",
+          "cities"
+        ],
         "additionalProperties": false
       },
       "NamedRef": {
@@ -6481,7 +7436,10 @@
             "type": "string"
           }
         },
-        "required": ["slug", "name"],
+        "required": [
+          "slug",
+          "name"
+        ],
         "additionalProperties": false
       },
       "UpdateTalentProfileRequest": {
@@ -6531,7 +7489,11 @@
             "anyOf": [
               {
                 "type": "string",
-                "enum": ["female", "male", "non_binary"]
+                "enum": [
+                  "female",
+                  "male",
+                  "non_binary"
+                ]
               },
               {
                 "type": "null"
@@ -6556,7 +7518,10 @@
             "type": "string"
           },
           "displayName": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "bio": {
             "type": "string"
@@ -6602,7 +7567,11 @@
                     "maxLength": 2
                   }
                 },
-                "required": ["slug", "name", "countryCode"],
+                "required": [
+                  "slug",
+                  "name",
+                  "countryCode"
+                ],
                 "additionalProperties": false
               },
               {
@@ -6614,7 +7583,11 @@
             "anyOf": [
               {
                 "type": "string",
-                "enum": ["female", "male", "non_binary"]
+                "enum": [
+                  "female",
+                  "male",
+                  "non_binary"
+                ]
               },
               {
                 "type": "null"
@@ -6653,7 +7626,14 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["displayName", "category", "subcategories", "city", "bio", "avatar"]
+              "enum": [
+                "displayName",
+                "category",
+                "subcategories",
+                "city",
+                "bio",
+                "avatar"
+              ]
             }
           },
           "version": {
@@ -6731,7 +7711,11 @@
                 "maxLength": 2
               }
             },
-            "required": ["slug", "name", "countryCode"],
+            "required": [
+              "slug",
+              "name",
+              "countryCode"
+            ],
             "additionalProperties": false
           },
           "ageYears": {
@@ -6750,7 +7734,11 @@
             "anyOf": [
               {
                 "type": "string",
-                "enum": ["female", "male", "non_binary"]
+                "enum": [
+                  "female",
+                  "male",
+                  "non_binary"
+                ]
               },
               {
                 "type": "null"
@@ -6850,10 +7838,16 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
           "agencyName": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "jobTitle": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "specializations": {
             "type": "array",
@@ -6880,7 +7874,11 @@
                     "maxLength": 2
                   }
                 },
-                "required": ["slug", "name", "countryCode"],
+                "required": [
+                  "slug",
+                  "name",
+                  "countryCode"
+                ],
                 "additionalProperties": false
               },
               {
@@ -6889,7 +7887,10 @@
             ]
           },
           "website": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "verified": {
             "type": "boolean"
@@ -6901,7 +7902,12 @@
             "type": "array",
             "items": {
               "type": "string",
-              "enum": ["agencyName", "jobTitle", "specializations", "city"]
+              "enum": [
+                "agencyName",
+                "jobTitle",
+                "specializations",
+                "city"
+              ]
             }
           },
           "version": {
@@ -6943,7 +7949,9 @@
             "maxLength": 300
           }
         },
-        "required": ["mediaId"],
+        "required": [
+          "mediaId"
+        ],
         "additionalProperties": false
       },
       "UpdatePortfolioItemRequest": {
@@ -6954,7 +7962,9 @@
             "maxLength": 300
           }
         },
-        "required": ["caption"],
+        "required": [
+          "caption"
+        ],
         "additionalProperties": false
       },
       "ReorderPortfolioRequest": {
@@ -6970,7 +7980,9 @@
             }
           }
         },
-        "required": ["itemIds"],
+        "required": [
+          "itemIds"
+        ],
         "additionalProperties": false
       },
       "MyPortfolioItem": {
@@ -6983,7 +7995,10 @@
           },
           "kind": {
             "type": "string",
-            "enum": ["image", "video"]
+            "enum": [
+              "image",
+              "video"
+            ]
           },
           "mediaId": {
             "type": "string",
@@ -7027,7 +8042,10 @@
             ]
           },
           "rejectionReason": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "createdAt": {
             "type": "string",
@@ -7068,7 +8086,11 @@
             "maximum": 9007199254740991
           }
         },
-        "required": ["items", "maxItems", "version"],
+        "required": [
+          "items",
+          "maxItems",
+          "version"
+        ],
         "additionalProperties": false
       },
       "PublicPortfolioItem": {
@@ -7092,7 +8114,12 @@
                 "$ref": "#/components/schemas/ImageUrls"
               }
             },
-            "required": ["id", "kind", "caption", "urls"],
+            "required": [
+              "id",
+              "kind",
+              "caption",
+              "urls"
+            ],
             "additionalProperties": false
           },
           {
@@ -7114,7 +8141,12 @@
                 "$ref": "#/components/schemas/VideoPlayback"
               }
             },
-            "required": ["id", "kind", "caption", "video"],
+            "required": [
+              "id",
+              "kind",
+              "caption",
+              "video"
+            ],
             "additionalProperties": false
           }
         ]
@@ -7129,7 +8161,9 @@
             }
           }
         },
-        "required": ["items"],
+        "required": [
+          "items"
+        ],
         "additionalProperties": false
       },
       "HeldMedia": {
@@ -7147,11 +8181,17 @@
           },
           "purpose": {
             "type": "string",
-            "enum": ["avatar", "portfolio"]
+            "enum": [
+              "avatar",
+              "portfolio"
+            ]
           },
           "kind": {
             "type": "string",
-            "enum": ["image", "video"]
+            "enum": [
+              "image",
+              "video"
+            ]
           },
           "labels": {
             "type": "array",
@@ -7162,13 +8202,20 @@
                   "type": "string"
                 },
                 "parentName": {
-                  "type": ["string", "null"]
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "confidence": {
                   "type": "number"
                 }
               },
-              "required": ["name", "parentName", "confidence"],
+              "required": [
+                "name",
+                "parentName",
+                "confidence"
+              ],
               "additionalProperties": false
             }
           },
@@ -7198,7 +8245,16 @@
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           }
         },
-        "required": ["id", "ownerId", "purpose", "kind", "labels", "urls", "video", "heldAt"],
+        "required": [
+          "id",
+          "ownerId",
+          "purpose",
+          "kind",
+          "labels",
+          "urls",
+          "video",
+          "heldAt"
+        ],
         "additionalProperties": false
       },
       "HeldMediaPage": {
@@ -7211,10 +8267,16 @@
             }
           },
           "nextCursor": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
-        "required": ["items", "nextCursor"],
+        "required": [
+          "items",
+          "nextCursor"
+        ],
         "additionalProperties": false
       },
       "ModerationDecision": {
@@ -7227,7 +8289,9 @@
                 "const": "approve"
               }
             },
-            "required": ["decision"],
+            "required": [
+              "decision"
+            ],
             "additionalProperties": false
           },
           {
@@ -7239,10 +8303,18 @@
               },
               "category": {
                 "type": "string",
-                "enum": ["sexual", "violence", "hate", "other"]
+                "enum": [
+                  "sexual",
+                  "violence",
+                  "hate",
+                  "other"
+                ]
               }
             },
-            "required": ["decision", "category"],
+            "required": [
+              "decision",
+              "category"
+            ],
             "additionalProperties": false
           }
         ]
@@ -7271,14 +8343,27 @@
               },
               "mediaKind": {
                 "type": "string",
-                "enum": ["image", "video"]
+                "enum": [
+                  "image",
+                  "video"
+                ]
               },
               "purpose": {
                 "type": "string",
-                "enum": ["avatar", "portfolio"]
+                "enum": [
+                  "avatar",
+                  "portfolio"
+                ]
               }
             },
-            "required": ["id", "createdAt", "read", "kind", "mediaKind", "purpose"],
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind",
+              "mediaKind",
+              "purpose"
+            ],
             "additionalProperties": false
           },
           {
@@ -7303,17 +8388,31 @@
               },
               "mediaKind": {
                 "type": "string",
-                "enum": ["image", "video"]
+                "enum": [
+                  "image",
+                  "video"
+                ]
               },
               "purpose": {
                 "type": "string",
-                "enum": ["avatar", "portfolio"]
+                "enum": [
+                  "avatar",
+                  "portfolio"
+                ]
               },
               "reason": {
                 "type": "string"
               }
             },
-            "required": ["id", "createdAt", "read", "kind", "mediaKind", "purpose", "reason"],
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind",
+              "mediaKind",
+              "purpose",
+              "reason"
+            ],
             "additionalProperties": false
           },
           {
@@ -7337,7 +8436,12 @@
                 "const": "agent_verified"
               }
             },
-            "required": ["id", "createdAt", "read", "kind"],
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind"
+            ],
             "additionalProperties": false
           },
           {
@@ -7364,7 +8468,13 @@
                 "type": "string"
               }
             },
-            "required": ["id", "createdAt", "read", "kind", "reason"],
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind",
+              "reason"
+            ],
             "additionalProperties": false
           },
           {
@@ -7393,7 +8503,13 @@
                 "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
               }
             },
-            "required": ["id", "createdAt", "read", "kind", "scheduledFor"],
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind",
+              "scheduledFor"
+            ],
             "additionalProperties": false
           },
           {
@@ -7417,7 +8533,12 @@
                 "const": "account_reinstated"
               }
             },
-            "required": ["id", "createdAt", "read", "kind"],
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind"
+            ],
             "additionalProperties": false
           },
           {
@@ -7441,7 +8562,12 @@
                 "const": "password_changed"
               }
             },
-            "required": ["id", "createdAt", "read", "kind"],
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind"
+            ],
             "additionalProperties": false
           },
           {
@@ -7465,7 +8591,12 @@
                 "const": "email_changed"
               }
             },
-            "required": ["id", "createdAt", "read", "kind"],
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind"
+            ],
             "additionalProperties": false
           },
           {
@@ -7497,7 +8628,14 @@
                 "type": "string"
               }
             },
-            "required": ["id", "createdAt", "read", "kind", "conversationId", "agencyName"],
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind",
+              "conversationId",
+              "agencyName"
+            ],
             "additionalProperties": false
           },
           {
@@ -7529,7 +8667,14 @@
                 "type": "string"
               }
             },
-            "required": ["id", "createdAt", "read", "kind", "conversationId", "talentName"],
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind",
+              "conversationId",
+              "talentName"
+            ],
             "additionalProperties": false
           },
           {
@@ -7556,7 +8701,13 @@
                 "type": "string"
               }
             },
-            "required": ["id", "createdAt", "read", "kind", "talentName"],
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind",
+              "talentName"
+            ],
             "additionalProperties": false
           }
         ]
@@ -7576,10 +8727,17 @@
             "maximum": 9007199254740991
           },
           "nextCursor": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
-        "required": ["items", "unread", "nextCursor"],
+        "required": [
+          "items",
+          "unread",
+          "nextCursor"
+        ],
         "additionalProperties": false
       },
       "UnreadNotifications": {
@@ -7591,7 +8749,9 @@
             "maximum": 9007199254740991
           }
         },
-        "required": ["unread"],
+        "required": [
+          "unread"
+        ],
         "additionalProperties": false
       },
       "RequestContact": {
@@ -7608,7 +8768,10 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           }
         },
-        "required": ["message", "clientMessageId"],
+        "required": [
+          "message",
+          "clientMessageId"
+        ],
         "additionalProperties": false
       },
       "SendMessage": {
@@ -7625,7 +8788,10 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           }
         },
-        "required": ["body", "clientMessageId"],
+        "required": [
+          "body",
+          "clientMessageId"
+        ],
         "additionalProperties": false
       },
       "ContactResponse": {
@@ -7633,10 +8799,15 @@
         "properties": {
           "decision": {
             "type": "string",
-            "enum": ["accept", "decline"]
+            "enum": [
+              "accept",
+              "decline"
+            ]
           }
         },
-        "required": ["decision"],
+        "required": [
+          "decision"
+        ],
         "additionalProperties": false
       },
       "Counterpart": {
@@ -7668,7 +8839,13 @@
                 "type": "boolean"
               }
             },
-            "required": ["kind", "handle", "displayName", "avatarUrls", "available"],
+            "required": [
+              "kind",
+              "handle",
+              "displayName",
+              "avatarUrls",
+              "available"
+            ],
             "additionalProperties": false
           },
           {
@@ -7685,13 +8862,22 @@
                 "type": "string"
               },
               "city": {
-                "type": ["string", "null"]
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "verified": {
                 "type": "boolean"
               }
             },
-            "required": ["kind", "agencyName", "jobTitle", "city", "verified"],
+            "required": [
+              "kind",
+              "agencyName",
+              "jobTitle",
+              "city",
+              "verified"
+            ],
             "additionalProperties": false
           }
         ]
@@ -7716,7 +8902,12 @@
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           }
         },
-        "required": ["id", "mine", "body", "sentAt"],
+        "required": [
+          "id",
+          "mine",
+          "body",
+          "sentAt"
+        ],
         "additionalProperties": false
       },
       "ConversationSummary": {
@@ -7729,7 +8920,12 @@
           },
           "status": {
             "type": "string",
-            "enum": ["requested", "accepted", "declined", "withdrawn"]
+            "enum": [
+              "requested",
+              "accepted",
+              "declined",
+              "withdrawn"
+            ]
           },
           "counterpart": {
             "$ref": "#/components/schemas/Counterpart"
@@ -7789,10 +8985,16 @@
             }
           },
           "nextCursor": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
-        "required": ["items", "nextCursor"],
+        "required": [
+          "items",
+          "nextCursor"
+        ],
         "additionalProperties": false
       },
       "MessagePage": {
@@ -7805,10 +9007,16 @@
             }
           },
           "nextCursor": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
-        "required": ["items", "nextCursor"],
+        "required": [
+          "items",
+          "nextCursor"
+        ],
         "additionalProperties": false
       },
       "MessagingUnread": {
@@ -7820,7 +9028,9 @@
             "maximum": 9007199254740991
           }
         },
-        "required": ["unread"],
+        "required": [
+          "unread"
+        ],
         "additionalProperties": false
       },
       "RequestAgentVerification": {
@@ -7840,7 +9050,9 @@
             "maxLength": 500
           }
         },
-        "required": ["evidenceUrl"],
+        "required": [
+          "evidenceUrl"
+        ],
         "additionalProperties": false
       },
       "MyAgentVerification": {
@@ -7848,10 +9060,18 @@
         "properties": {
           "state": {
             "type": "string",
-            "enum": ["not_requested", "pending", "verified", "declined"]
+            "enum": [
+              "not_requested",
+              "pending",
+              "verified",
+              "declined"
+            ]
           },
           "declineReason": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "submittedAt": {
             "anyOf": [
@@ -7869,7 +9089,12 @@
             "type": "boolean"
           }
         },
-        "required": ["state", "declineReason", "submittedAt", "canRequest"],
+        "required": [
+          "state",
+          "declineReason",
+          "submittedAt",
+          "canRequest"
+        ],
         "additionalProperties": false
       },
       "VerificationForReview": {
@@ -7911,13 +9136,19 @@
             }
           },
           "website": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "evidenceUrl": {
             "type": "string"
           },
           "registrationNumber": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "note": {
             "type": "string"
@@ -7960,10 +9191,16 @@
             }
           },
           "nextCursor": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
-        "required": ["items", "nextCursor"],
+        "required": [
+          "items",
+          "nextCursor"
+        ],
         "additionalProperties": false
       },
       "VerificationDecision": {
@@ -7976,7 +9213,9 @@
                 "const": "approve"
               }
             },
-            "required": ["decision"],
+            "required": [
+              "decision"
+            ],
             "additionalProperties": false
           },
           {
@@ -7996,7 +9235,10 @@
                 ]
               }
             },
-            "required": ["decision", "category"],
+            "required": [
+              "decision",
+              "category"
+            ],
             "additionalProperties": false
           }
         ]
@@ -8010,7 +9252,9 @@
             "maxLength": 128
           }
         },
-        "required": ["password"],
+        "required": [
+          "password"
+        ],
         "additionalProperties": false
       },
       "DataExport": {
@@ -8049,7 +9293,12 @@
                 "anyOf": [
                   {
                     "type": "string",
-                    "enum": ["talent", "agent", "moderator", "admin"]
+                    "enum": [
+                      "talent",
+                      "agent",
+                      "moderator",
+                      "admin"
+                    ]
                   },
                   {
                     "type": "null"
@@ -8058,7 +9307,13 @@
               },
               "status": {
                 "type": "string",
-                "enum": ["onboarding", "active", "suspended", "banned", "pending_deletion"]
+                "enum": [
+                  "onboarding",
+                  "active",
+                  "suspended",
+                  "banned",
+                  "pending_deletion"
+                ]
               },
               "deletionScheduledAt": {
                 "anyOf": [
@@ -8142,7 +9397,10 @@
               "type": "object",
               "properties": {
                 "handle": {
-                  "type": ["string", "null"]
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 },
                 "note": {
                   "type": "string"
@@ -8153,7 +9411,11 @@
                   "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
                 }
               },
-              "required": ["handle", "note", "savedAt"],
+              "required": [
+                "handle",
+                "note",
+                "savedAt"
+              ],
               "additionalProperties": false
             }
           },
@@ -8167,7 +9429,12 @@
                 },
                 "status": {
                   "type": "string",
-                  "enum": ["requested", "accepted", "declined", "withdrawn"]
+                  "enum": [
+                    "requested",
+                    "accepted",
+                    "declined",
+                    "withdrawn"
+                  ]
                 },
                 "requestedAt": {
                   "type": "string",
@@ -8193,12 +9460,21 @@
                         "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
                       }
                     },
-                    "required": ["body", "sentAt"],
+                    "required": [
+                      "body",
+                      "sentAt"
+                    ],
                     "additionalProperties": false
                   }
                 }
               },
-              "required": ["with", "status", "requestedAt", "messagesFromOthers", "myMessages"],
+              "required": [
+                "with",
+                "status",
+                "requestedAt",
+                "messagesFromOthers",
+                "myMessages"
+              ],
               "additionalProperties": false
             }
           },
@@ -8212,11 +9488,17 @@
                 },
                 "purpose": {
                   "type": "string",
-                  "enum": ["avatar", "portfolio"]
+                  "enum": [
+                    "avatar",
+                    "portfolio"
+                  ]
                 },
                 "kind": {
                   "type": "string",
-                  "enum": ["image", "video"]
+                  "enum": [
+                    "image",
+                    "video"
+                  ]
                 },
                 "status": {
                   "type": "string",
@@ -8252,7 +9534,14 @@
                   ]
                 }
               },
-              "required": ["id", "purpose", "kind", "status", "urls", "video"],
+              "required": [
+                "id",
+                "purpose",
+                "kind",
+                "status",
+                "urls",
+                "video"
+              ],
               "additionalProperties": false
             }
           }
@@ -8285,7 +9574,10 @@
             "maxLength": 128
           }
         },
-        "required": ["currentPassword", "newPassword"],
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ],
         "additionalProperties": false
       },
       "SignedInDevice": {
@@ -8297,7 +9589,10 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
           "device": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "signedInAt": {
             "type": "string",
@@ -8313,7 +9608,13 @@
             "type": "boolean"
           }
         },
-        "required": ["id", "device", "signedInAt", "lastActiveAt", "current"],
+        "required": [
+          "id",
+          "device",
+          "signedInAt",
+          "lastActiveAt",
+          "current"
+        ],
         "additionalProperties": false
       },
       "SignedInDevices": {
@@ -8326,7 +9627,9 @@
             }
           }
         },
-        "required": ["items"],
+        "required": [
+          "items"
+        ],
         "additionalProperties": false
       },
       "RequestEmailChange": {
@@ -8344,7 +9647,10 @@
             "maxLength": 128
           }
         },
-        "required": ["newEmail", "password"],
+        "required": [
+          "newEmail",
+          "password"
+        ],
         "additionalProperties": false
       },
       "ConfirmEmailChange": {
@@ -8355,7 +9661,9 @@
             "pattern": "^\\d{6}$"
           }
         },
-        "required": ["code"],
+        "required": [
+          "code"
+        ],
         "additionalProperties": false
       },
       "PendingEmailChange": {
@@ -8370,7 +9678,10 @@
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           }
         },
-        "required": ["newEmail", "requestedAt"],
+        "required": [
+          "newEmail",
+          "requestedAt"
+        ],
         "additionalProperties": false
       },
       "TalentCard": {
@@ -8408,7 +9719,11 @@
                 "maxLength": 2
               }
             },
-            "required": ["slug", "name", "countryCode"],
+            "required": [
+              "slug",
+              "name",
+              "countryCode"
+            ],
             "additionalProperties": false
           },
           "ageYears": {
@@ -8498,7 +9813,11 @@
                       "maximum": 9007199254740991
                     }
                   },
-                  "required": ["slug", "name", "count"],
+                  "required": [
+                    "slug",
+                    "name",
+                    "count"
+                  ],
                   "additionalProperties": false
                 }
               },
@@ -8521,16 +9840,30 @@
                       "maximum": 9007199254740991
                     }
                   },
-                  "required": ["slug", "name", "count"],
+                  "required": [
+                    "slug",
+                    "name",
+                    "count"
+                  ],
                   "additionalProperties": false
                 }
               }
             },
-            "required": ["categories", "cities"],
+            "required": [
+              "categories",
+              "cities"
+            ],
             "additionalProperties": false
           }
         },
-        "required": ["items", "total", "page", "perPage", "hasMore", "facets"],
+        "required": [
+          "items",
+          "total",
+          "page",
+          "perPage",
+          "hasMore",
+          "facets"
+        ],
         "additionalProperties": false
       },
       "SaveToShortlist": {
@@ -8563,7 +9896,12 @@
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           }
         },
-        "required": ["talent", "note", "savedAt", "updatedAt"],
+        "required": [
+          "talent",
+          "note",
+          "savedAt",
+          "updatedAt"
+        ],
         "additionalProperties": false
       },
       "ShortlistPage": {
@@ -8586,10 +9924,18 @@
             "maximum": 9007199254740991
           },
           "nextCursor": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
-        "required": ["items", "saved", "max", "nextCursor"],
+        "required": [
+          "items",
+          "saved",
+          "max",
+          "nextCursor"
+        ],
         "additionalProperties": false
       },
       "ReportSubject": {
@@ -8608,7 +9954,10 @@
                 "pattern": "^[a-z0-9](?:[a-z0-9._]*[a-z0-9])?$"
               }
             },
-            "required": ["kind", "handle"],
+            "required": [
+              "kind",
+              "handle"
+            ],
             "additionalProperties": false
           }
         ]
@@ -8634,7 +9983,10 @@
             "maxLength": 500
           }
         },
-        "required": ["subject", "category"],
+        "required": [
+          "subject",
+          "category"
+        ],
         "additionalProperties": false
       },
       "ReportedAccount": {
@@ -8649,7 +10001,12 @@
             "anyOf": [
               {
                 "type": "string",
-                "enum": ["talent", "agent", "moderator", "admin"]
+                "enum": [
+                  "talent",
+                  "agent",
+                  "moderator",
+                  "admin"
+                ]
               },
               {
                 "type": "null"
@@ -8658,7 +10015,13 @@
           },
           "status": {
             "type": "string",
-            "enum": ["onboarding", "active", "suspended", "banned", "pending_deletion"]
+            "enum": [
+              "onboarding",
+              "active",
+              "suspended",
+              "banned",
+              "pending_deletion"
+            ]
           },
           "talent": {
             "anyOf": [
@@ -8672,7 +10035,10 @@
                     "type": "string"
                   }
                 },
-                "required": ["handle", "displayName"],
+                "required": [
+                  "handle",
+                  "displayName"
+                ],
                 "additionalProperties": false
               },
               {
@@ -8706,7 +10072,10 @@
                   "maximum": 9007199254740991
                 }
               },
-              "required": ["category", "count"],
+              "required": [
+                "category",
+                "count"
+              ],
               "additionalProperties": false
             }
           },
@@ -8724,7 +10093,10 @@
                   "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
                 }
               },
-              "required": ["note", "reportedAt"],
+              "required": [
+                "note",
+                "reportedAt"
+              ],
               "additionalProperties": false
             }
           },
@@ -8762,10 +10134,16 @@
             }
           },
           "nextCursor": {
-            "type": ["string", "null"]
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
-        "required": ["items", "nextCursor"],
+        "required": [
+          "items",
+          "nextCursor"
+        ],
         "additionalProperties": false
       },
       "ReportDecision": {
@@ -8778,7 +10156,9 @@
                 "const": "dismiss"
               }
             },
-            "required": ["decision"],
+            "required": [
+              "decision"
+            ],
             "additionalProperties": false
           },
           {
@@ -8799,7 +10179,10 @@
                 ]
               }
             },
-            "required": ["decision", "reason"],
+            "required": [
+              "decision",
+              "reason"
+            ],
             "additionalProperties": false
           },
           {
@@ -8820,7 +10203,10 @@
                 ]
               }
             },
-            "required": ["decision", "reason"],
+            "required": [
+              "decision",
+              "reason"
+            ],
             "additionalProperties": false
           }
         ]

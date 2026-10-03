@@ -55,6 +55,14 @@ jobs:
       - name: Lint, typecheck, test, build
         run: pnpm turbo run lint typecheck test build
 
+      - name: OpenAPI document is up to date
+        run: |
+          if [ -n "$(git status --porcelain packages/contracts/openapi.json)" ]; then
+            echo "openapi.json is out of date. Run pnpm --filter @rt/contracts build and commit the result."
+            git diff --stat packages/contracts/openapi.json
+            exit 1
+          fi
+
       - name: Mobile app bundles for iOS and Android
         working-directory: apps/mobile
         run: pnpm bundle:check

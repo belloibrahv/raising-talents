@@ -35,21 +35,52 @@ export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];
 
 const errorCodeValues = Object.values(ErrorCode) as [ErrorCode, ...ErrorCode[]];
 
-export const fieldProblemSchema = z.object({
-  path: z.string(),
-  message: z.string(),
-});
+/** The HTTP status for each code. Shared so the API and the OpenAPI document cannot drift apart. */
+export const ERROR_STATUS: Record<ErrorCode, number> = {
+  [ErrorCode.ValidationFailed]: 400,
+  [ErrorCode.Unauthenticated]: 401,
+  [ErrorCode.Forbidden]: 403,
+  [ErrorCode.NotFound]: 404,
+  [ErrorCode.Conflict]: 409,
+  [ErrorCode.RateLimited]: 429,
+  [ErrorCode.Internal]: 500,
+
+  [ErrorCode.EmailAlreadyRegistered]: 409,
+  [ErrorCode.UnderMinimumAge]: 422,
+  [ErrorCode.WeakPassword]: 422,
+  [ErrorCode.InvalidCredentials]: 401,
+  [ErrorCode.AccountSuspended]: 403,
+  [ErrorCode.AccountBanned]: 403,
+  [ErrorCode.SessionExpired]: 401,
+  [ErrorCode.SessionRevoked]: 401,
+  [ErrorCode.VerificationCodeInvalid]: 422,
+  [ErrorCode.VerificationCodeExpired]: 422,
+  [ErrorCode.VerificationAttemptsExceeded]: 422,
+  [ErrorCode.VerificationResendTooSoon]: 429,
+  [ErrorCode.EmailAlreadyVerified]: 409,
+  [ErrorCode.EmailNotVerified]: 403,
+  [ErrorCode.RoleAlreadyLocked]: 409,
+};
+
+export const fieldProblemSchema = z
+  .object({
+    path: z.string(),
+    message: z.string(),
+  })
+  .meta({ id: 'FieldProblem' });
 
 /** RFC 9457 problem details, with our stable code and a trace id for support. */
-export const problemDetailsSchema = z.object({
-  type: z.url(),
-  title: z.string(),
-  status: z.number().int(),
-  code: z.enum(errorCodeValues),
-  detail: z.string().optional(),
-  traceId: z.string().optional(),
-  fields: z.array(fieldProblemSchema).optional(),
-  retryAfterSeconds: z.number().int().optional(),
-});
+export const problemDetailsSchema = z
+  .object({
+    type: z.url(),
+    title: z.string(),
+    status: z.number().int(),
+    code: z.enum(errorCodeValues),
+    detail: z.string().optional(),
+    traceId: z.string().optional(),
+    fields: z.array(fieldProblemSchema).optional(),
+    retryAfterSeconds: z.number().int().optional(),
+  })
+  .meta({ id: 'Problem' });
 
 export type ProblemDetails = z.infer<typeof problemDetailsSchema>;

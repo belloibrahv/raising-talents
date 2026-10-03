@@ -1,0 +1,1079 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Raising Talents API",
+    "version": "0.0.0",
+    "description": "Generated from @rt/contracts. Errors use RFC 9457 problem details; choose behaviour by the `code` field, never the message."
+  },
+  "servers": [
+    {
+      "url": "https://api.raisingtalents.app",
+      "description": "Production"
+    },
+    {
+      "url": "https://api.staging.raisingtalents.app",
+      "description": "Staging"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Local"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Accounts, sessions and email verification"
+    },
+    {
+      "name": "Me",
+      "description": "The signed-in account"
+    }
+  ],
+  "paths": {
+    "/v1/auth/sign-up": {
+      "post": {
+        "operationId": "auth_signUp",
+        "summary": "Create an account and start a session",
+        "tags": [
+          "Auth"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignUpRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict. Codes: EMAIL_ALREADY_REGISTERED.",
+            "x-error-codes": [
+              "EMAIL_ALREADY_REGISTERED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request cannot be completed. Codes: UNDER_MINIMUM_AGE, WEAK_PASSWORD.",
+            "x-error-codes": [
+              "UNDER_MINIMUM_AGE",
+              "WEAK_PASSWORD"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. Codes: RATE_LIMITED.",
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/sign-in": {
+      "post": {
+        "operationId": "auth_signIn",
+        "summary": "Sign in with email and password",
+        "tags": [
+          "Auth"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignInRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: INVALID_CREDENTIALS.",
+            "x-error-codes": [
+              "INVALID_CREDENTIALS"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. Codes: ACCOUNT_SUSPENDED, ACCOUNT_BANNED.",
+            "x-error-codes": [
+              "ACCOUNT_SUSPENDED",
+              "ACCOUNT_BANNED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. Codes: RATE_LIMITED.",
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/refresh": {
+      "post": {
+        "operationId": "auth_refresh",
+        "summary": "Swap a refresh token for a new token pair",
+        "tags": [
+          "Auth"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: SESSION_EXPIRED, SESSION_REVOKED.",
+            "x-error-codes": [
+              "SESSION_EXPIRED",
+              "SESSION_REVOKED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. Codes: ACCOUNT_SUSPENDED, ACCOUNT_BANNED.",
+            "x-error-codes": [
+              "ACCOUNT_SUSPENDED",
+              "ACCOUNT_BANNED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/sign-out": {
+      "post": {
+        "operationId": "auth_signOut",
+        "summary": "End the session on this device",
+        "tags": [
+          "Auth"
+        ],
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignOutRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/verify-email": {
+      "post": {
+        "operationId": "auth_verifyEmail",
+        "summary": "Confirm the email address with the emailed code",
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmailRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict. Codes: EMAIL_ALREADY_VERIFIED.",
+            "x-error-codes": [
+              "EMAIL_ALREADY_VERIFIED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Request cannot be completed. Codes: VERIFICATION_CODE_INVALID, VERIFICATION_CODE_EXPIRED, VERIFICATION_ATTEMPTS_EXCEEDED.",
+            "x-error-codes": [
+              "VERIFICATION_CODE_INVALID",
+              "VERIFICATION_CODE_EXPIRED",
+              "VERIFICATION_ATTEMPTS_EXCEEDED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. Codes: RATE_LIMITED.",
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/auth/verify-email/resend": {
+      "post": {
+        "operationId": "auth_resendVerification",
+        "summary": "Email a new verification code",
+        "tags": [
+          "Auth"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict. Codes: EMAIL_ALREADY_VERIFIED.",
+            "x-error-codes": [
+              "EMAIL_ALREADY_VERIFIED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. Codes: VERIFICATION_RESEND_TOO_SOON.",
+            "x-error-codes": [
+              "VERIFICATION_RESEND_TOO_SOON"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me": {
+      "get": {
+        "operationId": "me_get",
+        "summary": "The signed-in account",
+        "tags": [
+          "Me"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/me/role": {
+      "post": {
+        "operationId": "me_selectRole",
+        "summary": "Choose talent or agent",
+        "tags": [
+          "Me"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectRoleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not allowed. Codes: EMAIL_NOT_VERIFIED.",
+            "x-error-codes": [
+              "EMAIL_NOT_VERIFIED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict. Codes: ROLE_ALREADY_LOCKED.",
+            "x-error-codes": [
+              "ROLE_ALREADY_LOCKED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "FieldProblem": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "Problem": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "code": {
+            "type": "string",
+            "enum": [
+              "VALIDATION_FAILED",
+              "UNAUTHENTICATED",
+              "FORBIDDEN",
+              "NOT_FOUND",
+              "CONFLICT",
+              "RATE_LIMITED",
+              "INTERNAL",
+              "EMAIL_ALREADY_REGISTERED",
+              "UNDER_MINIMUM_AGE",
+              "WEAK_PASSWORD",
+              "INVALID_CREDENTIALS",
+              "ACCOUNT_SUSPENDED",
+              "ACCOUNT_BANNED",
+              "SESSION_EXPIRED",
+              "SESSION_REVOKED",
+              "VERIFICATION_CODE_INVALID",
+              "VERIFICATION_CODE_EXPIRED",
+              "VERIFICATION_ATTEMPTS_EXCEEDED",
+              "VERIFICATION_RESEND_TOO_SOON",
+              "EMAIL_ALREADY_VERIFIED",
+              "EMAIL_NOT_VERIFIED",
+              "ROLE_ALREADY_LOCKED"
+            ]
+          },
+          "detail": {
+            "type": "string"
+          },
+          "traceId": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FieldProblem"
+            }
+          },
+          "retryAfterSeconds": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code"
+        ],
+        "additionalProperties": false
+      },
+      "Me": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "talent",
+                  "agent",
+                  "moderator",
+                  "admin"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "roleLocked": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "onboarding",
+              "active",
+              "suspended",
+              "banned",
+              "pending_deletion"
+            ]
+          },
+          "countryCode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 2,
+                "maxLength": 2
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "emailVerified",
+          "role",
+          "roleLocked",
+          "status",
+          "countryCode",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "SelectRoleRequest": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "talent",
+              "agent"
+            ]
+          }
+        },
+        "required": [
+          "role"
+        ]
+      },
+      "SignUpRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "format": "email",
+            "maxLength": 254,
+            "description": "Compared without case or surrounding spaces.",
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 128
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+          },
+          "countryCode": {
+            "type": "string",
+            "minLength": 2,
+            "maxLength": 2
+          },
+          "acceptedTerms": {
+            "type": "boolean",
+            "const": true
+          },
+          "deviceId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "dateOfBirth",
+          "countryCode",
+          "acceptedTerms",
+          "deviceId"
+        ]
+      },
+      "SignInRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "format": "email",
+            "maxLength": 254,
+            "description": "Compared without case or surrounding spaces.",
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "deviceId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "deviceId"
+        ]
+      },
+      "RefreshRequest": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 256
+          },
+          "deviceId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "refreshToken",
+          "deviceId"
+        ]
+      },
+      "SignOutRequest": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "minLength": 32,
+            "maxLength": 256
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "VerifyEmailRequest": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^\\d{6}$"
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "SessionTokens": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "accessTokenExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "refreshTokenExpiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "accessToken",
+          "accessTokenExpiresAt",
+          "refreshToken",
+          "refreshTokenExpiresAt"
+        ],
+        "additionalProperties": false
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "tokens": {
+            "$ref": "#/components/schemas/SessionTokens"
+          },
+          "me": {
+            "$ref": "#/components/schemas/Me"
+          }
+        },
+        "required": [
+          "tokens",
+          "me"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "15-minute access token from sign-in, sign-up or refresh."
+      }
+    }
+  }
+}

@@ -17,19 +17,23 @@ export const accountStatusSchema = z.enum([
 ]);
 export type AccountStatus = z.infer<typeof accountStatusSchema>;
 
-export const meResponseSchema = z.object({
-  id: idSchema,
-  email: z.email(),
-  emailVerified: z.boolean(),
-  role: roleSchema.nullable(),
-  roleLocked: z.boolean(),
-  status: accountStatusSchema,
-  countryCode: z.string().length(2).nullable(),
-  createdAt: isoDateTimeSchema,
-});
+export const meResponseSchema = z
+  .object({
+    id: idSchema,
+    email: z.email(),
+    emailVerified: z.boolean(),
+    role: roleSchema.nullable(),
+    roleLocked: z.boolean(),
+    status: accountStatusSchema,
+    countryCode: z.string().length(2).nullable(),
+    createdAt: isoDateTimeSchema,
+  })
+  .meta({ id: 'Me' });
 export type MeResponse = z.infer<typeof meResponseSchema>;
 
-export const selectRoleRequestSchema = z.object({
-  role: selectableRoleSchema,
-});
+export const selectRoleRequestSchema = z
+  .object({
+    role: selectableRoleSchema,
+  })
+  .meta({ id: 'SelectRoleRequest' });
 export type SelectRoleRequest = z.infer<typeof selectRoleRequestSchema>;

@@ -116,7 +116,7 @@ jobs:
           # Public by design: a browser DSN only lets the page send errors.
           VITE_SENTRY_DSN: ${{ vars.STAGING_WEB_SENTRY_DSN }}
           VITE_APP_ENV: staging
-          VITE_RELEASE: ${{ github.sha }}
+          VITE_RELEASE: ${{ env.SHA }}
         run: pnpm turbo run build --filter=@rt/web
 
       - name: AWS credentials (short-lived, no stored keys)

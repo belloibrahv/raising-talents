@@ -9,7 +9,8 @@ Read [docs/DESIGN.md](docs/DESIGN.md) before you write code. It links to the ful
 ```
 apps/
   api/              NestJS backend. One codebase, three processes: api, worker, realtime (milestone 4)
-  mobile/           Expo app (SDK 57, Expo Router)
+  web/              The MVP: a progressive web app (React, Vite, Workbox). See ADR-023
+  mobile/           Expo app (SDK 57, Expo Router), parked until native work resumes
 packages/
   contracts/        Zod schemas and error codes shared by the API and the app
   config/           Shared TypeScript, lint and writing-check configuration
@@ -48,6 +49,16 @@ pnpm --filter @rt/api dev:worker        # in a second terminal: sends emails and
 ```
 
 Emails land in Mailpit at http://localhost:8025.
+
+The web app, in a third terminal:
+
+```bash
+pnpm --filter @rt/web dev               # http://localhost:5173
+```
+
+It calls the API at `VITE_API_URL` (default http://localhost:3000). The API must list the web app's address in `WEB_ORIGINS`, which `.env.example` already does for `http://localhost:5173`. Open the app at `localhost`, not `127.0.0.1`: the session cookie needs the same site as the API.
+
+To try the installable build and the offline start, run `pnpm --filter @rt/web build`, then `pnpm --filter @rt/web preview` (http://localhost:4173, which you then add to `WEB_ORIGINS`).
 
 Then the app, in a third terminal:
 
@@ -105,6 +116,21 @@ Every route is listed once, in `packages/contracts/src/endpoints.ts`. From that 
 
 To add an endpoint: add it to the list, build `@rt/contracts`, write the controller, and commit the regenerated `openapi.json`.
 
+## Web app structure
+
+```
+apps/web/src/
+  app/              Routes, the area gates that enforce the onboarding order, the query client
+  features/auth/    Welcome, sign up, sign in, email code, role choice
+  shared/api/       The HTTP client: access token in memory, refresh cookie, one refresh across tabs
+  shared/session/   Who is signed in, shared with other tabs over a BroadcastChannel
+  shared/pwa/       Update prompt, install offer, offline banner
+  shared/ui/        Design tokens as CSS variables, and accessible form components
+  i18n/en.json      Every word the app shows. Checked by the writing check
+```
+
+Every screen moves focus to its heading when it opens, every field has a label tied to its hint and error, and tests run axe against each screen.
+
 ## Mobile app structure
 
 ```
@@ -121,15 +147,16 @@ Onboarding is a strict order: sign up, verify email, choose a role, then the app
 
 ## Tests
 
-| Level            | Where                                    | Runs against                                                                        |
-| ---------------- | ---------------------------------------- | ----------------------------------------------------------------------------------- |
-| Domain           | `src/modules/*/domain/*.test.ts`         | Plain objects                                                                       |
-| Use case         | `src/modules/*/application/*.test.ts`    | In-memory adapters from each module's `testing` folder                              |
-| Adapter contract | `src/modules/*/infrastructure/*.test.ts` | Real Argon2, real JWT signing, real crypto                                          |
-| HTTP end to end  | `test/*.e2e.test.ts`                     | The real NestJS and Fastify stack with in-memory adapters                           |
-| Mobile logic     | `apps/mobile/src/**/*.test.ts`           | HTTP client against a fake API with single-use refresh tokens, routing, forms, copy |
-| Mobile bundle    | `pnpm --filter @rt/mobile bundle:check`  | Metro builds the iOS and Android bundles, as EAS does                               |
-| Route contract   | `apps/api/test/routes.contract.test.ts`  | Every served route matches the endpoint catalogue                                   |
+| Level            | Where                                    | Runs against                                                                                                    |
+| ---------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Domain           | `src/modules/*/domain/*.test.ts`         | Plain objects                                                                                                   |
+| Use case         | `src/modules/*/application/*.test.ts`    | In-memory adapters from each module's `testing` folder                                                          |
+| Adapter contract | `src/modules/*/infrastructure/*.test.ts` | Real Argon2, real JWT signing, real crypto                                                                      |
+| HTTP end to end  | `test/*.e2e.test.ts`                     | The real NestJS and Fastify stack with in-memory adapters                                                       |
+| Web app          | `apps/web/src/**/*.test.{ts,tsx}`        | Screens through the real router, with axe; the HTTP client against a fake API and cookie jar shared by two tabs |
+| Mobile logic     | `apps/mobile/src/**/*.test.ts`           | HTTP client against a fake API with single-use refresh tokens, routing, forms, copy                             |
+| Mobile bundle    | `pnpm --filter @rt/mobile bundle:check`  | Metro builds the iOS and Android bundles, as EAS does                                                           |
+| Route contract   | `apps/api/test/routes.contract.test.ts`  | Every served route matches the endpoint catalogue                                                               |
 
 ## How we work
 
@@ -157,5 +184,8 @@ Milestone 1, foundations.
 | Milestone 2: portfolio items (add, caption, reorder with If-Match, remove with media cleanup, public view)    | Done, limits provisional (ADR-020)      |
 | Milestone 2: video through Mux (direct upload, signed webhooks, frame scanning, signed playback)              | Done, limits provisional (ADR-021)      |
 | Milestone 2: scheduled cleanup of abandoned uploads                                                           | Done                                    |
-| Milestone 2: onboarding screens in the app                                                                    | Next                                    |
+| PWA (ADR-023): browser sessions with an HttpOnly refresh cookie (ADR-024), CORS                               | Done                                    |
+| PWA: installable shell, offline start, update prompt, sign up, sign in, email code, role choice               | Done                                    |
+| PWA: talent and agent onboarding, avatar and portfolio screens                                                | Next                                    |
+| PWA: hosting on S3 and CloudFront, deploy pipeline                                                            | Next                                    |
 | CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                        | Done                                    |

@@ -1,0 +1,150 @@
+{
+  "common": {
+    "continue": "Continue",
+    "tryAgain": "Try again",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "show": "Show",
+    "hide": "Hide",
+    "skipToContent": "Skip to main content",
+    "loading": "Loading",
+    "appName": "Raising Talents",
+    "back": "Back"
+  },
+  "welcome": {
+    "headline": "Get seen by the people who scout talent.",
+    "body": "Show your best work. Agents and scouts across Nigeria search here for athletes, musicians, models, actors and creators.",
+    "createAccount": "Create an account",
+    "signIn": "I already have an account"
+  },
+  "signUp": {
+    "title": "Create your account",
+    "subtitle": "You need to be 18 or older to join.",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 10 characters. A short phrase is easy to remember.",
+    "dateOfBirth": "Date of birth",
+    "dateOfBirthPlaceholder": "DD/MM/YYYY",
+    "dateOfBirthHint": "Only used to confirm your age. Never shown on your profile.",
+    "terms": "I agree to the Terms and the Community Guidelines.",
+    "readTerms": "Read the Terms",
+    "readGuidelines": "Read the Community Guidelines",
+    "submit": "Create account",
+    "haveAccount": "Already have an account? Sign in"
+  },
+  "signIn": {
+    "title": "Welcome back",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "noAccount": "New here? Create an account"
+  },
+  "verifyEmail": {
+    "title": "Check your email",
+    "body": "We sent a 6-digit code to {email}. It expires in 10 minutes.",
+    "codeLabel": "Verification code",
+    "submit": "Verify email",
+    "resend": "Send a new code",
+    "resendIn": "Send a new code in {seconds}s",
+    "resent": "New code sent. Check your inbox and spam folder.",
+    "wrongEmail": "Wrong email? Start again"
+  },
+  "chooseRole": {
+    "title": "How will you use Raising Talents?",
+    "body": "This decides what your profile looks like. You can change it until you finish setting up.",
+    "talentTitle": "I am a talent",
+    "talentBody": "Build a portfolio of your work so agents and scouts can find you.",
+    "agentTitle": "I am an agent or scout",
+    "agentBody": "Search for talent and get in touch. Agents are verified before they can message anyone.",
+    "submit": "Continue"
+  },
+  "home": {
+    "titleTalent": "Your portfolio starts here",
+    "titleAgent": "Your search starts here",
+    "bodyTalent": "Next you will add your discipline, a photo and your first clips.",
+    "bodyAgent": "Next you will confirm your agency details and get verified.",
+    "signedInAs": "Signed in as {email}",
+    "signOut": "Sign out"
+  },
+  "restore": {
+    "offlineTitle": "You are offline",
+    "offlineBody": "Raising Talents needs a connection to load your account. It will try again when you are back online."
+  },
+  "validation": {
+    "emailInvalid": "Enter a valid email address.",
+    "passwordShort": "Use at least 10 characters.",
+    "dateInvalid": "Enter your date of birth as DD/MM/YYYY.",
+    "termsRequired": "Tick the box to accept the Terms and Community Guidelines.",
+    "codeInvalid": "Enter the 6-digit code from the email."
+  },
+  "errors": {
+    "NETWORK": "No connection. Check your data or Wi-Fi and try again.",
+    "INTERNAL": "Something went wrong on our side. Try again in a moment.",
+    "UNAUTHENTICATED": "Sign in to continue.",
+    "FORBIDDEN": "You do not have access to this.",
+    "NOT_FOUND": "We could not find that. It may have been removed.",
+    "CONFLICT": "This changed while you were editing. Refresh and try again.",
+    "RATE_LIMITED": "Too many attempts. Wait a few minutes and try again.",
+    "VALIDATION_FAILED": "Some details need fixing. Check the highlighted fields.",
+    "EMAIL_ALREADY_REGISTERED": "An account with this email already exists. Sign in instead.",
+    "UNDER_MINIMUM_AGE": "You need to be 18 or older to join Raising Talents.",
+    "WEAK_PASSWORD": "Choose a stronger password.",
+    "INVALID_CREDENTIALS": "That email and password do not match.",
+    "ACCOUNT_SUSPENDED": "This account is suspended. Check your email for details.",
+    "ACCOUNT_BANNED": "This account has been closed for breaking the Community Guidelines.",
+    "SESSION_EXPIRED": "Your session has ended. Sign in again.",
+    "SESSION_REVOKED": "You were signed out to keep your account safe. Sign in again.",
+    "VERIFICATION_CODE_INVALID": "That code is not right. Check the email and try again.",
+    "VERIFICATION_CODE_EXPIRED": "That code has expired. Send a new one.",
+    "VERIFICATION_ATTEMPTS_EXCEEDED": "Too many wrong codes. Send a new one.",
+    "VERIFICATION_RESEND_TOO_SOON": "Wait a moment before asking for another code.",
+    "EMAIL_ALREADY_VERIFIED": "Your email is already verified.",
+    "EMAIL_NOT_VERIFIED": "Verify your email first.",
+    "ROLE_ALREADY_LOCKED": "Your role is set. Contact support to change it.",
+    "PRECONDITION_REQUIRED": "Reload your profile, then try saving again.",
+    "PRECONDITION_FAILED": "Your profile was changed on another device. We have loaded the latest version; check it and save again.",
+    "WRONG_ROLE": "This part of the app is for a different kind of account.",
+    "HANDLE_TAKEN": "That username is taken. Try another.",
+    "HANDLE_INVALID": "That username is not available. Try another.",
+    "UNKNOWN_TAXONOMY": "One of your choices is no longer available. Pick again from the list.",
+    "MEDIA_TYPE_NOT_ALLOWED": "Use a photo (JPEG, PNG, WebP or HEIC) or, for your portfolio, a video (MP4 or MOV).",
+    "MEDIA_TOO_LARGE": "That file is too large. Photos can be up to 15 MB and videos up to 300 MB.",
+    "MEDIA_NOT_UPLOADED": "The upload did not finish. Check your connection and try again.",
+    "MEDIA_UPLOAD_MISMATCH": "Something went wrong with that upload. Choose the photo again.",
+    "MEDIA_WRONG_STATE": "This photo is already being processed.",
+    "MEDIA_WRONG_PURPOSE": "That photo was uploaded for something else. Choose it again from your gallery.",
+    "MEDIA_ALREADY_USED": "That photo is already in your portfolio.",
+    "PORTFOLIO_FULL": "Your portfolio is full. Remove an item to add a new one.",
+    "PORTFOLIO_ORDER_MISMATCH": "Your portfolio changed on another device. We have loaded the latest order; try again."
+  },
+  "crash": {
+    "title": "Something went wrong",
+    "body": "The app hit a problem it could not recover from. Your account and your work are safe.",
+    "retry": "Reload"
+  },
+  "pwa": {
+    "updateReady": "A new version of Raising Talents is ready.",
+    "updateNow": "Update now",
+    "later": "Later",
+    "offlineReady": "Raising Talents now opens even without a connection.",
+    "install": "Install the app",
+    "installBody": "Add Raising Talents to your home screen to open it like any other app.",
+    "installIos": "To install, tap Share, then Add to Home Screen.",
+    "dismiss": "Not now",
+    "offline": "You are offline. Changes will not save until you reconnect."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The link may be old, or the page has moved.",
+    "home": "Go to the start"
+  },
+  "titles": {
+    "welcome": "Welcome",
+    "signUp": "Create your account",
+    "signIn": "Sign in",
+    "verifyEmail": "Verify your email",
+    "chooseRole": "Choose how you will use Raising Talents",
+    "home": "Home",
+    "notFound": "Page not found"
+  }
+}

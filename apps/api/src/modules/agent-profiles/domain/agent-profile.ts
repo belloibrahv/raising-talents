@@ -126,6 +126,22 @@ export class AgentProfile {
     return { becameComplete };
   }
 
+  get isVerified(): boolean {
+    return this.props.verifiedAt !== null;
+  }
+
+  /** A moderator confirmed the agency. Bumps the version so open forms reload the badge. */
+  markVerified(now: Date): void {
+    if (this.props.verifiedAt !== null) return;
+    this.props = {
+      ...this.props,
+      verifiedAt: now,
+      version: this.props.version + 1,
+      updatedAt: now,
+    };
+    this.raise(AgentProfileEvents.Updated, now, { isComplete: this.isComplete, verified: true });
+  }
+
   pullEvents(): DomainEvent[] {
     const events = this.pendingEvents;
     this.pendingEvents = [];

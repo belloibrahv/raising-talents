@@ -51,6 +51,12 @@ const ResetPasswordPage = lazy(() =>
 const ModerationPage = lazy(() =>
   import('../features/moderation/ModerationPage').then((m) => ({ default: m.ModerationPage })),
 );
+const VerificationPage = lazy(() =>
+  import('../features/profile/VerificationPage').then((m) => ({ default: m.VerificationPage })),
+);
+const AgentQueuePage = lazy(() =>
+  import('../features/moderation/AgentQueuePage').then((m) => ({ default: m.AgentQueuePage })),
+);
 const HomePage = lazy(() =>
   import('../features/auth/HomePage').then((m) => ({ default: m.HomePage })),
 );
@@ -116,6 +122,8 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
             { path: 'talents/:handle', element: <TalentProfilePage /> },
             { path: 'search', element: <SearchPage /> },
             { path: 'moderation', element: <ModerationPage /> },
+            { path: 'moderation/agents', element: <AgentQueuePage /> },
+            { path: 'verification', element: <VerificationPage /> },
           ],
         },
         { path: '*', element: <NotFoundPage /> },

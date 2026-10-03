@@ -18,10 +18,22 @@ import {
 import type { AgentProfileRepository } from './domain/agent-profile.js';
 import { DrizzleAgentProfileRepository } from './infrastructure/drizzle-agent-profile.repository.js';
 import { AgentProfileController } from './interface/http/agent-profile.controller.js';
+import { VerificationController } from './interface/http/verification.controller.js';
+import {
+  DecideVerificationHandler,
+  GetMyVerificationQuery,
+  ListPendingVerificationsQuery,
+  RequestVerificationHandler,
+  VERIFICATION,
+} from './application/verification.use-cases.js';
+import type { VerificationRequestRepository } from './domain/verification-request.js';
+import { DrizzleVerificationRequestRepository } from './infrastructure/drizzle-verification-request.repository.js';
+import type { Logger } from 'pino';
+import type { RateLimiter } from '../../platform/rate-limit/rate-limiter.js';
 
 @Module({
   imports: [AccountsModule, TaxonomyModule],
-  controllers: [AgentProfileController],
+  controllers: [AgentProfileController, VerificationController],
   providers: [
     {
       provide: AGENT.Repository,
@@ -54,6 +66,69 @@ import { AgentProfileController } from './interface/http/agent-profile.controlle
         accounts: AccountsFacade,
         taxonomy: TaxonomySource,
       ) => new GetMyAgentProfileQuery(repo, accounts, taxonomy),
+    },
+    {
+      provide: VERIFICATION.Requests,
+      inject: [PLATFORM.UnitOfWork, PLATFORM.EventRecorder],
+      useFactory: (uow: DrizzleUnitOfWork, events: EventRecorder) =>
+        new DrizzleVerificationRequestRepository(uow, events),
+    },
+    {
+      provide: VERIFICATION.GetMine,
+      inject: [AGENT.Repository, VERIFICATION.Requests, ACCOUNTS.Facade],
+      useFactory: (
+        repo: AgentProfileRepository,
+        requests: VerificationRequestRepository,
+        accounts: AccountsFacade,
+      ) => new GetMyVerificationQuery(repo, requests, accounts),
+    },
+    {
+      provide: VERIFICATION.Request,
+      inject: [
+        AGENT.Repository,
+        VERIFICATION.Requests,
+        ACCOUNTS.Facade,
+        PLATFORM.RateLimiter,
+        PLATFORM.UnitOfWork,
+        PLATFORM.Clock,
+      ],
+      useFactory: (
+        repo: AgentProfileRepository,
+        requests: VerificationRequestRepository,
+        accounts: AccountsFacade,
+        limiter: RateLimiter,
+        uow: UnitOfWork,
+        clock: Clock,
+      ) => new RequestVerificationHandler(repo, requests, accounts, limiter, uow, clock),
+    },
+    {
+      provide: VERIFICATION.List,
+      inject: [AGENT.Repository, VERIFICATION.Requests, ACCOUNTS.Facade, TAXONOMY.Source],
+      useFactory: (
+        repo: AgentProfileRepository,
+        requests: VerificationRequestRepository,
+        accounts: AccountsFacade,
+        taxonomy: TaxonomySource,
+      ) => new ListPendingVerificationsQuery(repo, requests, accounts, taxonomy),
+    },
+    {
+      provide: VERIFICATION.Decide,
+      inject: [
+        AGENT.Repository,
+        VERIFICATION.Requests,
+        ACCOUNTS.Facade,
+        PLATFORM.UnitOfWork,
+        PLATFORM.Clock,
+        PLATFORM.Logger,
+      ],
+      useFactory: (
+        repo: AgentProfileRepository,
+        requests: VerificationRequestRepository,
+        accounts: AccountsFacade,
+        uow: UnitOfWork,
+        clock: Clock,
+        logger: Logger,
+      ) => new DecideVerificationHandler(repo, requests, accounts, uow, clock, logger),
     },
   ],
 })

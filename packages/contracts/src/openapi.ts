@@ -30,7 +30,11 @@ const STATUS_DESCRIPTION: Record<number, string> = {
 /** Query parameters from a Zod object, documented as clients send them. */
 function queryParameters(schema: z.ZodType | undefined): JsonObject[] {
   if (!schema) return [];
-  const json = z.toJSONSchema(schema, { io: 'input', target: 'draft-2020-12', unrepresentable: 'any' }) as {
+  const json = z.toJSONSchema(schema, {
+    io: 'input',
+    target: 'draft-2020-12',
+    unrepresentable: 'any',
+  }) as {
     properties?: Record<string, JsonObject>;
     required?: string[];
   };

@@ -190,4 +190,5 @@ Milestone 1, foundations.
 | PWA: hosting on S3 and CloudFront with a strict CSP, deploy pipeline                                          | Done, not yet applied to an AWS account  |
 | Milestone 3: talent search (Typesense, event-driven indexing, rebuild, agent search screen)                   | Done; hosting needs a decision (ADR-025) |
 | Moderation: staff accounts, held media queue, approve or reject with an audit trail                           | Done                                     |
+| Agent verification: request with evidence, moderator queue, badge (ADR-026)                                   | Done, evidence rules provisional         |
 | CI: lint, types, tests, build, drift checks, audit, secret scan, infrastructure checks                        | Done                                     |

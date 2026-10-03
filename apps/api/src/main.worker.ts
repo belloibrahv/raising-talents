@@ -15,6 +15,7 @@ import {
 import { IDENTITY } from './modules/identity/application/identity.tokens.js';
 import type { ModuleEventHandlers } from './modules/identity/identity.module.js';
 import { MEDIA } from './modules/media/application/media.use-cases.js';
+import { NOTIFICATIONS } from './modules/notifications/application/notifications.js';
 import { SEARCH } from './modules/search/application/search.use-cases.js';
 import { TALENT } from './modules/talent-profiles/application/talent-profile.tokens.js';
 import { WorkerModule } from './worker.module.js';
@@ -32,6 +33,7 @@ for (const token of [
   MEDIA.EventHandlers,
   TALENT.EventHandlers,
   SEARCH.EventHandlers,
+  NOTIFICATIONS.EventHandlers,
 ]) {
   app.get<ModuleEventHandlers>(token).register(dispatcher);
 }

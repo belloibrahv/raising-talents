@@ -14,6 +14,8 @@ export interface MediaSummary {
   readonly kind: MediaKind;
   readonly status: MediaStatus;
   readonly rejectionReason: string | null;
+  /** True once a moderator decided on it (it had been held). */
+  readonly reviewed: boolean;
   /** Set only when a ready image. */
   readonly urls: ImageUrls | null;
   /** Set only when a ready video. */
@@ -40,6 +42,7 @@ export class MediaFacade {
           kind: asset.kind,
           status: props.status,
           rejectionReason: props.rejectionReason,
+          reviewed: props.reviewedAt !== null,
           ...(await this.presenter.links(asset)),
         };
       }),

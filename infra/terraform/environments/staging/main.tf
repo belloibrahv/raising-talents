@@ -211,6 +211,7 @@ locals {
     CONTENT_SCANNER             = "rekognition"
     VIDEO_PROVIDER              = "mux"
     WEB_ORIGINS                 = "https://${local.web_domain}"
+    WEB_APP_URL                 = "https://${local.web_domain}"
     OTEL_EXPORTER_OTLP_ENDPOINT = var.otlp_endpoint
     OTEL_TRACES_SAMPLER         = "parentbased_traceidratio"
     OTEL_TRACES_SAMPLER_ARG     = var.trace_sample_ratio

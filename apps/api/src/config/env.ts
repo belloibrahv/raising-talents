@@ -92,6 +92,8 @@ const envSchema = z.object({
         .filter(Boolean),
     )
     .pipe(z.array(z.url())),
+  /** The web app's address, for links in emails. */
+  WEB_APP_URL: z.url().default('http://localhost:5173'),
   /** Secure cookies need HTTPS. Only a laptop on plain http://localhost may turn it off. */
   WEB_COOKIE_SECURE: booleanFromString.default(true),
 });

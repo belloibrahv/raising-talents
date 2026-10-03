@@ -61,6 +61,7 @@ import { DrizzleNotificationLog } from './infrastructure/drizzle-notification-lo
           media,
           verifications,
           config.WEB_APP_URL.replace(/\/$/, ''),
+          config.SUPPORT_EMAIL,
           clock,
           logger,
         );
@@ -76,6 +77,15 @@ import { DrizzleNotificationLog } from './infrastructure/drizzle-notification-lo
             );
             dispatcher.on(AccountEvents.DeletionRequested, (event) =>
               notifier.deletionScheduled(event),
+            );
+            dispatcher.on(AccountEvents.AccountSuspended, (event) =>
+              notifier.accountRestricted(event, 'suspend'),
+            );
+            dispatcher.on(AccountEvents.AccountBanned, (event) =>
+              notifier.accountRestricted(event, 'ban'),
+            );
+            dispatcher.on(AccountEvents.AccountReinstated, (event) =>
+              notifier.accountReinstated(event),
             );
           },
         };

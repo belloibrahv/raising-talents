@@ -6,6 +6,10 @@ export const AccountEvents = {
   StaffRoleGranted: 'accounts.StaffRoleGranted',
   DeletionRequested: 'accounts.DeletionRequested',
   DeletionCancelled: 'accounts.DeletionCancelled',
+  /** Payload: the reason category, so the email can say why. */
+  AccountSuspended: 'accounts.AccountSuspended',
+  AccountBanned: 'accounts.AccountBanned',
+  AccountReinstated: 'accounts.AccountReinstated',
   /** Recorded in the same transaction that erases the account. The payload has no personal data. */
   AccountDeleted: 'accounts.AccountDeleted',
 } as const;

@@ -1,3 +1,4 @@
+import type { ReportCategory } from '@rt/contracts';
 import type { EmailMessage } from '../../../platform/email/email-sender.js';
 
 /** Plain, branded emails: one message, one link, no tracking. */
@@ -123,5 +124,54 @@ export function deletionScheduledEmail(input: {
       'If you did not ask for this, sign in, keep your account, and change your password.',
     ],
     link: { href: `${input.appUrl}/sign-in`, label: 'Sign in to keep your account' },
+  });
+}
+
+/** Why a moderator acted, in words the account holder reads. */
+const RESTRICTION_REASON: Record<ReportCategory, string> = {
+  fake_or_impersonation: 'The profile was not genuine, or pretended to be someone else.',
+  inappropriate_content: 'The profile showed content that breaks the Community Guidelines.',
+  scam_or_harassment: 'The account was used to ask people for money, scam them or harass them.',
+  underage: 'We believe the account holder is under 18, the minimum age for Raising Talents.',
+  other: 'The account broke the Community Guidelines.',
+};
+
+export function accountRestrictedEmail(input: {
+  to: string;
+  action: 'suspend' | 'ban';
+  reason: ReportCategory;
+  supportEmail: string;
+}): EmailMessage {
+  const suspended = input.action === 'suspend';
+  return email({
+    to: input.to,
+    subject: suspended
+      ? 'Your Raising Talents account is suspended'
+      : 'Your Raising Talents account has been closed',
+    paragraphs: [
+      suspended
+        ? 'We have suspended your account after a moderator reviewed reports about it.'
+        : 'We have closed your account after a moderator reviewed reports about it.',
+      RESTRICTION_REASON[input.reason],
+      suspended
+        ? 'While it is suspended you cannot sign in, and agents cannot see your profile.'
+        : 'You can no longer sign in, and agents cannot see your profile.',
+      `If you think this is a mistake, write to ${input.supportEmail} and tell us why. A different moderator will look at it.`,
+    ],
+    link: {
+      href: `mailto:${input.supportEmail}?subject=${encodeURIComponent('Appeal')}`,
+      label: 'Write to us to appeal',
+    },
+  });
+}
+
+export function accountReinstatedEmail(input: { to: string; appUrl: string }): EmailMessage {
+  return email({
+    to: input.to,
+    subject: 'Your Raising Talents account is back',
+    paragraphs: [
+      'We have lifted the restriction on your account. You can sign in again, and agents can see your profile once more.',
+    ],
+    link: { href: `${input.appUrl}/sign-in`, label: 'Sign in' },
   });
 }

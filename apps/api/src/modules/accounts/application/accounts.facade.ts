@@ -1,4 +1,4 @@
-import type { AccountStatus, MeResponse, Role } from '@rt/contracts';
+import type { AccountStatus, MeResponse, ReportCategory, Role } from '@rt/contracts';
 import type { Clock } from '../../../platform/clock.js';
 import { ageInYears } from '../domain/age.js';
 import type { DomainError } from '../../../platform/domain-error.js';
@@ -103,6 +103,33 @@ export class AccountsFacade {
       deletionScheduledAt: props.deletionScheduledAt?.toISOString() ?? null,
       createdAt: props.createdAt.toISOString(),
     };
+  }
+
+  /**
+   * Suspends or bans a member after reports. Joins the caller's transaction, so the
+   * status change and the closed reports are saved together.
+   */
+  async restrict(
+    userId: string,
+    action: 'suspend' | 'ban',
+    reason: ReportCategory,
+  ): Promise<Result<void, DomainError>> {
+    const account = await this.accounts.findById(userId);
+    if (!account) return err(AccountErrors.notFound());
+    const now = this.clock.now();
+    const result = action === 'suspend' ? account.suspend(reason, now) : account.ban(reason, now);
+    if (result.ok) await this.accounts.save(account);
+    return result;
+  }
+
+  /** For the operator script only. Returns the account id; logged by the caller. */
+  async reinstate(email: string): Promise<Result<string, DomainError>> {
+    const account = await this.accounts.findByEmail(email);
+    if (!account) return err(AccountErrors.notFound());
+    const result = account.reinstate(this.clock.now());
+    if (!result.ok) return result;
+    await this.accounts.save(account);
+    return ok(account.id);
   }
 
   /** For the operator script only. Logged by the caller. */

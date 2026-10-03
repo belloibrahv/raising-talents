@@ -10,7 +10,11 @@ import {
 } from '../../../platform/testing/fakes.js';
 import { createAccountsHarness } from '../../accounts/testing/accounts-harness.js';
 import { IdentityFacade } from '../../identity/application/identity.facade.js';
-import { FakePasswordHasher, InMemoryCredentialRepository } from '../../identity/testing/fakes.js';
+import {
+  FakePasswordHasher,
+  InMemoryCredentialRepository,
+  InMemorySessionRepository,
+} from '../../identity/testing/fakes.js';
 import { MediaFacade } from '../../media/application/media.facade.js';
 import { MediaPresenter } from '../../media/application/media-presenter.js';
 import { MediaUrls } from '../../media/application/media-urls.js';
@@ -65,7 +69,7 @@ describe('Account deletion and data export', () => {
     };
     requestDeletion = new RequestDeletionHandler(
       accounts.facade,
-      new IdentityFacade(credentials, hasher),
+      new IdentityFacade(credentials, hasher, new InMemorySessionRepository(), clock),
       new InMemoryRateLimiter(),
       uow,
       30,

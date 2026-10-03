@@ -1,9 +1,12 @@
+import { reportCategorySchema, type ReportCategory } from '@rt/contracts';
 import type { Logger } from 'pino';
 import type { Clock } from '../../../platform/clock.js';
 import type { DomainEvent } from '../../../platform/domain-event.js';
 import type { EmailMessage, EmailSender } from '../../../platform/email/email-sender.js';
 import {
   agentDeclinedEmail,
+  accountReinstatedEmail,
+  accountRestrictedEmail,
   deletionScheduledEmail,
   agentVerifiedEmail,
   mediaApprovedEmail,
@@ -47,6 +50,9 @@ export interface NotificationVerifications {
   ): Promise<{ agentId: string; status: string; declineReason: string | null } | null>;
 }
 
+const isReportCategory = (value: unknown): value is ReportCategory =>
+  reportCategorySchema.safeParse(value).success;
+
 /** The same event always gives the same key, so a redelivery is recognised. */
 const keyFor = (event: DomainEvent) =>
   `${event.type}:${event.aggregateId}:${event.occurredAt.toISOString()}`;
@@ -64,6 +70,7 @@ export class Notifier {
     private readonly media: NotificationMedia,
     private readonly verifications: NotificationVerifications,
     private readonly appUrl: string,
+    private readonly supportEmail: string,
     private readonly clock: Clock,
     private readonly logger: Logger,
   ) {}
@@ -105,6 +112,21 @@ export class Notifier {
     if (Number.isNaN(scheduledFor.getTime())) return;
     await this.sendOnce(event, event.aggregateId, (to) =>
       deletionScheduledEmail({ to, scheduledFor, appUrl: this.appUrl }),
+    );
+  }
+
+  /** Tells a suspended or banned member why, and how to appeal. */
+  async accountRestricted(event: DomainEvent, action: 'suspend' | 'ban'): Promise<void> {
+    const reason = event.payload['reason'];
+    if (!isReportCategory(reason)) return;
+    await this.sendOnce(event, event.aggregateId, (to) =>
+      accountRestrictedEmail({ to, action, reason, supportEmail: this.supportEmail }),
+    );
+  }
+
+  async accountReinstated(event: DomainEvent): Promise<void> {
+    await this.sendOnce(event, event.aggregateId, (to) =>
+      accountReinstatedEmail({ to, appUrl: this.appUrl }),
     );
   }
 

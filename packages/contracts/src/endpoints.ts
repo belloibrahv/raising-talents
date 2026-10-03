@@ -38,6 +38,7 @@ import {
   moderationQueueQuerySchema,
 } from './moderation.js';
 import { dataExportSchema, requestDeletionSchema } from './privacy.js';
+import { createReportSchema, reportDecisionSchema, reportQueuePageSchema } from './safety.js';
 import { searchTalentsQuerySchema, talentSearchResponseSchema } from './search.js';
 import {
   myAgentVerificationSchema,
@@ -597,6 +598,38 @@ export const endpoints = {
     successStatus: 200,
     errors: [ErrorCode.RateLimited],
     tag: 'Me',
+  }),
+  'reports.create': define({
+    method: 'POST',
+    path: '/v1/reports',
+    summary: 'Report a profile to the moderators. Reporting the same profile again changes nothing',
+    auth: true,
+    request: createReportSchema,
+    successStatus: 204,
+    errors: [ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.RateLimited],
+    tag: 'Safety',
+  }),
+  'moderation.reports': define({
+    method: 'GET',
+    path: '/v1/moderation/reports',
+    summary:
+      'Reported accounts with open reports, longest waiting first. Moderators and admins only',
+    auth: true,
+    query: moderationQueueQuerySchema,
+    response: reportQueuePageSchema,
+    successStatus: 200,
+    errors: [ErrorCode.Forbidden],
+    tag: 'Moderation',
+  }),
+  'moderation.decideReports': define({
+    method: 'POST',
+    path: '/v1/moderation/reports/{accountId}/decision',
+    summary: 'Dismiss the reports, or suspend or ban the account. Recorded with the moderator',
+    auth: true,
+    request: reportDecisionSchema,
+    successStatus: 204,
+    errors: [ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.Conflict],
+    tag: 'Moderation',
   }),
   'webhooks.mux': define({
     method: 'POST',

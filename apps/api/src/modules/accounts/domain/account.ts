@@ -1,6 +1,7 @@
 import {
   MINIMUM_AGE_YEARS,
   type AccountStatus,
+  type ReportCategory,
   type Role,
   type SelectableRole,
 } from '@rt/contracts';
@@ -167,6 +168,50 @@ export class Account {
     const status = this.props.roleLockedAt === null ? 'onboarding' : 'active';
     this.props = { ...this.props, status, deletionScheduledAt: null, updatedAt: now };
     this.raise(AccountEvents.DeletionCancelled, now, {});
+  }
+
+  /**
+   * A moderator suspends a member who broke the guidelines. They cannot sign in and are
+   * hidden everywhere until reinstated. A pending deletion is set aside, since erasing the
+   * account would also erase the evidence; staff decide what happens to it.
+   */
+  suspend(reason: ReportCategory, now: Date): Result<void, DomainError> {
+    const allowed = this.ensureMember();
+    if (!allowed.ok) return allowed;
+    if (this.props.status === 'banned') return err(AccountErrors.alreadyBanned());
+    if (this.props.status === 'suspended') return ok(undefined);
+    this.props = { ...this.props, status: 'suspended', deletionScheduledAt: null, updatedAt: now };
+    this.raise(AccountEvents.AccountSuspended, now, { reason });
+    return ok(undefined);
+  }
+
+  /** Closes the account for good. Only an operator can undo it. */
+  ban(reason: ReportCategory, now: Date): Result<void, DomainError> {
+    const allowed = this.ensureMember();
+    if (!allowed.ok) return allowed;
+    if (this.props.status === 'banned') return ok(undefined);
+    this.props = { ...this.props, status: 'banned', deletionScheduledAt: null, updatedAt: now };
+    this.raise(AccountEvents.AccountBanned, now, { reason });
+    return ok(undefined);
+  }
+
+  /** Lifts a suspension or ban. The account returns to where onboarding left it. */
+  reinstate(now: Date): Result<void, DomainError> {
+    if (this.props.status !== 'suspended' && this.props.status !== 'banned') {
+      return err(AccountErrors.notRestricted());
+    }
+    const status = this.props.roleLockedAt === null ? 'onboarding' : 'active';
+    this.props = { ...this.props, status, updatedAt: now };
+    this.raise(AccountEvents.AccountReinstated, now, {});
+    return ok(undefined);
+  }
+
+  /** Staff keep separate accounts and are removed by an operator, not by a colleague. */
+  private ensureMember(): Result<void, DomainError> {
+    const role = this.props.role;
+    return role === 'moderator' || role === 'admin'
+      ? err(AccountErrors.staffAccount())
+      : ok(undefined);
   }
 
   get role(): Role | null {

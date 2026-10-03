@@ -137,3 +137,49 @@ describe('Account onboarding completion', () => {
     expect(result.value.completeOnboarding(now).ok).toBe(false);
   });
 });
+
+describe('Account enforcement', () => {
+  const activeTalent = () => {
+    const result = register('1999-06-02');
+    if (!result.ok) throw new Error('expected success');
+    const account = Account.restore({
+      ...result.value.snapshot(),
+      role: 'talent',
+      roleLockedAt: now,
+      status: 'active',
+    });
+    return account;
+  };
+
+  it('suspends once, sets aside a pending deletion, and reinstates to active', () => {
+    const account = activeTalent();
+    account.requestDeletion(now, 30);
+    expect(account.suspend('scam_or_harassment', now).ok).toBe(true);
+    expect(account.suspend('scam_or_harassment', now).ok).toBe(true);
+    expect(account.snapshot()).toMatchObject({ status: 'suspended', deletionScheduledAt: null });
+    expect(account.ensureCanSignIn().ok).toBe(false);
+    expect(account.reinstate(now).ok).toBe(true);
+    expect(account.status).toBe('active');
+    expect(account.pullEvents().map((event) => [event.type, event.payload])).toEqual([
+      [AccountEvents.DeletionRequested, expect.any(Object)],
+      [AccountEvents.AccountSuspended, { reason: 'scam_or_harassment' }],
+      [AccountEvents.AccountReinstated, {}],
+    ]);
+  });
+
+  it('bans a suspended account, but will not suspend a banned one', () => {
+    const account = activeTalent();
+    account.suspend('other', now);
+    expect(account.ban('underage', now).ok).toBe(true);
+    const again = account.suspend('other', now);
+    expect(again.ok ? null : again.error.code).toBe(ErrorCode.Conflict);
+  });
+
+  it('refuses to act on staff, and to reinstate an account that is not restricted', () => {
+    const staff = Account.restore({ ...activeTalent().snapshot(), role: 'moderator' });
+    const suspended = staff.suspend('other', now);
+    expect(suspended.ok ? null : suspended.error.code).toBe(ErrorCode.Forbidden);
+    const reinstated = activeTalent().reinstate(now);
+    expect(reinstated.ok ? null : reinstated.error.code).toBe(ErrorCode.Conflict);
+  });
+});

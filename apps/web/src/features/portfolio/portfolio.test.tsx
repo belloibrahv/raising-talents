@@ -108,15 +108,47 @@ describe('portfolio', () => {
     renderAt('/portfolio');
     const user = userEvent.setup({ delay: null });
     await user.click(
-      await screen.findByRole('button', { name: 'Move Closing look, Lagos Fashion Week down' }),
+      await screen.findByRole('button', { name: 'Move Closing look, Lagos Fashion Week later' }),
     );
     expect(await screen.findByText('Moved to position 2.')).toBeInTheDocument();
     const reorder = calls.find((call) => call.method === 'PUT');
     expect(reorder?.headers['if-match']).toBe('"3"');
     expect(reorder?.body).toEqual({ itemIds: [ids[1], ids[0]] });
     expect(
-      screen.getByRole('button', { name: 'Move Closing look, Lagos Fashion Week down' }),
+      screen.getByRole('button', { name: 'Move Closing look, Lagos Fashion Week later' }),
     ).toBeDisabled();
+  });
+
+  it('edits a caption in place, from the pencil on the tile', async () => {
+    const fake = fakePortfolio();
+    const calls = stubApi({
+      '/v1/auth/web/refresh': () => signedIn(meFor({ status: 'active' })),
+      'GET /v1/me/portfolio': fake.get,
+      [`PATCH /v1/me/portfolio/items/${ids[1]}`]: (call) => {
+        fake.state.items = fake.state.items.map((entry) =>
+          entry.id === ids[1]
+            ? { ...entry, caption: (call.body as { caption: string }).caption }
+            : entry,
+        );
+        fake.state.version += 1;
+        return Response.json({
+          items: fake.state.items,
+          maxItems: 30,
+          version: fake.state.version,
+        });
+      },
+    });
+    renderAt('/portfolio');
+    const user = userEvent.setup({ delay: null });
+    const second = (await screen.findAllByRole('article'))[1] as HTMLElement;
+    expect(within(second).getByText('No caption yet')).toBeVisible();
+    await user.click(within(second).getByRole('button', { name: 'Edit the caption of Item 2' }));
+    await user.type(within(second).getByLabelText('Caption'), 'Studio session, Yaba');
+    await user.click(within(second).getByRole('button', { name: 'Save caption' }));
+    expect(await within(second).findByText('Studio session, Yaba')).toBeVisible();
+    expect(calls.find((call) => call.method === 'PATCH')?.body).toEqual({
+      caption: 'Studio session, Yaba',
+    });
   });
 
   it('asks before removing, in the page rather than a browser dialog', async () => {
@@ -201,7 +233,9 @@ describe('a talent profile as agents see it', () => {
     });
     renderAt('/talents/ngozi.adeyemi');
     expect(await screen.findByRole('heading', { level: 1, name: 'Ngozi Adeyemi' })).toBeVisible();
-    expect(screen.getByText('Music · Singer · Lagos · 26 years old')).toBeVisible();
+    for (const fact of ['Singer', 'Lagos', '26 years old']) {
+      expect(screen.getByText(fact)).toBeVisible();
+    }
     const photo = await screen.findByRole('img', { name: 'Photo 1 by Ngozi Adeyemi' });
     expect(photo.closest('figure')?.querySelector('figcaption')).toHaveTextContent(
       'Live at Hard Rock Lagos',

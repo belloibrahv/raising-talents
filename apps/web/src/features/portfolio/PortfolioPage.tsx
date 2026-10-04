@@ -24,7 +24,7 @@ import {
 } from './queries';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { ImagePlus } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ImagePlus, PenLine, Trash2 } from 'lucide-react';
 import { EmptyState } from '../../shared/ui/EmptyState';
 
 /** Ready is good news, held and in progress are neutral, rejected and failed need the owner. */
@@ -84,6 +84,8 @@ export function PortfolioPage() {
       title={t('portfolio.title')}
       documentTitle={t('titles.portfolio')}
       subtitle={t('portfolio.body', { max: maxItems })}
+      width="wide"
+      className="[&>div]:max-w-4xl"
     >
       <p className="text-sm text-muted-foreground">
         {t('portfolio.count', { count: items.length, max: maxItems })}
@@ -115,7 +117,7 @@ export function PortfolioPage() {
       {items.length === 0 ? (
         <EmptyState icon={ImagePlus} title={t('portfolio.empty')} />
       ) : (
-        <ol className="stack m-0 list-none p-0">
+        <ol className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:gap-4 lg:grid-cols-3">
           {items.map((item, index) => (
             <li key={item.id}>
               <PortfolioItemCard
@@ -168,103 +170,115 @@ function PortfolioItemCard({
   const updateCaption = useUpdateCaption();
   const remove = useRemoveItem();
   const [caption, setCaption] = useState(item.caption);
+  const [editing, setEditing] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const name = item.caption || t('portfolio.item', { position });
   const headingId = `item-${item.id}`;
+  const iconButton =
+    'grid size-9 cursor-pointer place-items-center rounded-full text-foreground transition-colors hover:bg-accent disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent';
 
   return (
     <article
-      className="flex flex-col gap-4 rounded-2xl border bg-card p-5 text-card-foreground shadow-sm sm:p-6"
+      className="flex h-full flex-col gap-3 rounded-2xl border bg-card p-2.5 text-card-foreground shadow-xs"
       aria-labelledby={headingId}
     >
-      <div className="row justify-between">
-        <h2 id={headingId} className="text-base font-semibold">
-          {t('portfolio.item', { position })}
-        </h2>
-        <Badge variant={STATUS_BADGE[item.mediaStatus]}>{t(`media.${item.mediaStatus}`)}</Badge>
+      <div className="relative">
+        <ItemMedia item={item} name={name} />
+        <span className="absolute top-2 left-2 grid h-7 min-w-7 place-items-center rounded-full bg-black/55 px-2 text-xs font-bold text-white backdrop-blur-sm">
+          <span aria-hidden="true">{position}</span>
+          <h2 id={headingId} className="sr-only">
+            {t('portfolio.item', { position })}
+          </h2>
+        </span>
+        <Badge
+          variant={STATUS_BADGE[item.mediaStatus]}
+          className="absolute top-2 right-2 shadow-sm"
+        >
+          {t(`media.${item.mediaStatus}`)}
+        </Badge>
       </div>
-      <ItemMedia item={item} name={name} />
-      {item.mediaStatus === 'rejected' && item.rejectionReason ? (
-        <FormMessage announce={false} tone="error">
-          {t('portfolio.rejectedReason', { reason: item.rejectionReason })}
-        </FormMessage>
-      ) : item.mediaStatus === 'held_for_review' ? (
-        <p className="text-sm text-muted-foreground">{t('portfolio.heldBody')}</p>
-      ) : item.mediaStatus !== 'ready' ? (
-        <p className="text-sm text-muted-foreground">{t('portfolio.processingBody')}</p>
-      ) : null}
-      <form
-        className="stack"
-        onSubmit={(event) => {
-          event.preventDefault();
-          updateCaption.mutate({ itemId: item.id, caption: caption.trim() });
-        }}
-      >
-        <TextField
-          label={t('portfolio.caption')}
-          hint={t('portfolio.captionHint', { max: PORTFOLIO_CAPTION_MAX })}
-          value={caption}
-          maxLength={PORTFOLIO_CAPTION_MAX}
-          onChange={(event) => {
-            setCaption(event.target.value);
-          }}
-        />
-        <div className="row">
-          <Button
-            type="submit"
-            variant="secondary"
-            size="sm"
-            loading={updateCaption.isPending}
-            disabled={caption.trim() === item.caption}
-          >
-            {t('portfolio.saveCaption')}
-          </Button>
-          <FormMessage tone="success">
-            {updateCaption.isSuccess ? t('portfolio.captionSaved') : null}
+      <div className="flex flex-1 flex-col gap-2 px-1">
+        {item.mediaStatus === 'rejected' && item.rejectionReason ? (
+          <FormMessage announce={false} tone="error">
+            {t('portfolio.rejectedReason', { reason: item.rejectionReason })}
           </FormMessage>
-        </div>
-      </form>
-      <div className="row">
-        <Button
-          variant="secondary"
-          size="sm"
-          disabled={isFirst || moving}
-          aria-label={t('portfolio.moveUp', { name })}
-          onClick={() => {
-            onMove(-1);
-          }}
-        >
-          ↑
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          disabled={isLast || moving}
-          aria-label={t('portfolio.moveDown', { name })}
-          onClick={() => {
-            onMove(1);
-          }}
-        >
-          ↓
-        </Button>
-        {confirming ? null : (
-          <Button
-            variant="text"
-            size="sm"
-            onClick={() => {
-              setConfirming(true);
+        ) : item.mediaStatus === 'held_for_review' ? (
+          <p className="text-xs text-muted-foreground">{t('portfolio.heldBody')}</p>
+        ) : item.mediaStatus !== 'ready' ? (
+          <p className="text-xs text-muted-foreground">{t('portfolio.processingBody')}</p>
+        ) : null}
+        {editing ? (
+          <form
+            className="stack gap-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              updateCaption.mutate(
+                { itemId: item.id, caption: caption.trim() },
+                {
+                  onSuccess: () => {
+                    setEditing(false);
+                  },
+                },
+              );
             }}
           >
-            {t('portfolio.remove')}
-          </Button>
+            <TextField
+              label={t('portfolio.caption')}
+              hint={t('portfolio.captionHint', { max: PORTFOLIO_CAPTION_MAX })}
+              value={caption}
+              maxLength={PORTFOLIO_CAPTION_MAX}
+              autoFocus
+              onChange={(event) => {
+                setCaption(event.target.value);
+              }}
+            />
+            <div className="row gap-2">
+              <Button
+                type="submit"
+                size="sm"
+                loading={updateCaption.isPending}
+                disabled={caption.trim() === item.caption}
+              >
+                {t('portfolio.saveCaption')}
+              </Button>
+              <Button
+                variant="text"
+                size="sm"
+                onClick={() => {
+                  setCaption(item.caption);
+                  setEditing(false);
+                }}
+              >
+                {t('portfolio.cancel')}
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <p
+            className={
+              item.caption
+                ? 'line-clamp-2 text-sm font-medium'
+                : 'text-sm text-muted-foreground italic'
+            }
+          >
+            {item.caption || t('portfolio.noCaption')}
+          </p>
         )}
+        <FormMessage tone="success">
+          {updateCaption.isSuccess && !editing ? t('portfolio.captionSaved') : null}
+        </FormMessage>
       </div>
       {confirming ? (
-        <div className="stack" role="group" aria-label={t('portfolio.removeConfirm')}>
-          <p>{t('portfolio.removeConfirm')}</p>
-          <div className="row">
+        <div
+          className="stack gap-2 rounded-xl bg-destructive-surface p-3"
+          role="group"
+          aria-label={t('portfolio.removeConfirm')}
+        >
+          <p className="text-sm font-medium">{t('portfolio.removeConfirm')}</p>
+          <div className="row gap-2">
             <Button
               size="sm"
+              variant="danger"
               loading={remove.isPending}
               onClick={() => {
                 remove.mutate(item.id, { onSuccess: onRemoved });
@@ -283,7 +297,53 @@ function PortfolioItemCard({
             </Button>
           </div>
         </div>
-      ) : null}
+      ) : (
+        <div className="flex items-center gap-0.5 border-t px-1 pt-2">
+          <button
+            type="button"
+            className={iconButton}
+            disabled={isFirst || moving}
+            aria-label={t('portfolio.moveUp', { name })}
+            onClick={() => {
+              onMove(-1);
+            }}
+          >
+            <ArrowLeft aria-hidden="true" className="size-4" />
+          </button>
+          <button
+            type="button"
+            className={iconButton}
+            disabled={isLast || moving}
+            aria-label={t('portfolio.moveDown', { name })}
+            onClick={() => {
+              onMove(1);
+            }}
+          >
+            <ArrowRight aria-hidden="true" className="size-4" />
+          </button>
+          <button
+            type="button"
+            className={`${iconButton} ml-auto`}
+            aria-label={t('portfolio.editCaption', { name })}
+            aria-expanded={editing}
+            onClick={() => {
+              setEditing(!editing);
+            }}
+          >
+            <PenLine aria-hidden="true" className="size-4" />
+          </button>
+          <button
+            type="button"
+            className={`${iconButton} text-destructive`}
+            aria-label={t('portfolio.remove')}
+            onClick={() => {
+              setConfirming(true);
+            }}
+          >
+            <Trash2 aria-hidden="true" className="size-4" />
+          </button>
+        </div>
+      )}
     </article>
   );
 }
@@ -303,7 +363,7 @@ function ItemMedia({ item, name }: { item: MyPortfolioItem; name: string }) {
         className="aspect-[4/5] w-full rounded-xl bg-muted object-cover"
         src={item.urls.medium}
         srcSet={`${item.urls.small} 256w, ${item.urls.medium} 1024w, ${item.urls.large} 2048w`}
-        sizes="(max-width: 30rem) 100vw, 30rem"
+        sizes="(max-width: 40rem) 50vw, 20rem"
         alt={name}
         loading="lazy"
         decoding="async"
@@ -311,6 +371,11 @@ function ItemMedia({ item, name }: { item: MyPortfolioItem; name: string }) {
     );
   }
   return (
-    <div className="aspect-[4/5] w-full rounded-xl bg-muted object-cover" aria-hidden="true" />
+    <div
+      className="grid aspect-[4/5] w-full place-items-center rounded-xl bg-muted text-muted-foreground"
+      aria-hidden="true"
+    >
+      <ImagePlus className="size-8 opacity-50" />
+    </div>
   );
 }

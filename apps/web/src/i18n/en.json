@@ -1,4 +1,8 @@
 {
+  "auth": {
+    "panelLabel": "Why Raising Talents",
+    "panelTitle": "Where Nigeria's next stars meet the people who scout them."
+  },
   "messages": {
     "title": "Messages",
     "subtitleTalent": "Requests from verified agents, and your chats with the ones you accepted.",
@@ -473,8 +477,11 @@
     "captionHint": "Up to {max} characters. Say where and when.",
     "saveCaption": "Save caption",
     "captionSaved": "Caption saved.",
-    "moveUp": "Move {name} up",
-    "moveDown": "Move {name} down",
+    "moveUp": "Move {name} earlier",
+    "moveDown": "Move {name} later",
+    "editCaption": "Edit the caption of {name}",
+    "noCaption": "No caption yet",
+    "cancel": "Cancel",
     "remove": "Remove",
     "removeConfirm": "Remove this item? Its file is deleted too.",
     "removeYes": "Yes, remove it",
@@ -496,7 +503,8 @@
     "noPortfolio": "No portfolio items yet.",
     "photoAlt": "Photo {position} by {name}",
     "videoAlt": "Video {position} by {name}",
-    "about": "About"
+    "about": "About",
+    "contact": "Contact"
   },
   "search": {
     "title": "Find talent",

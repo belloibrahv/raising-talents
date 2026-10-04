@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Inject,
@@ -34,6 +35,7 @@ import { body, ZodValidationPipe } from '../../../../platform/http/zod-validatio
 import {
   MESSAGING,
   type ConversationWithTalentQuery,
+  type BlockConversationHandler,
   type GetConversationQuery,
   type ListConversationsQuery,
   type ListMessagesQuery,
@@ -59,7 +61,26 @@ export class MessagingController {
     @Inject(MESSAGING.Withdraw) private readonly withdrawRequest: WithdrawContactHandler,
     @Inject(MESSAGING.MarkRead) private readonly markRead: MarkConversationReadHandler,
     @Inject(MESSAGING.Unread) private readonly unreadCount: MessagingUnreadQuery,
+    @Inject(MESSAGING.Block) private readonly blocking: BlockConversationHandler,
   ) {}
+
+  @Post('me/conversations/:conversationId/block')
+  @HttpCode(200)
+  async block(
+    @CurrentPrincipal() principal: Principal,
+    @Param('conversationId', ParseUUIDPipe) id: string,
+  ): Promise<ConversationSummary> {
+    return unwrap(await this.blocking.execute(principal.userId, id, true));
+  }
+
+  @Delete('me/conversations/:conversationId/block')
+  @HttpCode(200)
+  async unblock(
+    @CurrentPrincipal() principal: Principal,
+    @Param('conversationId', ParseUUIDPipe) id: string,
+  ): Promise<ConversationSummary> {
+    return unwrap(await this.blocking.execute(principal.userId, id, false));
+  }
 
   @Post('talents/:handle/contact')
   @HttpCode(201)

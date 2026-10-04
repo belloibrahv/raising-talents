@@ -58,6 +58,9 @@ export interface ConversationProps {
   readonly updatedAt: Date;
   readonly agentReadAt: Date | null;
   readonly talentReadAt: Date | null;
+  /** Who blocked the other, if anyone. Only they can unblock (ADR-040). */
+  readonly blockedBy: string | null;
+  readonly blockedAt: Date | null;
 }
 
 /**
@@ -86,6 +89,8 @@ export class Conversation {
       updatedAt: input.now,
       agentReadAt: input.now,
       talentReadAt: null,
+      blockedBy: null,
+      blockedAt: null,
     });
     conversation.raise(ConversationEvents.ContactRequested, input.now);
     return conversation;
@@ -127,8 +132,53 @@ export class Conversation {
     return this.sideOf(userId) === 'agent' ? this.props.agentReadAt : this.props.talentReadAt;
   }
 
+  get isBlocked(): boolean {
+    return this.props.blockedBy !== null;
+  }
+
+  blockedBy(userId: string): boolean {
+    return this.props.blockedBy === userId;
+  }
+
+  /**
+   * Either person stops the other from writing. Blocking a request the talent has not
+   * answered also declines it, so the agent hears the same as any decline (ADR-040).
+   */
+  block(userId: string, now: Date): Result<void, DomainError> {
+    if (!this.sideOf(userId)) return err(MessagingErrors.notFound());
+    if (this.props.blockedBy === userId) return ok(undefined);
+    if (this.props.blockedBy) return err(MessagingErrors.closed());
+    const pending = this.props.status === 'requested';
+    const declining = pending && this.sideOf(userId) === 'talent';
+    // An agent blocking their own unanswered request takes it back, so the talent stops
+    // seeing a request nobody will follow up.
+    const withdrawing = pending && this.sideOf(userId) === 'agent';
+    this.props = {
+      ...this.props,
+      blockedBy: userId,
+      blockedAt: now,
+      ...(declining ? { status: 'declined' as const, respondedAt: now } : {}),
+      ...(withdrawing ? { status: 'withdrawn' as const, respondedAt: now } : {}),
+    };
+    if (declining) this.raise(ConversationEvents.ContactDeclined, now);
+    return ok(undefined);
+  }
+
+  unblock(userId: string): Result<void, DomainError> {
+    if (this.props.blockedBy !== userId) return err(MessagingErrors.notFound());
+    this.props = { ...this.props, blockedBy: null, blockedAt: null };
+    return ok(undefined);
+  }
+
   /** The agent asks again after a withdrawal, or once the decline cooldown has passed. */
   requestAgain(now: Date): Result<void, DomainError> {
+    if (this.props.blockedBy === this.props.talentId) {
+      // The agent is not told they were blocked: they get what any recent decline gets.
+      const since = (this.props.blockedAt ?? now).getTime();
+      const waitUntil = Math.max(since, now.getTime()) + CONTACT_DECLINE_COOLDOWN_DAYS * DAY_MS;
+      return err(MessagingErrors.declinedRecently(Math.ceil((waitUntil - now.getTime()) / 1000)));
+    }
+    if (this.props.blockedBy) return err(MessagingErrors.closed());
     switch (this.props.status) {
       case 'requested':
         return err(MessagingErrors.pending());
@@ -160,7 +210,9 @@ export class Conversation {
   }
 
   respond(accept: boolean, now: Date): Result<void, DomainError> {
-    if (this.props.status !== 'requested') return err(MessagingErrors.notRequested());
+    if (this.props.status !== 'requested' || this.props.blockedBy) {
+      return err(MessagingErrors.notRequested());
+    }
     this.props = {
       ...this.props,
       status: accept ? 'accepted' : 'declined',
@@ -235,7 +287,8 @@ export interface ConversationRepository {
   save(conversation: Conversation): Promise<void>;
   /**
    * Conversations the user can see, newest activity first. Talent do not see requests that
-   * were withdrawn or that they declined; agents see all of theirs.
+   * were withdrawn or that they declined, unless they blocked the agent (so they can
+   * unblock); agents see all of theirs.
    */
   pageFor(
     userId: string,

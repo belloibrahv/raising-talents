@@ -46,6 +46,8 @@ export const MESSAGING = {
   Export: Symbol('MessagingExport'),
   Notices: Symbol('ContactNotices'),
   Evidence: Symbol('ConversationEvidence'),
+  Block: Symbol('BlockConversationHandler'),
+  Unblock: Symbol('UnblockConversationHandler'),
 } as const;
 
 /** Provisional (ADR-038): generous for real scouting, tight enough to stop a mass mailing. */
@@ -129,7 +131,7 @@ export class ConversationViews {
 
   /** Chat stays open while both accounts are active and the talent is visible. */
   async canSend(conversation: Conversation): Promise<boolean> {
-    if (conversation.status !== 'accepted') return false;
+    if (conversation.status !== 'accepted' || conversation.isBlocked) return false;
     const [agent, talentCard] = await Promise.all([
       this.accounts.profileContext(conversation.agentId),
       this.talents.cardFor(conversation.talentId),
@@ -155,7 +157,9 @@ export class ConversationViews {
       lastMessage: last ? toMessage(last, viewerId) : null,
       unread,
       canSend,
-      awaitingMyAnswer: side === 'talent' && props.status === 'requested',
+      awaitingMyAnswer:
+        side === 'talent' && props.status === 'requested' && !conversation.isBlocked,
+      blockedByMe: conversation.blockedBy(viewerId),
       requestedAt: props.requestedAt.toISOString(),
       updatedAt: props.updatedAt.toISOString(),
     };
@@ -169,10 +173,12 @@ export class ConversationViews {
   ): Promise<Conversation | null> {
     const conversation = await this.conversations.findById(conversationId, options);
     if (!conversation?.sideOf(userId)) return null;
-    // A talent no longer sees a request that was withdrawn, or that they declined.
+    // A talent no longer sees a request that was withdrawn, or that they declined, unless
+    // they blocked the agent and may want to undo it.
     if (
       conversation.sideOf(userId) === 'talent' &&
-      (conversation.status === 'withdrawn' || conversation.status === 'declined')
+      (conversation.status === 'withdrawn' || conversation.status === 'declined') &&
+      !conversation.blockedBy(userId)
     ) {
       return null;
     }
@@ -413,7 +419,7 @@ export class SendMessageHandler {
     try {
       const result = await this.uow.run(async () => {
         const locked = await this.conversations.findById(conversation.id, { lock: true });
-        if (locked?.status !== 'accepted') return err(MessagingErrors.closed());
+        if (locked?.status !== 'accepted' || locked.isBlocked) return err(MessagingErrors.closed());
         await this.conversations.addMessage(message);
         locked.messageSent(userId, message.sentAt);
         await this.conversations.save(locked);
@@ -482,6 +488,35 @@ export class WithdrawContactHandler {
     });
     if (!result.ok) return result;
     return ok(await this.views.summary(result.value, agentId));
+  }
+}
+
+/** Either person stops the other from writing; only they can undo it (ADR-040). */
+export class BlockConversationHandler {
+  constructor(
+    private readonly conversations: ConversationRepository,
+    private readonly views: ConversationViews,
+    private readonly uow: UnitOfWork,
+    private readonly clock: Clock,
+  ) {}
+
+  async execute(
+    userId: string,
+    conversationId: string,
+    block: boolean,
+  ): Promise<Result<ConversationSummary, DomainError>> {
+    const result = await this.uow.run(async () => {
+      const conversation = await this.views.find(conversationId, userId, { lock: true });
+      if (!conversation) return err(MessagingErrors.notFound());
+      const changed = block
+        ? conversation.block(userId, this.clock.now())
+        : conversation.unblock(userId);
+      if (!changed.ok) return changed;
+      await this.conversations.save(conversation);
+      return ok(conversation);
+    });
+    if (!result.ok) return result;
+    return ok(await this.views.summary(result.value, userId));
   }
 }
 

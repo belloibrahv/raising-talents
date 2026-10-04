@@ -1,7 +1,7 @@
 import { MESSAGE_MAX, type ConversationSummary, type Message } from '@rt/contracts';
-import { ArrowLeft, Clock3, Info, MessageSquareOff, Send, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Ban, Clock3, Info, MessageSquareOff, Send, ShieldCheck } from 'lucide-react';
 import { Fragment, useEffect, useState, type ReactNode, type SubmitEvent } from 'react';
-import { Link, useParams } from 'react-router';
+import { Link, useNavigate, useParams } from 'react-router';
 import { cn } from '@/lib/utils';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
@@ -18,6 +18,7 @@ import {
   CounterpartVerified,
 } from './Counterpart';
 import {
+  useBlock,
   useConversation,
   useMarkConversationRead,
   useRespond,
@@ -116,7 +117,10 @@ export function ConversationPage() {
         <Thread messages={messages} name={name} />
       </section>
       <NextStep summary={summary} name={name} />
-      <ReportConversation conversationId={summary.id} />
+      <div className="flex flex-wrap items-start gap-2">
+        {summary.blockedByMe ? null : <BlockControl summary={summary} name={name} />}
+        <ReportConversation conversationId={summary.id} />
+      </div>
     </Page>
   );
 }
@@ -183,7 +187,17 @@ function NextStep({
   readonly summary: ConversationSummary;
   readonly name: string;
 }) {
+  if (summary.blockedByMe) return <Blocked summary={summary} name={name} />;
   if (summary.awaitingMyAnswer) return <Answer summary={summary} name={name} />;
+  // The talent's side of a request they cannot answer: the agent blocked it.
+  const viewerIsTalent = summary.counterpart.kind === 'agent';
+  if (viewerIsTalent && summary.status !== 'accepted') {
+    return summary.status === 'declined' ? (
+      <Note icon={Info} title={t('messages.youDeclined', { name })} />
+    ) : (
+      <Note icon={MessageSquareOff} title={t('messages.closed')} />
+    );
+  }
   if (summary.status === 'requested') return <Waiting summary={summary} name={name} />;
   if (summary.status === 'withdrawn') {
     return (
@@ -325,6 +339,103 @@ function Waiting({
         </Button>
       </div>
     </Note>
+  );
+}
+
+function Blocked({
+  summary,
+  name,
+}: {
+  readonly summary: ConversationSummary;
+  readonly name: string;
+}) {
+  const block = useBlock(summary.id);
+  const navigate = useNavigate();
+  // A talent who unblocks a request they declined has nothing left to do here.
+  const leaveAfter = summary.counterpart.kind === 'agent' && summary.status === 'declined';
+  return (
+    <Note icon={Ban} title={t('messages.blockedTitle', { name })} body={t('messages.blockedBody')}>
+      <FormMessage tone="error">{block.error ? errorMessage(block.error) : null}</FormMessage>
+      <div>
+        <Button
+          variant="secondary"
+          size="sm"
+          loading={block.isPending}
+          onClick={() => {
+            block.mutate(false, {
+              onSuccess: () => {
+                if (leaveAfter) void navigate('/messages');
+              },
+            });
+          }}
+        >
+          {t('messages.unblock', { name })}
+        </Button>
+      </div>
+    </Note>
+  );
+}
+
+/** A quiet control that asks first. Blocking a request also declines it. */
+function BlockControl({
+  summary,
+  name,
+}: {
+  readonly summary: ConversationSummary;
+  readonly name: string;
+}) {
+  const block = useBlock(summary.id);
+  const [confirming, setConfirming] = useState(false);
+  if (!confirming) {
+    return (
+      <Button
+        variant="quiet"
+        size="sm"
+        className="text-muted-foreground"
+        onClick={() => {
+          setConfirming(true);
+        }}
+      >
+        <Ban aria-hidden="true" />
+        {t('messages.block', { name })}
+      </Button>
+    );
+  }
+  return (
+    <div
+      className="stack w-full gap-3 rounded-2xl border bg-card p-5"
+      role="group"
+      aria-labelledby="block-confirm"
+    >
+      <p id="block-confirm" className="m-0 font-semibold">
+        {t('messages.blockConfirm', { name })}
+      </p>
+      <p className="m-0 text-sm text-muted-foreground">
+        {summary.awaitingMyAnswer ? t('messages.blockRequestBody') : t('messages.blockBody')}
+      </p>
+      <FormMessage tone="error">{block.error ? errorMessage(block.error) : null}</FormMessage>
+      <div className="row gap-2">
+        <Button
+          variant="danger"
+          size="sm"
+          loading={block.isPending}
+          onClick={() => {
+            block.mutate(true);
+          }}
+        >
+          {t('messages.blockYes')}
+        </Button>
+        <Button
+          variant="text"
+          size="sm"
+          onClick={() => {
+            setConfirming(false);
+          }}
+        >
+          {t('messages.keep')}
+        </Button>
+      </div>
+    </div>
   );
 }
 

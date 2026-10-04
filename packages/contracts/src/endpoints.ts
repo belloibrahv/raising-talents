@@ -933,6 +933,27 @@ export const endpoints = {
     errors: [ErrorCode.NotFound, ErrorCode.Conflict],
     tag: 'Messaging',
   }),
+  'messaging.block': define({
+    method: 'POST',
+    path: '/v1/me/conversations/{conversationId}/block',
+    summary:
+      'Stop the other person from writing. Declines a request the talent has not answered. Safe to repeat',
+    auth: true,
+    response: conversationSummarySchema,
+    successStatus: 200,
+    errors: [ErrorCode.NotFound, ErrorCode.ConversationClosed],
+    tag: 'Messaging',
+  }),
+  'messaging.unblock': define({
+    method: 'DELETE',
+    path: '/v1/me/conversations/{conversationId}/block',
+    summary: 'Undo your own block',
+    auth: true,
+    response: conversationSummarySchema,
+    successStatus: 200,
+    errors: [ErrorCode.NotFound],
+    tag: 'Messaging',
+  }),
   'messaging.markRead': define({
     method: 'POST',
     path: '/v1/me/conversations/{conversationId}/read',

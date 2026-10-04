@@ -43,3 +43,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-037](037-soft-email-verification.md)                               | Soft email verification                                              | Accepted                          |
 | [ADR-038](038-contact-requests-and-chat.md)                             | Contact requests and chat                                            | Accepted                          |
 | [ADR-039](039-reporting-from-a-conversation.md)                         | Reporting from a conversation                                        | Accepted                          |
+| [ADR-040](040-blocking-a-conversation.md)                               | Blocking a conversation                                              | Accepted                          |

@@ -10,6 +10,7 @@ import { createAccountsHarness } from '../../accounts/testing/accounts-harness.j
 import { ConversationEvents } from '../domain/conversation.js';
 import { InMemoryConversationRepository } from '../testing/in-memory-conversation.repository.js';
 import {
+  BlockConversationHandler,
   CONTACT_REQUEST_LIMIT,
   ConversationEvidence,
   ConversationViews,
@@ -92,6 +93,7 @@ describe('contact requests and chat (ADR-011, ADR-038)', () => {
   let markRead: MarkConversationReadHandler;
   let unread: MessagingUnreadQuery;
   let exporter: MessagingExport;
+  let blocking: BlockConversationHandler;
   let agentId: string;
   let talentId: string;
 
@@ -124,6 +126,7 @@ describe('contact requests and chat (ADR-011, ADR-038)', () => {
     markRead = new MarkConversationReadHandler(conversations, views, uow, clock);
     unread = new MessagingUnreadQuery(conversations);
     exporter = new MessagingExport(conversations, views);
+    blocking = new BlockConversationHandler(conversations, views, uow, clock);
 
     agentId = await accounts.createAccount({ email: 'tunde@eko-talent.example', role: 'agent' });
     await accounts.facade.completeOnboarding(agentId);
@@ -337,5 +340,45 @@ describe('contact requests and chat (ADR-011, ADR-038)', () => {
     });
     const stranger = await accounts.createAccount({ email: 'x@example.com', role: 'talent' });
     expect(await evidence.forReport(id, stranger)).toBeNull();
+  });
+
+  it('lets a talent block an agent mid-chat: nobody can write, and only they can undo it (ADR-040)', async () => {
+    const id = await openChat();
+    const blocked = await blocking.execute(talentId, id, true);
+    expect(blocked.ok && blocked.value).toMatchObject({ blockedByMe: true, canSend: false });
+    const forAgent = await get.execute(agentId, id);
+    expect(forAgent.ok && forAgent.value).toMatchObject({ blockedByMe: false, canSend: false });
+    const sent = await send.execute(agentId, id, { body: 'Hello?', clientMessageId: ids.b });
+    expect(sent.ok ? null : sent.error.code).toBe('CONVERSATION_CLOSED');
+    const agentUnblock = await blocking.execute(agentId, id, false);
+    expect(agentUnblock.ok ? null : agentUnblock.error.code).toBe('NOT_FOUND');
+
+    const unblocked = await blocking.execute(talentId, id, false);
+    expect(unblocked.ok && unblocked.value).toMatchObject({ blockedByMe: false, canSend: true });
+  });
+
+  it('declines a request the talent blocks, keeps it in their list, and stops the agent asking again', async () => {
+    const asked = await request();
+    const id = asked.ok ? asked.value.id : '';
+    const blocked = await blocking.execute(talentId, id, true);
+    expect(blocked.ok && blocked.value).toMatchObject({ status: 'declined', blockedByMe: true });
+    expect(events.ofType(ConversationEvents.ContactDeclined)).toHaveLength(1);
+    expect(await unread.execute(talentId)).toEqual({ unread: 0 });
+    const list1 = await list.execute(talentId);
+    expect(list1.ok && list1.value.items.map((item) => item.id)).toEqual([id]);
+
+    clock.advanceDays(31);
+    const again = await request(ids.b);
+    // The same answer a recent decline gives: the agent is not told about the block.
+    expect(again.ok ? null : again.error.code).toBe('CONTACT_DECLINED_RECENTLY');
+  });
+
+  it('withdraws a request the agent blocks, so the talent stops seeing it', async () => {
+    const asked = await request();
+    const id = asked.ok ? asked.value.id : '';
+    const blocked = await blocking.execute(agentId, id, true);
+    expect(blocked.ok && blocked.value).toMatchObject({ status: 'withdrawn', blockedByMe: true });
+    expect((await get.execute(talentId, id)).ok).toBe(false);
+    expect(await unread.execute(talentId)).toEqual({ unread: 0 });
   });
 });

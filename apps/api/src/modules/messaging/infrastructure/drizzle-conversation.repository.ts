@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gt, inArray, lt, ne, or, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gt, inArray, isNull, lt, ne, or, sql } from 'drizzle-orm';
 import type { DrizzleUnitOfWork } from '../../../platform/database/drizzle-unit-of-work.js';
 import type { EventRecorder } from '../../../platform/domain-event.js';
 import {
@@ -17,13 +17,16 @@ const isUniqueClash = (error: unknown, constraint: string): boolean => {
   return cause.code === '23505' && cause.constraint === constraint;
 };
 
-/** Agents see all of theirs; talent see requests and open chats only. */
+/** Agents see all of theirs; talent see requests, open chats and anyone they blocked. */
 const visibleTo = (userId: string) =>
   or(
     eq(conversations.agentId, userId),
     and(
       eq(conversations.talentId, userId),
-      inArray(conversations.status, ['requested', 'accepted']),
+      or(
+        inArray(conversations.status, ['requested', 'accepted']),
+        eq(conversations.blockedBy, userId),
+      ),
     ),
   );
 
@@ -75,6 +78,8 @@ export class DrizzleConversationRepository implements ConversationRepository {
             updatedAt: row.updatedAt,
             agentReadAt: row.agentReadAt,
             talentReadAt: row.talentReadAt,
+            blockedBy: row.blockedBy,
+            blockedAt: row.blockedAt,
           },
         });
     } catch (error) {
@@ -126,7 +131,11 @@ export class DrizzleConversationRepository implements ConversationRepository {
       .from(conversations)
       .where(
         or(
-          and(eq(conversations.talentId, userId), eq(conversations.status, 'requested')),
+          and(
+            eq(conversations.talentId, userId),
+            eq(conversations.status, 'requested'),
+            isNull(conversations.blockedBy),
+          ),
           and(
             eq(conversations.status, 'accepted'),
             or(eq(conversations.agentId, userId), eq(conversations.talentId, userId)),

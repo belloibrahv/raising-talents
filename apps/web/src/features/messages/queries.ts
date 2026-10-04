@@ -113,6 +113,17 @@ export function useRespond(id: string) {
   });
 }
 
+export function useBlock(id: string) {
+  const refresh = useRefreshAfter();
+  return useMutation({
+    mutationFn: (block: boolean) =>
+      api.call(block ? 'messaging.block' : 'messaging.unblock', {
+        params: { conversationId: id },
+      }),
+    onSuccess: refresh,
+  });
+}
+
 export function useWithdraw(id: string) {
   const refresh = useRefreshAfter();
   return useMutation({

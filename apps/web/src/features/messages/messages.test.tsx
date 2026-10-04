@@ -46,6 +46,7 @@ const summary = (overrides: Partial<ConversationSummary>): ConversationSummary =
   unread: 1,
   canSend: false,
   awaitingMyAnswer: true,
+  blockedByMe: false,
   requestedAt: '2026-10-03T09:00:00.000Z',
   updatedAt: '2026-10-03T09:00:00.000Z',
   ...overrides,
@@ -310,6 +311,45 @@ describe('messages', () => {
     expect(calls.find((call) => call.path === '/v1/reports')?.body).toEqual({
       subject: { kind: 'conversation', conversationId: ID },
       category: 'scam_or_harassment',
+    });
+  });
+
+  it('blocks after asking, then offers unblock', async () => {
+    let current = summary({ unread: 0 });
+    const calls = stubApi({
+      '/v1/auth/web/refresh': () => signedIn(talent),
+      'GET /v1/me/notifications/unread': () => Response.json({ unread: 0 }),
+      'GET /v1/me/conversations/unread': () => Response.json({ unread: 0 }),
+      [`GET /v1/me/conversations/${ID}`]: () => Response.json(current),
+      [`GET /v1/me/conversations/${ID}/messages`]: () =>
+        Response.json({ items: [intro(false)], nextCursor: null }),
+      [`POST /v1/me/conversations/${ID}/block`]: () => {
+        current = { ...current, status: 'declined', awaitingMyAnswer: false, blockedByMe: true };
+        return Response.json(current);
+      },
+      [`DELETE /v1/me/conversations/${ID}/block`]: () => {
+        current = { ...current, blockedByMe: false };
+        return Response.json(current);
+      },
+      'GET /v1/me/conversations': () => Response.json({ items: [], nextCursor: null }),
+    });
+    const router = renderAt(`/messages/${ID}`);
+    const user = userEvent.setup({ delay: null });
+    await user.click(await screen.findByRole('button', { name: 'Block Eko Talent Partners' }));
+    const confirm = screen.getByRole('group', { name: 'Block Eko Talent Partners?' });
+    expect(confirm).toHaveTextContent('This also declines their request');
+    await expectNoAxeViolations();
+    await user.click(within(confirm).getByRole('button', { name: 'Yes, block' }));
+    expect(await screen.findByText('You blocked Eko Talent Partners')).toBeVisible();
+    expect(calls.some((call) => call.method === 'POST' && call.path.endsWith('/block'))).toBe(true);
+
+    await user.click(screen.getByRole('button', { name: 'Unblock Eko Talent Partners' }));
+    await waitFor(() => {
+      expect(calls.some((call) => call.method === 'DELETE')).toBe(true);
+    });
+    // The request stays declined, so the talent goes back to their messages.
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/messages');
     });
   });
 });

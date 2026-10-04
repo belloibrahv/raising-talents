@@ -92,6 +92,8 @@ export const conversationSummarySchema = z
     canSend: z.boolean(),
     /** The viewer is the talent and has not answered the request yet. */
     awaitingMyAnswer: z.boolean(),
+    /** The viewer blocked the other person. Only the viewer can undo it (ADR-040). */
+    blockedByMe: z.boolean(),
     requestedAt: isoDateTimeSchema,
     updatedAt: isoDateTimeSchema,
   })

@@ -27,6 +27,9 @@ export const conversations = messagingSchema.table(
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
     agentReadAt: timestamp('agent_read_at', { withTimezone: true }),
     talentReadAt: timestamp('talent_read_at', { withTimezone: true }),
+    // Set null if the blocker's account is erased: the conversation is going with it anyway.
+    blockedBy: uuid('blocked_by').references(() => users.id, { onDelete: 'set null' }),
+    blockedAt: timestamp('blocked_at', { withTimezone: true }),
   },
   (table) => [
     uniqueIndex('conversations_one_per_pair').on(table.agentId, table.talentId),

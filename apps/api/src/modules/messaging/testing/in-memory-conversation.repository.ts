@@ -44,7 +44,10 @@ export class InMemoryConversationRepository implements ConversationRepository {
 
   private visibleTo(row: ConversationProps, userId: string): boolean {
     if (row.agentId === userId) return true;
-    return row.talentId === userId && (row.status === 'requested' || row.status === 'accepted');
+    return (
+      row.talentId === userId &&
+      (row.status === 'requested' || row.status === 'accepted' || row.blockedBy === userId)
+    );
   }
 
   async pageFor(
@@ -64,7 +67,7 @@ export class InMemoryConversationRepository implements ConversationRepository {
   async countNeedingAttention(userId: string): Promise<number> {
     let total = 0;
     for (const row of this.rows.values()) {
-      if (row.talentId === userId && row.status === 'requested') total += 1;
+      if (row.talentId === userId && row.status === 'requested' && !row.blockedBy) total += 1;
       else if (row.status === 'accepted' && (row.agentId === userId || row.talentId === userId)) {
         const readAt = row.agentId === userId ? row.agentReadAt : row.talentReadAt;
         if ((await this.countUnread(row.id, userId, readAt)) > 0) total += 1;

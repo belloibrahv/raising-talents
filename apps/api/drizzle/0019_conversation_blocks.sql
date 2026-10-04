@@ -1,0 +1,3 @@
+ALTER TABLE "messaging"."conversations" ADD COLUMN "blocked_by" uuid;--> statement-breakpoint
+ALTER TABLE "messaging"."conversations" ADD COLUMN "blocked_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "messaging"."conversations" ADD CONSTRAINT "conversations_blocked_by_users_id_fk" FOREIGN KEY ("blocked_by") REFERENCES "accounts"."users"("id") ON DELETE set null ON UPDATE no action;

@@ -63,6 +63,7 @@ export function CounterpartVerified({ counterpart }: { readonly counterpart: Cou
 
 /** The short status word for the list, from the viewer's side. */
 export function statusLabel(conversation: ConversationSummary): string | null {
+  if (conversation.blockedByMe) return t('messages.status.blocked');
   switch (conversation.status) {
     case 'requested':
       return conversation.awaitingMyAnswer

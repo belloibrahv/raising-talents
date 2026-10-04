@@ -17,6 +17,7 @@ import type { TalentDirectory } from '../talent-profiles/application/get-talent-
 import { TALENT } from '../talent-profiles/application/talent-profile.tokens.js';
 import { TalentProfilesModule } from '../talent-profiles/talent-profiles.module.js';
 import {
+  BlockConversationHandler,
   ContactNotices,
   ConversationEvidence,
   ConversationViews,
@@ -159,6 +160,16 @@ const Views = Symbol('ConversationViews');
         uow: UnitOfWork,
         clock: Clock,
       ) => new WithdrawContactHandler(conversations, views, uow, clock),
+    },
+    {
+      provide: MESSAGING.Block,
+      inject: [MESSAGING.Conversations, Views, PLATFORM.UnitOfWork, PLATFORM.Clock],
+      useFactory: (
+        conversations: ConversationRepository,
+        views: ConversationViews,
+        uow: UnitOfWork,
+        clock: Clock,
+      ) => new BlockConversationHandler(conversations, views, uow, clock),
     },
     {
       provide: MESSAGING.MarkRead,

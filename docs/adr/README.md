@@ -46,3 +46,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-040](040-blocking-a-conversation.md)                               | Blocking a conversation                                              | Accepted                          |
 | [ADR-041](041-live-updates-over-server-sent-events.md)                  | Live updates over server-sent events                                 | Accepted                          |
 | [ADR-042](042-shareable-talent-pages.md)                                | Shareable talent pages                                               | Accepted                          |
+| [ADR-043](043-link-previews.md)                                         | Link previews                                                        | Accepted                          |

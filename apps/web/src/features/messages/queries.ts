@@ -2,14 +2,16 @@ import type { ConversationPage, ConversationSummary, MessagePage } from '@rt/con
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isApiError } from '../../shared/api/api-error';
 import { api } from '../../shared/api/client';
+import { pollEvery } from '../../shared/realtime/live-updates';
 
 /**
- * Delivery is polling for now (ADR-038). Queries only poll while the tab is visible, which is
- * TanStack Query's default, so a phone in a pocket stays quiet.
+ * Server events refetch these at once (ADR-041); polling is the safety net, quick while the
+ * stream is down and rare while it is up. Queries only poll while the tab is visible, which
+ * is TanStack Query's default, so a phone in a pocket stays quiet.
  */
-const THREAD_POLL_MS = 5_000;
-const LIST_POLL_MS = 20_000;
-const BADGE_POLL_MS = 45_000;
+const THREAD_POLL = pollEvery(5_000, 60_000);
+const LIST_POLL = pollEvery(20_000, 120_000);
+const BADGE_POLL = pollEvery(45_000, 180_000);
 
 export const messagesKey = ['messages'] as const;
 const listKey = [...messagesKey, 'list'] as const;
@@ -23,7 +25,7 @@ export function useMessagingUnread(enabled: boolean) {
     queryKey: unreadKey,
     queryFn: () => api.call('messaging.unread'),
     enabled,
-    refetchInterval: BADGE_POLL_MS,
+    refetchInterval: BADGE_POLL,
   });
 }
 
@@ -34,7 +36,7 @@ export function useConversations() {
       api.call('messaging.list', { query: pageParam ? { cursor: pageParam } : {} }),
     initialPageParam: '',
     getNextPageParam: (last: ConversationPage) => last.nextCursor ?? undefined,
-    refetchInterval: LIST_POLL_MS,
+    refetchInterval: LIST_POLL,
   });
 }
 
@@ -43,7 +45,7 @@ export function useConversation(id: string) {
     queryKey: conversationKey(id),
     queryFn: () => api.call('messaging.get', { params: { conversationId: id } }),
     retry: (failures, error) => !isApiError(error, 'NOT_FOUND') && failures < 2,
-    refetchInterval: THREAD_POLL_MS,
+    refetchInterval: THREAD_POLL,
   });
 }
 
@@ -59,7 +61,7 @@ export function useThread(id: string, enabled: boolean) {
     initialPageParam: '',
     getNextPageParam: (last: MessagePage) => last.nextCursor ?? undefined,
     enabled,
-    refetchInterval: THREAD_POLL_MS,
+    refetchInterval: THREAD_POLL,
   });
 }
 

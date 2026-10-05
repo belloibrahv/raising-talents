@@ -23,6 +23,7 @@ import { VerificationEvents } from '../agent-profiles/domain/verification-reques
 import { MESSAGING, type ContactNotices } from '../messaging/application/messaging.use-cases.js';
 import { ConversationEvents } from '../messaging/domain/conversation.js';
 import { MessagingModule } from '../messaging/messaging.module.js';
+import type { Realtime } from '../../platform/realtime/realtime.js';
 import { NOTIFICATIONS, Notifier, type NotificationLog } from './application/notifications.js';
 import { DrizzleNotificationLog } from './infrastructure/drizzle-notification-log.js';
 import { IdentityEvents } from '../identity/domain/identity.events.js';
@@ -91,6 +92,7 @@ import { NotificationsController } from './interface/http/notifications.controll
         PLATFORM.Config,
         PLATFORM.Clock,
         PLATFORM.Logger,
+        PLATFORM.Realtime,
       ],
       useFactory: (
         email: EmailSender,
@@ -103,6 +105,7 @@ import { NotificationsController } from './interface/http/notifications.controll
         config: AppConfig,
         clock: Clock,
         logger: Logger,
+        realtime: Realtime,
       ): ModuleEventHandlers => {
         const notifier = new Notifier(
           email,
@@ -116,6 +119,7 @@ import { NotificationsController } from './interface/http/notifications.controll
           config.SUPPORT_EMAIL,
           clock,
           logger,
+          realtime,
         );
         return {
           register: (dispatcher) => {

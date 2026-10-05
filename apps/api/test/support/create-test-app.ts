@@ -48,6 +48,7 @@ import { TAXONOMY } from '../../src/modules/taxonomy/application/taxonomy.tokens
 import { sampleTaxonomySource } from '../../src/modules/taxonomy/testing/sample-taxonomy.js';
 import { EventDispatcher } from '../../src/platform/outbox/event-dispatcher.js';
 import { PLATFORM } from '../../src/platform/platform.tokens.js';
+import { InMemoryRealtime } from '../../src/platform/realtime/realtime.js';
 import {
   FixedClock,
   InMemoryEventRecorder,
@@ -67,6 +68,7 @@ export interface TestApp {
   readonly email: CapturingEmailSender;
   readonly talentProfiles: InMemoryTalentProfileRepository;
   readonly agentProfiles: InMemoryAgentProfileRepository;
+  readonly realtime: InMemoryRealtime;
   readonly storage: InMemoryObjectStorage;
   readonly mediaAssets: InMemoryMediaAssetRepository;
   readonly video: FakeVideoProvider;
@@ -102,6 +104,7 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
   const email = new CapturingEmailSender();
   const talentProfiles = new InMemoryTalentProfileRepository(events);
   const agentProfiles = new InMemoryAgentProfileRepository(events);
+  const realtime = new InMemoryRealtime();
   const storage = new InMemoryObjectStorage();
   const mediaAssets = new InMemoryMediaAssetRepository(events);
   const video = new FakeVideoProvider();
@@ -118,6 +121,8 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
     .useValue(events)
     .overrideProvider(PLATFORM.RateLimiter)
     .useValue(new InMemoryRateLimiter())
+    .overrideProvider(PLATFORM.Realtime)
+    .useValue(realtime)
     .overrideProvider(PLATFORM.Redis)
     .useValue({ ping: async () => 'PONG', quit: async () => 'OK' })
     .overrideProvider(ACCOUNTS.Repository)
@@ -195,6 +200,7 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
     email,
     talentProfiles,
     agentProfiles,
+    realtime,
     storage,
     mediaAssets,
     video,

@@ -10,4 +10,5 @@ export const PLATFORM = {
   ErrorReporter: Symbol('ErrorReporter'),
   JobLock: Symbol('JobLock'),
   EmailSender: Symbol('EmailSender'),
+  Realtime: Symbol('Realtime'),
 } as const;

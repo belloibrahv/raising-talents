@@ -68,6 +68,10 @@ export function stubApi(routes: Record<string, Route>): Call[] {
     await Promise.resolve();
     const method = init?.method ?? 'GET';
     const path = new URL(url).pathname;
+    // Screens do not depend on the event stream; tests that do stub it themselves.
+    if (path === '/v1/me/events' && !routes[path] && !routes[`${method} ${path}`]) {
+      return new Response(null, { status: 204 });
+    }
     const call: Call = {
       method,
       path,

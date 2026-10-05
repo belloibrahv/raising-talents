@@ -19,6 +19,7 @@ import { useSession, useSignOut } from '../features/auth/use-auth';
 import { t } from '../i18n';
 import { NotificationBell } from '../features/notifications/NotificationBell';
 import { useMessagingUnread } from '../features/messages/queries';
+import { useLiveUpdates } from '../shared/realtime/live-updates';
 import { InstallCard } from '../shared/pwa/InstallCard';
 import { BrandMark } from '../shared/ui/BrandMark';
 import { PageSkeleton } from '../shared/ui/PageSkeleton';
@@ -40,6 +41,7 @@ export function AppLayout() {
   const staff = me?.role === 'moderator' || me?.role === 'admin';
   const talks = (me?.role === 'agent' || me?.role === 'talent') && !onboarding;
   const waiting = useMessagingUnread(talks).data?.unread ?? 0;
+  useLiveUpdates(me !== null);
   // A chat keeps the bottom of the screen for its message bar.
   // The install offer lives on the home screen only, so it never crowds a task.
   const onHome = useMatch('/home') !== null;

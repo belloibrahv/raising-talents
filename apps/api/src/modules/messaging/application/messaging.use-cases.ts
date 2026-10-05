@@ -22,6 +22,7 @@ import { newId } from '../../../platform/ids.js';
 import type { RateLimiter } from '../../../platform/rate-limit/rate-limiter.js';
 import { err, ok, type Result } from '../../../platform/result.js';
 import type { UnitOfWork } from '../../../platform/unit-of-work.js';
+import type { Realtime } from '../../../platform/realtime/realtime.js';
 import {
   Conversation,
   ConversationExistsError,
@@ -47,6 +48,7 @@ export const MESSAGING = {
   Notices: Symbol('ContactNotices'),
   Evidence: Symbol('ConversationEvidence'),
   Block: Symbol('BlockConversationHandler'),
+  Live: Symbol('ConversationLive'),
   Unblock: Symbol('UnblockConversationHandler'),
 } as const;
 
@@ -633,5 +635,22 @@ export class ConversationEvidence {
         .slice(-REPORT_EVIDENCE_MAX)
         .map((message) => ({ body: message.body, sentAt: message.sentAt })),
     };
+  }
+}
+
+/** Tells both people's open tabs that a conversation changed, after the write committed. */
+export class ConversationLive {
+  constructor(
+    private readonly conversations: ConversationRepository,
+    private readonly realtime: Realtime,
+  ) {}
+
+  async changed(conversationId: string): Promise<void> {
+    const conversation = await this.conversations.findById(conversationId);
+    if (!conversation) return;
+    await this.realtime.publish([conversation.agentId, conversation.talentId], {
+      type: 'conversation',
+      conversationId,
+    });
   }
 }

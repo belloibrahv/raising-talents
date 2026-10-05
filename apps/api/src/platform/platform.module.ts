@@ -23,6 +23,8 @@ import { AuthGuard } from './http/auth.guard.js';
 import { DrizzleEventRecorder } from './outbox/drizzle-event-recorder.js';
 import { PLATFORM } from './platform.tokens.js';
 import { RedisRateLimiter } from './rate-limit/redis-rate-limiter.js';
+import { RedisRealtime } from './realtime/realtime.js';
+import { RealtimeController } from './realtime/realtime.controller.js';
 import { NoopErrorReporter } from './observability/error-reporter.js';
 import { SentryErrorReporter } from './observability/sentry-error-reporter.js';
 import { flushTelemetry, isSentryEnabled } from './observability/telemetry.js';
@@ -34,10 +36,16 @@ class PlatformLifecycle implements OnApplicationShutdown {
   constructor(
     @Inject(DATABASE_HANDLE) private readonly database: DatabaseHandle,
     @Inject(PLATFORM.Redis) private readonly redis: Redis,
+    @Inject(PLATFORM.Realtime) private readonly realtime: { close?: () => Promise<void> },
   ) {}
 
   async onApplicationShutdown(): Promise<void> {
-    await Promise.allSettled([this.database.close(), this.redis.quit(), flushTelemetry()]);
+    await Promise.allSettled([
+      this.database.close(),
+      this.redis.quit(),
+      this.realtime.close?.(),
+      flushTelemetry(),
+    ]);
   }
 }
 
@@ -55,7 +63,7 @@ export class PlatformModule {
     const { config, logger } = options;
     return {
       module: PlatformModule,
-      controllers: [HealthController],
+      controllers: [HealthController, RealtimeController],
       providers: [
         { provide: PLATFORM.Config, useValue: config },
         { provide: PLATFORM.Logger, useValue: logger },
@@ -113,6 +121,11 @@ export class PlatformModule {
             new Redis(config.REDIS_URL, { maxRetriesPerRequest: 2, lazyConnect: true }),
         },
         {
+          provide: PLATFORM.Realtime,
+          inject: [PLATFORM.Redis, PLATFORM.Logger],
+          useFactory: (redis: Redis, log: Logger) => new RedisRealtime(redis, log),
+        },
+        {
           provide: PLATFORM.RateLimiter,
           inject: [PLATFORM.Redis],
           useFactory: (redis: Redis) => new RedisRateLimiter(redis),
@@ -149,6 +162,7 @@ export class PlatformModule {
         PLATFORM.EventRecorder,
         PLATFORM.Redis,
         PLATFORM.RateLimiter,
+        PLATFORM.Realtime,
         ACCESS_TOKENS.Issuer,
         ACCESS_TOKENS.Verifier,
         AuthGuard,

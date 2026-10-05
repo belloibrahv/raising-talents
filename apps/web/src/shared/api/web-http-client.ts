@@ -104,6 +104,30 @@ export class WebHttpClient {
     return options.schema.parse(await response.json()) as Parsed<TSchema>;
   }
 
+  /**
+   * Opens a long-lived authenticated stream, such as server-sent events (ADR-041). The
+   * caller reads the body and closes it with the signal. The token is checked and refreshed
+   * the same way as for any request; it is sent once, at the start.
+   */
+  async openStream(path: string, signal: AbortSignal): Promise<Response> {
+    if (!this.access || this.isNearExpiry()) await this.refreshOrThrow();
+    const open = () => {
+      const headers: Record<string, string> = { accept: 'text/event-stream' };
+      if (this.access) headers['authorization'] = `Bearer ${this.access.token}`;
+      return this.fetchImpl(`${this.options.baseUrl}${path}`, {
+        headers,
+        credentials: 'omit',
+        signal,
+      });
+    };
+    let response = await open();
+    if (response.status === 401) {
+      await this.refreshOrThrow();
+      response = await open();
+    }
+    return response;
+  }
+
   /** Every caller in this tab shares one refresh; the lock makes other tabs wait their turn. */
   refreshOnce(): Promise<MeResponse | null> {
     this.refreshInFlight ??= this.lock(REFRESH_LOCK, () => this.refresh()).finally(() => {

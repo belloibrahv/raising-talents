@@ -1,6 +1,7 @@
 import type { NotificationPage } from '@rt/contracts';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../shared/api/client';
+import { pollEvery } from '../../shared/realtime/live-updates';
 
 export const notificationsKey = ['notifications'] as const;
 const unreadKey = [...notificationsKey, 'unread'] as const;
@@ -11,7 +12,7 @@ export function useUnreadCount(enabled: boolean) {
     queryKey: unreadKey,
     queryFn: () => api.call('notifications.unread'),
     enabled,
-    refetchInterval: 60_000,
+    refetchInterval: pollEvery(60_000, 300_000),
   });
 }
 

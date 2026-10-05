@@ -5,6 +5,7 @@ import type { EventRecorder } from '../../platform/domain-event.js';
 import { PLATFORM } from '../../platform/platform.tokens.js';
 import type { RateLimiter } from '../../platform/rate-limit/rate-limiter.js';
 import type { UnitOfWork } from '../../platform/unit-of-work.js';
+import type { Realtime } from '../../platform/realtime/realtime.js';
 import type { AccountsFacade } from '../accounts/application/accounts.facade.js';
 import { ACCOUNTS } from '../accounts/application/accounts.tokens.js';
 import { AccountsModule } from '../accounts/accounts.module.js';
@@ -19,6 +20,7 @@ import { TalentProfilesModule } from '../talent-profiles/talent-profiles.module.
 import {
   BlockConversationHandler,
   ContactNotices,
+  ConversationLive,
   ConversationEvidence,
   ConversationViews,
   ConversationWithTalentQuery,
@@ -160,6 +162,12 @@ const Views = Symbol('ConversationViews');
         uow: UnitOfWork,
         clock: Clock,
       ) => new WithdrawContactHandler(conversations, views, uow, clock),
+    },
+    {
+      provide: MESSAGING.Live,
+      inject: [MESSAGING.Conversations, PLATFORM.Realtime],
+      useFactory: (conversations: ConversationRepository, realtime: Realtime) =>
+        new ConversationLive(conversations, realtime),
     },
     {
       provide: MESSAGING.Block,

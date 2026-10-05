@@ -189,52 +189,81 @@ export function NotificationsPage() {
           description={t('notifications.emptyBody')}
         />
       ) : null}
-      <ul className="m-0 grid list-none gap-2 p-0">
-        {items.map((notice) => {
-          const shown = show(notice);
-          const Icon = shown.icon;
-          return (
-            <li key={notice.id}>
-              <Link
-                to={shown.to}
-                className={cn(
-                  'group flex items-start gap-3 rounded-2xl border p-4 text-card-foreground no-underline transition-colors hover:border-input',
-                  notice.read ? 'bg-card' : 'border-primary/30 bg-accent/60',
-                )}
-              >
-                <span
-                  className={cn(
-                    'grid size-10 shrink-0 place-items-center rounded-xl',
-                    TONE[shown.tone],
-                  )}
-                >
-                  <Icon aria-hidden="true" className="size-5" />
-                </span>
-                <span className="grid min-w-0 flex-1 gap-0.5">
-                  <span className="flex items-start gap-2 font-semibold">
-                    {notice.read ? null : (
-                      <>
+      {(
+        [
+          { key: 'new', title: t('notifications.groupNew'), items: items.filter((n) => !n.read) },
+          {
+            key: 'earlier',
+            title: t('notifications.groupEarlier'),
+            items: items.filter((n) => n.read),
+          },
+        ] as const
+      ).map((group) =>
+        group.items.length === 0 ? null : (
+          <section key={group.key} className="stack gap-2" aria-labelledby={`group-${group.key}`}>
+            <h2
+              id={`group-${group.key}`}
+              className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
+            >
+              {group.title}
+            </h2>
+            <ul className="m-0 list-none divide-y overflow-hidden rounded-2xl border bg-card p-0 shadow-xs">
+              {group.items.map((notice) => {
+                const shown = show(notice);
+                const Icon = shown.icon;
+                return (
+                  <li key={notice.id}>
+                    <Link
+                      to={shown.to}
+                      className={cn(
+                        'group flex items-start gap-3 p-4 text-card-foreground no-underline transition-colors hover:bg-accent/60 sm:px-5',
+                        notice.read ? null : 'bg-spotlight/10',
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          'grid size-10 shrink-0 place-items-center rounded-full',
+                          TONE[shown.tone],
+                        )}
+                      >
+                        <Icon aria-hidden="true" className="size-5" />
+                      </span>
+                      <span className="grid min-w-0 flex-1 gap-0.5">
+                        <span
+                          className={cn(
+                            'flex items-start gap-2',
+                            notice.read ? 'font-medium' : 'font-bold',
+                          )}
+                        >
+                          {notice.read ? null : (
+                            <span className="sr-only">{`${t('notifications.unread')} `}</span>
+                          )}
+                          {shown.title}
+                        </span>
+                        <span className="text-sm text-muted-foreground">{shown.body}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {ago(notice.createdAt)}
+                        </span>
+                      </span>
+                      {notice.read ? (
+                        <ChevronRight
+                          aria-hidden="true"
+                          className="mt-2 size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+                        />
+                      ) : (
                         <span
                           aria-hidden="true"
-                          className="mt-2 size-2 shrink-0 rounded-full bg-destructive"
+                          className="mt-2 size-2.5 shrink-0 rounded-full bg-destructive"
                         />
-                        <span className="sr-only">{`${t('notifications.unread')} `}</span>
-                      </>
-                    )}
-                    {shown.title}
-                  </span>
-                  <span className="text-sm text-muted-foreground">{shown.body}</span>
-                  <span className="text-xs text-muted-foreground">{ago(notice.createdAt)}</span>
-                </span>
-                <ChevronRight
-                  aria-hidden="true"
-                  className="mt-2 size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
-                />
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        ),
+      )}
       {notifications.hasNextPage ? (
         <Button
           variant="secondary"

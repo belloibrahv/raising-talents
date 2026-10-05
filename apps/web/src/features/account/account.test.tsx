@@ -75,7 +75,8 @@ describe('account page', () => {
     });
     renderAt('/account');
     const user = userEvent.setup({ delay: null });
-    await user.click(await screen.findByRole('button', { name: 'Delete my account' }));
+    await user.click(await screen.findByRole('button', { name: 'Delete account' }));
+    await user.click(screen.getByRole('button', { name: 'Delete my account' }));
     expect(screen.getByLabelText('Your password')).toHaveAttribute('aria-invalid', 'true');
     expect(calls.some((call) => call.path === '/v1/me/deletion')).toBe(false);
     await expectNoAxeViolations();
@@ -101,7 +102,7 @@ describe('account page', () => {
     await waitFor(() => {
       expect(screen.queryByText(/will be deleted on/)).toBeNull();
     });
-    expect(await screen.findByRole('button', { name: 'Delete my account' })).toBeVisible();
+    expect(await screen.findByRole('button', { name: 'Delete account' })).toBeVisible();
   });
 
   it('shows the banner on any screen after signing back in during the grace period', async () => {

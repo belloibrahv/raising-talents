@@ -49,8 +49,10 @@ describe('notification inbox', () => {
     await user.click(await screen.findByRole('link', { name: 'Notifications, 1 unread' }));
 
     await screen.findByRole('heading', { level: 1, name: 'Notifications' });
-    const list = await within(screen.getByRole('main')).findByRole('list');
-    const [first, second] = within(list).getAllByRole('link');
+    const fresh = await screen.findByRole('region', { name: 'New' });
+    const earlier = screen.getByRole('region', { name: 'Earlier' });
+    const [first] = within(fresh).getAllByRole('link');
+    const [second] = within(earlier).getAllByRole('link');
     expect(first).toHaveTextContent('New: Your portfolio video was not approved');
     expect(first).toHaveTextContent('This video breaks the Community Guidelines');
     expect(first).toHaveTextContent('2 hours ago');

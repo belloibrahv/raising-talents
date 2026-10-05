@@ -662,6 +662,18 @@
   "account": {
     "title": "Your account",
     "signedInAs": "Signed in as {email}",
+    "summary": "Your account",
+    "memberSince": "Member since {date}",
+    "security": "Sign-in and security",
+    "privacy": "Privacy and data",
+    "deleteStart": "Delete account",
+    "deleteCancel": "Cancel",
+    "role": {
+      "talent": "Talent",
+      "agent": "Agent",
+      "moderator": "Moderator",
+      "admin": "Admin"
+    },
     "dataTitle": "Your data",
     "dataBody": "Download everything Raising Talents holds about you: your account, profile, portfolio and files, as one JSON file.",
     "download": "Download my data",
@@ -712,6 +724,12 @@
     "noteHint": "Only you can see this.",
     "saveNote": "Save note",
     "noteSaved": "Note saved.",
+    "open": "Open {name}'s profile",
+    "editNote": "Edit your note about {name}",
+    "addNote": "Add a private note about {name}",
+    "addNoteShort": "Add a note",
+    "yourNote": "Your note",
+    "cancel": "Cancel",
     "remove": "Remove",
     "removeLabel": "Remove {name} from your shortlist",
     "removed": "{name} removed from your shortlist.",
@@ -719,6 +737,8 @@
     "allHiddenBody": "They stay on your shortlist and come back here if their profiles return."
   },
   "security": {
+    "update": "Update",
+    "cancel": "Cancel",
     "passwordTitle": "Password",
     "passwordBody": "Change it whenever you like. Every other device is signed out, and we email you to confirm.",
     "currentPassword": "Current password",
@@ -745,6 +765,8 @@
     "loadMore": "Show older",
     "unread": "New:",
     "justNow": "just now",
+    "groupNew": "New",
+    "groupEarlier": "Earlier",
     "file": {
       "avatar": "profile photo",
       "photo": "portfolio photo",

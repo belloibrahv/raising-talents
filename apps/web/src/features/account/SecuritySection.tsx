@@ -1,7 +1,7 @@
 import { PASSWORD_MIN_LENGTH, type SignedInDevice } from '@rt/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { KeyRound, Laptop, LogOut, Smartphone } from 'lucide-react';
-import { useState, type SubmitEvent } from 'react';
+import { KeyRound, Laptop, LogOut, MonitorSmartphone, Smartphone } from 'lucide-react';
+import { useRef, useState, type SubmitEvent } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
@@ -32,6 +32,8 @@ type Errors = Partial<Record<'current' | 'next', string>>;
 
 function ChangePasswordCard() {
   const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const toggle = useRef<HTMLButtonElement>(null);
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [errors, setErrors] = useState<Errors>({});
@@ -44,6 +46,8 @@ function ChangePasswordCard() {
     onSuccess: async () => {
       setCurrent('');
       setNext('');
+      setOpen(false);
+      requestAnimationFrame(() => toggle.current?.focus());
       await queryClient.invalidateQueries({ queryKey: devicesKey });
     },
     onError: (error) => {
@@ -65,43 +69,75 @@ function ChangePasswordCard() {
     (isApiError(change.error, 'INVALID_CREDENTIALS') || isApiError(change.error, 'WEAK_PASSWORD'));
   return (
     <section className={cardClass} aria-labelledby="password-heading">
-      <h2 id="password-heading" className="flex items-center gap-2">
-        <KeyRound aria-hidden="true" className="size-5" />
-        {t('security.passwordTitle')}
-      </h2>
-      <p className="text-muted-foreground">{t('security.passwordBody')}</p>
-      <form ref={form} className="stack" onSubmit={submit} noValidate>
-        <FormMessage tone="success">
-          {change.isSuccess ? t('security.passwordChanged') : null}
-        </FormMessage>
-        <FormMessage tone="error">
-          {change.error && !fieldError ? errorMessage(change.error) : null}
-        </FormMessage>
-        <PasswordField
-          label={t('security.currentPassword')}
-          value={current}
-          onChange={(event) => {
-            setCurrent(event.target.value);
-          }}
-          error={errors.current}
-          autoComplete="current-password"
-          required
-        />
-        <PasswordField
-          label={t('security.newPassword')}
-          hint={t('signUp.passwordHint')}
-          value={next}
-          onChange={(event) => {
-            setNext(event.target.value);
-          }}
-          error={errors.next}
-          autoComplete="new-password"
-          required
-        />
-        <Button type="submit" variant="secondary" loading={change.isPending}>
-          {t('security.changePassword')}
-        </Button>
-      </form>
+      <div className="flex items-start gap-4">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-muted">
+          <KeyRound aria-hidden="true" className="size-5" />
+        </span>
+        <div className="grid flex-1 gap-1">
+          <h2 id="password-heading">{t('security.passwordTitle')}</h2>
+          <p className="text-sm text-muted-foreground">{t('security.passwordBody')}</p>
+        </div>
+        {open ? null : (
+          <Button
+            ref={toggle}
+            variant="secondary"
+            size="sm"
+            aria-expanded={false}
+            onClick={() => {
+              // A fresh start: no message left over from an earlier change.
+              change.reset();
+              setOpen(true);
+            }}
+          >
+            {t('security.update')}
+          </Button>
+        )}
+      </div>
+      <FormMessage tone="success">
+        {change.isSuccess && !open ? t('security.passwordChanged') : null}
+      </FormMessage>
+      {open ? (
+        <form ref={form} className="stack border-t pt-4" onSubmit={submit} noValidate>
+          <FormMessage tone="error">
+            {change.error && !fieldError ? errorMessage(change.error) : null}
+          </FormMessage>
+          <PasswordField
+            label={t('security.currentPassword')}
+            value={current}
+            onChange={(event) => {
+              setCurrent(event.target.value);
+            }}
+            error={errors.current}
+            autoComplete="current-password"
+            required
+          />
+          <PasswordField
+            label={t('security.newPassword')}
+            hint={t('signUp.passwordHint')}
+            value={next}
+            onChange={(event) => {
+              setNext(event.target.value);
+            }}
+            error={errors.next}
+            autoComplete="new-password"
+            required
+          />
+          <div className="row gap-2">
+            <Button type="submit" loading={change.isPending}>
+              {t('security.changePassword')}
+            </Button>
+            <Button
+              variant="text"
+              onClick={() => {
+                setOpen(false);
+                setErrors({});
+              }}
+            >
+              {t('security.cancel')}
+            </Button>
+          </div>
+        </form>
+      ) : null}
     </section>
   );
 }
@@ -121,8 +157,15 @@ function DevicesCard() {
   const others = items.filter((item) => !item.current);
   return (
     <section className={cardClass} aria-labelledby="devices-heading">
-      <h2 id="devices-heading">{t('security.devicesTitle')}</h2>
-      <p className="text-muted-foreground">{t('security.devicesBody')}</p>
+      <div className="flex items-start gap-4">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-muted">
+          <MonitorSmartphone aria-hidden="true" className="size-5" />
+        </span>
+        <div className="grid flex-1 gap-1">
+          <h2 id="devices-heading">{t('security.devicesTitle')}</h2>
+          <p className="text-sm text-muted-foreground">{t('security.devicesBody')}</p>
+        </div>
+      </div>
       <FormMessage tone="error">
         {devices.error
           ? errorMessage(devices.error)

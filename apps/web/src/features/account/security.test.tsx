@@ -77,6 +77,7 @@ describe('account security', () => {
     renderAt('/account');
     const user = userEvent.setup({ delay: null });
     const card = await screen.findByRole('region', { name: 'Password' });
+    await user.click(within(card).getByRole('button', { name: 'Update' }));
     await user.click(within(card).getByRole('button', { name: 'Change password' }));
     expect(within(card).getByLabelText('Current password')).toHaveAccessibleDescription(
       'Enter your current password.',
@@ -98,6 +99,8 @@ describe('account security', () => {
     expect(
       await within(card).findByText('Password changed. Other devices are signed out.'),
     ).toBeVisible();
-    expect(within(card).getByLabelText('New password')).toHaveValue('');
+    // The form folds away again once the password has changed.
+    expect(within(card).queryByLabelText('New password')).toBeNull();
+    expect(within(card).getByRole('button', { name: 'Update' })).toBeVisible();
   });
 });

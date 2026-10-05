@@ -3,6 +3,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthGuard } from '../http/auth.guard.js';
 import type { Principal } from '../http/authenticated-request.js';
 import { CurrentPrincipal } from '../http/current-principal.decorator.js';
+import type { AppConfig } from '../../config/env.js';
 import { PLATFORM } from '../platform.tokens.js';
 import type { Realtime } from './realtime.js';
 
@@ -16,7 +17,10 @@ const HEARTBEAT_MS = 15_000;
 @Controller('v1/me/events')
 @UseGuards(AuthGuard)
 export class RealtimeController {
-  constructor(@Inject(PLATFORM.Realtime) private readonly realtime: Realtime) {}
+  constructor(
+    @Inject(PLATFORM.Realtime) private readonly realtime: Realtime,
+    @Inject(PLATFORM.Config) private readonly config: AppConfig,
+  ) {}
 
   @Get()
   async stream(
@@ -40,11 +44,27 @@ export class RealtimeController {
     const send = (event: unknown) => {
       raw.write(`data: ${JSON.stringify(event)}\n\n`);
     };
-    const stop = await this.realtime.subscribe(principal.userId, send);
+    const state = { closed: false };
+    let stop: (() => void) | null = null;
     const heartbeat = setInterval(() => raw.write(': ping\n\n'), HEARTBEAT_MS);
-    request.raw.on('close', () => {
+    // A stream lives no longer than the token that opened it, so a signed-out or suspended
+    // person stops hearing anything; the client reconnects with a fresh token.
+    const expiry = setTimeout(() => raw.end(), this.config.ACCESS_TOKEN_TTL_SECONDS * 1000);
+    const cleanUp = () => {
+      state.closed = true;
       clearInterval(heartbeat);
-      stop();
-    });
+      clearTimeout(expiry);
+      stop?.();
+    };
+    request.raw.on('close', cleanUp);
+    try {
+      const unsubscribe = await this.realtime.subscribe(principal.userId, send);
+      // The tab may have gone while subscribing.
+      if (state.closed) unsubscribe();
+      else stop = unsubscribe;
+    } catch {
+      // Redis is unavailable: end the stream and let the client retry; polling covers the gap.
+      raw.end();
+    }
   }
 }

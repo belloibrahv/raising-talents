@@ -16,6 +16,7 @@ import {
 } from './emails.js';
 import { newId } from '../../../platform/ids.js';
 import type { Inbox, NoticeContent } from './inbox.js';
+import type { Realtime } from '../../../platform/realtime/realtime.js';
 
 export const NOTIFICATIONS = {
   Log: Symbol('NotificationLog'),
@@ -95,6 +96,8 @@ export class Notifier {
     private readonly supportEmail: string,
     private readonly clock: Clock,
     private readonly logger: Logger,
+    /** Nudges the person's open tabs to refresh the bell (ADR-041). */
+    private readonly realtime?: Realtime,
   ) {}
 
   /** A moderator approved or rejected held media. Instant scan results are shown in the app instead. */
@@ -250,6 +253,7 @@ export class Notifier {
         createdAt: event.occurredAt,
         readAt: null,
       });
+      await this.realtime?.publish([userId], { type: 'notifications' });
     }
     if (!build || (await this.log.wasSent(key))) return;
     const recipient = await this.recipients.findSummaryById(userId);

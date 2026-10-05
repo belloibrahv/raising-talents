@@ -754,6 +754,16 @@ export const endpoints = {
     errors: [],
     tag: 'Me',
   }),
+  'realtime.events': define({
+    method: 'GET',
+    path: '/v1/me/events',
+    summary:
+      'Server-sent events: data lines are { type: "conversation", conversationId } or { type: "notifications" }. Refetch on each',
+    auth: true,
+    successStatus: 200,
+    errors: [],
+    tag: 'Me',
+  }),
   'notifications.unread': define({
     method: 'GET',
     path: '/v1/me/notifications/unread',

@@ -162,6 +162,11 @@ describe('Contact requests and chat over HTTP (ADR-038)', () => {
     });
     expect(reply.statusCode).toBe(201);
     expect(reply.json<Message>()).toMatchObject({ mine: true });
+    // Both people's open tabs hear about it at once (ADR-041).
+    expect(testApp.realtime.published.at(-1)).toEqual({
+      userIds: [agentId, expect.any(String) as string],
+      event: { type: 'conversation', conversationId: conversation.id },
+    });
 
     const list = (await call('GET', '/v1/me/conversations', agent)).json<ConversationPage>();
     expect(list.items[0]).toMatchObject({ id: conversation.id, unread: 1 });
@@ -190,6 +195,11 @@ describe('Contact requests and chat over HTTP (ADR-038)', () => {
         ],
       }),
     ]);
+  });
+
+  it('opens the event stream only for a signed-in person', async () => {
+    const response = await testApp.app.inject({ method: 'GET', url: '/v1/me/events' });
+    expect(response.statusCode).toBe(401);
   });
 
   it('keeps other people out with the same 404 as a missing conversation', async () => {

@@ -5115,6 +5115,65 @@
         }
       }
     },
+    "/v1/me/events": {
+      "get": {
+        "operationId": "realtime_events",
+        "summary": "Server-sent events: data lines are { type: \"conversation\", conversationId } or { type: \"notifications\" }. Refetch on each",
+        "tags": [
+          "Me"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/me/notifications/unread": {
       "get": {
         "operationId": "notifications_unread",

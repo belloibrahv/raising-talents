@@ -36,6 +36,7 @@ import {
   MESSAGING,
   type ConversationWithTalentQuery,
   type BlockConversationHandler,
+  type ConversationLive,
   type GetConversationQuery,
   type ListConversationsQuery,
   type ListMessagesQuery,
@@ -62,7 +63,14 @@ export class MessagingController {
     @Inject(MESSAGING.MarkRead) private readonly markRead: MarkConversationReadHandler,
     @Inject(MESSAGING.Unread) private readonly unreadCount: MessagingUnreadQuery,
     @Inject(MESSAGING.Block) private readonly blocking: BlockConversationHandler,
+    @Inject(MESSAGING.Live) private readonly live: ConversationLive,
   ) {}
+
+  /** After a successful write: both people's open tabs refetch (ADR-041). */
+  private async announce<T>(conversationId: string, value: T): Promise<T> {
+    await this.live.changed(conversationId);
+    return value;
+  }
 
   @Post('me/conversations/:conversationId/block')
   @HttpCode(200)
@@ -70,7 +78,7 @@ export class MessagingController {
     @CurrentPrincipal() principal: Principal,
     @Param('conversationId', ParseUUIDPipe) id: string,
   ): Promise<ConversationSummary> {
-    return unwrap(await this.blocking.execute(principal.userId, id, true));
+    return this.announce(id, unwrap(await this.blocking.execute(principal.userId, id, true)));
   }
 
   @Delete('me/conversations/:conversationId/block')
@@ -79,7 +87,7 @@ export class MessagingController {
     @CurrentPrincipal() principal: Principal,
     @Param('conversationId', ParseUUIDPipe) id: string,
   ): Promise<ConversationSummary> {
-    return unwrap(await this.blocking.execute(principal.userId, id, false));
+    return this.announce(id, unwrap(await this.blocking.execute(principal.userId, id, false)));
   }
 
   @Post('talents/:handle/contact')
@@ -89,7 +97,8 @@ export class MessagingController {
     @Param('handle') handle: string,
     @Body(body(requestContactSchema)) input: RequestContact,
   ): Promise<ConversationSummary> {
-    return unwrap(await this.requestContact.execute(principal.userId, handle, input));
+    const summary = unwrap(await this.requestContact.execute(principal.userId, handle, input));
+    return this.announce(summary.id, summary);
   }
 
   @Get('me/conversations')
@@ -138,7 +147,7 @@ export class MessagingController {
     @Param('conversationId', ParseUUIDPipe) id: string,
     @Body(body(sendMessageSchema)) input: SendMessage,
   ): Promise<Message> {
-    return unwrap(await this.sendMessage.execute(principal.userId, id, input));
+    return this.announce(id, unwrap(await this.sendMessage.execute(principal.userId, id, input)));
   }
 
   @Post('me/conversations/:conversationId/response')
@@ -148,7 +157,10 @@ export class MessagingController {
     @Param('conversationId', ParseUUIDPipe) id: string,
     @Body(body(contactResponseSchema)) input: ContactResponse,
   ): Promise<ConversationSummary> {
-    return unwrap(await this.respondTo.execute(principal.userId, id, input.decision === 'accept'));
+    return this.announce(
+      id,
+      unwrap(await this.respondTo.execute(principal.userId, id, input.decision === 'accept')),
+    );
   }
 
   @Post('me/conversations/:conversationId/withdraw')
@@ -157,7 +169,7 @@ export class MessagingController {
     @CurrentPrincipal() principal: Principal,
     @Param('conversationId', ParseUUIDPipe) id: string,
   ): Promise<ConversationSummary> {
-    return unwrap(await this.withdrawRequest.execute(principal.userId, id));
+    return this.announce(id, unwrap(await this.withdrawRequest.execute(principal.userId, id)));
   }
 
   @Post('me/conversations/:conversationId/read')
@@ -167,5 +179,6 @@ export class MessagingController {
     @Param('conversationId', ParseUUIDPipe) id: string,
   ): Promise<void> {
     unwrap(await this.markRead.execute(principal.userId, id));
+    await this.live.changed(id);
   }
 }

@@ -54,7 +54,7 @@ unread messages.
 - A request withdrawn before its event is delivered notifies nobody.
 - Each message is not emailed. The badge covers it; a digest can come later.
 
-**Delivery** is polling for now. The web app refreshes the open thread every few seconds and
+**Delivery** was polling at first; ADR-041 adds server-sent events, with polling kept as the fallback. The web app refreshes the open thread every few seconds and
 the list less often, and only while the page is visible. The socket in ADR-009 comes later
 without changing the API: it only tells clients to refetch.
 

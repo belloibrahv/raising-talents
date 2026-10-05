@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { Download, TriangleAlert } from 'lucide-react';
-import { useState, type SubmitEvent } from 'react';
+import { useRef, useState, type SubmitEvent } from 'react';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { isApiError } from '../../shared/api/api-error';
@@ -111,6 +111,7 @@ export function AccountPage() {
 
 function DeleteAccount() {
   const [open, setOpen] = useState(false);
+  const toggle = useRef<HTMLButtonElement>(null);
   const [password, setPassword] = useState('');
   const [confirmed, setConfirmed] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<'password' | 'confirm', string>>>({});
@@ -155,11 +156,13 @@ function DeleteAccount() {
         </div>
         {open ? null : (
           <Button
+            ref={toggle}
             variant="secondary"
             size="sm"
             className="text-destructive"
             aria-expanded={false}
             onClick={() => {
+              remove.reset();
               setOpen(true);
             }}
           >

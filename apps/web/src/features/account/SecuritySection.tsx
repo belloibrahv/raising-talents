@@ -1,7 +1,7 @@
 import { PASSWORD_MIN_LENGTH, type SignedInDevice } from '@rt/contracts';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { KeyRound, Laptop, LogOut, MonitorSmartphone, Smartphone } from 'lucide-react';
-import { useState, type SubmitEvent } from 'react';
+import { useRef, useState, type SubmitEvent } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
@@ -33,6 +33,7 @@ type Errors = Partial<Record<'current' | 'next', string>>;
 function ChangePasswordCard() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const toggle = useRef<HTMLButtonElement>(null);
   const [current, setCurrent] = useState('');
   const [next, setNext] = useState('');
   const [errors, setErrors] = useState<Errors>({});
@@ -46,6 +47,7 @@ function ChangePasswordCard() {
       setCurrent('');
       setNext('');
       setOpen(false);
+      requestAnimationFrame(() => toggle.current?.focus());
       await queryClient.invalidateQueries({ queryKey: devicesKey });
     },
     onError: (error) => {
@@ -77,10 +79,13 @@ function ChangePasswordCard() {
         </div>
         {open ? null : (
           <Button
+            ref={toggle}
             variant="secondary"
             size="sm"
             aria-expanded={false}
             onClick={() => {
+              // A fresh start: no message left over from an earlier change.
+              change.reset();
               setOpen(true);
             }}
           >

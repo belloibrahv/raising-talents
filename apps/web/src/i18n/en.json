@@ -667,7 +667,7 @@
     "security": "Sign-in and security",
     "privacy": "Privacy and data",
     "deleteStart": "Delete account",
-    "keep": "Cancel",
+    "deleteCancel": "Cancel",
     "role": {
       "talent": "Talent",
       "agent": "Agent",

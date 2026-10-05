@@ -192,6 +192,7 @@ function SavedTalent({
               size="sm"
               onClick={() => {
                 setNote(entry.note);
+                save.reset();
                 setEditing(false);
               }}
             >
@@ -207,6 +208,8 @@ function SavedTalent({
               className="w-full cursor-pointer rounded-xl bg-spotlight/15 p-3 text-left text-sm transition-colors hover:bg-spotlight/25"
               aria-label={t('shortlist.editNote', { name: talent.displayName })}
               onClick={() => {
+                save.reset();
+                remove.reset();
                 setEditing(true);
               }}
             >
@@ -223,6 +226,8 @@ function SavedTalent({
               className="w-full"
               aria-label={t('shortlist.addNote', { name: talent.displayName })}
               onClick={() => {
+                save.reset();
+                remove.reset();
                 setEditing(true);
               }}
             >

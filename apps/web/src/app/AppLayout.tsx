@@ -41,7 +41,8 @@ export function AppLayout() {
   const talks = (me?.role === 'agent' || me?.role === 'talent') && !onboarding;
   const waiting = useMessagingUnread(talks).data?.unread ?? 0;
   // A chat keeps the bottom of the screen for its message bar.
-  const inChat = useMatch('/messages/:conversationId') !== null;
+  // The install offer lives on the home screen only, so it never crowds a task.
+  const onHome = useMatch('/home') !== null;
   const destinations: Destination[] = [
     ...(onboarding ? [] : [{ to: '/home', label: t('nav.home'), icon: House }]),
     ...(staff ? [{ to: '/moderation', label: t('nav.moderation'), icon: ShieldCheck }] : []),
@@ -145,7 +146,7 @@ export function AppLayout() {
       <Suspense fallback={<PageSkeleton />}>
         <Outlet />
       </Suspense>
-      {onboarding || inChat ? null : (
+      {onboarding || !onHome ? null : (
         <aside className="mx-auto w-full max-w-xl px-4 pb-28 md:pb-10">
           <InstallCard />
         </aside>

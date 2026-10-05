@@ -101,9 +101,14 @@ describe('shortlist', () => {
         name: 'Shortlist',
       }),
     ).toHaveAttribute('aria-current', 'page');
+    expect(within(article).getByText('Strong live vocals')).toBeVisible();
+    await expectNoAxeViolations();
+
+    await user.click(
+      within(article).getByRole('button', { name: 'Edit your note about Ada Nwosu' }),
+    );
     const note = within(article).getByLabelText('Private note about Ada Nwosu');
     expect(note).toHaveValue('Strong live vocals');
-    await expectNoAxeViolations();
 
     await user.clear(note);
     await user.type(note, 'Call after the showcase');

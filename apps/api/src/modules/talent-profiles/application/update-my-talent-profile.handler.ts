@@ -1,4 +1,5 @@
 import type { MyTalentProfile } from '@rt/contracts';
+import { randomBytes } from 'node:crypto';
 import type { Clock } from '../../../platform/clock.js';
 import type { DomainError } from '../../../platform/domain-error.js';
 import { err, ok, type Result } from '../../../platform/result.js';
@@ -22,6 +23,9 @@ export interface UpdateMyTalentProfileCommand {
 }
 
 /** Saves one onboarding step (or any later edit). Creates the profile on the first save. */
+/** Eight URL-safe characters: 48 random bits, so codes cannot be guessed or walked. */
+const newShareCode = (): string => randomBytes(6).toString('base64url');
+
 export class UpdateMyTalentProfileHandler {
   constructor(
     private readonly profiles: TalentProfileRepository,
@@ -71,7 +75,12 @@ export class UpdateMyTalentProfileHandler {
           return err(TalentProfileErrors.handleTaken(command.patch.handle));
         }
 
-        const applied = profile.apply(command.patch, now);
+        // The first time the link is turned on, it gets a code of its own (ADR-042).
+        const patch =
+          command.patch.publicLink && !profile.snapshot().shareCode
+            ? { ...command.patch, shareCode: newShareCode() }
+            : command.patch;
+        const applied = profile.apply(patch, now);
         if (!applied.ok) return applied;
 
         const props = profile.snapshot();

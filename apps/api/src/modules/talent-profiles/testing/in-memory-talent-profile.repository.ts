@@ -20,6 +20,11 @@ export class InMemoryTalentProfileRepository implements TalentProfileRepository 
     return row ? TalentProfile.restore(row) : null;
   }
 
+  async findByShareCode(code: string): Promise<TalentProfile | null> {
+    const found = [...this.rows.values()].find((props) => props.shareCode === code);
+    return found ? TalentProfile.restore(found) : null;
+  }
+
   async handleExists(handle: string): Promise<boolean> {
     return [...this.rows.values()].some((candidate) => candidate.handle === handle);
   }

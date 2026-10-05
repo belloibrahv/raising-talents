@@ -23,6 +23,7 @@ const talentProfile = {
   gender: null,
   genderSearchable: false,
   publicLink: false,
+  shareCode: null,
   avatarMediaId: null,
   avatarUrls: null,
   isComplete: true,

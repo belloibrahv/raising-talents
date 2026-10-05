@@ -37,6 +37,7 @@ export const profiles = talentSchema.table(
     gender: genderEnum('gender'),
     genderSearchable: boolean('gender_searchable').notNull().default(false),
     publicLink: boolean('public_link').notNull().default(false),
+    shareCode: text('share_code'),
     avatarMediaId: uuid('avatar_media_id'),
     // Category-specific fields (height, playing position), validated per category once the list is agreed.
     attributes: jsonb('attributes').$type<Record<string, unknown>>().notNull().default({}),
@@ -49,6 +50,7 @@ export const profiles = talentSchema.table(
   },
   (table) => [
     uniqueIndex('profiles_handle_unique').on(table.handle),
+    uniqueIndex('profiles_share_code_unique').on(table.shareCode),
     index('profiles_complete_category_idx')
       .on(table.categorySlug)
       .where(sql`is_complete`),

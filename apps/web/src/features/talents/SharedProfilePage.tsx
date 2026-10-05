@@ -9,6 +9,7 @@ import { isApiError } from '../../shared/api/api-error';
 import { api } from '../../shared/api/client';
 import { VideoPlayer } from '../../shared/media/VideoPlayer';
 import { BrandMark } from '../../shared/ui/BrandMark';
+import { Button } from '../../shared/ui/Button';
 import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
 
 /**
@@ -16,11 +17,13 @@ import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
  * best advert for the product, so it ends by inviting both kinds of visitor in.
  */
 export function SharedProfilePage() {
-  const { handle = '' } = useParams();
+  const { code = '' } = useParams();
   const heading = useRef<HTMLHeadingElement>(null);
   const page = useQuery({
-    queryKey: ['shared', handle],
-    queryFn: () => api.call('talents.shared', { params: { handle } }),
+    queryKey: ['shared', code],
+    // A link without its code (or an old one) has nothing to load.
+    enabled: code !== '',
+    queryFn: () => api.call('talents.shared', { params: { code } }),
     retry: (failures, error) => !isApiError(error, 'NOT_FOUND') && failures < 2,
   });
   const talent = page.data;
@@ -31,7 +34,9 @@ export function SharedProfilePage() {
     heading.current?.focus();
   }, [talent]);
 
-  if (page.isPending) return <FullScreenStatus />;
+  if (page.isPending && code !== '') return <FullScreenStatus />;
+  // A failure that is not "not found" is ours, not the visitor's: offer to try again.
+  const failed = page.isError && !isApiError(page.error, 'NOT_FOUND');
 
   return (
     <div className="min-h-dvh bg-background text-foreground">
@@ -57,9 +62,20 @@ export function SharedProfilePage() {
         {!talent ? (
           <section className="grid justify-items-center gap-4 py-20 text-center">
             <h1 ref={heading} tabIndex={-1} className="text-3xl font-bold">
-              {t('shared.notAvailable')}
+              {failed ? t('shared.failed') : t('shared.notAvailable')}
             </h1>
-            <p className="max-w-md text-muted-foreground">{t('shared.notAvailableBody')}</p>
+            <p className="max-w-md text-muted-foreground">
+              {failed ? t('shared.failedBody') : t('shared.notAvailableBody')}
+            </p>
+            {failed ? (
+              <Button
+                onClick={() => {
+                  void page.refetch();
+                }}
+              >
+                {t('common.tryAgain')}
+              </Button>
+            ) : null}
             <Link
               to="/welcome"
               className={cn(buttonVariants({ variant: 'outline' }), 'no-underline')}

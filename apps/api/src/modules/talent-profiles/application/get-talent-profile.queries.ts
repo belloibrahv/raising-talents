@@ -115,7 +115,7 @@ export class TalentDirectory {
    * The page anyone with the link can see (ADR-042): only for a complete, public profile
    * whose owner turned the link on, and never with age or gender.
    */
-  async shareable(handle: string): Promise<{
+  async shareable(code: string): Promise<{
     userId: string;
     handle: string;
     displayName: string;
@@ -127,7 +127,7 @@ export class TalentDirectory {
     verified: boolean;
     avatarUrls: TalentCard['avatarUrls'];
   } | null> {
-    const profile = await this.profiles.findByHandle(handle.toLowerCase());
+    const profile = await this.profiles.findByShareCode(code);
     if (!profile?.isComplete || !profile.snapshot().publicLink) return null;
     const account = await this.accounts.profileContext(profile.userId);
     if (!isPublic(account)) return null;

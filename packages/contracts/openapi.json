@@ -5115,17 +5115,17 @@
         }
       }
     },
-    "/v1/shared/talents/{handle}": {
+    "/v1/shared/{code}": {
       "get": {
         "operationId": "talents_shared",
-        "summary": "A talent page for anyone with the link, when the talent turned sharing on. No sign-in needed",
+        "summary": "A talent page for anyone with the link, by the link's own code, when the talent turned sharing on. No sign-in needed",
         "tags": [
           "Talent profiles"
         ],
         "security": [],
         "parameters": [
           {
-            "name": "handle",
+            "name": "code",
             "in": "path",
             "required": true,
             "schema": {
@@ -7935,6 +7935,12 @@
           "publicLink": {
             "type": "boolean"
           },
+          "shareCode": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "avatarMediaId": {
             "anyOf": [
               {
@@ -7997,6 +8003,7 @@
           "gender",
           "genderSearchable",
           "publicLink",
+          "shareCode",
           "avatarMediaId",
           "avatarUrls",
           "isComplete",

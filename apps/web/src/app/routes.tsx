@@ -137,7 +137,7 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
         // The root sends everyone to the start of their area.
         { index: true, element: <Gate /> },
         // A talent's shared page: open to everyone, signed in or not (ADR-042).
-        { path: 't/:handle', element: <SharedProfilePage /> },
+        { path: 't/:handle/:code?', element: <SharedProfilePage /> },
         screen('welcome', 'auth', <WelcomePage />),
         screen(
           'sign-up',

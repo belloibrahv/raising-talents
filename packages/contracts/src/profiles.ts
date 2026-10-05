@@ -75,6 +75,8 @@ export const myTalentProfileSchema = z
     gender: genderSchema.nullable(),
     genderSearchable: z.boolean(),
     publicLink: z.boolean(),
+    /** The code in the shared link, once the link has ever been turned on (ADR-042). */
+    shareCode: z.string().nullable(),
     avatarMediaId: idSchema.nullable(),
     avatarUrls: imageUrlsSchema.nullable(),
     isComplete: z.boolean(),

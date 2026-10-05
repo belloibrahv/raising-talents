@@ -45,6 +45,7 @@ class FakeTalentProfile {
       gender: null,
       genderSearchable: false,
       publicLink: false,
+      shareCode: null,
       avatarMediaId: null,
       version: 0,
     };
@@ -81,6 +82,7 @@ class FakeTalentProfile {
       gender: p['gender'] ?? null,
       genderSearchable: p['genderSearchable'] ?? false,
       publicLink: p['publicLink'] ?? false,
+      shareCode: null,
       avatarMediaId: p['avatarMediaId'] ?? null,
       avatarUrls: p['avatarMediaId']
         ? {

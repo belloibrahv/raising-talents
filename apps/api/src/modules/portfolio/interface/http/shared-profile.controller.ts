@@ -5,15 +5,15 @@ import { unwrap } from '../../../../platform/http/problem.js';
 import { PORTFOLIO, type SharedTalentProfileQuery } from '../../application/portfolio.use-cases.js';
 
 /** No sign-in: the shareable talent page (ADR-042). */
-@Controller('v1/shared/talents')
+@Controller('v1/shared')
 export class SharedProfileController {
   constructor(@Inject(PORTFOLIO.Shared) private readonly shared: SharedTalentProfileQuery) {}
 
-  @Get(':handle')
-  async byHandle(
-    @Param('handle') handle: string,
+  @Get(':code')
+  async byCode(
+    @Param('code') code: string,
     @ClientIp() clientIp: string,
   ): Promise<SharedTalentProfile> {
-    return unwrap(await this.shared.execute(handle, clientIp));
+    return unwrap(await this.shared.execute(code, clientIp));
   }
 }

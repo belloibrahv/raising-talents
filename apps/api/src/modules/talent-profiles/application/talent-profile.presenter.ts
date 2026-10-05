@@ -28,6 +28,7 @@ export function toMyTalentProfile(
     gender: props.gender,
     genderSearchable: props.genderSearchable,
     publicLink: props.publicLink,
+    shareCode: props.shareCode,
     avatarMediaId: props.avatarMediaId,
     avatarUrls: avatarOf(props, urls),
     isComplete: profile.isComplete,

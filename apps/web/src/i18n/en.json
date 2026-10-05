@@ -8,6 +8,7 @@
     "linkLabel": "Link to your profile",
     "copy": "Copy link",
     "copied": "Link copied",
+    "copyFailed": "Your browser did not allow copying. Select the link and copy it yourself.",
     "share": "Share",
     "text": "See my work on Raising Talents"
   },
@@ -15,6 +16,8 @@
     "notAvailable": "This profile is not available",
     "notAvailableBody": "The link may be old, or the talent has made their profile private.",
     "discover": "Discover Raising Talents",
+    "failed": "We could not load this profile",
+    "failedBody": "Something went wrong on our side. Try again in a moment.",
     "ctaLabel": "Join Raising Talents",
     "agentTitle": "Scouting? Contact {name} on Raising Talents.",
     "agentBody": "Verified agencies can send a contact request. Talent choose who they talk to.",

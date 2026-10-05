@@ -19,6 +19,11 @@ export interface TalentProfileProps {
   readonly genderSearchable: boolean;
   /** The talent chose to share a public link that anyone can open (ADR-042). */
   readonly publicLink: boolean;
+  /**
+   * Made once, the first time the link is turned on, and never reused: a shared link keeps
+   * pointing at this talent even if the handle changes and someone else takes the old one.
+   */
+  readonly shareCode: string | null;
   readonly avatarMediaId: string | null;
   readonly completedAt: Date | null;
   readonly verifiedAt: Date | null;
@@ -38,6 +43,8 @@ export interface TalentProfilePatch {
   readonly gender?: Gender | null;
   readonly genderSearchable?: boolean;
   readonly publicLink?: boolean;
+  /** Set by the application layer when the link is first turned on. */
+  readonly shareCode?: string;
 }
 
 const unique = (values: readonly string[]) => [...new Set(values)];
@@ -71,6 +78,7 @@ export class TalentProfile {
         gender: null,
         genderSearchable: false,
         publicLink: false,
+        shareCode: null,
         avatarMediaId: null,
         completedAt: null,
         verifiedAt: null,
@@ -153,6 +161,7 @@ export class TalentProfile {
       gender,
       genderSearchable,
       publicLink: patch.publicLink ?? this.props.publicLink,
+      shareCode: this.props.shareCode ?? patch.shareCode ?? null,
       version: this.props.version + 1,
       updatedAt: now,
     };

@@ -7,7 +7,9 @@ import { Button } from '../../shared/ui/Button';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { useUpdateTalentProfile } from '../profile/queries';
 
-export const sharedLinkFor = (handle: string): string => `${window.location.origin}/t/${handle}`;
+/** The handle is for people reading the link; the code is what finds the talent (ADR-042). */
+export const sharedLinkFor = (handle: string, code: string): string =>
+  `${window.location.origin}/t/${handle}/${code}`;
 
 /**
  * Off by default: a public link shows the profile to anyone on the internet, so the talent
@@ -15,12 +17,12 @@ export const sharedLinkFor = (handle: string): string => `${window.location.orig
  */
 export function ShareCard({ profile }: { readonly profile: MyTalentProfile }) {
   const update = useUpdateTalentProfile();
-  const [copied, setCopied] = useState(false);
-  const link = sharedLinkFor(profile.handle);
+  const [copied, setCopied] = useState<'yes' | 'failed' | null>(null);
+  const link = profile.shareCode ? sharedLinkFor(profile.handle, profile.shareCode) : '';
   const canShare = typeof navigator.share === 'function';
 
   const toggle = (publicLink: boolean) => {
-    setCopied(false);
+    setCopied(null);
     update.mutate({ publicLink });
   };
 
@@ -31,7 +33,7 @@ export function ShareCard({ profile }: { readonly profile: MyTalentProfile }) {
     >
       <div className="flex items-start gap-4">
         <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-spotlight text-spotlight-foreground">
-          {profile.publicLink ? (
+          {profile.publicLink && link ? (
             <Globe aria-hidden="true" className="size-5" />
           ) : (
             <Lock aria-hidden="true" className="size-5" />
@@ -67,13 +69,19 @@ export function ShareCard({ profile }: { readonly profile: MyTalentProfile }) {
                 size="sm"
                 className="h-11"
                 onClick={() => {
-                  void navigator.clipboard.writeText(link).then(() => {
-                    setCopied(true);
-                  });
+                  // Some browsers refuse without a secure context or permission: say so.
+                  navigator.clipboard.writeText(link).then(
+                    () => {
+                      setCopied('yes');
+                    },
+                    () => {
+                      setCopied('failed');
+                    },
+                  );
                 }}
               >
-                {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
-                {copied ? t('share.copied') : t('share.copy')}
+                {copied === 'yes' ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+                {copied === 'yes' ? t('share.copied') : t('share.copy')}
               </Button>
               {canShare ? (
                 <Button
@@ -93,8 +101,11 @@ export function ShareCard({ profile }: { readonly profile: MyTalentProfile }) {
             </div>
           </div>
           <span className="sr-only" role="status">
-            {copied ? t('share.copied') : ''}
+            {copied === 'yes' ? t('share.copied') : ''}
           </span>
+          <FormMessage tone="error">
+            {copied === 'failed' ? t('share.copyFailed') : null}
+          </FormMessage>
           <div>
             <Button
               variant="text"

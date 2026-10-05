@@ -47,6 +47,7 @@ const profile = {
   gender: null,
   genderSearchable: false,
   publicLink: false,
+  shareCode: null as string | null,
   avatarMediaId: null,
   avatarUrls: null,
   isComplete: true,
@@ -61,11 +62,11 @@ describe('the shared talent page (ADR-042)', () => {
   it('shows a talent to a signed-out visitor, and invites both kinds of visitor in', async () => {
     stubApi({
       '/v1/auth/web/refresh': () => problem(401, 'UNAUTHENTICATED'),
-      'GET /v1/shared/talents/ngozi.sings': () => Response.json(shared),
+      'GET /v1/shared/Ab3dE6fG': () => Response.json(shared),
     });
-    const router = renderAt('/t/ngozi.sings');
+    const router = renderAt('/t/ngozi.sings/Ab3dE6fG');
     expect(await screen.findByRole('heading', { level: 1, name: 'Ngozi Adeyemi' })).toHaveFocus();
-    expect(router.state.location.pathname).toBe('/t/ngozi.sings');
+    expect(router.state.location.pathname).toBe('/t/ngozi.sings/Ab3dE6fG');
     expect(screen.getByText('Singer')).toBeVisible();
     expect(screen.getByRole('img', { name: 'Photo 1 by Ngozi Adeyemi' })).toBeVisible();
     expect(screen.getByRole('link', { name: 'Join as an agent' })).toHaveAttribute(
@@ -79,12 +80,28 @@ describe('the shared talent page (ADR-042)', () => {
   it('says so, without a sign-in wall, when the link is off or old', async () => {
     stubApi({
       '/v1/auth/web/refresh': () => problem(401, 'UNAUTHENTICATED'),
-      'GET /v1/shared/talents/gone': () => problem(404, 'NOT_FOUND'),
+      'GET /v1/shared/OldCode1': () => problem(404, 'NOT_FOUND'),
     });
-    renderAt('/t/gone');
+    renderAt('/t/gone/OldCode1');
     expect(
       await screen.findByRole('heading', { level: 1, name: 'This profile is not available' }),
     ).toBeVisible();
+  });
+
+  it('offers to try again when the server fails, rather than calling the profile gone', async () => {
+    let fail = true;
+    stubApi({
+      '/v1/auth/web/refresh': () => problem(401, 'UNAUTHENTICATED'),
+      'GET /v1/shared/Ab3dE6fG': () => (fail ? problem(500, 'INTERNAL') : Response.json(shared)),
+    });
+    renderAt('/t/ngozi.sings/Ab3dE6fG');
+    const user = userEvent.setup({ delay: null });
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'We could not load this profile' }),
+    ).toBeVisible();
+    fail = false;
+    await user.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(await screen.findByRole('heading', { level: 1, name: 'Ngozi Adeyemi' })).toBeVisible();
   });
 
   it('lets a talent turn their link on from Home and copy it', async () => {
@@ -97,7 +114,12 @@ describe('the shared talent page (ADR-042)', () => {
       'GET /v1/me/portfolio': () => Response.json({ items: [], maxItems: 30, version: 0 }),
       'GET /v1/me/talent-profile': () => Response.json(current),
       'PATCH /v1/me/talent-profile': () => {
-        current = { ...current, publicLink: true, version: current.version + 1 };
+        current = {
+          ...current,
+          publicLink: true,
+          shareCode: 'Ab3dE6fG',
+          version: current.version + 1,
+        };
         return Response.json(current);
       },
     });
@@ -105,12 +127,14 @@ describe('the shared talent page (ADR-042)', () => {
     const user = userEvent.setup({ delay: null });
     await user.click(await screen.findByRole('button', { name: 'Turn on my public link' }));
     const link = await screen.findByLabelText('Link to your profile');
-    expect(link).toHaveValue(`${window.location.origin}/t/ngozi.sings`);
+    expect(link).toHaveValue(`${window.location.origin}/t/ngozi.sings/Ab3dE6fG`);
     expect(calls.find((call) => call.method === 'PATCH')?.headers['if-match']).toBe('"3"');
     await user.click(screen.getByRole('button', { name: 'Copy link' }));
     // user-event stands in for the clipboard, so the copy can be read back.
     await waitFor(async () => {
-      expect(await navigator.clipboard.readText()).toBe(`${window.location.origin}/t/ngozi.sings`);
+      expect(await navigator.clipboard.readText()).toBe(
+        `${window.location.origin}/t/ngozi.sings/Ab3dE6fG`,
+      );
     });
     expect(await screen.findByRole('button', { name: 'Link copied' })).toBeVisible();
   });

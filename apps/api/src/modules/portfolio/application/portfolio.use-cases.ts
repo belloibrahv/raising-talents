@@ -264,10 +264,7 @@ export class SharedTalentProfileQuery {
     private readonly rateLimiter: RateLimiter,
   ) {}
 
-  async execute(
-    handle: string,
-    clientIp: string,
-  ): Promise<Result<SharedTalentProfile, DomainError>> {
+  async execute(code: string, clientIp: string): Promise<Result<SharedTalentProfile, DomainError>> {
     const limit = await this.rateLimiter.consume(
       `shared-profile:${clientIp}`,
       SHARED_PROFILE_LIMIT.perMinute,
@@ -282,13 +279,11 @@ export class SharedTalentProfileQuery {
         ),
       );
     }
-    const shared = await this.talents.shareable(handle);
+    const shared = await this.talents.shareable(code);
     if (!shared) return err(domainError('NOT_FOUND', 'This profile is not available.'));
     const { userId, ...profile } = shared;
     const portfolio = await this.portfolios.findByTalentId(userId);
-    const described = await this.media.describe(
-      portfolio?.items.map((item) => item.mediaId) ?? [],
-    );
+    const described = await this.media.describe(portfolio?.items.map((item) => item.mediaId) ?? []);
     return ok({
       ...profile,
       portfolio: (portfolio?.items ?? []).flatMap((item): SharedTalentProfile['portfolio'] => {

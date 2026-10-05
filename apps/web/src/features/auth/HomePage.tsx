@@ -25,6 +25,7 @@ import { useMyPortfolio } from '../portfolio/queries';
 import { useMyAgentProfile, useMyTalentProfile, useTaxonomy } from '../profile/queries';
 import { VerificationCard } from '../profile/VerificationCard';
 import { useShortlist } from '../shortlist/queries';
+import { ShareCard } from '../talents/ShareCard';
 import { useSession } from './use-auth';
 
 /** The signed-in start: finishes onboarding first, then a dashboard for each role. */
@@ -131,6 +132,8 @@ function TalentHome() {
       </section>
 
       <Attention />
+
+      {data ? <ShareCard profile={data} /> : null}
 
       <section className="stack gap-4" aria-labelledby="portfolio-heading">
         <SectionHeading

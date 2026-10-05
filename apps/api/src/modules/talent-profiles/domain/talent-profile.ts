@@ -17,6 +17,8 @@ export interface TalentProfileProps {
   readonly citySlug: string | null;
   readonly gender: Gender | null;
   readonly genderSearchable: boolean;
+  /** The talent chose to share a public link that anyone can open (ADR-042). */
+  readonly publicLink: boolean;
   readonly avatarMediaId: string | null;
   readonly completedAt: Date | null;
   readonly verifiedAt: Date | null;
@@ -35,6 +37,7 @@ export interface TalentProfilePatch {
   readonly citySlug?: string;
   readonly gender?: Gender | null;
   readonly genderSearchable?: boolean;
+  readonly publicLink?: boolean;
 }
 
 const unique = (values: readonly string[]) => [...new Set(values)];
@@ -67,6 +70,7 @@ export class TalentProfile {
         citySlug: null,
         gender: null,
         genderSearchable: false,
+        publicLink: false,
         avatarMediaId: null,
         completedAt: null,
         verifiedAt: null,
@@ -148,6 +152,7 @@ export class TalentProfile {
       citySlug: patch.citySlug ?? this.props.citySlug,
       gender,
       genderSearchable,
+      publicLink: patch.publicLink ?? this.props.publicLink,
       version: this.props.version + 1,
       updatedAt: now,
     };

@@ -27,6 +27,7 @@ export function toMyTalentProfile(
     city: catalog.city(props.citySlug),
     gender: props.gender,
     genderSearchable: props.genderSearchable,
+    publicLink: props.publicLink,
     avatarMediaId: props.avatarMediaId,
     avatarUrls: avatarOf(props, urls),
     isComplete: profile.isComplete,

@@ -22,6 +22,7 @@ const talentProfile = {
   city: { slug: 'ng-lagos', name: 'Lagos', countryCode: 'NG' },
   gender: null,
   genderSearchable: false,
+  publicLink: false,
   avatarMediaId: null,
   avatarUrls: null,
   isComplete: true,

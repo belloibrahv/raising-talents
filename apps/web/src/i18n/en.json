@@ -1,4 +1,28 @@
 {
+  "share": {
+    "title": "Your public link",
+    "offBody": "Share your profile on Instagram, WhatsApp or your CV. Anyone with the link can see your photo, discipline, city, story and work, never your age, email or phone number. It is off until you turn it on.",
+    "onBody": "Anyone with this link can see your profile and work, even without an account. Your age, email and phone number stay hidden.",
+    "turnOn": "Turn on my public link",
+    "turnOff": "Turn off public link",
+    "linkLabel": "Link to your profile",
+    "copy": "Copy link",
+    "copied": "Link copied",
+    "share": "Share",
+    "text": "See my work on Raising Talents"
+  },
+  "shared": {
+    "notAvailable": "This profile is not available",
+    "notAvailableBody": "The link may be old, or the talent has made their profile private.",
+    "discover": "Discover Raising Talents",
+    "ctaLabel": "Join Raising Talents",
+    "agentTitle": "Scouting? Contact {name} on Raising Talents.",
+    "agentBody": "Verified agencies can send a contact request. Talent choose who they talk to.",
+    "agentCta": "Join as an agent",
+    "talentTitle": "Have a talent of your own?",
+    "talentBody": "Build a profile like this in minutes and get found by verified agents across Nigeria.",
+    "talentCta": "Create my profile"
+  },
   "auth": {
     "panelLabel": "Why Raising Talents",
     "panelTitle": "Where Nigeria's next stars meet the people who scout them."

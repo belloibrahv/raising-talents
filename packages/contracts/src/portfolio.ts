@@ -91,3 +91,23 @@ export const publicPortfolioSchema = z
   })
   .meta({ id: 'PublicPortfolio' });
 export type PublicPortfolio = z.infer<typeof publicPortfolioSchema>;
+
+/**
+ * A talent's shareable page, for anyone with the link (ADR-042). Only for talent who turned
+ * the link on. Never shows age, gender or anything only agents may see.
+ */
+export const sharedTalentProfileSchema = z
+  .object({
+    handle: z.string(),
+    displayName: z.string(),
+    bio: z.string(),
+    discipline: z.string(),
+    category: z.string(),
+    city: z.string(),
+    skills: z.array(z.string()),
+    verified: z.boolean(),
+    avatarUrls: imageUrlsSchema.nullable(),
+    portfolio: z.array(publicPortfolioItemSchema),
+  })
+  .meta({ id: 'SharedTalentProfile' });
+export type SharedTalentProfile = z.infer<typeof sharedTalentProfileSchema>;

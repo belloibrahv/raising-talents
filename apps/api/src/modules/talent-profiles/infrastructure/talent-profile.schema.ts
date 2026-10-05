@@ -36,6 +36,7 @@ export const profiles = talentSchema.table(
     citySlug: text('city_slug').references(() => cities.slug),
     gender: genderEnum('gender'),
     genderSearchable: boolean('gender_searchable').notNull().default(false),
+    publicLink: boolean('public_link').notNull().default(false),
     avatarMediaId: uuid('avatar_media_id'),
     // Category-specific fields (height, playing position), validated per category once the list is agreed.
     attributes: jsonb('attributes').$type<Record<string, unknown>>().notNull().default({}),

@@ -54,6 +54,8 @@ export const updateTalentProfileRequestSchema = z
     citySlug: slugSchema.optional(),
     gender: genderSchema.nullable().optional(),
     genderSearchable: z.boolean().optional(),
+    /** Share a public page anyone can open, without an account (ADR-042). */
+    publicLink: z.boolean().optional(),
   })
   .strict()
   .meta({ id: 'UpdateTalentProfileRequest' });
@@ -72,6 +74,7 @@ export const myTalentProfileSchema = z
     city: namedRefSchema.extend({ countryCode: z.string().length(2) }).nullable(),
     gender: genderSchema.nullable(),
     genderSearchable: z.boolean(),
+    publicLink: z.boolean(),
     avatarMediaId: idSchema.nullable(),
     avatarUrls: imageUrlsSchema.nullable(),
     isComplete: z.boolean(),

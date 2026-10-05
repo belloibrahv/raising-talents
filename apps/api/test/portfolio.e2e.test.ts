@@ -1,4 +1,5 @@
 import type {
+  SharedTalentProfile,
   MediaAsset,
   MyPortfolio,
   MyTalentProfile,
@@ -210,6 +211,36 @@ describe('Portfolio over HTTP', () => {
     expect(items).toHaveLength(1);
     expect(items[0]).toMatchObject({ kind: 'image', caption: 'Eko Atlantic editorial' });
     expect(items[0]).not.toHaveProperty('mediaId');
+  });
+
+  it('shares a page with anyone only once the talent turns the link on (ADR-042)', async () => {
+    const open = () =>
+      testApp.app.inject({ method: 'GET', url: '/v1/shared/talents/adaeze.okafor' });
+    expect((await open()).statusCode).toBe(404);
+
+    const current = await call('GET', '/v1/me/talent-profile', talent);
+    const turnedOn = await call(
+      'PATCH',
+      '/v1/me/talent-profile',
+      talent,
+      { publicLink: true },
+      { 'if-match': current.headers.etag as string },
+    );
+    expect(turnedOn.json<MyTalentProfile>().publicLink).toBe(true);
+
+    const shared = await open();
+    expect(shared.statusCode).toBe(200);
+    const page = shared.json<SharedTalentProfile>();
+    expect(page).toMatchObject({
+      handle: 'adaeze.okafor',
+      displayName: 'Adaeze Okafor',
+      discipline: 'Singer',
+      city: 'Lagos',
+    });
+    expect(page.portfolio.length).toBeGreaterThan(0);
+    // Agents see age in years; strangers on the internet see neither age nor gender.
+    expect(page).not.toHaveProperty('ageYears');
+    expect(page).not.toHaveProperty('gender');
   });
 
   /** What Mux sends: the JSON body, signed over its exact bytes. */

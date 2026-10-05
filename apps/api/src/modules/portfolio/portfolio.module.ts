@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import type { Clock } from '../../platform/clock.js';
 import type { DrizzleUnitOfWork } from '../../platform/database/drizzle-unit-of-work.js';
 import type { EventRecorder } from '../../platform/domain-event.js';
+import type { RateLimiter } from '../../platform/rate-limit/rate-limiter.js';
 import { PLATFORM } from '../../platform/platform.tokens.js';
 import type { UnitOfWork } from '../../platform/unit-of-work.js';
 import type { AccountsFacade } from '../accounts/application/accounts.facade.js';
@@ -17,6 +18,7 @@ import {
   AddPortfolioItemHandler,
   GetMyPortfolioQuery,
   GetPublicPortfolioQuery,
+  SharedTalentProfileQuery,
   PORTFOLIO,
   RemovePortfolioItemHandler,
   ReorderPortfolioHandler,
@@ -27,6 +29,7 @@ import {
 } from './application/portfolio.use-cases.js';
 import type { PortfolioRepository } from './domain/portfolio.js';
 import { DrizzlePortfolioRepository } from './infrastructure/drizzle-portfolio.repository.js';
+import { SharedProfileController } from './interface/http/shared-profile.controller.js';
 import { PortfolioController } from './interface/http/portfolio.controller.js';
 
 const OWNER_DEPS = [
@@ -40,7 +43,7 @@ type OwnerDeps = [PortfolioRepository, PortfolioAccounts, PortfolioMedia, UnitOf
 
 @Module({
   imports: [AccountsModule, MediaModule, TalentProfilesModule],
-  controllers: [PortfolioController],
+  controllers: [PortfolioController, SharedProfileController],
   providers: [
     {
       provide: PORTFOLIO.Repository,
@@ -98,6 +101,16 @@ type OwnerDeps = [PortfolioRepository, PortfolioAccounts, PortfolioMedia, UnitOf
       inject: [PORTFOLIO.Repository, PORTFOLIO.Talents, PORTFOLIO.Media],
       useFactory: (repo: PortfolioRepository, talents: PortfolioTalents, media: PortfolioMedia) =>
         new GetPublicPortfolioQuery(repo, talents, media),
+    },
+    {
+      provide: PORTFOLIO.Shared,
+      inject: [PORTFOLIO.Repository, PORTFOLIO.Talents, PORTFOLIO.Media, PLATFORM.RateLimiter],
+      useFactory: (
+        repo: PortfolioRepository,
+        talents: PortfolioTalents,
+        media: PortfolioMedia,
+        limiter: RateLimiter,
+      ) => new SharedTalentProfileQuery(repo, talents, media, limiter),
     },
   ],
   exports: [PORTFOLIO.GetMine],

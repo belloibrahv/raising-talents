@@ -111,6 +111,47 @@ export class TalentDirectory {
     return (await this.profiles.findByHandle(handle.toLowerCase()))?.userId ?? null;
   }
 
+  /**
+   * The page anyone with the link can see (ADR-042): only for a complete, public profile
+   * whose owner turned the link on, and never with age or gender.
+   */
+  async shareable(handle: string): Promise<{
+    userId: string;
+    handle: string;
+    displayName: string;
+    bio: string;
+    discipline: string;
+    category: string;
+    city: string;
+    skills: string[];
+    verified: boolean;
+    avatarUrls: TalentCard['avatarUrls'];
+  } | null> {
+    const profile = await this.profiles.findByHandle(handle.toLowerCase());
+    if (!profile?.isComplete || !profile.snapshot().publicLink) return null;
+    const account = await this.accounts.profileContext(profile.userId);
+    if (!isPublic(account)) return null;
+    const view = toPublicTalentProfile(
+      profile,
+      await this.taxonomy.current(),
+      null,
+      this.avatarUrls,
+    );
+    if (!view) return null;
+    return {
+      userId: profile.userId,
+      handle: view.handle,
+      displayName: view.displayName,
+      bio: view.bio,
+      discipline: view.subcategories.map((entry) => entry.name).join(', ') || view.category.name,
+      category: view.category.name,
+      city: view.city.name,
+      skills: view.skills.map((entry) => entry.name),
+      verified: view.verified,
+      avatarUrls: view.avatarUrls,
+    };
+  }
+
   /** The name and handle, whatever the account's status, for someone they already talk to. */
   async nameOf(userId: string): Promise<{ handle: string; displayName: string } | null> {
     const props = (await this.profiles.findByUserId(userId))?.snapshot();

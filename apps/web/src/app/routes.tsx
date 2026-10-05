@@ -76,6 +76,9 @@ const MessagesPage = lazy(() =>
 const ConversationPage = lazy(() =>
   import('../features/messages/ConversationPage').then((m) => ({ default: m.ConversationPage })),
 );
+const SharedProfilePage = lazy(() =>
+  import('../features/talents/SharedProfilePage').then((m) => ({ default: m.SharedProfilePage })),
+);
 const AccountPage = lazy(() =>
   import('../features/account/AccountPage').then((m) => ({ default: m.AccountPage })),
 );
@@ -133,6 +136,8 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
       children: [
         // The root sends everyone to the start of their area.
         { index: true, element: <Gate /> },
+        // A talent's shared page: open to everyone, signed in or not (ADR-042).
+        { path: 't/:handle', element: <SharedProfilePage /> },
         screen('welcome', 'auth', <WelcomePage />),
         screen(
           'sign-up',

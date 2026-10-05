@@ -1,4 +1,5 @@
 import {
+  type SharedTalentProfile,
   PORTFOLIO_MAX_ITEMS,
   type ImageUrls,
   type MediaKind,
@@ -13,6 +14,7 @@ import { domainError, type DomainError } from '../../../platform/domain-error.js
 import { newId } from '../../../platform/ids.js';
 import { err, ok, type Result } from '../../../platform/result.js';
 import type { UnitOfWork } from '../../../platform/unit-of-work.js';
+import type { RateLimiter } from '../../../platform/rate-limit/rate-limiter.js';
 import {
   Portfolio,
   PortfolioConcurrencyError,
@@ -31,6 +33,7 @@ export const PORTFOLIO = {
   Remove: Symbol('RemovePortfolioItemHandler'),
   Reorder: Symbol('ReorderPortfolioHandler'),
   GetPublic: Symbol('GetPublicPortfolioQuery'),
+  Shared: Symbol('SharedTalentProfileQuery'),
 } as const;
 
 /** What the portfolio needs from accounts. */
@@ -60,6 +63,9 @@ export interface PortfolioMedia {
 /** What the portfolio needs from talent profiles. Implemented by TalentDirectory. */
 export interface PortfolioTalents {
   visibleUserId(handle: string): Promise<string | null>;
+  shareable(
+    handle: string,
+  ): Promise<(Omit<SharedTalentProfile, 'portfolio'> & { userId: string }) | null>;
 }
 
 async function present(portfolio: Portfolio, media: PortfolioMedia): Promise<MyPortfolio> {
@@ -240,6 +246,57 @@ export class GetPublicPortfolioQuery {
         const shared = { id: item.id, caption: item.caption };
         if (file.urls) return [{ ...shared, kind: 'image', urls: file.urls }];
         if (file.video) return [{ ...shared, kind: 'video', video: file.video }];
+        return [];
+      }),
+    });
+  }
+}
+
+/** Generous for real visitors, tight enough to stop someone walking every handle. */
+export const SHARED_PROFILE_LIMIT = { perMinute: 60, windowSeconds: 60 } as const;
+
+/** The shareable page: the profile and its ready media, for anyone with the link (ADR-042). */
+export class SharedTalentProfileQuery {
+  constructor(
+    private readonly portfolios: PortfolioRepository,
+    private readonly talents: PortfolioTalents,
+    private readonly media: PortfolioMedia,
+    private readonly rateLimiter: RateLimiter,
+  ) {}
+
+  async execute(
+    handle: string,
+    clientIp: string,
+  ): Promise<Result<SharedTalentProfile, DomainError>> {
+    const limit = await this.rateLimiter.consume(
+      `shared-profile:${clientIp}`,
+      SHARED_PROFILE_LIMIT.perMinute,
+      SHARED_PROFILE_LIMIT.windowSeconds,
+    );
+    if (!limit.allowed) {
+      return err(
+        domainError(
+          'RATE_LIMITED',
+          'Too many profiles opened. Wait a minute.',
+          limit.retryAfterSeconds,
+        ),
+      );
+    }
+    const shared = await this.talents.shareable(handle);
+    if (!shared) return err(domainError('NOT_FOUND', 'This profile is not available.'));
+    const { userId, ...profile } = shared;
+    const portfolio = await this.portfolios.findByTalentId(userId);
+    const described = await this.media.describe(
+      portfolio?.items.map((item) => item.mediaId) ?? [],
+    );
+    return ok({
+      ...profile,
+      portfolio: (portfolio?.items ?? []).flatMap((item): SharedTalentProfile['portfolio'] => {
+        const file = described.get(item.mediaId);
+        if (file?.status !== 'ready') return [];
+        const common = { id: item.id, caption: item.caption };
+        if (file.urls) return [{ ...common, kind: 'image', urls: file.urls }];
+        if (file.video) return [{ ...common, kind: 'video', video: file.video }];
         return [];
       }),
     });

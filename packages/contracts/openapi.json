@@ -5115,6 +5115,90 @@
         }
       }
     },
+    "/v1/shared/talents/{handle}": {
+      "get": {
+        "operationId": "talents_shared",
+        "summary": "A talent page for anyone with the link, when the talent turned sharing on. No sign-in needed",
+        "tags": [
+          "Talent profiles"
+        ],
+        "security": [],
+        "parameters": [
+          {
+            "name": "handle",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SharedTalentProfile"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. Codes: NOT_FOUND.",
+            "x-error-codes": [
+              "NOT_FOUND"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests. Codes: RATE_LIMITED.",
+            "x-error-codes": [
+              "RATE_LIMITED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/me/events": {
       "get": {
         "operationId": "realtime_events",
@@ -7750,6 +7834,9 @@
           },
           "genderSearchable": {
             "type": "boolean"
+          },
+          "publicLink": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false
@@ -7845,6 +7932,9 @@
           "genderSearchable": {
             "type": "boolean"
           },
+          "publicLink": {
+            "type": "boolean"
+          },
           "avatarMediaId": {
             "anyOf": [
               {
@@ -7906,6 +7996,7 @@
           "city",
           "gender",
           "genderSearchable",
+          "publicLink",
           "avatarMediaId",
           "avatarUrls",
           "isComplete",
@@ -8411,6 +8502,67 @@
         },
         "required": [
           "items"
+        ],
+        "additionalProperties": false
+      },
+      "SharedTalentProfile": {
+        "type": "object",
+        "properties": {
+          "handle": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "bio": {
+            "type": "string"
+          },
+          "discipline": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "avatarUrls": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageUrls"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "portfolio": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicPortfolioItem"
+            }
+          }
+        },
+        "required": [
+          "handle",
+          "displayName",
+          "bio",
+          "discipline",
+          "category",
+          "city",
+          "skills",
+          "verified",
+          "avatarUrls",
+          "portfolio"
         ],
         "additionalProperties": false
       },

@@ -29,6 +29,7 @@ import {
   addPortfolioItemRequestSchema,
   myPortfolioSchema,
   publicPortfolioSchema,
+  sharedTalentProfileSchema,
   reorderPortfolioRequestSchema,
   updatePortfolioItemRequestSchema,
 } from './portfolio.js';
@@ -753,6 +754,17 @@ export const endpoints = {
     successStatus: 200,
     errors: [],
     tag: 'Me',
+  }),
+  'talents.shared': define({
+    method: 'GET',
+    path: '/v1/shared/{code}',
+    summary:
+      "A talent page for anyone with the link, by the link's own code, when the talent turned sharing on. No sign-in needed",
+    auth: false,
+    response: sharedTalentProfileSchema,
+    successStatus: 200,
+    errors: [ErrorCode.NotFound, ErrorCode.RateLimited],
+    tag: 'Talent profiles',
   }),
   'realtime.events': define({
     method: 'GET',

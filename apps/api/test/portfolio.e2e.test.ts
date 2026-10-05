@@ -1,4 +1,5 @@
 import type {
+  SharedTalentProfile,
   MediaAsset,
   MyPortfolio,
   MyTalentProfile,
@@ -210,6 +211,58 @@ describe('Portfolio over HTTP', () => {
     expect(items).toHaveLength(1);
     expect(items[0]).toMatchObject({ kind: 'image', caption: 'Eko Atlantic editorial' });
     expect(items[0]).not.toHaveProperty('mediaId');
+  });
+
+  it('shares a page with anyone only once the talent turns the link on (ADR-042)', async () => {
+    const open = (code: string) => testApp.app.inject({ method: 'GET', url: `/v1/shared/${code}` });
+    const before = await call('GET', '/v1/me/talent-profile', talent);
+    expect(before.json<MyTalentProfile>().shareCode).toBeNull();
+    expect((await open('adaeze.okafor')).statusCode).toBe(404);
+
+    const turnedOn = await call(
+      'PATCH',
+      '/v1/me/talent-profile',
+      talent,
+      { publicLink: true },
+      { 'if-match': before.headers.etag as string },
+    );
+    const on = turnedOn.json<MyTalentProfile>();
+    expect(on.publicLink).toBe(true);
+    expect(on.shareCode).toMatch(/^[A-Za-z0-9_-]{8}$/);
+    const code = on.shareCode ?? '';
+
+    const shared = await open(code);
+    expect(shared.statusCode).toBe(200);
+    const page = shared.json<SharedTalentProfile>();
+    expect(page).toMatchObject({
+      handle: 'adaeze.okafor',
+      displayName: 'Adaeze Okafor',
+      discipline: 'Singer',
+      city: 'Lagos',
+    });
+    expect(page.portfolio.length).toBeGreaterThan(0);
+    // Agents see age in years; strangers on the internet see neither age nor gender.
+    expect(page).not.toHaveProperty('ageYears');
+    expect(page).not.toHaveProperty('gender');
+
+    // A new handle keeps the same link: it can never point at whoever takes the old handle.
+    const renamed = await call(
+      'PATCH',
+      '/v1/me/talent-profile',
+      talent,
+      { handle: 'adaeze.sings' },
+      { 'if-match': turnedOn.headers.etag as string },
+    );
+    expect(renamed.json<MyTalentProfile>().shareCode).toBe(code);
+    expect((await open(code)).json<SharedTalentProfile>().handle).toBe('adaeze.sings');
+    // Back to the handle the next test expects.
+    await call(
+      'PATCH',
+      '/v1/me/talent-profile',
+      talent,
+      { handle: 'adaeze.okafor' },
+      { 'if-match': renamed.headers.etag as string },
+    );
   });
 
   /** What Mux sends: the JSON body, signed over its exact bytes. */

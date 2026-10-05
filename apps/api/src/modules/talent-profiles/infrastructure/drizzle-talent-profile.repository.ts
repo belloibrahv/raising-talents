@@ -45,6 +45,16 @@ export class DrizzleTalentProfileRepository implements TalentProfileRepository {
     return row ? this.toDomain(row) : null;
   }
 
+  async findByShareCode(code: string): Promise<TalentProfile | null> {
+    const [row] = await this.uow
+      .executor()
+      .select()
+      .from(profiles)
+      .where(eq(profiles.shareCode, code))
+      .limit(1);
+    return row ? this.toDomain(row) : null;
+  }
+
   async handleExists(handle: string): Promise<boolean> {
     const rows = await this.uow
       .executor()
@@ -81,6 +91,8 @@ export class DrizzleTalentProfileRepository implements TalentProfileRepository {
       citySlug: props.citySlug,
       gender: props.gender,
       genderSearchable: props.genderSearchable,
+      publicLink: props.publicLink,
+      shareCode: props.shareCode,
       avatarMediaId: props.avatarMediaId,
       isComplete: profile.isComplete,
       completedAt: props.completedAt,
@@ -147,6 +159,8 @@ export class DrizzleTalentProfileRepository implements TalentProfileRepository {
       citySlug: row.citySlug,
       gender: row.gender,
       genderSearchable: row.genderSearchable,
+      publicLink: row.publicLink,
+      shareCode: row.shareCode,
       avatarMediaId: row.avatarMediaId,
       completedAt: row.completedAt,
       verifiedAt: row.verifiedAt,

@@ -16,7 +16,9 @@ const ONE_MEGABYTE = 1_048_576;
 
 export function createFastifyAdapter(config: AppConfig): FastifyAdapter {
   return new FastifyAdapter({
-    trustProxy: config.TRUST_PROXY,
+    // One hop: the load balancer in front of us. Trusting every hop would let a caller choose
+    // their own address by sending X-Forwarded-For, and so dodge every IP rate limit.
+    trustProxy: config.TRUST_PROXY ? (_address: string, hop: number) => hop === 0 : false,
     bodyLimit: ONE_MEGABYTE,
     genReqId: () => newId(),
   });

@@ -44,6 +44,8 @@ class FakeTalentProfile {
       citySlug: null,
       gender: null,
       genderSearchable: false,
+      publicLink: false,
+      shareCode: null,
       avatarMediaId: null,
       version: 0,
     };
@@ -79,6 +81,8 @@ class FakeTalentProfile {
       city: p['citySlug'] ? { slug: p['citySlug'], name: 'Lagos', countryCode: 'NG' } : null,
       gender: p['gender'] ?? null,
       genderSearchable: p['genderSearchable'] ?? false,
+      publicLink: p['publicLink'] ?? false,
+      shareCode: null,
       avatarMediaId: p['avatarMediaId'] ?? null,
       avatarUrls: p['avatarMediaId']
         ? {

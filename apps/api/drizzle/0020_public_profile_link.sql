@@ -1,0 +1,1 @@
+ALTER TABLE "talent"."profiles" ADD COLUMN "public_link" boolean DEFAULT false NOT NULL;

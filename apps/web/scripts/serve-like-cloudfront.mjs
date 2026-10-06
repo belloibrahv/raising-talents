@@ -3,7 +3,7 @@
 // --stub-api also answers the start-up session check on :3000 the way the real API answers
 // a visitor with no session (204), for CI runs that have no API.
 // It also hosts the app on Railway (ADR-036), configured by PORT, API_ORIGIN, MEDIA_ORIGIN,
-// UPLOAD_ORIGIN and ERROR_REPORTING_ORIGIN. With API_UPSTREAM set, /v1 and /media are passed
+// UPLOAD_ORIGIN, ERROR_REPORTING_ORIGIN and PUBLIC_ORIGIN (for link previews, ADR-043). With API_UPSTREAM set, /v1 and /media are passed
 // to the API over the private network, so the app and its API share one origin: the session
 // cookie stays first-party on hosts whose addresses are separate sites (*.up.railway.app).
 // The routing function and the Content Security Policy are read from the hosting module,
@@ -14,6 +14,7 @@ import { createServer, request as forward } from 'node:http';
 import { extname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { brotliCompressSync, gzipSync } from 'node:zlib';
+import { createShareCache, SHARED_PATH, withShareTags } from './share-tags.mjs';
 
 const root = fileURLToPath(new URL('../dist/', import.meta.url));
 const terraform = readFileSync(
@@ -65,7 +66,15 @@ const cache = new Map();
 function compressed(file, encoding) {
   const key = `${file}|${encoding ?? 'identity'}`;
   if (!cache.has(key)) {
-    const raw = readFileSync(file);
+    let raw = readFileSync(file);
+    // Link previews need absolute addresses; the built page cannot know its own (ADR-043).
+    if (file.endsWith('index.html') && process.env.PUBLIC_ORIGIN) {
+      raw = Buffer.from(
+        raw
+          .toString('utf8')
+          .replace('content="/og.png"', `content="${process.env.PUBLIC_ORIGIN}/og.png"`),
+      );
+    }
     cache.set(
       key,
       encoding === 'br' ? brotliCompressSync(raw) : encoding === 'gzip' ? gzipSync(raw) : raw,
@@ -149,20 +158,10 @@ function proxyToApi(request, response) {
   request.pipe(outgoing);
 }
 
-createServer((request, response) => {
-  const pathname = new URL(request.url ?? '/', 'http://localhost').pathname;
-  if (upstream && (pathname.startsWith('/v1/') || pathname.startsWith('/media/'))) {
-    proxyToApi(request, response);
-    return;
-  }
-  const routed = route({ request: { uri: pathname } });
-  const uri = routed.request?.uri ?? routed.uri ?? pathname;
-  const file = join(root, uri);
+function setPageHeaders(response) {
   response.setHeader('content-security-policy', csp);
   response.setHeader('x-content-type-options', 'nosniff');
   response.setHeader('referrer-policy', 'strict-origin-when-cross-origin');
-  // The rest of CloudFront's response headers policy. HSTS only over https, and without
-  // preload: a host's own address (such as *.up.railway.app) is not ours to preload.
   response.setHeader('x-frame-options', 'DENY');
   response.setHeader(
     'permissions-policy',
@@ -170,6 +169,15 @@ createServer((request, response) => {
   );
   if (secure)
     response.setHeader('strict-transport-security', 'max-age=63072000; includeSubDomains');
+}
+
+function serveStatic(request, response, pathname) {
+  const routed = route({ request: { uri: pathname } });
+  const uri = routed.request?.uri ?? routed.uri ?? pathname;
+  const file = join(root, uri);
+  // CloudFront's response headers policy. HSTS only over https, and without preload: a
+  // host's own address (such as *.up.railway.app) is not ours to preload.
+  setPageHeaders(response);
   if (!file.startsWith(root) || !existsSync(file) || statSync(file).isDirectory()) {
     response.statusCode = 404;
     response.end('Not found');
@@ -192,6 +200,88 @@ createServer((request, response) => {
   if (compressible.has(extension)) response.setHeader('vary', 'accept-encoding');
   if (encoding) response.setHeader('content-encoding', encoding);
   response.end(compressed(file, encoding));
+}
+
+const shareCache = createShareCache();
+
+/** The shared profile from the API over the private network, or null for any failure. */
+function fetchShared(code, client) {
+  return new Promise((resolve) => {
+    const headers = { accept: 'application/json', host: upstream.host, 'x-forwarded-for': client };
+    if (process.env.PROXY_SECRET) headers['x-proxy-secret'] = process.env.PROXY_SECRET;
+    const outgoing = forward(
+      {
+        hostname: upstream.hostname,
+        port: upstream.port,
+        path: `/v1/shared/${code}`,
+        headers,
+      },
+      (answer) => {
+        if (answer.statusCode !== 200) {
+          answer.resume();
+          resolve(null);
+          return;
+        }
+        let text = '';
+        answer.setEncoding('utf8');
+        answer.on('data', (chunk) => (text += chunk));
+        answer.on('end', () => {
+          try {
+            resolve(JSON.parse(text));
+          } catch {
+            resolve(null);
+          }
+        });
+      },
+    );
+    outgoing.setTimeout(3_000, () => outgoing.destroy());
+    outgoing.on('error', () => resolve(null));
+    outgoing.end();
+  });
+}
+
+/**
+ * A shared talent page with its own link preview (ADR-043). The app then loads as usual;
+ * any failure here serves the plain page instead.
+ */
+async function serveShared(request, response, pathname, code) {
+  let page = shareCache.get(code);
+  if (page === undefined) {
+    const chain = String(request.headers['x-forwarded-for'] ?? '').split(',');
+    const client = chain.at(-1)?.trim() || request.socket.remoteAddress || '';
+    const profile = await fetchShared(code, client);
+    const origin =
+      process.env.PUBLIC_ORIGIN ?? `${secure ? 'https' : 'http'}://${request.headers.host}`;
+    page = profile
+      ? withShareTags(compressed(join(root, 'index.html'), null).toString('utf8'), profile, {
+          url: `${origin}${pathname}`,
+          origin,
+        })
+      : null;
+    shareCache.set(code, page);
+  }
+  if (!page) {
+    serveStatic(request, response, pathname);
+    return;
+  }
+  setPageHeaders(response);
+  response.setHeader('content-type', 'text/html; charset=utf-8');
+  response.setHeader('cache-control', 'no-cache');
+  response.end(page);
+}
+
+createServer((request, response) => {
+  const pathname = new URL(request.url ?? '/', 'http://localhost').pathname;
+  if (upstream && (pathname.startsWith('/v1/') || pathname.startsWith('/media/'))) {
+    proxyToApi(request, response);
+    return;
+  }
+  const shared = upstream ? pathname.match(SHARED_PATH) : null;
+  if (shared) {
+    void serveShared(request, response, pathname, shared[1]);
+    return;
+  }
+  serveStatic(request, response, pathname);
   // '::' also accepts IPv4: Railway's private network is IPv6, its public edge either.
 }).listen(port, process.env.HOST ?? '::', () => {
   console.log(`Serving dist/ like CloudFront on http://localhost:${String(port)}`);

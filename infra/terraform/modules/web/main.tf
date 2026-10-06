@@ -100,7 +100,7 @@ resource "aws_cloudfront_function" "spa_routes" {
   comment = "Serve index.html for app routes"
   publish = true
   code    = <<-JS
-    var ROOT_FILES = /^\/(index\.html|sw\.js(\.map)?|workbox-[\w-]+\.js(\.map)?|manifest\.webmanifest|favicon\.svg|apple-touch-icon\.png|robots\.txt)$/;
+    var ROOT_FILES = /^\/(index\.html|sw\.js(\.map)?|workbox-[\w-]+\.js(\.map)?|manifest\.webmanifest|favicon\.svg|apple-touch-icon\.png|og\.png|robots\.txt)$/;
     function handler(event) {
       var request = event.request;
       var uri = request.uri;

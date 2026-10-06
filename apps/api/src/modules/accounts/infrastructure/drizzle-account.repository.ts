@@ -1,4 +1,4 @@
-import { and, asc, eq, lte } from 'drizzle-orm';
+import { and, asc, eq, isNull, lte } from 'drizzle-orm';
 import { AccountEvents } from '../domain/account.events.js';
 import type { EventRecorder } from '../../../platform/domain-event.js';
 import type { DrizzleUnitOfWork } from '../../../platform/database/drizzle-unit-of-work.js';
@@ -94,6 +94,17 @@ export class DrizzleAccountRepository implements AccountRepository {
       throw error;
     }
     await this.events.record(account.pullEvents());
+  }
+
+  async findUnverified(limit: number): Promise<Account[]> {
+    const rows = await this.uow
+      .executor()
+      .select()
+      .from(users)
+      .where(isNull(users.emailVerifiedAt))
+      .orderBy(asc(users.createdAt))
+      .limit(limit);
+    return rows.map(toDomain);
   }
 
   async findDueForDeletion(now: Date, limit: number): Promise<Account[]> {

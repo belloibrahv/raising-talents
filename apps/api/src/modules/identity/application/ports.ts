@@ -51,4 +51,6 @@ export interface AccountDirectory {
 export interface IdentitySettings {
   readonly refreshTokenTtlDays: number;
   readonly breachedPasswordCheck: boolean;
+  /** 'off' verifies new accounts at sign-up without sending a code (ADR-045). */
+  readonly emailVerification?: 'required' | 'off';
 }

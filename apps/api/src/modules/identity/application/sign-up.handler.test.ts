@@ -60,6 +60,15 @@ describe('SignUpHandler', () => {
     expect(!result.ok && result.error.code).toBe(ErrorCode.WeakPassword);
   });
 
+  it('verifies the account at once and sends nothing when verification is off (ADR-045)', async () => {
+    const off = await createIdentityHarness({ emailVerification: 'off' });
+    const result = await off.signUp.execute(AMAKA);
+    if (!result.ok) throw new Error(result.error.message);
+    const account = await off.accountRepository.findByEmail(AMAKA.email);
+    expect(account?.snapshot().emailVerifiedAt).not.toBeNull();
+    expect(off.events.ofType(IdentityEvents.EmailVerificationRequested)).toHaveLength(0);
+  });
+
   it('limits sign-ups from one IP address', async () => {
     for (let index = 0; index < 10; index += 1) {
       await harness.signUp.execute({ ...AMAKA, email: `scout${index}@example.com` });

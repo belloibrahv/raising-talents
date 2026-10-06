@@ -32,6 +32,13 @@ export class InMemoryAccountRepository implements AccountRepository {
     await this.events.record(events);
   }
 
+  async findUnverified(limit: number): Promise<Account[]> {
+    return [...this.rows.values()]
+      .filter((row) => row.emailVerifiedAt === null)
+      .slice(0, limit)
+      .map((row) => Account.restore(row));
+  }
+
   async findDueForDeletion(now: Date, limit: number): Promise<Account[]> {
     return [...this.rows.values()]
       .filter(

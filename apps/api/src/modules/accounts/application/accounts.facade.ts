@@ -212,6 +212,24 @@ export class AccountsFacade {
     return account.ensureCanSignIn();
   }
 
+  /**
+   * With email verification off (ADR-045), verifies everyone who signed up before. Each one
+   * goes through the domain, so search and notifications hear about it as usual.
+   * Returns how many were verified.
+   */
+  async verifyAllPending(batch = 200): Promise<number> {
+    let total = 0;
+    for (;;) {
+      const pending = await this.accounts.findUnverified(batch);
+      if (pending.length === 0) return total;
+      for (const account of pending) {
+        const result = await this.markEmailVerifiedHandler.execute(account.id);
+        if (!result.ok) throw new Error(result.error.message);
+        total += 1;
+      }
+    }
+  }
+
   markEmailVerified(userId: string): Promise<Result<void, DomainError>> {
     return this.markEmailVerifiedHandler.execute(userId);
   }

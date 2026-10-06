@@ -85,6 +85,7 @@ const infrastructureProviders: Provider[] = [
     useFactory: (config: AppConfig): IdentitySettings => ({
       refreshTokenTtlDays: config.REFRESH_TOKEN_TTL_DAYS,
       breachedPasswordCheck: config.BREACHED_PASSWORD_CHECK,
+      emailVerification: config.EMAIL_VERIFICATION,
     }),
   },
   {

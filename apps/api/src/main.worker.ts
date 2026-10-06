@@ -20,6 +20,9 @@ import { PRIVACY } from './modules/privacy/application/privacy.use-cases.js';
 import { SEARCH } from './modules/search/application/search.use-cases.js';
 import { TALENT } from './modules/talent-profiles/application/talent-profile.tokens.js';
 import { WorkerModule } from './worker.module.js';
+import type { AccountsFacade } from './modules/accounts/application/accounts.facade.js';
+import { ACCOUNTS } from './modules/accounts/application/accounts.tokens.js';
+import type { UnitOfWork } from './platform/unit-of-work.js';
 
 const config = loadConfig();
 const logger = createLogger(config, 'worker');
@@ -56,6 +59,21 @@ const scheduler = new JobScheduler(
 );
 scheduler.start();
 logger.info('worker process started');
+
+// With email verification off (ADR-045), people who signed up before still wait for a code
+// that will never come: verify them once, through the domain, so search hears about it.
+if (config.EMAIL_VERIFICATION === 'off') {
+  const accounts = app.get<AccountsFacade>(ACCOUNTS.Facade);
+  void app
+    .get<UnitOfWork>(PLATFORM.UnitOfWork)
+    .run(() => accounts.verifyAllPending())
+    .then((verified) => {
+      if (verified > 0) logger.warn({ verified }, 'email verification is off: accounts verified');
+    })
+    .catch((error: unknown) => {
+      logger.error({ err: error }, 'verifying pending accounts failed');
+    });
+}
 
 process.on('unhandledRejection', (reason) => {
   logger.error({ err: reason }, 'Unhandled rejection in worker');

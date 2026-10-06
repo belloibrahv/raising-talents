@@ -23,6 +23,7 @@ import { WorkerModule } from './worker.module.js';
 import type { AccountsFacade } from './modules/accounts/application/accounts.facade.js';
 import { ACCOUNTS } from './modules/accounts/application/accounts.tokens.js';
 import type { UnitOfWork } from './platform/unit-of-work.js';
+import { VerifyPendingAccountsJob } from './modules/accounts/application/verify-pending-accounts.job.js';
 
 const config = loadConfig();
 const logger = createLogger(config, 'worker');
@@ -47,33 +48,31 @@ const database = app.get<Database>(PLATFORM.Database);
 const relay = new OutboxRelay(database, dispatcher, logger, errors);
 relay.start();
 
+// With email verification off, people still waiting for a code are verified (ADR-045).
+const verifyPending =
+  config.EMAIL_VERIFICATION === 'off'
+    ? new VerifyPendingAccountsJob(
+        app.get<AccountsFacade>(ACCOUNTS.Facade),
+        app.get<UnitOfWork>(PLATFORM.UnitOfWork),
+        logger,
+      )
+    : null;
+
 const scheduler = new JobScheduler(
   [
     app.get<ScheduledJob>(MEDIA.AbandonedUploads),
     app.get<ScheduledJob>(PRIVACY.Erasure),
     app.get<ScheduledJob>(NOTIFICATIONS.Prune),
+    ...(verifyPending ? [verifyPending] : []),
   ],
   app.get<JobLock>(PLATFORM.JobLock),
   logger,
   errors,
 );
 scheduler.start();
+// Straight away too, rather than ten minutes after a deploy.
+if (verifyPending) void scheduler.runOnce(verifyPending);
 logger.info('worker process started');
-
-// With email verification off (ADR-045), people who signed up before still wait for a code
-// that will never come: verify them once, through the domain, so search hears about it.
-if (config.EMAIL_VERIFICATION === 'off') {
-  const accounts = app.get<AccountsFacade>(ACCOUNTS.Facade);
-  void app
-    .get<UnitOfWork>(PLATFORM.UnitOfWork)
-    .run(() => accounts.verifyAllPending())
-    .then((verified) => {
-      if (verified > 0) logger.warn({ verified }, 'email verification is off: accounts verified');
-    })
-    .catch((error: unknown) => {
-      logger.error({ err: error }, 'verifying pending accounts failed');
-    });
-}
 
 process.on('unhandledRejection', (reason) => {
   logger.error({ err: reason }, 'Unhandled rejection in worker');

@@ -65,7 +65,7 @@ describe('SignUpHandler', () => {
     const result = await off.signUp.execute(AMAKA);
     if (!result.ok) throw new Error(result.error.message);
     const account = await off.accountRepository.findByEmail(AMAKA.email);
-    expect(account?.snapshot().emailVerifiedAt).not.toBeNull();
+    expect(account?.snapshot().emailVerifiedAt).toBeInstanceOf(Date);
     expect(off.events.ofType(IdentityEvents.EmailVerificationRequested)).toHaveLength(0);
   });
 

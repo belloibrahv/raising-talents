@@ -37,7 +37,8 @@ export const SIGN_UP_LIMIT = { perIp: 10, windowSeconds: 3600 } as const;
 
 /**
  * Creates the account, the password credential and the first session in one
- * transaction, and asks the worker to email a verification code.
+ * transaction, and asks the worker to email a verification code (or, with email
+ * verification off, verifies the account at once).
  */
 export class SignUpHandler {
   constructor(
@@ -87,14 +88,20 @@ export class SignUpHandler {
         command.deviceId,
         command.deviceLabel,
       );
-      await this.events.record([
-        {
-          type: IdentityEvents.EmailVerificationRequested,
-          aggregateId: created.value.id,
-          occurredAt: now,
-          payload: {},
-        },
-      ]);
+      if (this.settings.emailVerification === 'off') {
+        // Development and testing without email (ADR-045): verified at once, no code sent.
+        const verified = await this.directory.markEmailVerified(created.value.id);
+        if (!verified.ok) return verified;
+      } else {
+        await this.events.record([
+          {
+            type: IdentityEvents.EmailVerificationRequested,
+            aggregateId: created.value.id,
+            occurredAt: now,
+            payload: {},
+          },
+        ]);
+      }
       return ok(session);
     });
     if (!started.ok) return started;

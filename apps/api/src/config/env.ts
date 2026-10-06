@@ -53,6 +53,11 @@ const envSchema = z.object({
   EMAIL_FROM: z.string().min(3).default('Raising Talents <no-reply@raisingtalents.app>'),
 
   BREACHED_PASSWORD_CHECK: booleanFromString.default(true),
+  /**
+   * 'off' while developing and testing without email (ADR-045): new accounts are verified at
+   * sign-up and no code is sent. Turn it back on before launch.
+   */
+  EMAIL_VERIFICATION: z.enum(['required', 'off']).default('required'),
 
   MEDIA_BUCKET: z.string().min(3),
   /** CloudFront in AWS. Ready images are served from MEDIA_CDN_URL/media/... */

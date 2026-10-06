@@ -14,6 +14,8 @@ export interface AccountRepository {
   findByEmail(email: string): Promise<Account | null>;
   emailExists(email: string): Promise<boolean>;
   save(account: Account): Promise<void>;
+  /** Accounts whose email is not verified yet, for turning verification off (ADR-045). */
+  findUnverified(limit: number): Promise<Account[]>;
   /** Accounts whose grace period has ended, oldest first. */
   findDueForDeletion(now: Date, limit: number): Promise<Account[]>;
   /** Erases the account; the database removes everything that belongs to it. Records AccountDeleted. */

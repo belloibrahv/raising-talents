@@ -88,7 +88,12 @@ export class UpdateMyTalentProfileHandler {
         if (!valid.ok) return valid;
 
         await this.profiles.save(profile);
-        if (applied.value.becameComplete) {
+        // Finishing the steps after the photo was sent also ends onboarding (ADR-044).
+        const finishing =
+          applied.value.becameComplete ||
+          (profile.canFinishOnboarding &&
+            (await this.accounts.profileContext(command.userId))?.status === 'onboarding');
+        if (finishing) {
           const completed = await this.accounts.completeOnboarding(command.userId);
           if (!completed.ok) return completed;
         }

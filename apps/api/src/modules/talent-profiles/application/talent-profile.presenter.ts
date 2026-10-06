@@ -29,6 +29,7 @@ export function toMyTalentProfile(
     genderSearchable: props.genderSearchable,
     publicLink: props.publicLink,
     shareCode: props.shareCode,
+    photoInReview: props.pendingAvatarMediaId !== null,
     avatarMediaId: props.avatarMediaId,
     avatarUrls: avatarOf(props, urls),
     isComplete: profile.isComplete,

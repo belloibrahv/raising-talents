@@ -58,6 +58,23 @@ export async function refreshMe(): Promise<void> {
 }
 
 /**
+ * Waits for the worker to finish onboarding after a photo is sent for review (ADR-044),
+ * then updates the session so the app opens. Gives up after a few seconds: the next
+ * visit picks it up anyway.
+ */
+export async function waitUntilActive(tries = 10, delayMs = 1000): Promise<boolean> {
+  for (let attempt = 0; attempt < tries; attempt += 1) {
+    const me = await api.call('me.get');
+    if (me.status !== 'onboarding') {
+      session.signedIn(me);
+      return true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+  return false;
+}
+
+/**
  * Saves one step with the version from the last read. If another device saved first,
  * the API refuses with 412; the latest profile is loaded so the person can check it.
  */

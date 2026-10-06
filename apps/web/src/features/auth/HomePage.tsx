@@ -133,6 +133,28 @@ function TalentHome() {
 
       <Attention />
 
+      {data?.photoInReview ? (
+        <p className="flex items-start gap-3 rounded-2xl border bg-card p-4 text-sm">
+          <Clock3 aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+          <span>
+            <span className="block font-semibold">{t('home.photoInReview')}</span>
+            {t('home.photoInReviewBody')}
+          </span>
+        </p>
+      ) : data && !data.avatarUrls ? (
+        <Link
+          to="/onboarding/talent/photo"
+          className="flex items-center gap-3 rounded-2xl border-2 border-destructive/40 bg-destructive-surface p-4 text-sm text-foreground no-underline"
+        >
+          <ImagePlus aria-hidden="true" className="size-5 shrink-0 text-destructive" />
+          <span className="flex-1">
+            <span className="block font-semibold">{t('home.photoNeeded')}</span>
+            {t('home.photoNeededBody')}
+          </span>
+          <ArrowRight aria-hidden="true" className="size-5" />
+        </Link>
+      ) : null}
+
       {data ? <ShareCard profile={data} /> : null}
 
       <section className="stack gap-4" aria-labelledby="portfolio-heading">

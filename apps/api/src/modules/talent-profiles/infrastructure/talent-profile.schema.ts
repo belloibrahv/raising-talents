@@ -39,6 +39,7 @@ export const profiles = talentSchema.table(
     publicLink: boolean('public_link').notNull().default(false),
     shareCode: text('share_code'),
     avatarMediaId: uuid('avatar_media_id'),
+    pendingAvatarMediaId: uuid('pending_avatar_media_id'),
     // Category-specific fields (height, playing position), validated per category once the list is agreed.
     attributes: jsonb('attributes').$type<Record<string, unknown>>().notNull().default({}),
     isComplete: boolean('is_complete').notNull().default(false),

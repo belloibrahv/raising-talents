@@ -25,6 +25,11 @@ export interface TalentProfileProps {
    */
   readonly shareCode: string | null;
   readonly avatarMediaId: string | null;
+  /**
+   * A photo sent for review and not decided yet. With every other step done, it is enough
+   * to finish onboarding; agents still see the profile only once a photo is approved.
+   */
+  readonly pendingAvatarMediaId: string | null;
   readonly completedAt: Date | null;
   readonly verifiedAt: Date | null;
   readonly version: number;
@@ -80,6 +85,7 @@ export class TalentProfile {
         publicLink: false,
         shareCode: null,
         avatarMediaId: null,
+        pendingAvatarMediaId: null,
         completedAt: null,
         verifiedAt: null,
         version: 0,
@@ -121,6 +127,15 @@ export class TalentProfile {
 
   get isComplete(): boolean {
     return this.missing().length === 0;
+  }
+
+  /**
+   * Every step is done and a photo is approved or waiting for a moderator. The account can
+   * then leave onboarding; visibility to agents still waits for isComplete.
+   */
+  get canFinishOnboarding(): boolean {
+    const photo = this.props.avatarMediaId !== null || this.props.pendingAvatarMediaId !== null;
+    return photo && this.missing().every((field) => field === 'avatar');
   }
 
   /** Applies one wizard step. Returns whether this change completed the profile for the first time. */
@@ -173,10 +188,36 @@ export class TalentProfile {
     this.props = {
       ...this.props,
       avatarMediaId: mediaId,
+      pendingAvatarMediaId:
+        this.props.pendingAvatarMediaId === mediaId ? null : this.props.pendingAvatarMediaId,
       version: this.props.version + 1,
       updatedAt: now,
     };
     return { becameComplete: this.recordChange(now) };
+  }
+
+  /** A new photo is waiting for a moderator. Returns whether onboarding can now finish. */
+  avatarHeldForReview(mediaId: string, now: Date): { canFinishOnboarding: boolean } {
+    this.props = {
+      ...this.props,
+      pendingAvatarMediaId: mediaId,
+      version: this.props.version + 1,
+      updatedAt: now,
+    };
+    this.recordChange(now);
+    return { canFinishOnboarding: this.canFinishOnboarding };
+  }
+
+  /** The waiting photo was turned down: nothing is waiting any more. */
+  avatarRejected(mediaId: string, now: Date): void {
+    if (this.props.pendingAvatarMediaId !== mediaId) return;
+    this.props = {
+      ...this.props,
+      pendingAvatarMediaId: null,
+      version: this.props.version + 1,
+      updatedAt: now,
+    };
+    this.recordChange(now);
   }
 
   pullEvents(): DomainEvent[] {

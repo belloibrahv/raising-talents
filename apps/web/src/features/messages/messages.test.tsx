@@ -23,6 +23,10 @@ const agentSide = {
   jobTitle: 'Talent scout',
   city: 'Lagos',
   verified: true,
+  specializations: ['Music', 'Dance'],
+  website: 'https://www.eko-talent.example/team',
+  verifiedAt: '2026-09-01T09:00:00.000Z',
+  memberSince: '2026-08-01T09:00:00.000Z',
 };
 const talentSide = {
   kind: 'talent' as const,
@@ -126,7 +130,14 @@ describe('messages', () => {
       }),
     ).toBeVisible();
     expect(screen.getByRole('log')).toHaveTextContent(INTRO);
-    expect(screen.getByText(/never pay a fee to be represented/)).toBeVisible();
+    const agency = screen.getByRole('region', { name: 'About Eko Talent Partners' });
+    expect(agency).toHaveTextContent('Verified agency since September 2026');
+    expect(agency).toHaveTextContent('Music');
+    expect(within(agency).getByRole('link', { name: /eko-talent\.example/ })).toHaveAttribute(
+      'rel',
+      'noopener noreferrer nofollow',
+    );
+    expect(agency).toHaveTextContent(/never ask you to pay to be represented/);
     await expectNoAxeViolations();
 
     await user.click(screen.getByRole('button', { name: 'Accept and reply' }));

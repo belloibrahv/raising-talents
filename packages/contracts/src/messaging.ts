@@ -65,6 +65,13 @@ export const counterpartSchema = z
       jobTitle: z.string(),
       city: z.string().nullable(),
       verified: z.boolean(),
+      /** What talent need to judge a request: what the agency works in, and where to check it. */
+      specializations: z.array(z.string()),
+      website: z.string().nullable(),
+      /** When the agency was verified, if it is. */
+      verifiedAt: isoDateTimeSchema.nullable(),
+      /** When the agent joined Raising Talents. */
+      memberSince: isoDateTimeSchema,
     }),
   ])
   .meta({ id: 'Counterpart' });

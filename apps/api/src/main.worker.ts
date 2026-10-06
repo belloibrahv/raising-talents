@@ -23,6 +23,7 @@ import { WorkerModule } from './worker.module.js';
 import type { AccountsFacade } from './modules/accounts/application/accounts.facade.js';
 import { ACCOUNTS } from './modules/accounts/application/accounts.tokens.js';
 import type { UnitOfWork } from './platform/unit-of-work.js';
+import { applyStaffGrants } from './ops/staff-grants.js';
 import { VerifyPendingAccountsJob } from './modules/accounts/application/verify-pending-accounts.job.js';
 
 const config = loadConfig();
@@ -73,6 +74,26 @@ scheduler.start();
 // Straight away too, rather than ten minutes after a deploy.
 if (verifyPending) void scheduler.runOnce(verifyPending);
 logger.info('worker process started');
+
+// Operators make moderators and admins here on Railway, where there is no shell (STAFF_GRANT).
+if (process.env['STAFF_GRANT']) {
+  await applyStaffGrants(
+    process.env['STAFF_GRANT'],
+    app.get<AccountsFacade>(ACCOUNTS.Facade),
+    app.get<UnitOfWork>(PLATFORM.UnitOfWork),
+    logger,
+  );
+}
+
+// Demo data for testing a live environment, switched on for one deploy (docs/runbooks/demo-data.md).
+const seedDemo = process.env['SEED_DEMO'];
+if (seedDemo === 'run' || seedDemo === 'remove') {
+  const { removeDemoData, runDemoSeed } = await import('./ops/demo-seed.js');
+  const task = seedDemo === 'run' ? runDemoSeed(app, logger) : removeDemoData(app, logger);
+  void task.catch((error: unknown) => {
+    logger.error({ err: error }, `demo data ${seedDemo} failed`);
+  });
+}
 
 process.on('unhandledRejection', (reason) => {
   logger.error({ err: reason }, 'Unhandled rejection in worker');

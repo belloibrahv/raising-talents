@@ -23,9 +23,11 @@ export const portfolioItems = portfolioSchema.table(
     talentId: uuid('talent_id')
       .notNull()
       .references(() => portfolios.talentId, { onDelete: 'cascade' }),
+    // An item is nothing without its file. Erasing an account removes both along two
+    // cascade paths at once; without this, the file could not go while the item remained.
     mediaId: uuid('media_id')
       .notNull()
-      .references(() => assets.id),
+      .references(() => assets.id, { onDelete: 'cascade' }),
     kind: portfolioItemKindEnum('kind').notNull(),
     caption: text('caption').notNull().default(''),
     position: integer('position').notNull(),

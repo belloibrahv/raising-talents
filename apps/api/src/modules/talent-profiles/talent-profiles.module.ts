@@ -21,7 +21,10 @@ import {
   TalentDirectory,
 } from './application/get-talent-profile.queries.js';
 import type { ProfileAccounts } from './application/ports.js';
-import { SetApprovedAvatarHandler } from './application/set-approved-avatar.handler.js';
+import {
+  AvatarReviewHandler,
+  SetApprovedAvatarHandler,
+} from './application/set-approved-avatar.handler.js';
 import type { AvatarUrls } from './application/talent-profile.presenter.js';
 import { TALENT } from './application/talent-profile.tokens.js';
 import { UpdateMyTalentProfileHandler } from './application/update-my-talent-profile.handler.js';
@@ -113,9 +116,12 @@ const AVATAR_URLS = Symbol('AvatarUrls');
         clock: Clock,
       ): ModuleEventHandlers => {
         const setAvatar = new SetApprovedAvatarHandler(repo, accounts, uow, clock);
+        const review = new AvatarReviewHandler(repo, accounts, uow, clock);
         return {
           register: (dispatcher) => {
             dispatcher.on(MediaEvents.Ready, (event) => setAvatar.handle(event));
+            dispatcher.on(MediaEvents.Held, (event) => review.held(event));
+            dispatcher.on(MediaEvents.Rejected, (event) => review.rejected(event));
           },
         };
       },

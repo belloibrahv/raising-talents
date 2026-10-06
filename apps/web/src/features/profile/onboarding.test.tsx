@@ -46,6 +46,7 @@ class FakeTalentProfile {
       genderSearchable: false,
       publicLink: false,
       shareCode: null,
+      photoInReview: false,
       avatarMediaId: null,
       version: 0,
     };
@@ -83,6 +84,7 @@ class FakeTalentProfile {
       genderSearchable: p['genderSearchable'] ?? false,
       publicLink: p['publicLink'] ?? false,
       shareCode: null,
+      photoInReview: false,
       avatarMediaId: p['avatarMediaId'] ?? null,
       avatarUrls: p['avatarMediaId']
         ? {
@@ -315,6 +317,83 @@ describe('talent onboarding', () => {
     await waitFor(() => {
       expect(calls.some((call) => call.method === 'GET' && call.path === '/v1/me')).toBe(true);
     });
+  });
+
+  it('lets the talent carry on while a moderator checks the photo (ADR-044)', async () => {
+    const fake = new FakeTalentProfile();
+    fake.profile = {
+      userId: USER,
+      handle: 'ngozi.adeyemi',
+      displayName: 'Ngozi Adeyemi',
+      categorySlug: 'music',
+      subcategorySlugs: ['singer'],
+      citySlug: 'ng-lagos',
+      bio: 'Afro-soul singer. Backing vocals on two albums and a residency in Lekki.',
+      version: 4,
+    };
+    let meChecks = 0;
+    vi.stubGlobal('XMLHttpRequest', FakeUploadRequest);
+    stubApi({
+      '/v1/auth/web/refresh': () => signedIn(),
+      '/v1/taxonomy': () => Response.json(TAXONOMY),
+      'GET /v1/me/talent-profile': fake.get,
+      'POST /v1/media/upload-intents': () =>
+        Response.json(
+          {
+            mediaId: AVATAR,
+            upload: { method: 'POST', url: 'https://uploads.test/bucket', fields: {} },
+            expiresAt: '2026-10-02T09:10:00.000Z',
+          },
+          { status: 201 },
+        ),
+      [`POST /v1/media/${AVATAR}/complete`]: () =>
+        Response.json(
+          {
+            id: AVATAR,
+            purpose: 'avatar',
+            kind: 'image',
+            status: 'processing',
+            urls: null,
+            video: null,
+            rejectionReason: null,
+            createdAt: '2026-10-02T09:00:00.000Z',
+          },
+          { status: 202 },
+        ),
+      [`GET /v1/media/${AVATAR}`]: () =>
+        Response.json({
+          id: AVATAR,
+          purpose: 'avatar',
+          kind: 'image',
+          status: 'held_for_review',
+          urls: null,
+          video: null,
+          rejectionReason: null,
+          createdAt: '2026-10-02T09:00:00.000Z',
+        }),
+      // The worker finishes onboarding a moment after the photo is held.
+      'GET /v1/me': () => {
+        meChecks += 1;
+        return Response.json(meFor({ status: meChecks > 1 ? 'active' : 'onboarding' }));
+      },
+    });
+    const router = renderAt('/onboarding/talent/photo');
+    const user = userEvent.setup({ delay: null });
+    await user.upload(
+      await screen.findByLabelText('Choose a photo'),
+      new File(['jpeg-bytes'], 'ngozi.jpg', { type: 'image/jpeg' }),
+    );
+    expect(
+      await screen.findByText('Your photo is with a moderator', {}, { timeout: 10_000 }),
+    ).toBeVisible();
+    await user.click(screen.getByRole('button', { name: 'Continue to Raising Talents' }));
+    await waitFor(
+      () => {
+        expect(router.state.location.pathname).toBe('/home');
+      },
+      { timeout: 10_000 },
+    );
+    expect(meChecks).toBeGreaterThan(1);
   });
 
   it('refuses a video for the profile photo before uploading anything', async () => {

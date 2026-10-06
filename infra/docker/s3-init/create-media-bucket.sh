@@ -7,7 +7,7 @@ BUCKET=raising-talents-media-local
 awslocal s3 mb "s3://$BUCKET"
 awslocal s3api put-bucket-cors --bucket "$BUCKET" --cors-configuration '{
   "CORSRules": [{
-    "AllowedOrigins": ["http://localhost:5173", "http://localhost:4173"],
+    "AllowedOrigins": ["http://localhost:5173", "http://localhost:4173", "http://localhost:4180"],
     "AllowedMethods": ["POST", "GET"],
     "AllowedHeaders": ["*"],
     "MaxAgeSeconds": 600

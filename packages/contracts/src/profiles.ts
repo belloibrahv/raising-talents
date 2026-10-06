@@ -77,6 +77,8 @@ export const myTalentProfileSchema = z
     publicLink: z.boolean(),
     /** The code in the shared link, once the link has ever been turned on (ADR-042). */
     shareCode: z.string().nullable(),
+    /** A photo is waiting for a moderator; agents see the profile once one is approved. */
+    photoInReview: z.boolean(),
     avatarMediaId: idSchema.nullable(),
     avatarUrls: imageUrlsSchema.nullable(),
     isComplete: z.boolean(),

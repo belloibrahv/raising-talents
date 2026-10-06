@@ -47,3 +47,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-041](041-live-updates-over-server-sent-events.md)                  | Live updates over server-sent events                                 | Accepted                          |
 | [ADR-042](042-shareable-talent-pages.md)                                | Shareable talent pages                                               | Accepted                          |
 | [ADR-043](043-link-previews.md)                                         | Link previews                                                        | Accepted                          |
+| [ADR-044](044-finishing-onboarding-while-a-photo-is-checked.md)         | Finishing onboarding while a photo is checked                        | Accepted                          |

@@ -1,7 +1,7 @@
 import type { MyTalentProfile } from '@rt/contracts';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { api } from '../../shared/api/client';
@@ -14,8 +14,8 @@ import {
 } from '../../shared/media/upload';
 import { useMediaStatus } from '../../shared/media/use-media';
 import { FormMessage } from '../../shared/ui/FormMessage';
-import { keys, refreshMe } from './queries';
-import { buttonLink } from '../../shared/ui/Button';
+import { keys, refreshMe, waitUntilActive } from './queries';
+import { Button, buttonLink } from '../../shared/ui/Button';
 import { Progress } from '@/components/ui/progress';
 
 type Phase =
@@ -88,6 +88,8 @@ export function AvatarStep({ profile }: { readonly profile: MyTalentProfile }) {
       status !== 'failed' &&
       status !== 'held_for_review');
   const shown = preview ?? profile.avatarUrls?.medium ?? null;
+  // Held now, or held on an earlier visit: either way the talent can carry on (ADR-044).
+  const inReview = status === 'held_for_review' || (phase.kind === 'idle' && profile.photoInReview);
 
   return (
     <div className="stack">
@@ -109,9 +111,7 @@ export function AvatarStep({ profile }: { readonly profile: MyTalentProfile }) {
       (status === undefined || status === 'processing' || status === 'scanning' || ready) ? (
         <p role="status">{t('onboarding.photo.checking')}</p>
       ) : null}
-      {status === 'held_for_review' ? (
-        <FormMessage tone="success">{t('onboarding.photo.held')}</FormMessage>
-      ) : null}
+      {inReview ? <ContinueWhileInReview /> : null}
       <FormMessage tone="error">
         {phase.kind === 'error'
           ? phase.message
@@ -121,7 +121,7 @@ export function AvatarStep({ profile }: { readonly profile: MyTalentProfile }) {
               ? t('media.uploadFailed')
               : null}
       </FormMessage>
-      {done ? (
+      {done && !inReview ? (
         <>
           <FormMessage tone="success">{t('onboarding.photo.done')}</FormMessage>
           <Link className={buttonLink('primary')} to="/portfolio">
@@ -136,6 +136,46 @@ export function AvatarStep({ profile }: { readonly profile: MyTalentProfile }) {
           onPick={(file) => void pick(file)}
         />
       )}
+    </div>
+  );
+}
+
+/** The photo is with a moderator: the talent does not have to wait for them. */
+function ContinueWhileInReview() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [state, setState] = useState<'idle' | 'opening' | 'slow'>('idle');
+  return (
+    <div className="stack gap-3 rounded-2xl border-2 border-spotlight bg-spotlight/10 p-5">
+      <p className="m-0 font-semibold">{t('onboarding.photo.heldTitle')}</p>
+      <p className="m-0 text-sm text-muted-foreground">{t('onboarding.photo.heldBody')}</p>
+      {state === 'slow' ? (
+        <FormMessage tone="error">{t('onboarding.photo.slow')}</FormMessage>
+      ) : null}
+      <div>
+        <Button
+          loading={state === 'opening'}
+          onClick={() => {
+            setState('opening');
+            void waitUntilActive()
+              .then(async (active) => {
+                if (!active) {
+                  setState('slow');
+                  return;
+                }
+                // Home must see the photo as waiting, not as missing.
+                await queryClient.invalidateQueries({ queryKey: keys.talentProfile });
+                void navigate('/home');
+              })
+              // Offline or the API failed: the same "try again" as a slow worker.
+              .catch(() => {
+                setState('slow');
+              });
+          }}
+        >
+          {t('onboarding.photo.continue')}
+        </Button>
+      </div>
     </div>
   );
 }

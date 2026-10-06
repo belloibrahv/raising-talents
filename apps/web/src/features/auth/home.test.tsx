@@ -24,6 +24,7 @@ const talentProfile = {
   genderSearchable: false,
   publicLink: false,
   shareCode: null,
+  photoInReview: false,
   avatarMediaId: null,
   avatarUrls: null,
   isComplete: true,

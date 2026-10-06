@@ -48,6 +48,7 @@ const profile = {
   genderSearchable: false,
   publicLink: false,
   shareCode: null as string | null,
+  photoInReview: false,
   avatarMediaId: null,
   avatarUrls: null,
   isComplete: true,

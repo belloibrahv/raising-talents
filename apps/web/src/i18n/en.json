@@ -301,6 +301,10 @@
     "yourShortlist": "Your shortlist",
     "shortlistEmpty": "Save talent from their profile to compare them here.",
     "verifiedChip": "Verified agency",
+    "photoInReview": "Your photo is with a moderator",
+    "photoInReviewBody": "Agents will see your profile as soon as it is approved. Keep adding your work in the meantime.",
+    "photoNeeded": "Add a profile photo",
+    "photoNeededBody": "Agents only see profiles with an approved photo. Your last one was not approved.",
     "pendingChip": "Verification pending"
   },
   "restore": {
@@ -481,6 +485,10 @@
       "current": "Your current profile photo",
       "checking": "Checking your photo. This usually takes a few seconds.",
       "held": "A moderator is checking your photo. We will let you know when it is approved.",
+      "heldTitle": "Your photo is with a moderator",
+      "heldBody": "You do not have to wait. Start adding your work now: agents will see your profile as soon as the photo is approved, and we will let you know.",
+      "continue": "Continue to Raising Talents",
+      "slow": "This is taking longer than usual. Try again in a moment.",
       "done": "Your profile is complete. Agents can find you now.",
       "toPortfolio": "Add to your portfolio"
     },

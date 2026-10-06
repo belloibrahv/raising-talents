@@ -36,3 +36,49 @@ export class SetApprovedAvatarHandler {
     });
   }
 }
+
+/**
+ * Runs in the worker when an avatar is held for a moderator or turned down. A held photo is
+ * enough to leave onboarding when every other step is done (ADR-044); a rejected one stops
+ * waiting, so the talent is asked for another.
+ */
+export class AvatarReviewHandler {
+  constructor(
+    private readonly profiles: TalentProfileRepository,
+    private readonly accounts: ProfileAccounts,
+    private readonly uow: UnitOfWork,
+    private readonly clock: Clock,
+  ) {}
+
+  async held(event: DomainEvent): Promise<void> {
+    if (event.payload['purpose'] !== 'avatar') return;
+    const ownerId = event.payload['ownerId'];
+    if (typeof ownerId !== 'string') return;
+    await this.uow.run(async () => {
+      const profile = await this.profiles.findByUserId(ownerId, { lock: true });
+      if (!profile || profile.snapshot().pendingAvatarMediaId === event.aggregateId) return;
+      const { canFinishOnboarding } = profile.avatarHeldForReview(
+        event.aggregateId,
+        this.clock.now(),
+      );
+      await this.profiles.save(profile);
+      if (canFinishOnboarding) {
+        const completed = await this.accounts.completeOnboarding(ownerId);
+        if (!completed.ok)
+          throw new Error(`Onboarding could not complete: ${completed.error.message}`);
+      }
+    });
+  }
+
+  async rejected(event: DomainEvent): Promise<void> {
+    if (event.payload['purpose'] !== 'avatar') return;
+    const ownerId = event.payload['ownerId'];
+    if (typeof ownerId !== 'string') return;
+    await this.uow.run(async () => {
+      const profile = await this.profiles.findByUserId(ownerId, { lock: true });
+      if (profile?.snapshot().pendingAvatarMediaId !== event.aggregateId) return;
+      profile.avatarRejected(event.aggregateId, this.clock.now());
+      await this.profiles.save(profile);
+    });
+  }
+}

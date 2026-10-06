@@ -7941,6 +7941,9 @@
               "null"
             ]
           },
+          "photoInReview": {
+            "type": "boolean"
+          },
           "avatarMediaId": {
             "anyOf": [
               {
@@ -8004,6 +8007,7 @@
           "genderSearchable",
           "publicLink",
           "shareCode",
+          "photoInReview",
           "avatarMediaId",
           "avatarUrls",
           "isComplete",

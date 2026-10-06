@@ -155,6 +155,13 @@
       "when": 1791243468067,
       "tag": "0021_public_profile_link_code",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1791270536323,
+      "tag": "0022_pending_avatar",
+      "breakpoints": true
     }
   ]
 }

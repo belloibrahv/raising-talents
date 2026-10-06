@@ -11,6 +11,7 @@ import { InMemoryTalentProfileRepository } from '../testing/in-memory-talent-pro
 import { MediaUrls } from '../../media/application/media-urls.js';
 import { GetPublicTalentProfileQuery } from './get-talent-profile.queries.js';
 import { UpdateMyTalentProfileHandler } from './update-my-talent-profile.handler.js';
+import { AvatarReviewHandler, SetApprovedAvatarHandler } from './set-approved-avatar.handler.js';
 
 const BIO = 'Left winger from Surulere. Fast on the break, comfortable on either foot.';
 
@@ -237,5 +238,74 @@ describe('UpdateMyTalentProfileHandler', () => {
     await accounts.facade.completeOnboarding(talentId);
     const view = await publicQuery.execute('amaka.okafor');
     expect(view.ok && view.value.gender).toBe('female');
+  });
+
+  describe('a photo waiting for a moderator (ADR-044)', () => {
+    const PHOTO = '0192a3b4-0000-7000-8000-0000000000a9';
+    const mediaEvent = (type: string, mediaId = PHOTO) => ({
+      type,
+      aggregateId: mediaId,
+      occurredAt: clock.now(),
+      payload: { ownerId: talentId, purpose: 'avatar', kind: 'image' },
+    });
+    let review: AvatarReviewHandler;
+    let approve: SetApprovedAvatarHandler;
+
+    beforeEach(async () => {
+      const uow = new InMemoryUnitOfWork();
+      review = new AvatarReviewHandler(profiles, accounts.facade, uow, clock);
+      approve = new SetApprovedAvatarHandler(profiles, accounts.facade, uow, clock);
+      const first = await handler.execute({
+        userId: talentId,
+        expectedVersion: null,
+        patch: { displayName: 'Amaka Okafor' },
+      });
+      if (!first.ok) throw new Error(first.error.message);
+      const rest = await handler.execute({
+        userId: talentId,
+        expectedVersion: first.value.version,
+        patch: {
+          categorySlug: 'sports',
+          subcategorySlugs: ['football'],
+          citySlug: 'ng-lagos',
+          bio: BIO,
+        },
+      });
+      if (!rest.ok) throw new Error(rest.error.message);
+    });
+
+    const status = async () => (await accounts.facade.profileContext(talentId))?.status;
+
+    it('lets the talent into the app while the photo is checked, but keeps them hidden', async () => {
+      expect(await status()).toBe('onboarding');
+      await review.held(mediaEvent('media.MediaHeldForReview'));
+      expect(await status()).toBe('active');
+      const profile = await profiles.findByUserId(talentId);
+      expect(profile?.isComplete).toBe(false);
+      expect((await publicQuery.execute('amaka.okafor')).ok).toBe(false);
+
+      await approve.handle(mediaEvent('media.MediaReady'));
+      const approved = await profiles.findByUserId(talentId);
+      expect(approved?.isComplete).toBe(true);
+      expect(approved?.snapshot().pendingAvatarMediaId).toBeNull();
+      expect((await publicQuery.execute('amaka.okafor')).ok).toBe(true);
+    });
+
+    it('stops waiting when the photo is turned down, so a new one is asked for', async () => {
+      await review.held(mediaEvent('media.MediaHeldForReview'));
+      await review.rejected(mediaEvent('media.MediaRejected'));
+      const profile = await profiles.findByUserId(talentId);
+      expect(profile?.snapshot().pendingAvatarMediaId).toBeNull();
+      // Onboarding does not go backwards: the talent keeps using the app and adds a new photo.
+      expect(await status()).toBe('active');
+    });
+
+    it('ignores portfolio files and other people', async () => {
+      await review.held({
+        ...mediaEvent('media.MediaHeldForReview'),
+        payload: { ownerId: talentId, purpose: 'portfolio', kind: 'image' },
+      });
+      expect(await status()).toBe('onboarding');
+    });
   });
 });

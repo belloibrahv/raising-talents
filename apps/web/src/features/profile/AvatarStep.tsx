@@ -121,7 +121,7 @@ export function AvatarStep({ profile }: { readonly profile: MyTalentProfile }) {
               ? t('media.uploadFailed')
               : null}
       </FormMessage>
-      {inReview ? null : done ? (
+      {done && !inReview ? (
         <>
           <FormMessage tone="success">{t('onboarding.photo.done')}</FormMessage>
           <Link className={buttonLink('primary')} to="/portfolio">
@@ -157,15 +157,20 @@ function ContinueWhileInReview() {
           loading={state === 'opening'}
           onClick={() => {
             setState('opening');
-            void waitUntilActive().then(async (active) => {
-              if (!active) {
+            void waitUntilActive()
+              .then(async (active) => {
+                if (!active) {
+                  setState('slow');
+                  return;
+                }
+                // Home must see the photo as waiting, not as missing.
+                await queryClient.invalidateQueries({ queryKey: keys.talentProfile });
+                void navigate('/home');
+              })
+              // Offline or the API failed: the same "try again" as a slow worker.
+              .catch(() => {
                 setState('slow');
-                return;
-              }
-              // Home must see the photo as waiting, not as missing.
-              await queryClient.invalidateQueries({ queryKey: keys.talentProfile });
-              void navigate('/home');
-            });
+              });
           }}
         >
           {t('onboarding.photo.continue')}

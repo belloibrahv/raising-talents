@@ -30,7 +30,8 @@ RUN pnpm install --frozen-lockfile --offline --filter=@rt/web... \
 FROM gcr.io/distroless/nodejs22-debian12:nonroot AS runtime
 WORKDIR /repo
 COPY --from=build --chown=65532:65532 /repo/apps/web/dist apps/web/dist
-COPY --from=build --chown=65532:65532 /repo/apps/web/scripts/serve-like-cloudfront.mjs apps/web/scripts/
+# The server and every module it imports (share-tags.mjs writes link previews, ADR-043).
+COPY --from=build --chown=65532:65532 /repo/apps/web/scripts/serve-like-cloudfront.mjs /repo/apps/web/scripts/share-tags.mjs apps/web/scripts/
 COPY --from=build --chown=65532:65532 /repo/infra/terraform/modules/web/main.tf infra/terraform/modules/web/
 USER 65532:65532
 EXPOSE 8080

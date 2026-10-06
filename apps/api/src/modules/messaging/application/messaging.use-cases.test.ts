@@ -71,6 +71,10 @@ class FakeAgents implements MessagingAgents {
       jobTitle: 'Talent scout',
       city: 'Lagos',
       verified: this.verified.has(agentId),
+      specializations: ['Music'],
+      website: 'https://eko-talent.example',
+      verifiedAt: this.verified.has(agentId) ? new Date('2026-09-01T09:00:00.000Z') : null,
+      memberSince: new Date('2026-08-01T09:00:00.000Z'),
     };
   }
 }
@@ -166,7 +170,14 @@ describe('contact requests and chat (ADR-011, ADR-038)', () => {
 
     const inbox = await list.execute(talentId);
     expect(inbox.ok && inbox.value.items[0]).toMatchObject({
-      counterpart: { kind: 'agent', agencyName: 'Eko Talent Partners', verified: true },
+      counterpart: {
+        kind: 'agent',
+        agencyName: 'Eko Talent Partners',
+        verified: true,
+        specializations: ['Music'],
+        website: 'https://eko-talent.example',
+        verifiedAt: '2026-09-01T09:00:00.000Z',
+      },
       lastMessage: { mine: false, body: INTRO },
       unread: 1,
       awaitingMyAnswer: true,

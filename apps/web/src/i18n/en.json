@@ -1,4 +1,17 @@
 {
+  "agency": {
+    "about": "About {agency}",
+    "verified": "Verified agency",
+    "verifiedSince": "Verified agency since {date}",
+    "notVerified": "Not verified",
+    "contact": "Your contact",
+    "based": "Based in",
+    "worksIn": "Works in",
+    "website": "Website",
+    "opensNewTab": " (opens in a new tab)",
+    "memberSince": "On Raising Talents since",
+    "tip": "Check that the website belongs to the agency before you share personal details. Real agencies never ask you to pay to be represented."
+  },
   "share": {
     "title": "Your public link",
     "offBody": "Share your profile on Instagram, WhatsApp or your CV. Anyone with the link can see your photo, discipline, city, story and work, never your age, email or phone number. It is off until you turn it on.",

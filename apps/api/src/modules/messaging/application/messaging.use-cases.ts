@@ -79,6 +79,10 @@ export interface MessagingAgents {
     jobTitle: string;
     city: string | null;
     verified: boolean;
+    specializations: string[];
+    website: string | null;
+    verifiedAt: Date | null;
+    memberSince: Date;
   } | null>;
 }
 
@@ -128,6 +132,10 @@ export class ConversationViews {
       jobTitle: summary?.jobTitle ?? '',
       city: summary?.city ?? null,
       verified: summary?.verified ?? false,
+      specializations: summary?.specializations ?? [],
+      website: summary?.website ?? null,
+      verifiedAt: summary?.verifiedAt?.toISOString() ?? null,
+      memberSince: (summary?.memberSince ?? new Date(0)).toISOString(),
     };
   }
 

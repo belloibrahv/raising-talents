@@ -115,15 +115,24 @@ export class AgentDirectory {
     jobTitle: string;
     city: string | null;
     verified: boolean;
+    specializations: string[];
+    website: string | null;
+    verifiedAt: Date | null;
+    memberSince: Date;
   } | null> {
     const profile = await this.profiles.findByUserId(agentId);
     const props = profile?.snapshot();
     if (!props?.agencyName) return null;
+    const catalog = await this.taxonomy.current();
     return {
       agencyName: props.agencyName,
       jobTitle: props.jobTitle ?? '',
-      city: (await this.taxonomy.current()).city(props.citySlug)?.name ?? null,
+      city: catalog.city(props.citySlug)?.name ?? null,
       verified: props.verifiedAt !== null,
+      specializations: catalog.categoryRefs(props.specializationSlugs).map((ref) => ref.name),
+      website: props.website,
+      verifiedAt: props.verifiedAt,
+      memberSince: props.createdAt,
     };
   }
 }

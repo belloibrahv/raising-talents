@@ -1,5 +1,5 @@
 import { MESSAGE_MAX, type ConversationSummary, type Message } from '@rt/contracts';
-import { ArrowLeft, Ban, Clock3, Info, MessageSquareOff, Send, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Ban, Clock3, Info, MessageSquareOff, Send } from 'lucide-react';
 import { Fragment, useEffect, useState, type ReactNode, type SubmitEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { cn } from '@/lib/utils';
@@ -27,6 +27,7 @@ import {
   useWithdraw,
 } from './queries';
 import { ReportConversation } from '../talents/ReportProfile';
+import { AgencyCard } from './AgencyCard';
 import { dayHeading, dayKey, timeOfDay } from './time';
 
 /** One conversation: the request and its answer, then the chat (ADR-038). */
@@ -98,12 +99,7 @@ export function ConversationPage() {
         </div>
       }
     >
-      {counterpart.kind === 'agent' ? (
-        <p className="flex items-start gap-3 rounded-2xl bg-muted p-4 text-sm text-muted-foreground">
-          <ShieldCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-foreground" />
-          {t('messages.safety')}
-        </p>
-      ) : null}
+      {counterpart.kind === 'agent' ? <AgencyCard agent={counterpart} /> : null}
       <section className="stack gap-3" aria-label={t('messages.thread', { name })}>
         {thread.hasNextPage ? (
           <Button

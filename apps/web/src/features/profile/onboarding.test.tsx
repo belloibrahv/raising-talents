@@ -147,7 +147,9 @@ describe('talent onboarding', () => {
     const user = userEvent.setup({ delay: null });
 
     expect(await screen.findByRole('heading', { level: 1, name: 'About you' })).toBeVisible();
-    expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '1');
+    const steps = screen.getByRole('list', { name: 'Set up your profile' });
+    expect(within(steps).getByText('About')).toHaveAttribute('aria-current', 'step');
+    expect(within(steps).getAllByRole('listitem')).toHaveLength(5);
     await expectNoAxeViolations();
     await user.type(screen.getByLabelText('Your name'), 'Ngozi Adeyemi');
     await user.click(screen.getByRole('button', { name: 'Save and continue' }));

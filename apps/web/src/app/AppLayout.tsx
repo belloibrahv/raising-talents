@@ -66,78 +66,92 @@ export function AppLayout() {
         <div className="mx-auto flex h-16 w-full max-w-5xl items-center gap-4 px-4 sm:px-6">
           <NavLink
             to="/home"
-            className="flex items-center gap-2.5 rounded-lg font-display text-lg font-bold no-underline"
+            className="flex min-w-0 items-center gap-2.5 rounded-lg font-display text-lg font-bold whitespace-nowrap no-underline"
           >
             <BrandMark />
             <span>{t('common.appName')}</span>
           </NavLink>
-          <nav
-            aria-label={t('nav.main')}
-            className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:static md:ml-auto md:border-0 md:bg-transparent md:pb-0"
-          >
-            <ul className="mx-auto flex max-w-md list-none justify-around p-0 md:max-w-none md:gap-1">
-              {destinations.map(({ to, label, icon: Icon }) => (
-                <li key={to} className="flex-1 md:flex-none">
-                  <NavLink
-                    to={to}
-                    end={to === '/home'}
-                    className={({ isActive }) =>
-                      cn(
-                        'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-3 text-xs font-semibold text-muted-foreground no-underline transition-colors hover:text-foreground md:min-h-10 md:flex-row md:gap-2 md:rounded-full md:px-4 md:text-sm',
-                        isActive && 'text-foreground md:bg-accent',
-                      )
-                    }
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <span
-                          className={cn(
-                            'relative grid h-7 w-12 place-items-center rounded-full transition-colors md:h-auto md:w-auto',
-                            isActive &&
-                              'bg-spotlight text-spotlight-foreground md:bg-transparent md:text-current',
-                          )}
-                        >
-                          <Icon aria-hidden="true" className="size-5 md:size-4" />
+          {onboarding ? (
+            // Setting up is one focused flow: no tab bar, just a way to the account.
+            <nav aria-label={t('nav.main')} className="ml-auto">
+              <NavLink
+                to="/account"
+                className="rounded-full px-3 py-2 text-sm font-semibold text-muted-foreground no-underline hover:bg-accent hover:text-foreground"
+              >
+                {t('nav.account')}
+              </NavLink>
+            </nav>
+          ) : (
+            <nav
+              aria-label={t('nav.main')}
+              className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:static md:ml-auto md:border-0 md:bg-transparent md:pb-0"
+            >
+              <ul className="mx-auto flex max-w-md list-none justify-around p-0 md:max-w-none md:gap-1">
+                {destinations.map(({ to, label, icon: Icon }) => (
+                  <li key={to} className="flex-1 md:flex-none">
+                    <NavLink
+                      to={to}
+                      end={to === '/home'}
+                      className={({ isActive }) =>
+                        cn(
+                          'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-3 text-xs font-semibold text-muted-foreground no-underline transition-colors hover:text-foreground md:min-h-10 md:flex-row md:gap-2 md:rounded-full md:px-4 md:text-sm',
+                          isActive && 'text-foreground md:bg-accent',
+                        )
+                      }
+                    >
+                      {({ isActive }) => (
+                        <>
+                          <span
+                            className={cn(
+                              'relative grid h-7 w-12 place-items-center rounded-full transition-colors md:h-auto md:w-auto',
+                              isActive &&
+                                'bg-spotlight text-spotlight-foreground md:bg-transparent md:text-current',
+                            )}
+                          >
+                            <Icon aria-hidden="true" className="size-5 md:size-4" />
+                            {to === '/account' && me && !me.emailVerified ? (
+                              <span
+                                aria-hidden="true"
+                                className="absolute top-0.5 right-2.5 size-2.5 rounded-full bg-destructive ring-2 ring-background md:-top-0.5 md:-right-1"
+                              />
+                            ) : null}
+                            {to === '/messages' && waiting > 0 ? (
+                              <span
+                                aria-hidden="true"
+                                className="absolute -top-1 right-0.5 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-destructive px-1 text-[10px] leading-none font-bold text-destructive-foreground ring-2 ring-background md:-top-2 md:-right-3"
+                              >
+                                {waiting > 9 ? '9+' : waiting}
+                              </span>
+                            ) : null}
+                          </span>
+                          {label}
                           {to === '/account' && me && !me.emailVerified ? (
-                            <span
-                              aria-hidden="true"
-                              className="absolute top-0.5 right-2.5 size-2.5 rounded-full bg-destructive ring-2 ring-background md:-top-0.5 md:-right-1"
-                            />
+                            <span className="sr-only">{`, ${t('verifyBanner.dot')}`}</span>
                           ) : null}
                           {to === '/messages' && waiting > 0 ? (
-                            <span
-                              aria-hidden="true"
-                              className="absolute -top-1 right-0.5 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-destructive px-1 text-[10px] leading-none font-bold text-destructive-foreground ring-2 ring-background md:-top-2 md:-right-3"
-                            >
-                              {waiting > 9 ? '9+' : waiting}
-                            </span>
+                            <span className="sr-only">{`, ${t('nav.messagesUnread', { count: waiting })}`}</span>
                           ) : null}
-                        </span>
-                        {label}
-                        {to === '/account' && me && !me.emailVerified ? (
-                          <span className="sr-only">{`, ${t('verifyBanner.dot')}`}</span>
-                        ) : null}
-                        {to === '/messages' && waiting > 0 ? (
-                          <span className="sr-only">{`, ${t('nav.messagesUnread', { count: waiting })}`}</span>
-                        ) : null}
-                      </>
-                    )}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          </nav>
+                        </>
+                      )}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          )}
           <div className="ml-auto flex items-center gap-1 md:ml-0">
             <NotificationBell />
             <Button
               variant="ghost"
               size="sm"
+              aria-label={t('nav.signOut')}
               onClick={() => {
                 signOut.mutate();
               }}
             >
               <LogOut aria-hidden="true" />
-              {t('nav.signOut')}
+              {/* An icon on phones, where the header has little room. */}
+              <span className="hidden sm:inline">{t('nav.signOut')}</span>
             </Button>
           </div>
         </div>

@@ -435,6 +435,13 @@
     "saved": "Saved.",
     "back": "Back",
     "finishLater": "Finish later",
+    "steps": {
+      "about": "About",
+      "discipline": "Discipline",
+      "location": "City",
+      "story": "Story",
+      "photo": "Photo"
+    },
     "staleReloaded": "Your profile was changed on another device. We loaded the latest version; check it and save again.",
     "about": {
       "title": "About you",
@@ -485,6 +492,13 @@
       "current": "Your current profile photo",
       "checking": "Checking your photo. This usually takes a few seconds.",
       "held": "A moderator is checking your photo. We will let you know when it is approved.",
+      "tipsTitle": "What makes a great profile photo",
+      "tips": {
+        "face": "Your face, clearly visible: no sunglasses or masks",
+        "light": "Good light, ideally daylight facing a window",
+        "alone": "Just you: agents should know who they are looking at",
+        "recent": "Taken in the last year, without heavy filters"
+      },
       "heldTitle": "Your photo is with a moderator",
       "heldBody": "You do not have to wait. Start adding your work now: agents will see your profile as soon as the photo is approved, and we will let you know.",
       "continue": "Continue to Raising Talents",

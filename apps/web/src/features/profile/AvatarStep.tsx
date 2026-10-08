@@ -1,5 +1,6 @@
 import type { MyTalentProfile } from '@rt/contracts';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Camera, Check } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { t } from '../../i18n';
@@ -93,13 +94,22 @@ export function AvatarStep({ profile }: { readonly profile: MyTalentProfile }) {
 
   return (
     <div className="stack">
-      {shown ? (
-        <img
-          className="size-32 rounded-full bg-muted object-cover shadow-md ring-4 ring-background"
-          src={shown}
-          alt={preview ? t('onboarding.photo.preview') : t('onboarding.photo.current')}
-        />
-      ) : null}
+      <div className="flex flex-col items-center gap-3 py-2">
+        {shown ? (
+          <img
+            className="size-40 rounded-full bg-muted object-cover shadow-xl ring-4 ring-spotlight/60"
+            src={shown}
+            alt={preview ? t('onboarding.photo.preview') : t('onboarding.photo.current')}
+          />
+        ) : (
+          <span
+            aria-hidden="true"
+            className="grid size-40 place-items-center rounded-full border-2 border-dashed border-input bg-muted/60 text-muted-foreground"
+          >
+            <Camera className="size-10" />
+          </span>
+        )}
+      </div>
       {phase.kind === 'uploading' ? (
         <div className="flex flex-col gap-1.5">
           <p role="status">{t('media.uploading', { percent: Math.round(phase.fraction * 100) })}</p>
@@ -135,6 +145,24 @@ export function AvatarStep({ profile }: { readonly profile: MyTalentProfile }) {
           disabled={busy}
           onPick={(file) => void pick(file)}
         />
+      )}
+      {done ? null : (
+        <section
+          className="grid gap-3 rounded-2xl bg-muted/60 p-4"
+          aria-labelledby="photo-tips-heading"
+        >
+          <h2 id="photo-tips-heading" className="text-sm font-bold">
+            {t('onboarding.photo.tipsTitle')}
+          </h2>
+          <ul className="m-0 grid list-none gap-2 p-0 text-sm">
+            {(['face', 'light', 'alone', 'recent'] as const).map((tip) => (
+              <li key={tip} className="flex items-start gap-2">
+                <Check aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-success" />
+                {t(`onboarding.photo.tips.${tip}`)}
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   );

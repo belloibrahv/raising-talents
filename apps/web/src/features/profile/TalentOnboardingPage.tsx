@@ -9,6 +9,7 @@ import {
   type TaxonomyResponse,
   type UpdateTalentProfileRequest,
 } from '@rt/contracts';
+import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState, type SubmitEvent } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router';
 import { t } from '../../i18n';
@@ -26,6 +27,7 @@ import { TextField } from '../../shared/ui/TextField';
 import { useFocusFirstError } from '../../shared/ui/use-focus-first-error';
 import { fieldErrorsFrom } from '../auth/form-errors';
 import { AvatarStep } from './AvatarStep';
+import { categoryIcon } from './category-icons';
 import { useMyTalentProfile, useTaxonomy, useUpdateTalentProfile } from './queries';
 import {
   firstOpenStep,
@@ -35,7 +37,6 @@ import {
   TALENT_STEPS,
   type TalentStep,
 } from './steps';
-import { Progress } from '@/components/ui/progress';
 
 type Errors = Record<string, string>;
 
@@ -66,6 +67,10 @@ interface StepProps {
   readonly profile: MyTalentProfile | null;
   readonly taxonomy: TaxonomyResponse;
 }
+
+/** In thumb reach on phones, and always visible however long the step. */
+const STICKY_ACTION =
+  'sticky bottom-[calc(1rem+env(safe-area-inset-bottom))] z-10 shadow-lg shadow-primary/20';
 
 const STEP_TITLE: Record<TalentStep, string> = {
   about: t('onboarding.about.title'),
@@ -107,15 +112,48 @@ function StepScreen({ step, profile, taxonomy }: StepProps) {
       documentTitle={`${STEP_TITLE[step]}, ${t('onboarding.stepOf', { current: position, total: TALENT_STEPS.length })}`}
       subtitle={STEP_BODY[step]}
       hero={
-        <div className="grid gap-2">
-          <p className="text-sm font-semibold text-muted-foreground">
-            {t('onboarding.stepOf', { current: position, total: TALENT_STEPS.length })}
-          </p>
-          <Progress
+        <div className="grid gap-3">
+          <div className="flex min-h-9 items-center justify-between gap-3">
+            {back ? (
+              <Link className={buttonLink('text', 'sm')} to={`/onboarding/talent/${back}`}>
+                <ArrowLeft aria-hidden="true" />
+                {t('onboarding.back')}
+              </Link>
+            ) : (
+              <span />
+            )}
+            <p className="m-0 text-sm font-semibold text-muted-foreground">
+              {t('onboarding.stepOf', { current: position, total: TALENT_STEPS.length })}
+            </p>
+          </div>
+          {/* One bar per step, named, so people see what is left. */}
+          <ol
+            className="m-0 grid list-none grid-flow-col gap-1.5 p-0"
             aria-label={t('titles.talentOnboarding')}
-            value={position}
-            max={TALENT_STEPS.length}
-          />
+          >
+            {TALENT_STEPS.map((entry, index) => (
+              <li key={entry} className="grid gap-1.5">
+                <span
+                  aria-hidden="true"
+                  className={
+                    index < position
+                      ? 'h-1.5 rounded-full bg-primary'
+                      : 'h-1.5 rounded-full bg-muted'
+                  }
+                />
+                <span
+                  className={
+                    index + 1 === position
+                      ? 'text-[11px] font-bold text-foreground sm:text-xs'
+                      : 'text-[11px] font-medium text-muted-foreground sm:text-xs'
+                  }
+                  aria-current={index + 1 === position ? 'step' : undefined}
+                >
+                  {t(`onboarding.steps.${entry}`)}
+                </span>
+              </li>
+            ))}
+          </ol>
         </div>
       }
     >
@@ -145,11 +183,6 @@ function StepScreen({ step, profile, taxonomy }: StepProps) {
         <StoryStep key={profile.version} profile={profile} update={update} onSaved={goNext} />
       ) : null}
       {step === 'photo' && profile ? <AvatarStep profile={profile} /> : null}
-      {back ? (
-        <Link className={buttonLink('text')} to={`/onboarding/talent/${back}`}>
-          {t('onboarding.back')}
-        </Link>
-      ) : null}
     </Page>
   );
 }
@@ -268,7 +301,7 @@ function AboutStep({
           </p>
         </div>
       ) : null}
-      <Button type="submit" loading={pending}>
+      <Button type="submit" loading={pending} className={STICKY_ACTION}>
         {t('onboarding.save')}
       </Button>
     </form>
@@ -323,7 +356,12 @@ function DisciplineStep({
           if (value !== category) setSubcategories([]);
           setCategory(value);
         }}
-        options={taxonomy.categories.map((entry) => ({ value: entry.slug, label: entry.name }))}
+        layout="tiles"
+        options={taxonomy.categories.map((entry) => ({
+          value: entry.slug,
+          label: entry.name,
+          icon: categoryIcon(entry.slug),
+        }))}
         error={errors['category']}
       />
       {chosen ? (
@@ -355,7 +393,7 @@ function DisciplineStep({
           options={skillOptions.map((entry) => ({ value: entry.slug, label: entry.name }))}
         />
       ) : null}
-      <Button type="submit" loading={pending}>
+      <Button type="submit" loading={pending} className={STICKY_ACTION}>
         {t('onboarding.save')}
       </Button>
     </form>
@@ -400,7 +438,7 @@ function LocationStep({
         autoComplete="address-level2"
         required
       />
-      <Button type="submit" loading={pending}>
+      <Button type="submit" loading={pending} className={STICKY_ACTION}>
         {t('onboarding.save')}
       </Button>
     </form>
@@ -448,7 +486,7 @@ function StoryStep({
         error={errors['bio']}
         required
       />
-      <Button type="submit" loading={pending}>
+      <Button type="submit" loading={pending} className={STICKY_ACTION}>
         {t('onboarding.save')}
       </Button>
     </form>

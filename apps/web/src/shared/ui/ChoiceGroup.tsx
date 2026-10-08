@@ -92,7 +92,7 @@ export function ChoiceGroup(props: SingleProps | MultipleProps) {
             return (
               <label
                 key={option.value}
-                className="relative flex min-h-28 cursor-pointer flex-col justify-between gap-3 rounded-2xl border-2 border-border bg-card p-4 transition-all select-none hover:-translate-y-0.5 hover:border-input hover:shadow-sm has-checked:border-primary has-checked:bg-accent has-checked:shadow-md has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
+                className="relative flex min-h-28 cursor-pointer flex-col justify-between gap-3 rounded-2xl border-2 border-border bg-card p-4 transition-all select-none hover:-translate-y-0.5 hover:border-input hover:shadow-sm has-checked:border-primary has-checked:bg-accent has-checked:shadow-md has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:translate-y-0 has-disabled:hover:border-border has-disabled:hover:shadow-none has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
               >
                 {input}
                 {Icon ? (

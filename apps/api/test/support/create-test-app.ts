@@ -40,6 +40,12 @@ import { NOTIFICATIONS } from '../../src/modules/notifications/application/notif
 import { InMemoryInbox } from '../../src/modules/notifications/testing/in-memory-inbox.js';
 import { MESSAGING } from '../../src/modules/messaging/application/messaging.use-cases.js';
 import { InMemoryConversationRepository } from '../../src/modules/messaging/testing/in-memory-conversation.repository.js';
+import { SOCIAL } from '../../src/modules/social/application/social.use-cases.js';
+import {
+  InMemoryFollowRepository,
+  InMemoryLikeRepository,
+  InMemoryPostSource,
+} from '../../src/modules/social/testing/in-memory-social.js';
 import { SHORTLIST } from '../../src/modules/shortlists/application/shortlist.use-cases.js';
 import { InMemoryShortlistRepository } from '../../src/modules/shortlists/testing/in-memory-shortlist.repository.js';
 import { TALENT } from '../../src/modules/talent-profiles/application/talent-profile.tokens.js';
@@ -109,6 +115,8 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
   const mediaAssets = new InMemoryMediaAssetRepository(events);
   const video = new FakeVideoProvider();
   const clock = new FixedClock();
+  const portfolios = new InMemoryPortfolioRepository(events);
+  const follows = new InMemoryFollowRepository();
 
   const moduleRef = await Test.createTestingModule({
     imports: [AppModule.register({ config, logger }), DiscoveryModule],
@@ -162,7 +170,13 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
     .overrideProvider(MEDIA.WebhookVerifier)
     .useValue(new MuxWebhookVerifier(E2E_WEBHOOK_SECRET, clock))
     .overrideProvider(PORTFOLIO.Repository)
-    .useValue(new InMemoryPortfolioRepository(events))
+    .useValue(portfolios)
+    .overrideProvider(SOCIAL.Follows)
+    .useValue(follows)
+    .overrideProvider(SOCIAL.Likes)
+    .useValue(new InMemoryLikeRepository())
+    .overrideProvider(SOCIAL.Posts)
+    .useValue(new InMemoryPostSource(portfolios, talentProfiles, follows))
     .overrideProvider(SAFETY.Reports)
     .useValue(new InMemoryReportRepository())
     .overrideProvider(SHORTLIST.Entries)

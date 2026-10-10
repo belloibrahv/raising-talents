@@ -52,6 +52,14 @@ export const notificationSchema = z
       talentName: z.string(),
     }),
     z.object({ ...common, kind: z.literal('contact_declined'), talentName: z.string() }),
+    z.object({
+      ...common,
+      kind: z.literal('new_follower'),
+      /** The follower's name: a talent's display name or an agent's agency. */
+      followerName: z.string(),
+      /** Set when the follower is a talent with a page to open. */
+      followerHandle: z.string().nullable(),
+    }),
   ])
   .meta({ id: 'Notification' });
 export type Notification = z.infer<typeof notificationSchema>;

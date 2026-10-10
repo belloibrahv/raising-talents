@@ -9,6 +9,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { PrivacyModule } from './modules/privacy/privacy.module.js';
 import { SafetyModule } from './modules/safety/safety.module.js';
 import { ShortlistsModule } from './modules/shortlists/shortlists.module.js';
+import { SocialModule } from './modules/social/social.module.js';
 import { SearchModule } from './modules/search/search.module.js';
 import { TalentProfilesModule } from './modules/talent-profiles/talent-profiles.module.js';
 import { TaxonomyModule } from './modules/taxonomy/taxonomy.module.js';
@@ -35,6 +36,7 @@ export class AppModule {
         PrivacyModule,
         SafetyModule,
         ShortlistsModule,
+        SocialModule,
       ],
     };
   }

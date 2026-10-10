@@ -21,6 +21,7 @@ import { MediaEvents } from '../media/domain/media-asset.js';
 import { MediaModule } from '../media/media.module.js';
 import { VerificationEvents } from '../agent-profiles/domain/verification-request.js';
 import { MESSAGING, type ContactNotices } from '../messaging/application/messaging.use-cases.js';
+import { SocialEvents } from '../social/domain/social.js';
 import { ConversationEvents } from '../messaging/domain/conversation.js';
 import { MessagingModule } from '../messaging/messaging.module.js';
 import type { Realtime } from '../../platform/realtime/realtime.js';
@@ -156,6 +157,7 @@ import { NotificationsController } from './interface/http/notifications.controll
             dispatcher.on(ConversationEvents.ContactDeclined, (event) =>
               notifier.contactAnswered(event, false),
             );
+            dispatcher.on(SocialEvents.TalentFollowed, (event) => notifier.newFollower(event));
           },
         };
       },

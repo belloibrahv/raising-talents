@@ -237,6 +237,28 @@ export class Notifier {
    * The inbox first, then the email. Each is idempotent on its own (the inbox by key, the
    * email by the sent log), so a retried event fills in whichever part failed.
    */
+  /**
+   * Told in the app only: a follow is good news, not something to email about. One notice
+   * per follower, so following again after unfollowing does not repeat it.
+   */
+  async newFollower(event: DomainEvent): Promise<void> {
+    const { followerId, followerName, followerHandle } = event.payload;
+    if (typeof followerId !== 'string' || typeof followerName !== 'string' || !followerName) return;
+    await this.inbox.add({
+      id: newId(),
+      key: `${event.type}:${event.aggregateId}:${followerId}`,
+      userId: event.aggregateId,
+      content: {
+        kind: 'new_follower',
+        followerName,
+        followerHandle: typeof followerHandle === 'string' ? followerHandle : null,
+      },
+      createdAt: event.occurredAt,
+      readAt: null,
+    });
+    await this.realtime?.publish([event.aggregateId], { type: 'notifications' });
+  }
+
   private async deliver(
     event: DomainEvent,
     userId: string,

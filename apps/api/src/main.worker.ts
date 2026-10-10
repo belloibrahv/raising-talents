@@ -17,7 +17,7 @@ import type { ModuleEventHandlers } from './modules/identity/identity.module.js'
 import { MEDIA } from './modules/media/application/media.use-cases.js';
 import { NOTIFICATIONS } from './modules/notifications/application/notifications.js';
 import { PRIVACY } from './modules/privacy/application/privacy.use-cases.js';
-import { SEARCH } from './modules/search/application/search.use-cases.js';
+import { SEARCH, type RebuildSearchIndex } from './modules/search/application/search.use-cases.js';
 import { TALENT } from './modules/talent-profiles/application/talent-profile.tokens.js';
 import { WorkerModule } from './worker.module.js';
 import type { AccountsFacade } from './modules/accounts/application/accounts.facade.js';
@@ -83,6 +83,17 @@ if (process.env['STAFF_GRANT']) {
     app.get<UnitOfWork>(PLATFORM.UnitOfWork),
     logger,
   );
+}
+
+// Rebuilds the search index after a release that renames categories or cities, on hosts with
+// no shell for search:rebuild (SEARCH_REBUILD=run). Searches use the old index until it is done.
+if (process.env['SEARCH_REBUILD'] === 'run') {
+  void app
+    .get<RebuildSearchIndex>(SEARCH.Rebuild)
+    .run()
+    .catch((error: unknown) => {
+      logger.error({ err: error }, 'search rebuild failed');
+    });
 }
 
 // Demo data for testing a live environment, switched on for one deploy (docs/runbooks/demo-data.md).

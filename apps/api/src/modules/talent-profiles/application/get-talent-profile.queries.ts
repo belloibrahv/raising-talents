@@ -131,12 +131,8 @@ export class TalentDirectory {
     if (!profile?.isComplete || !profile.snapshot().publicLink) return null;
     const account = await this.accounts.profileContext(profile.userId);
     if (!isPublic(account)) return null;
-    const view = toPublicTalentProfile(
-      profile,
-      await this.taxonomy.current(),
-      null,
-      this.avatarUrls,
-    );
+    const catalog = await this.taxonomy.current();
+    const view = toPublicTalentProfile(profile, catalog, null, this.avatarUrls);
     if (!view) return null;
     return {
       userId: profile.userId,
@@ -145,7 +141,7 @@ export class TalentDirectory {
       bio: view.bio,
       discipline: view.subcategories.map((entry) => entry.name).join(', ') || view.category.name,
       category: view.category.name,
-      city: view.city.name,
+      city: catalog.placeName(view.city.slug) ?? view.city.name,
       skills: view.skills.map((entry) => entry.name),
       verified: view.verified,
       avatarUrls: view.avatarUrls,

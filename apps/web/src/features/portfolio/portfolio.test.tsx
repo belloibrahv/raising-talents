@@ -233,7 +233,7 @@ describe('a talent profile as agents see it', () => {
     });
     renderAt('/talents/ngozi.adeyemi');
     expect(await screen.findByRole('heading', { level: 1, name: 'Ngozi Adeyemi' })).toBeVisible();
-    for (const fact of ['Singer', 'Lagos', '26 years old']) {
+    for (const fact of ['Singer', 'Lagos, Nigeria', '26 years old']) {
       expect(screen.getByText(fact)).toBeVisible();
     }
     const photo = await screen.findByRole('img', { name: 'Photo 1 by Ngozi Adeyemi' });

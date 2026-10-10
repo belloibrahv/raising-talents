@@ -6,16 +6,19 @@ import {
   type TalentSearchResponse,
 } from '@rt/contracts';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { useState, type SubmitEvent } from 'react';
+import { useState, type ReactNode, type SubmitEvent } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { api } from '../../shared/api/client';
+import { placeLabel } from '../../shared/places';
 import { Button } from '../../shared/ui/Button';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { Page } from '../../shared/ui/Page';
 import { Select } from '../../shared/ui/Select';
 import { TextField } from '../../shared/ui/TextField';
+import { PlaceFields } from '../profile/PlaceFields';
+import { categoryIcon } from '../profile/category-icons';
 import { useTaxonomy } from '../profile/queries';
 import { cn } from '@/lib/utils';
 import {
@@ -24,12 +27,24 @@ import {
   Search as SearchIcon,
   SlidersHorizontal,
   UserSearch,
+  X,
 } from 'lucide-react';
 import { EmptyState } from '../../shared/ui/EmptyState';
 
 /** The filters that live in the address, so back, refresh and sharing a search all work. */
-const FILTER_KEYS = ['q', 'category', 'cities', 'gender', 'ageMin', 'ageMax'] as const;
+const FILTER_KEYS = [
+  'q',
+  'category',
+  'subcategories',
+  'country',
+  'cities',
+  'gender',
+  'ageMin',
+  'ageMax',
+] as const;
 type Filters = Partial<Record<(typeof FILTER_KEYS)[number], string>>;
+/** The filters typed into a form and sent together; the rest apply as soon as they are picked. */
+type Typed = Pick<Filters, 'q' | 'gender' | 'ageMin' | 'ageMax'>;
 
 function filtersFrom(params: URLSearchParams): Filters {
   return Object.fromEntries(
@@ -37,10 +52,23 @@ function filtersFrom(params: URLSearchParams): Filters {
   );
 }
 
+/** Always in the same order, so one search has one address. */
+const withoutEmpty = (filters: Filters) =>
+  Object.fromEntries(
+    FILTER_KEYS.flatMap((key) => {
+      const value = filters[key]?.trim();
+      return value ? [[key, value]] : [];
+    }),
+  );
+
+/**
+ * Search follows the order of a profile: what someone does (category, then type), then
+ * where they are (country, then city). Age and gender sit behind "More filters".
+ */
 export function SearchPage() {
   const [params, setParams] = useSearchParams();
   const applied = filtersFrom(params);
-  const [draft, setDraft] = useState<Filters>(applied);
+  const [typed, setTyped] = useState<Typed>(applied);
   const [ageProblem, setAgeProblem] = useState(false);
   const taxonomy = useTaxonomy();
 
@@ -54,10 +82,15 @@ export function SearchPage() {
     getNextPageParam: (last: TalentSearchResponse) => (last.hasMore ? last.page + 1 : undefined),
   });
 
+  /** Picked filters apply at once and keep whatever is typed but not yet sent. */
+  const apply = (changes: Filters) => {
+    setParams(withoutEmpty({ ...applied, ...changes }));
+  };
+
   const submit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const min = draft.ageMin ? Number(draft.ageMin) : undefined;
-    const max = draft.ageMax ? Number(draft.ageMax) : undefined;
+    const min = typed.ageMin ? Number(typed.ageMin) : undefined;
+    const max = typed.ageMax ? Number(typed.ageMax) : undefined;
     const outOfRange = [min, max].some(
       (age) => age !== undefined && (age < SEARCH_MIN_AGE || age > SEARCH_MAX_AGE),
     );
@@ -66,15 +99,29 @@ export function SearchPage() {
       return;
     }
     setAgeProblem(false);
-    setParams(Object.fromEntries(Object.entries(draft).filter(([, value]) => value.trim())));
+    apply({
+      q: typed.q ?? '',
+      gender: typed.gender ?? '',
+      ageMin: typed.ageMin ?? '',
+      ageMax: typed.ageMax ?? '',
+    });
   };
 
   const first = results.data?.pages[0];
   const items = results.data?.pages.flatMap((page) => page.items) ?? [];
   const count = (facet: readonly { slug: string; count: number }[] | undefined, slug: string) =>
     facet?.find((entry) => entry.slug === slug)?.count;
-  const label = (name: string, total: number | undefined) =>
-    total === undefined ? name : t('search.optionCount', { name, count: total });
+
+  const categories = taxonomy.data?.categories ?? [];
+  const category = categories.find((entry) => entry.slug === applied.category);
+  const chosenTypes = applied.subcategories ? applied.subcategories.split(',') : [];
+  const toggleType = (slug: string) => {
+    const next = chosenTypes.includes(slug)
+      ? chosenTypes.filter((entry) => entry !== slug)
+      : [...chosenTypes, slug].slice(-MAX_TYPES);
+    apply({ subcategories: next.join(',') });
+  };
+  const narrowed = FILTER_KEYS.some((key) => key !== 'q' && applied[key]);
 
   return (
     <Page
@@ -83,17 +130,17 @@ export function SearchPage() {
       subtitle={t('search.body')}
       width="wide"
     >
-      <form className="stack max-w-3xl" role="search" onSubmit={submit} noValidate>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+      <form className="stack" role="search" onSubmit={submit} noValidate>
+        <div className="flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-end">
           <TextField
             className="flex-1"
             label={t('search.query')}
             type="search"
             enterKeyHint="search"
             placeholder={t('search.queryPlaceholder')}
-            value={draft.q ?? ''}
+            value={typed.q ?? ''}
             onChange={(event) => {
-              setDraft({ ...draft, q: event.target.value });
+              setTyped({ ...typed, q: event.target.value });
             }}
             maxLength={100}
           />
@@ -102,9 +149,77 @@ export function SearchPage() {
             {t('search.submit')}
           </Button>
         </div>
+
+        <FilterRow label={t('search.category')}>
+          <Chip
+            active={!applied.category}
+            onClick={() => {
+              apply({ category: '', subcategories: '' });
+            }}
+          >
+            {t('search.allTalent')}
+          </Chip>
+          {categories.map((entry) => {
+            const Icon = categoryIcon(entry.slug);
+            return (
+              <Chip
+                key={entry.slug}
+                active={applied.category === entry.slug}
+                onClick={() => {
+                  // Types belong to one category, so a new category starts without any.
+                  apply({ category: entry.slug, subcategories: '' });
+                }}
+              >
+                <Icon aria-hidden="true" className="size-4" />
+                {entry.name}
+              </Chip>
+            );
+          })}
+        </FilterRow>
+
+        {category && category.subcategories.length > 0 ? (
+          <FilterRow label={t('search.type')}>
+            <Chip
+              active={chosenTypes.length === 0}
+              onClick={() => {
+                apply({ subcategories: '' });
+              }}
+            >
+              {t('search.allOf', { category: category.name.toLowerCase() })}
+            </Chip>
+            {category.subcategories.map((entry) => {
+              const total = count(first?.facets.subcategories, entry.slug);
+              return (
+                <Chip
+                  key={entry.slug}
+                  active={chosenTypes.includes(entry.slug)}
+                  onClick={() => {
+                    toggleType(entry.slug);
+                  }}
+                >
+                  {entry.name}
+                  {total === undefined ? null : (
+                    <span className="font-normal opacity-70">{total}</span>
+                  )}
+                </Chip>
+              );
+            })}
+          </FilterRow>
+        ) : null}
+
+        <PlaceFields
+          className="grid max-w-3xl gap-3 sm:grid-cols-2"
+          optional
+          countries={taxonomy.data?.countries ?? []}
+          value={{ countryCode: applied.country ?? '', citySlug: applied.cities ?? '' }}
+          onChange={(place) => {
+            apply({ country: place.countryCode, cities: place.citySlug });
+          }}
+        />
+
         <details
-          className="group rounded-2xl border bg-card text-card-foreground shadow-sm"
-          open={Object.keys(applied).some((key) => key !== 'q')}
+          className="group max-w-3xl rounded-2xl border bg-card text-card-foreground shadow-sm"
+          open={Boolean(applied.gender ?? applied.ageMin ?? applied.ageMax)}
         >
           <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 rounded-2xl px-5 font-semibold [&::-webkit-details-marker]:hidden">
             <SlidersHorizontal aria-hidden="true" className="size-5" />
@@ -115,30 +230,6 @@ export function SearchPage() {
             />
           </summary>
           <div className="stack border-t px-5 py-5">
-            <Select
-              label={t('search.category')}
-              placeholder={t('search.anyCategory')}
-              value={draft.category ?? ''}
-              onChange={(event) => {
-                setDraft({ ...draft, category: event.target.value });
-              }}
-              options={(taxonomy.data?.categories ?? []).map((entry) => ({
-                value: entry.slug,
-                label: label(entry.name, count(first?.facets.categories, entry.slug)),
-              }))}
-            />
-            <Select
-              label={t('search.city')}
-              placeholder={t('search.anyCity')}
-              value={draft.cities ?? ''}
-              onChange={(event) => {
-                setDraft({ ...draft, cities: event.target.value });
-              }}
-              options={(taxonomy.data?.cities ?? []).map((entry) => ({
-                value: entry.slug,
-                label: label(entry.name, count(first?.facets.cities, entry.slug)),
-              }))}
-            />
             <div className="row items-start">
               <TextField
                 label={t('search.ageMin')}
@@ -146,9 +237,9 @@ export function SearchPage() {
                 inputMode="numeric"
                 min={SEARCH_MIN_AGE}
                 max={SEARCH_MAX_AGE}
-                value={draft.ageMin ?? ''}
+                value={typed.ageMin ?? ''}
                 onChange={(event) => {
-                  setDraft({ ...draft, ageMin: event.target.value });
+                  setTyped({ ...typed, ageMin: event.target.value });
                 }}
                 error={ageProblem ? t('search.ageRange') : undefined}
                 className="min-w-32 flex-1"
@@ -159,9 +250,9 @@ export function SearchPage() {
                 inputMode="numeric"
                 min={SEARCH_MIN_AGE}
                 max={SEARCH_MAX_AGE}
-                value={draft.ageMax ?? ''}
+                value={typed.ageMax ?? ''}
                 onChange={(event) => {
-                  setDraft({ ...draft, ageMax: event.target.value });
+                  setTyped({ ...typed, ageMax: event.target.value });
                 }}
                 className="min-w-32 flex-1"
               />
@@ -170,9 +261,9 @@ export function SearchPage() {
               <Select
                 label={t('search.gender')}
                 placeholder={t('search.anyGender')}
-                value={draft.gender ?? ''}
+                value={typed.gender ?? ''}
                 onChange={(event) => {
-                  setDraft({ ...draft, gender: event.target.value });
+                  setTyped({ ...typed, gender: event.target.value });
                 }}
                 options={[
                   { value: 'female', label: t('onboarding.about.genderFemale') },
@@ -182,51 +273,12 @@ export function SearchPage() {
               />
               <p className="text-sm text-muted-foreground">{t('search.genderHint')}</p>
             </div>
-            <Button
-              variant="text"
-              onClick={() => {
-                setDraft({ q: draft.q });
-                setParams(draft.q ? { q: draft.q } : {});
-              }}
-            >
-              {t('search.clear')}
+            <Button type="submit" variant="secondary">
+              {t('search.apply')}
             </Button>
           </div>
         </details>
       </form>
-      <ul
-        className="m-0 -mx-4 flex list-none gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0"
-        aria-label={t('search.quickCategories')}
-      >
-        {[{ slug: '', name: t('search.allTalent') }, ...(taxonomy.data?.categories ?? [])].map(
-          (entry) => {
-            const active = (applied.category ?? '') === entry.slug;
-            return (
-              <li key={entry.slug || 'all'} className="shrink-0">
-                <button
-                  type="button"
-                  aria-pressed={active}
-                  className={cn(
-                    'h-10 cursor-pointer rounded-full border px-4 text-sm font-semibold whitespace-nowrap transition-colors',
-                    active
-                      ? 'border-foreground bg-foreground text-background'
-                      : 'bg-card text-foreground hover:border-input',
-                  )}
-                  onClick={() => {
-                    const next = { ...applied, category: entry.slug };
-                    setDraft(next);
-                    setParams(
-                      Object.fromEntries(Object.entries(next).filter(([, value]) => value.trim())),
-                    );
-                  }}
-                >
-                  {entry.name}
-                </button>
-              </li>
-            );
-          },
-        )}
-      </ul>
 
       <section
         className="stack"
@@ -234,13 +286,28 @@ export function SearchPage() {
         aria-busy={results.isPending}
       >
         <FormMessage tone="error">{results.error ? errorMessage(results.error) : null}</FormMessage>
-        <p role="status" className="text-sm text-muted-foreground">
-          {first
-            ? first.total === 1
-              ? t('search.resultsOne')
-              : t('search.results', { count: first.total })
-            : null}
-        </p>
+        <div className="flex min-h-10 flex-wrap items-center justify-between gap-x-4 gap-y-1">
+          <p role="status" className="text-sm text-muted-foreground">
+            {first
+              ? first.total === 1
+                ? t('search.resultsOne')
+                : t('search.results', { count: first.total })
+              : null}
+          </p>
+          {narrowed ? (
+            <button
+              type="button"
+              className="inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full px-3 text-sm font-semibold hover:bg-accent"
+              onClick={() => {
+                setTyped({ q: typed.q });
+                setParams(applied.q ? { q: applied.q } : {});
+              }}
+            >
+              <X aria-hidden="true" className="size-4" />
+              {t('search.clear')}
+            </button>
+          ) : null}
+        </div>
         {first && first.total === 0 ? (
           <EmptyState icon={UserSearch} title={t('search.noResults')} />
         ) : null}
@@ -265,10 +332,52 @@ export function SearchPage() {
   );
 }
 
+/** The API takes up to five types in one search. */
+const MAX_TYPES = 5;
+
+/** One line of choices that scrolls sideways on a phone and wraps on a wide screen. */
+function FilterRow({ label, children }: { readonly label: string; readonly children: ReactNode }) {
+  return (
+    <div role="group" aria-label={label} className="grid gap-2">
+      <span className="text-sm font-semibold">{label}</span>
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Chip({
+  active,
+  onClick,
+  children,
+}: {
+  readonly active: boolean;
+  readonly onClick: () => void;
+  readonly children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      className={cn(
+        'inline-flex h-10 shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-4 text-sm font-semibold whitespace-nowrap transition-colors',
+        active
+          ? 'border-foreground bg-foreground text-background'
+          : 'bg-card text-foreground hover:border-input',
+      )}
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+}
+
 function ResultCard({ card }: { readonly card: TalentCard }) {
   const facts = [
-    card.city.name,
-    card.ageYears === null ? null : t('talent.age', { age: card.ageYears }),
+    placeLabel(card.city),
+    // The place takes most of the line on a phone, so the age is only the number here.
+    card.ageYears === null ? null : String(card.ageYears),
   ].filter(Boolean);
   const discipline = card.subcategories[0]?.name ?? card.category.name;
   return (

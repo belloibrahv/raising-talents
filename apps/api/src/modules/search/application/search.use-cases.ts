@@ -152,6 +152,7 @@ export class SearchTalentsHandler {
       text: query.q ?? '',
       category: query.category,
       subcategories: query.subcategories,
+      country: query.country,
       cities: query.cities,
       skills: query.skills,
       gender: query.gender,
@@ -179,6 +180,11 @@ export class SearchTalentsHandler {
       hasMore: query.page * SEARCH_PAGE_SIZE < result.found,
       facets: {
         categories: facet(result.facets.category, (slug) => catalog.category(slug)?.name ?? null),
+        subcategories: facet(
+          result.facets.subcategories,
+          (slug) => catalog.subcategoryRefs([slug])[0]?.name ?? null,
+        ),
+        countries: facet(result.facets.country, (code) => catalog.countryName(code)),
         cities: facet(result.facets.city, (slug) => catalog.city(slug)?.name ?? null),
       },
     });

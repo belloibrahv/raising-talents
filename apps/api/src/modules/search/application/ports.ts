@@ -6,6 +6,8 @@ export interface IndexQuery {
   readonly text: string;
   readonly category?: string | undefined;
   readonly subcategories: readonly string[];
+  /** ISO code. Cities narrow further within it. */
+  readonly country?: string | undefined;
   readonly cities: readonly string[];
   readonly skills: readonly string[];
   readonly gender?: string | undefined;
@@ -25,6 +27,8 @@ export interface IndexResult {
   readonly found: number;
   readonly facets: {
     readonly category: readonly FacetCount[];
+    readonly subcategories: readonly FacetCount[];
+    readonly country: readonly FacetCount[];
     readonly city: readonly FacetCount[];
   };
 }

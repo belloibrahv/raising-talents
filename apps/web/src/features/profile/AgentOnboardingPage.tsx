@@ -9,11 +9,11 @@ import { ChoiceGroup } from '../../shared/ui/ChoiceGroup';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { PageSkeleton } from '../../shared/ui/PageSkeleton';
 import { Page } from '../../shared/ui/Page';
-import { Select } from '../../shared/ui/Select';
 import { TextField } from '../../shared/ui/TextField';
 import { useFocusFirstError } from '../../shared/ui/use-focus-first-error';
 import { fieldErrorsFrom } from '../auth/form-errors';
 import { categoryIcon } from './category-icons';
+import { PlaceFields, startingPlace, type Place } from './PlaceFields';
 import { useMyAgentProfile, useTaxonomy, useUpdateAgentProfile } from './queries';
 
 export function AgentOnboardingPage() {
@@ -58,7 +58,9 @@ function AgentForm({
   const [specializations, setSpecializations] = useState<readonly string[]>(
     profile?.specializations.map((ref) => ref.slug) ?? [],
   );
-  const [city, setCity] = useState(profile?.city?.slug ?? '');
+  const [place, setPlace] = useState<Place>(() =>
+    startingPlace(profile?.city ?? null, taxonomy.countries),
+  );
   const [website, setWebsite] = useState(profile?.website ?? '');
   const [errors, setErrors] = useState<Errors>({});
   const form = useFocusFirstError(errors);
@@ -69,7 +71,7 @@ function AgentForm({
     if (agencyName.trim().length < 2) found['agencyName'] = t('validation.nameShort');
     if (jobTitle.trim().length < 2) found['jobTitle'] = t('validation.nameShort');
     if (specializations.length === 0) found['specializationSlugs'] = t('validation.chooseOne');
-    if (!city) found['citySlug'] = t('validation.chooseOne');
+    if (!place.citySlug) found['citySlug'] = t('validation.chooseOne');
     if (website.trim() && !/^https:\/\/\S+\.\S+/.test(website.trim()))
       found['website'] = t('validation.websiteInvalid');
     setErrors(found);
@@ -79,7 +81,7 @@ function AgentForm({
         agencyName: agencyName.trim(),
         jobTitle: jobTitle.trim(),
         specializationSlugs: [...specializations],
-        citySlug: city,
+        citySlug: place.citySlug,
         website: website.trim() || null,
       },
       {
@@ -138,16 +140,11 @@ function AgentForm({
         }))}
         error={errors['specializationSlugs']}
       />
-      <Select
-        label={t('onboarding.agent.city')}
-        placeholder={t('onboarding.location.choose')}
-        value={city}
-        onChange={(event) => {
-          setCity(event.target.value);
-        }}
-        options={taxonomy.cities.map((entry) => ({ value: entry.slug, label: entry.name }))}
-        error={errors['citySlug']}
-        required
+      <PlaceFields
+        countries={taxonomy.countries}
+        value={place}
+        onChange={setPlace}
+        cityError={errors['citySlug']}
       />
       <TextField
         label={t('onboarding.agent.website')}

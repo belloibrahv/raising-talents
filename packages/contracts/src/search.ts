@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { imageUrlsSchema } from './media.js';
 import { genderSchema } from './profiles.js';
-import { namedRefSchema, slugSchema } from './taxonomy.js';
+import { countryCodeSchema, namedRefSchema, slugSchema } from './taxonomy.js';
 
 export const SEARCH_PAGE_SIZE = 24;
 export const SEARCH_MAX_PAGE = 50;
@@ -26,6 +26,7 @@ export const searchTalentsQuerySchema = z
     q: z.string().trim().max(100).optional(),
     category: slugSchema.optional(),
     subcategories: slugList(5),
+    country: z.string().trim().toUpperCase().pipe(countryCodeSchema).optional(),
     cities: slugList(10),
     skills: slugList(10),
     gender: genderSchema.optional(),
@@ -61,6 +62,9 @@ export const talentCardSchema = z
 export type TalentCard = z.infer<typeof talentCardSchema>;
 
 const facetSchema = z.array(namedRefSchema.extend({ count: z.number().int().nonnegative() }));
+const countryFacetSchema = z.array(
+  z.object({ slug: countryCodeSchema, name: z.string(), count: z.number().int().nonnegative() }),
+);
 
 export const talentSearchResponseSchema = z
   .object({
@@ -70,7 +74,13 @@ export const talentSearchResponseSchema = z
     perPage: z.number().int().positive(),
     hasMore: z.boolean(),
     /** Counts for the current search, to show next to each filter option. */
-    facets: z.object({ categories: facetSchema, cities: facetSchema }),
+    facets: z.object({
+      categories: facetSchema,
+      subcategories: facetSchema,
+      /** The slug is the country code. */
+      countries: countryFacetSchema,
+      cities: facetSchema,
+    }),
   })
   .meta({ id: 'TalentSearchResponse' });
 export type TalentSearchResponse = z.infer<typeof talentSearchResponseSchema>;

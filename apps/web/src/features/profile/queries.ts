@@ -10,6 +10,7 @@ import { api, session } from '../../shared/api/client';
 
 export const keys = {
   taxonomy: ['taxonomy'] as const,
+  cities: (countryCode: string) => ['taxonomy', 'cities', countryCode] as const,
   talentProfile: ['talentProfile', 'mine'] as const,
   agentProfile: ['agentProfile', 'mine'] as const,
 };
@@ -19,6 +20,16 @@ export function useTaxonomy() {
   return useQuery({
     queryKey: keys.taxonomy,
     queryFn: () => api.call('taxonomy.get'),
+    staleTime: Infinity,
+  });
+}
+
+/** A country's cities, largest first. Idle until a country is chosen. */
+export function useCountryCities(countryCode: string) {
+  return useQuery({
+    queryKey: keys.cities(countryCode),
+    queryFn: () => api.call('taxonomy.cities', { params: { code: countryCode } }),
+    enabled: countryCode !== '',
     staleTime: Infinity,
   });
 }

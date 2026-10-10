@@ -252,8 +252,10 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 interface Taxonomy {
   categories: { slug: string; name: string; subcategories: { slug: string; name: string }[] }[];
-  cities: { slug: string; name: string }[];
 }
+
+/** The demo people live in Nigeria; their cities come from its list (ADR-046). */
+const DEMO_COUNTRY = 'NG';
 
 /** The live taxonomy decides the slugs: pick the closest match, or the first. */
 function pick<T extends { slug: string; name: string }>(items: readonly T[], hint: string): T {
@@ -335,6 +337,13 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
     ip: moderator.ip,
     token: moderator.token,
   });
+  const cities = (
+    await api.expect<{ items: { slug: string; name: string }[] }>(
+      'GET',
+      `/v1/taxonomy/countries/${DEMO_COUNTRY}/cities`,
+      { ip: moderator.ip, token: moderator.token },
+    )
+  ).items;
 
   /** Uploads through the real pipeline and approves it as the moderator. */
   async function upload(
@@ -408,7 +417,7 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
           subcategorySlugs: [subcategory.slug],
           ...(persona.onlyFirstSteps
             ? {}
-            : { citySlug: pick(taxonomy.cities, persona.city).slug, bio: persona.bio }),
+            : { citySlug: pick(cities, persona.city).slug, bio: persona.bio }),
         },
       });
     }
@@ -464,7 +473,7 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
           specializationSlugs: persona.specializations.map(
             (hint) => pick(taxonomy.categories, hint).slug,
           ),
-          citySlug: pick(taxonomy.cities, persona.city).slug,
+          citySlug: pick(cities, persona.city).slug,
           website: persona.website,
         },
       });

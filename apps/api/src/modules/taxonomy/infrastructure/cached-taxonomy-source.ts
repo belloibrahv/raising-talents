@@ -1,8 +1,8 @@
-import { asc, eq } from 'drizzle-orm';
+import { asc, desc, eq } from 'drizzle-orm';
 import type { Clock } from '../../../platform/clock.js';
 import type { Database } from '../../../platform/database/client.js';
 import { TaxonomyCatalog, type TaxonomySource } from '../application/taxonomy-catalog.js';
-import { categories, cities, skills, subcategories } from './taxonomy.schema.js';
+import { categories, cities, countries, skills, subcategories } from './taxonomy.schema.js';
 
 const REFRESH_AFTER_MS = 5 * 60 * 1000;
 
@@ -29,7 +29,7 @@ export class CachedTaxonomySource implements TaxonomySource {
   }
 
   private async load(now: number): Promise<TaxonomyCatalog> {
-    const [categoryRows, subcategoryRows, skillRows, cityRows] = await Promise.all([
+    const [categoryRows, subcategoryRows, skillRows, countryRows, cityRows] = await Promise.all([
       this.db
         .select()
         .from(categories)
@@ -41,12 +41,27 @@ export class CachedTaxonomySource implements TaxonomySource {
         .where(eq(subcategories.active, true))
         .orderBy(asc(subcategories.position)),
       this.db.select().from(skills).where(eq(skills.active, true)).orderBy(asc(skills.name)),
-      this.db.select().from(cities).where(eq(cities.active, true)).orderBy(asc(cities.name)),
+      this.db
+        .select({ code: countries.code, name: countries.name, searchTerms: countries.searchTerms })
+        .from(countries)
+        .where(eq(countries.active, true))
+        .orderBy(asc(countries.name)),
+      this.db
+        .select({
+          slug: cities.slug,
+          name: cities.name,
+          countryCode: cities.countryCode,
+          region: cities.region,
+        })
+        .from(cities)
+        .where(eq(cities.active, true))
+        .orderBy(desc(cities.population), asc(cities.name)),
     ]);
     const catalog = new TaxonomyCatalog({
       categories: categoryRows,
       subcategories: subcategoryRows,
       skills: skillRows,
+      countries: countryRows,
       cities: cityRows,
     });
     this.cached = { catalog, loadedAt: now };

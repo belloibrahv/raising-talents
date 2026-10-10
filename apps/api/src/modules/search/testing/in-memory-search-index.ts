@@ -37,6 +37,7 @@ export class InMemorySearchIndex implements SearchIndex {
           query.subcategories.length === 0 ||
           doc.subcategories.some((slug) => query.subcategories.includes(slug)),
       )
+      .filter((doc) => !query.country || doc.country === query.country)
       .filter((doc) => query.cities.length === 0 || query.cities.includes(doc.city))
       .filter(
         (doc) =>
@@ -54,16 +55,23 @@ export class InMemorySearchIndex implements SearchIndex {
           (doc.born_on !== undefined && doc.born_on <= query.bornOnTo),
       )
       .sort((a, b) => b.updated_at - a.updated_at);
-    const count = (field: 'category' | 'city') => {
+    const count = (field: 'category' | 'subcategories' | 'country' | 'city') => {
       const counts = new Map<string, number>();
-      for (const doc of matches) counts.set(doc[field], (counts.get(doc[field]) ?? 0) + 1);
+      for (const doc of matches) {
+        for (const value of [doc[field]].flat()) counts.set(value, (counts.get(value) ?? 0) + 1);
+      }
       return [...counts.entries()].map(([value, total]) => ({ value, count: total }));
     };
     const start = (query.page - 1) * query.perPage;
     return {
       hits: matches.slice(start, start + query.perPage),
       found: matches.length,
-      facets: { category: count('category'), city: count('city') },
+      facets: {
+        category: count('category'),
+        subcategories: count('subcategories'),
+        country: count('country'),
+        city: count('city'),
+      },
     };
   }
 

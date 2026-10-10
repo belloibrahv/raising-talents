@@ -1,6 +1,9 @@
-import { Controller, Get, Header, Inject, UseGuards } from '@nestjs/common';
-import type { TaxonomyResponse } from '@rt/contracts';
+import { Controller, Get, Header, Inject, Param, UseGuards } from '@nestjs/common';
+import { ErrorCode, type CountryCitiesResponse, type TaxonomyResponse } from '@rt/contracts';
+import { domainError } from '../../../../platform/domain-error.js';
 import { AuthGuard } from '../../../../platform/http/auth.guard.js';
+import { unwrap } from '../../../../platform/http/problem.js';
+import { err, ok } from '../../../../platform/result.js';
 import { TAXONOMY } from '../../application/taxonomy.tokens.js';
 import type { TaxonomySource } from '../../application/taxonomy-catalog.js';
 
@@ -14,5 +17,16 @@ export class TaxonomyController {
   @Header('Cache-Control', 'private, max-age=3600')
   async list(): Promise<TaxonomyResponse> {
     return (await this.source.current()).toResponse();
+  }
+
+  @Get('countries/:code/cities')
+  @Header('Cache-Control', 'private, max-age=3600')
+  async cities(@Param('code') code: string): Promise<CountryCitiesResponse> {
+    const items = (await this.source.current()).citiesIn(code.toUpperCase());
+    return unwrap(
+      items === null
+        ? err(domainError(ErrorCode.NotFound, 'There is no such country.'))
+        : ok({ items: [...items] }),
+    );
   }
 }

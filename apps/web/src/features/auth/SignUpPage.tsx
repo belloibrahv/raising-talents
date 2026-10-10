@@ -5,14 +5,16 @@ import { z } from 'zod';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { isApiError } from '../../shared/api/api-error';
-import { LAUNCH_COUNTRY_CODE, LEGAL_URLS } from '../../shared/config';
+import { LEGAL_URLS } from '../../shared/config';
+import { deviceCountryCode, FALLBACK_COUNTRY_CODE } from '../../shared/places';
 import { Button, buttonLink } from '../../shared/ui/Button';
 import { Checkbox } from '../../shared/ui/Checkbox';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { Page } from '../../shared/ui/Page';
 import { PasswordField, TextField } from '../../shared/ui/TextField';
 import { useFocusFirstError } from '../../shared/ui/use-focus-first-error';
-import { formatDateOfBirthInput, toIsoDate } from './date-of-birth';
+import { DateOfBirthField } from './DateOfBirthField';
+import { EMPTY_DATE, toIsoDate, type DateParts } from './date-of-birth';
 import { fieldErrorsFrom } from './form-errors';
 import { useSignUp } from './use-auth';
 
@@ -25,7 +27,7 @@ export function SignUpPage() {
   const signUp = useSignUp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState<DateParts>(EMPTY_DATE);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const form = useFocusFirstError(errors);
@@ -47,7 +49,8 @@ export function SignUpPage() {
         email: normalisedEmail,
         password,
         dateOfBirth: isoDate,
-        countryCode: LAUNCH_COUNTRY_CODE,
+        // The device's region is a starting point; the city on the profile is what people see.
+        countryCode: deviceCountryCode() ?? FALLBACK_COUNTRY_CODE,
         acceptedTerms: true,
       },
       {
@@ -98,19 +101,11 @@ export function SignUpPage() {
           minLength={PASSWORD_MIN_LENGTH}
           required
         />
-        <TextField
-          label={t('signUp.dateOfBirth')}
-          hint={t('signUp.dateOfBirthHint')}
-          placeholder={t('signUp.dateOfBirthPlaceholder')}
+        <DateOfBirthField
           value={dateOfBirth}
-          onChange={(event) => {
-            setDateOfBirth(formatDateOfBirthInput(event.target.value));
-          }}
+          onChange={setDateOfBirth}
+          hint={t('signUp.dateOfBirthHint')}
           error={errors.dateOfBirth}
-          inputMode="numeric"
-          autoComplete="bday"
-          maxLength={10}
-          required
         />
         <Checkbox
           checked={acceptedTerms}

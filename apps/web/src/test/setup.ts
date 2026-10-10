@@ -25,3 +25,6 @@ afterEach(() => {
   cleanup();
   localStorage.clear();
 });
+
+// jsdom lays nothing out, so it has no scrolling. Lists that keep the active option in view call this.
+Element.prototype.scrollIntoView = () => undefined;

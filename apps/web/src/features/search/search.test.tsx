@@ -6,6 +6,7 @@ import {
   meFor,
   renderAt,
   resetSession,
+  citiesRoutes,
   signedIn,
   stubApi,
   TAXONOMY,
@@ -42,6 +43,8 @@ function searchApi(total: number) {
       hasMore: page * 24 < total,
       facets: {
         categories: [{ slug: 'music', name: 'Music', count: total }],
+        subcategories: [{ slug: 'singer', name: 'Singer', count: total }],
+        countries: [{ slug: 'NG', name: 'Nigeria', count: total }],
         cities: [{ slug: 'ng-lagos', name: 'Lagos', count: total }],
       },
     });
@@ -63,29 +66,72 @@ describe('search for agents', () => {
     await expectNoAxeViolations();
   });
 
-  it('puts the filters in the address and sends them, with counts next to each option', async () => {
+  it('narrows by category then type, and by country then city, in the address', async () => {
     const calls = stubApi({
       '/v1/auth/web/refresh': () => signedIn(agent),
       '/v1/taxonomy': () => Response.json(TAXONOMY),
+      ...citiesRoutes,
       'GET /v1/search/talents': searchApi(3),
     });
     const router = renderAt('/search');
     const user = userEvent.setup({ delay: null });
     await screen.findByText('3 talent found');
+
+    // A type is offered only once its category is chosen.
+    expect(screen.queryByRole('group', { name: 'Type' })).toBeNull();
+    await user.click(screen.getByRole('button', { name: 'Music' }));
+    const types = await screen.findByRole('group', { name: 'Type' });
+    await user.click(within(types).getByRole('button', { name: /Singer/ }));
+    await waitFor(() => {
+      expect(within(types).getByRole('button', { name: /Singer/ })).toHaveTextContent('Singer3');
+    });
+
+    // "UK" finds the United Kingdom, and its cities follow.
+    expect(screen.getByRole('combobox', { name: 'City' })).toBeDisabled();
+    await user.type(screen.getByRole('combobox', { name: 'Country' }), 'uk');
+    await user.click(await screen.findByRole('option', { name: 'United Kingdom' }));
+    await user.click(screen.getByRole('combobox', { name: 'City' }));
+    await user.click(await screen.findByRole('option', { name: 'London' }));
+
+    expect(router.state.location.search).toBe(
+      '?category=music&subcategories=singer&country=GB&cities=gb-london',
+    );
+    await waitFor(() => {
+      expect(calls.filter((call) => call.path === '/v1/search/talents').at(-1)?.query).toBe(
+        '?category=music&subcategories=singer&country=GB&cities=gb-london&page=1',
+      );
+    });
+
+    // Another country drops the city, which belonged to the first.
+    await user.clear(screen.getByRole('combobox', { name: 'Country' }));
+    await user.type(screen.getByRole('combobox', { name: 'Country' }), 'nig');
+    await user.click(await screen.findByRole('option', { name: 'Nigeria' }));
+    expect(router.state.location.search).toBe('?category=music&subcategories=singer&country=NG');
+  });
+
+  it('sends the words and the age range together, keeping what was picked', async () => {
+    const calls = stubApi({
+      '/v1/auth/web/refresh': () => signedIn(agent),
+      '/v1/taxonomy': () => Response.json(TAXONOMY),
+      'GET /v1/search/talents': searchApi(3),
+    });
+    const router = renderAt('/search?category=music');
+    const user = userEvent.setup({ delay: null });
+    await screen.findByText('3 talent found');
     await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'afro soul');
-    await user.click(screen.getByText('Filters'));
-    await user.selectOptions(screen.getByLabelText('City'), 'ng-lagos');
-    expect(screen.getByRole('option', { name: 'Lagos (3)' })).toBeInTheDocument();
+    await user.click(screen.getByText('More filters'));
     await user.type(screen.getByLabelText('Youngest age'), '18');
     await user.type(screen.getByLabelText('Oldest age'), '25');
     await user.click(screen.getByRole('button', { name: 'Search' }));
 
-    expect(router.state.location.search).toBe('?q=afro+soul&cities=ng-lagos&ageMin=18&ageMax=25');
+    expect(router.state.location.search).toBe('?q=afro+soul&category=music&ageMin=18&ageMax=25');
     await waitFor(() => {
       expect(calls.filter((call) => call.path === '/v1/search/talents').at(-1)?.query).toBe(
-        '?q=afro+soul&cities=ng-lagos&ageMin=18&ageMax=25&page=1',
+        '?q=afro+soul&category=music&ageMin=18&ageMax=25&page=1',
       );
     });
+    await user.click(screen.getByRole('button', { name: 'Clear filters' }));
+    expect(router.state.location.search).toBe('?q=afro+soul');
   });
 
   it('loads the next page on request, and stops offering more at the end', async () => {
@@ -112,7 +158,7 @@ describe('search for agents', () => {
     });
     renderAt('/search');
     const user = userEvent.setup({ delay: null });
-    await user.click(await screen.findByText('Filters'));
+    await user.click(await screen.findByText('More filters'));
     await user.type(screen.getByLabelText('Youngest age'), '30');
     await user.type(screen.getByLabelText('Oldest age'), '20');
     const before = calls.length;

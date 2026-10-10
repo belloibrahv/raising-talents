@@ -1283,7 +1283,7 @@
     "/v1/taxonomy": {
       "get": {
         "operationId": "taxonomy_get",
-        "summary": "Categories, subcategories, skills and cities",
+        "summary": "Categories, subcategories, skills and countries",
         "tags": [
           "Taxonomy"
         ],
@@ -1321,6 +1321,95 @@
             "x-error-codes": [
               "UNAUTHENTICATED",
               "SESSION_EXPIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Something went wrong. Codes: INTERNAL.",
+            "x-error-codes": [
+              "INTERNAL"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/taxonomy/countries/{code}/cities": {
+      "get": {
+        "operationId": "taxonomy_cities",
+        "summary": "A country's cities, largest first",
+        "tags": [
+          "Taxonomy"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryCities"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request. Codes: VALIDATION_FAILED.",
+            "x-error-codes": [
+              "VALIDATION_FAILED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not signed in. Codes: UNAUTHENTICATED, SESSION_EXPIRED.",
+            "x-error-codes": [
+              "UNAUTHENTICATED",
+              "SESSION_EXPIRED"
+            ],
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found. Codes: NOT_FOUND.",
+            "x-error-codes": [
+              "NOT_FOUND"
             ],
             "content": {
               "application/problem+json": {
@@ -3015,6 +3104,14 @@
           },
           {
             "name": "subcategories",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "country",
             "in": "query",
             "required": false,
             "schema": {
@@ -7641,6 +7738,30 @@
         ],
         "additionalProperties": false
       },
+      "Country": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z]{2}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "searchTerms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "searchTerms"
+        ],
+        "additionalProperties": false
+      },
       "Taxonomy": {
         "type": "object",
         "properties": {
@@ -7721,38 +7842,57 @@
               "additionalProperties": false
             }
           },
-          "cities": {
+          "countries": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "slug": {
-                  "type": "string",
-                  "maxLength": 64,
-                  "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "countryCode": {
-                  "type": "string",
-                  "minLength": 2,
-                  "maxLength": 2
-                }
-              },
-              "required": [
-                "slug",
-                "name",
-                "countryCode"
-              ],
-              "additionalProperties": false
+              "$ref": "#/components/schemas/Country"
             }
           }
         },
         "required": [
           "categories",
           "skills",
-          "cities"
+          "countries"
+        ],
+        "additionalProperties": false
+      },
+      "CityOption": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "region": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "slug",
+          "name",
+          "region"
+        ],
+        "additionalProperties": false
+      },
+      "CountryCities": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CityOption"
+            }
+          }
+        },
+        "required": [
+          "items"
         ],
         "additionalProperties": false
       },
@@ -10269,6 +10409,59 @@
                   "additionalProperties": false
                 }
               },
+              "subcategories": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "type": "string",
+                      "maxLength": 64,
+                      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "slug",
+                    "name",
+                    "count"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "countries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "slug": {
+                      "type": "string",
+                      "pattern": "^[A-Z]{2}$"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "count": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    }
+                  },
+                  "required": [
+                    "slug",
+                    "name",
+                    "count"
+                  ],
+                  "additionalProperties": false
+                }
+              },
               "cities": {
                 "type": "array",
                 "items": {
@@ -10299,6 +10492,8 @@
             },
             "required": [
               "categories",
+              "subcategories",
+              "countries",
               "cities"
             ],
             "additionalProperties": false

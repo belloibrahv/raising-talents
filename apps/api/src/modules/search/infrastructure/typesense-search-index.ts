@@ -54,6 +54,7 @@ export function filterFor(query: IndexQuery): string {
   if (query.category) parts.push(`category:=${literal(query.category)}`);
   if (query.subcategories.length)
     parts.push(`subcategories:=[${query.subcategories.map(literal).join(',')}]`);
+  if (query.country) parts.push(`country:=${literal(query.country)}`);
   if (query.cities.length) parts.push(`city:=[${query.cities.map(literal).join(',')}]`);
   if (query.skills.length) parts.push(`skills:=[${query.skills.map(literal).join(',')}]`);
   if (query.gender) parts.push(`gender:=${literal(query.gender)}`);
@@ -102,8 +103,8 @@ export class TypesenseSearchIndex implements SearchIndex {
       q: query.text.trim() || '*',
       query_by: QUERY_BY.join(','),
       query_by_weights: QUERY_WEIGHTS.join(','),
-      facet_by: 'category,city',
-      max_facet_values: '50',
+      facet_by: 'category,subcategories,country,city',
+      max_facet_values: '100',
       sort_by: query.text.trim() ? '_text_match:desc,updated_at:desc' : 'updated_at:desc',
       num_typos: '2',
       exclude_fields: 'bio',
@@ -130,7 +131,12 @@ export class TypesenseSearchIndex implements SearchIndex {
     return {
       hits: body.hits.map((hit) => hit.document),
       found: body.found,
-      facets: { category: facet('category'), city: facet('city') },
+      facets: {
+        category: facet('category'),
+        subcategories: facet('subcategories'),
+        country: facet('country'),
+        city: facet('city'),
+      },
     };
   }
 

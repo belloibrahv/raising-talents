@@ -3,6 +3,7 @@ import { BadgeCheck, Bookmark, BookmarkX, EyeOff, StickyNote } from 'lucide-reac
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { t } from '../../i18n';
+import { placeLabel } from '../../shared/places';
 import { errorMessage } from '../../i18n/error-message';
 import { Button, buttonLink } from '../../shared/ui/Button';
 import { EmptyState } from '../../shared/ui/EmptyState';
@@ -90,7 +91,7 @@ function SavedTalent({
   const headingId = `saved-${talent.handle}`;
   const discipline = talent.subcategories[0]?.name ?? talent.category.name;
   const facts = [
-    talent.city.name,
+    placeLabel(talent.city),
     talent.ageYears === null ? null : t('talent.age', { age: talent.ageYears }),
   ].filter(Boolean);
   return (

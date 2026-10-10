@@ -165,6 +165,11 @@ Onboarding is a strict order: sign up, verify email, choose a role, then the app
 - Schema changes are SQL migrations that follow expand and contract: add first, backfill, switch, then remove in a later release.
 - Writing rules apply to everything people read: no em dashes, en dashes or double hyphens in prose, no filler words, and real content in examples. The rules live in `packages/config/writing-rules.json`.
 
+## Credits
+
+Countries and cities come from [GeoNames](https://www.geonames.org), licensed under
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) (ADR-046).
+
 ## Status
 
 Milestone 1, foundations.

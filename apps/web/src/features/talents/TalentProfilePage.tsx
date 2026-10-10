@@ -1,25 +1,46 @@
+import type { Post } from '@rt/contracts';
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'react-router';
+import {
+  Cake,
+  Heart,
+  ImageOff,
+  ImagePlus,
+  MapPin,
+  MessageCircle,
+  PenLine,
+  Play,
+  X,
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useParams } from 'react-router';
+import { Badge } from '@/components/ui/badge';
 import { t } from '../../i18n';
-import { placeLabel } from '../../shared/places';
 import { errorMessage } from '../../i18n/error-message';
 import { isApiError } from '../../shared/api/api-error';
 import { api } from '../../shared/api/client';
-import { VideoPlayer } from '../../shared/media/VideoPlayer';
-import { FormMessage } from '../../shared/ui/FormMessage';
-import { PageSkeleton } from '../../shared/ui/PageSkeleton';
-import { Page } from '../../shared/ui/Page';
-import { ReportProfile } from './ReportProfile';
-import { useSession } from '../auth/use-auth';
-import { SaveToggle } from '../shortlist/SaveToggle';
-import { Badge } from '@/components/ui/badge';
-import { VerifiedBadge } from '../../shared/ui/VerifiedBadge';
-import { Cake, ImageOff, MapPin, MessageCircle, Sparkles } from 'lucide-react';
-import { buttonLink } from '../../shared/ui/Button';
-import { ContactPanel } from '../messages/ContactPanel';
+import { placeLabel } from '../../shared/places';
+import { Avatar } from '../../shared/ui/Avatar';
+import { Button, buttonLink } from '../../shared/ui/Button';
 import { EmptyState } from '../../shared/ui/EmptyState';
+import { FormMessage } from '../../shared/ui/FormMessage';
+import { Page } from '../../shared/ui/Page';
+import { PageSkeleton } from '../../shared/ui/PageSkeleton';
+import { VerifiedBadge } from '../../shared/ui/VerifiedBadge';
+import { useSession } from '../auth/use-auth';
+import { ContactPanel } from '../messages/ContactPanel';
+import { useMyTalentProfile } from '../profile/queries';
+import { SaveToggle } from '../shortlist/SaveToggle';
+import { FollowButton } from '../social/FollowButton';
+import { PostCard } from '../social/PostCard';
+import { useTalentPosts, useTalentSocial } from '../social/queries';
+import { ReportProfile } from './ReportProfile';
+import { ShareCard } from './ShareCard';
 
-/** A talent as agents see them: ready media only, age in years, never the date of birth. */
+/**
+ * A talent's page: who they are, their numbers, and their work in a grid. Ready media only,
+ * age in years, never the date of birth. On your own page the actions are yours: edit, post
+ * and share.
+ */
 export function TalentProfilePage() {
   const { handle = '' } = useParams();
   const me = useSession().me;
@@ -28,11 +49,11 @@ export function TalentProfilePage() {
     queryFn: () => api.call('talents.getByHandle', { params: { handle } }),
     retry: (failures, error) => !isApiError(error, 'NOT_FOUND') && failures < 2,
   });
-  const portfolio = useQuery({
-    queryKey: ['talents', handle, 'portfolio'],
-    queryFn: () => api.call('talents.getPortfolio', { params: { handle } }),
-    enabled: profile.isSuccess,
-  });
+  const social = useTalentSocial(handle, profile.isSuccess);
+  const posts = useTalentPosts(handle, profile.isSuccess);
+  const isSelf = social.data?.isSelf ?? false;
+  const mine = useMyTalentProfile(isSelf);
+  const [open, setOpen] = useState<string | null>(null);
 
   if (profile.isPending) return <PageSkeleton variant="profile" />;
   if (profile.isError) {
@@ -46,15 +67,15 @@ export function TalentProfilePage() {
   }
 
   const talent = profile.data;
-  const canSave = me?.role === 'agent' && me.status === 'active';
+  const isAgent = me?.role === 'agent' && me.status === 'active';
   const discipline =
     talent.subcategories.map((entry) => entry.name).join(', ') || talent.category.name;
-  const chips = [
-    { icon: Sparkles, label: discipline },
-    { icon: MapPin, label: placeLabel(talent.city, 'long') },
-    ...(talent.ageYears === null
-      ? []
-      : [{ icon: Cake, label: t('talent.age', { age: talent.ageYears }) }]),
+  const items = posts.data?.pages.flatMap((page) => page.items) ?? [];
+  const opened = items.find((post) => post.id === open) ?? null;
+  const stats = [
+    { value: social.data?.posts, label: t('social.posts') },
+    { value: social.data?.followers, label: t('social.followers') },
+    { value: social.data?.following, label: t('social.followingCount') },
   ];
 
   return (
@@ -62,72 +83,55 @@ export function TalentProfilePage() {
       title={talent.displayName}
       documentTitle={t('titles.talentProfile', { name: talent.displayName })}
       width="wide"
-      className="[&>div]:max-w-5xl [&>div>header]:sr-only"
+      className="[&>div]:max-w-4xl [&>div>header]:sr-only"
       hero={
-        <section className="overflow-hidden rounded-3xl border bg-card shadow-sm">
-          <div
-            className="h-32 bg-stage [background-image:radial-gradient(ellipse_55%_120%_at_15%_0%,rgb(255_201_60/0.55),transparent_70%),radial-gradient(ellipse_50%_120%_at_95%_100%,rgb(142_162_255/0.35),transparent_70%)] sm:h-44"
-            aria-hidden="true"
-          />
-          <div className="flex flex-col gap-5 px-5 pb-6 sm:flex-row sm:items-end sm:gap-6 sm:px-8">
-            {talent.avatarUrls ? (
-              <img
-                className="-mt-16 size-32 shrink-0 rounded-full bg-muted object-cover shadow-xl ring-4 ring-card sm:-mt-20 sm:size-40"
-                src={talent.avatarUrls.medium}
-                alt=""
-              />
-            ) : (
-              <span
-                className="-mt-16 grid size-32 shrink-0 place-items-center rounded-full bg-stage font-display text-5xl font-bold text-stage-foreground shadow-xl ring-4 ring-card sm:-mt-20 sm:size-40"
-                aria-hidden="true"
-              >
-                {talent.displayName.slice(0, 1)}
-              </span>
-            )}
-            <div className="grid min-w-0 flex-1 gap-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <p
-                  className="m-0 font-display text-3xl leading-tight font-bold sm:text-4xl"
-                  aria-hidden="true"
-                >
+        <section className="grid gap-5" aria-label={talent.displayName}>
+          <div className="flex items-center gap-5 sm:gap-10">
+            <Avatar name={talent.displayName} urls={talent.avatarUrls} size="xl" ring />
+            <div className="grid min-w-0 flex-1 gap-4">
+              <div className="hidden flex-wrap items-center gap-x-3 gap-y-1 sm:flex">
+                <p className="m-0 font-display text-3xl leading-tight font-bold" aria-hidden="true">
                   {talent.displayName}
                 </p>
                 {talent.verified ? <VerifiedBadge /> : null}
               </div>
-              <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-                {chips.map(({ icon: Icon, label }) => (
-                  <li
-                    key={label}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-sm font-medium"
+              <dl className="m-0 grid max-w-sm grid-cols-3 text-center sm:text-left">
+                {stats.map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="flex flex-col-reverse sm:flex-row-reverse sm:justify-end sm:gap-1.5"
                   >
-                    <Icon aria-hidden="true" className="size-4 text-muted-foreground" />
-                    {label}
-                  </li>
+                    <dt className="text-sm text-muted-foreground sm:text-base">{stat.label}</dt>
+                    <dd className="m-0 text-lg font-bold sm:text-base">{stat.value ?? '–'}</dd>
+                  </div>
                 ))}
-              </ul>
+              </dl>
             </div>
-            {canSave ? (
-              <div className="flex shrink-0 items-start gap-2 sm:items-end">
-                <a href="#contact" className={buttonLink('primary', 'sm')}>
-                  <MessageCircle aria-hidden="true" />
-                  {t('talent.contact')}
-                </a>
-                <SaveToggle handle={talent.handle} name={talent.displayName} />
-              </div>
-            ) : null}
           </div>
-        </section>
-      }
-    >
-      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-        <div className="grid gap-10">
-          <section className="stack gap-3" aria-labelledby="about-heading">
-            <h2 id="about-heading" className="text-xl font-semibold">
-              {t('talent.about')}
-            </h2>
-            <p className="text-lg leading-relaxed whitespace-pre-line">{talent.bio}</p>
+
+          <div className="grid gap-2">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:hidden">
+              <p className="m-0 font-display text-2xl leading-tight font-bold" aria-hidden="true">
+                {talent.displayName}
+              </p>
+              {talent.verified ? <VerifiedBadge /> : null}
+            </div>
+            <p className="m-0 font-semibold">{discipline}</p>
+            <ul className="m-0 flex list-none flex-wrap gap-x-4 gap-y-1 p-0 text-sm text-muted-foreground">
+              <li className="inline-flex items-center gap-1.5">
+                <MapPin aria-hidden="true" className="size-4" />
+                {placeLabel(talent.city, 'long')}
+              </li>
+              {talent.ageYears === null ? null : (
+                <li className="inline-flex items-center gap-1.5">
+                  <Cake aria-hidden="true" className="size-4" />
+                  {t('talent.age', { age: talent.ageYears })}
+                </li>
+              )}
+            </ul>
+            <p className="m-0 max-w-2xl leading-relaxed whitespace-pre-line">{talent.bio}</p>
             {talent.skills.length > 0 ? (
-              <ul className="row m-0 mt-2 list-none gap-2 p-0" aria-label={t('talent.skills')}>
+              <ul className="row m-0 mt-1 list-none gap-2 p-0" aria-label={t('talent.skills')}>
                 {talent.skills.map((skill) => (
                   <li key={skill.slug}>
                     <Badge variant="secondary" className="px-3 py-1 text-sm">
@@ -137,59 +141,190 @@ export function TalentProfilePage() {
                 ))}
               </ul>
             ) : null}
-          </section>
-          <section className="stack" aria-labelledby="portfolio-heading">
-            <h2 id="portfolio-heading" className="text-xl font-semibold">
-              {t('talent.portfolio')}
-            </h2>
-            {portfolio.data && portfolio.data.items.length === 0 ? (
-              <EmptyState icon={ImageOff} title={t('talent.noPortfolio')} />
+          </div>
+
+          <div className="flex flex-wrap items-start gap-2">
+            {isSelf ? (
+              <>
+                <Link className={buttonLink('secondary', 'sm')} to="/onboarding/talent/about">
+                  <PenLine aria-hidden="true" />
+                  {t('home.editProfile')}
+                </Link>
+                <Link className={buttonLink('primary', 'sm')} to="/portfolio">
+                  <ImagePlus aria-hidden="true" />
+                  {t('talent.addWork')}
+                </Link>
+              </>
+            ) : social.data ? (
+              <FollowButton
+                handle={talent.handle}
+                name={talent.displayName}
+                following={social.data.followedByViewer}
+              />
             ) : null}
-            <ul className="grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3">
-              {portfolio.data?.items.map((item, index) => {
-                // The caption is printed under the media, so the media's own name must not repeat it.
-                const values = { position: index + 1, name: talent.displayName };
-                return (
-                  <li key={item.id} className={index === 0 ? 'col-span-2 row-span-2' : undefined}>
-                    <figure className="m-0 flex h-full flex-col gap-1.5">
-                      {item.kind === 'video' ? (
-                        <VideoPlayer playback={item.video} label={t('talent.videoAlt', values)} />
-                      ) : (
-                        <img
-                          className="aspect-[4/5] w-full flex-1 rounded-2xl bg-muted object-cover"
-                          src={item.urls.medium}
-                          srcSet={`${item.urls.small} 256w, ${item.urls.medium} 1024w, ${item.urls.large} 2048w`}
-                          sizes={
-                            index === 0
-                              ? '(max-width: 40rem) 100vw, 30rem'
-                              : '(max-width: 40rem) 50vw, 15rem'
-                          }
-                          alt={t('talent.photoAlt', values)}
-                          loading={index < 3 ? 'eager' : 'lazy'}
-                          decoding="async"
-                        />
-                      )}
-                      {item.caption ? (
-                        <figcaption className="text-sm text-muted-foreground">
-                          {item.caption}
-                        </figcaption>
-                      ) : null}
-                    </figure>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        </div>
-        <aside
-          className="grid gap-4 lg:sticky lg:top-24"
-          id="contact"
-          aria-label={t('talent.contact')}
-        >
-          {canSave ? <ContactPanel handle={talent.handle} name={talent.displayName} /> : null}
+            {isAgent ? (
+              <>
+                <a href="#contact" className={buttonLink('secondary', 'sm')}>
+                  <MessageCircle aria-hidden="true" />
+                  {t('talent.contact')}
+                </a>
+                <SaveToggle handle={talent.handle} name={talent.displayName} />
+              </>
+            ) : null}
+          </div>
+        </section>
+      }
+    >
+      {isSelf && mine.data ? <ShareCard profile={mine.data} /> : null}
+
+      <section className="stack border-t pt-6" aria-labelledby="portfolio-heading">
+        <h2 id="portfolio-heading" className="sr-only">
+          {t('talent.portfolio')}
+        </h2>
+        <FormMessage tone="error">{posts.error ? errorMessage(posts.error) : null}</FormMessage>
+        {posts.isSuccess && items.length === 0 ? (
+          <EmptyState
+            icon={ImageOff}
+            title={isSelf ? t('talent.noPortfolioMine') : t('talent.noPortfolio')}
+          >
+            {isSelf ? (
+              <Link className={buttonLink('primary', 'sm')} to="/portfolio">
+                <ImagePlus aria-hidden="true" />
+                {t('talent.addWork')}
+              </Link>
+            ) : null}
+          </EmptyState>
+        ) : null}
+        <ul className="m-0 grid list-none grid-cols-3 gap-1 p-0 sm:gap-3">
+          {items.map((post, index) => (
+            <li key={post.id}>
+              <Tile
+                post={post}
+                position={index + 1}
+                eager={index < 6}
+                onOpen={() => {
+                  setOpen(post.id);
+                }}
+              />
+            </li>
+          ))}
+        </ul>
+        {posts.hasNextPage ? (
+          <Button
+            variant="secondary"
+            loading={posts.isFetchingNextPage}
+            onClick={() => void posts.fetchNextPage()}
+          >
+            {t('home.morePosts')}
+          </Button>
+        ) : null}
+      </section>
+
+      {isSelf ? null : (
+        <aside className="grid gap-4 border-t pt-6" id="contact" aria-label={t('talent.contact')}>
+          {isAgent ? <ContactPanel handle={talent.handle} name={talent.displayName} /> : null}
           <ReportProfile handle={talent.handle} />
         </aside>
-      </div>
+      )}
+
+      <PostDialog
+        post={opened}
+        onClose={() => {
+          setOpen(null);
+        }}
+      />
     </Page>
+  );
+}
+
+/** One square of the grid. The like count shows on hover and to screen readers. */
+function Tile({
+  post,
+  position,
+  eager,
+  onOpen,
+}: {
+  readonly post: Post;
+  readonly position: number;
+  readonly eager: boolean;
+  readonly onOpen: () => void;
+}) {
+  const values = { position, name: post.talent.displayName };
+  const name = post.kind === 'video' ? t('talent.videoAlt', values) : t('talent.photoAlt', values);
+  return (
+    <button
+      type="button"
+      className="group relative block aspect-square w-full cursor-pointer overflow-hidden bg-muted sm:rounded-xl"
+      aria-label={post.caption ? `${name}: ${post.caption}` : name}
+      onClick={onOpen}
+    >
+      {post.kind === 'image' ? (
+        <img
+          className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+          src={post.urls.medium}
+          srcSet={`${post.urls.small} 256w, ${post.urls.medium} 1024w`}
+          sizes="(max-width: 40rem) 33vw, 18rem"
+          alt=""
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+        />
+      ) : (
+        <span className="grid size-full place-items-center bg-stage stage-glow text-stage-foreground">
+          <Play aria-hidden="true" className="size-8 fill-current" />
+        </span>
+      )}
+      <span className="absolute inset-0 hidden items-center justify-center gap-1.5 bg-black/45 font-semibold text-white group-hover:flex group-focus-visible:flex">
+        <Heart aria-hidden="true" className="size-5 fill-current" />
+        {post.likes}
+      </span>
+    </button>
+  );
+}
+
+/**
+ * The opened post, in the browser's own dialog: it traps focus, closes on Escape and needs no
+ * injected styles, which the content security policy would refuse.
+ */
+function PostDialog({
+  post,
+  onClose,
+}: {
+  readonly post: Post | null;
+  readonly onClose: () => void;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    const element = dialog.current;
+    if (!element) return;
+    if (post && !element.open) element.showModal();
+    if (!post && element.open) element.close();
+  }, [post]);
+  return (
+    <dialog
+      ref={dialog}
+      aria-label={post ? t('social.postBy', { name: post.talent.displayName }) : undefined}
+      className="m-auto w-[min(100vw,32rem)] max-w-none overflow-visible bg-transparent p-0 backdrop:bg-black/70"
+      onClose={onClose}
+      // A press on the dimmed area around the post closes it.
+      onClick={(event) => {
+        if (event.target === dialog.current) onClose();
+      }}
+    >
+      {post ? (
+        <div className="grid gap-2">
+          <button
+            type="button"
+            aria-label={t('common.close')}
+            className="grid size-10 cursor-pointer place-items-center justify-self-end rounded-full bg-white/15 text-white hover:bg-white/30"
+            onClick={onClose}
+          >
+            <X aria-hidden="true" className="size-5" />
+          </button>
+          <div className="max-h-[82dvh] overflow-y-auto rounded-2xl">
+            <PostCard post={post} eager />
+          </div>
+        </div>
+      ) : null}
+    </dialog>
   );
 }

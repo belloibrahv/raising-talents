@@ -1,34 +1,38 @@
-import type { ConversationSummary } from '@rt/contracts';
+import type { ConversationSummary, FeedScope } from '@rt/contracts';
 import {
   ArrowRight,
   BadgeCheck,
-  Building2,
   Clock3,
-  Eye,
+  Compass,
   ImagePlus,
-  Lightbulb,
   MessagesSquare,
   PenLine,
   Search,
+  UsersRound,
 } from 'lucide-react';
-import { useState, type SubmitEvent } from 'react';
+import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router';
 import { cn } from '@/lib/utils';
 import { t } from '../../i18n';
-import { buttonLink } from '../../shared/ui/Button';
-import { PageSkeleton } from '../../shared/ui/PageSkeleton';
+import { errorMessage } from '../../i18n/error-message';
+import { placeLabel } from '../../shared/places';
+import { Avatar } from '../../shared/ui/Avatar';
+import { Button, buttonLink } from '../../shared/ui/Button';
+import { EmptyState } from '../../shared/ui/EmptyState';
+import { FormMessage } from '../../shared/ui/FormMessage';
 import { Page } from '../../shared/ui/Page';
 import { counterpartName, CounterpartAvatar, statusLabel } from '../messages/Counterpart';
 import { useConversations, useMessagingUnread } from '../messages/queries';
 import { shortTime } from '../messages/time';
-import { useMyPortfolio } from '../portfolio/queries';
+import { categoryIcon } from '../profile/category-icons';
 import { useMyAgentProfile, useMyTalentProfile, useTaxonomy } from '../profile/queries';
 import { VerificationCard } from '../profile/VerificationCard';
-import { useShortlist } from '../shortlist/queries';
-import { ShareCard } from '../talents/ShareCard';
+import { PostCard } from '../social/PostCard';
+import { useFeed, useTalentSocial } from '../social/queries';
+import { SuggestionRail } from '../social/SuggestionRail';
 import { useSession } from './use-auth';
 
-/** The signed-in start: finishes onboarding first, then a dashboard for each role. */
+/** The signed-in start: finishes onboarding first, then the feed. */
 export function HomePage() {
   const me = useSession().me;
   if (me?.status === 'onboarding') {
@@ -38,13 +42,368 @@ export function HomePage() {
   }
   if (me?.role === 'moderator' || me?.role === 'admin')
     return <Navigate to="/moderation" replace />;
-  return me?.role === 'agent' ? <AgentHome /> : <TalentHome />;
+  const agent = me?.role === 'agent';
+  return (
+    <Page
+      title={t('home.title')}
+      documentTitle={t('titles.home')}
+      width="wide"
+      className="px-0 pt-0 sm:px-6 sm:pt-2 [&>div]:max-w-5xl"
+      titleClassName="sr-only"
+    >
+      <div className="grid gap-8 lg:grid-cols-[minmax(0,36rem)_minmax(0,1fr)] lg:items-start lg:gap-12">
+        <div className="grid gap-6">
+          <div className="grid gap-4 px-4 empty:hidden sm:px-0">
+            <Attention />
+            {agent ? <AgentNotices /> : <TalentNotices />}
+          </div>
+          {agent ? <SearchStart /> : <ShareStart />}
+          <SuggestionRail />
+          <Feed />
+        </div>
+        <aside className="hidden gap-6 lg:sticky lg:top-24 lg:grid" aria-label={t('home.aside')}>
+          {agent ? <AgentCard /> : <TalentCard />}
+          <Categories />
+          <RecentConversations
+            emptyText={agent ? t('home.noMessagesAgent') : t('home.noMessagesTalent')}
+          />
+        </aside>
+      </div>
+    </Page>
+  );
 }
 
-const stageCard =
-  'relative overflow-hidden rounded-3xl bg-stage p-6 text-stage-foreground shadow-lg [background-image:radial-gradient(ellipse_70%_90%_at_90%_0%,rgb(255_201_60/0.32),transparent_65%)] sm:p-8';
-const onStageButton =
-  'inline-flex h-10 items-center gap-2 rounded-full bg-stage-foreground/10 px-4 text-sm font-semibold text-stage-foreground no-underline ring-1 ring-stage-foreground/20 transition-colors hover:bg-stage-foreground/20';
+const SCOPES: readonly { scope: FeedScope; label: () => string }[] = [
+  { scope: 'discover', label: () => t('home.forYou') },
+  { scope: 'following', label: () => t('home.following') },
+];
+
+/** Work from everyone, or only from talent you follow. More loads as the end comes into view. */
+function Feed() {
+  const [scope, setScope] = useState<FeedScope>('discover');
+  const feed = useFeed(scope);
+  const posts = feed.data?.pages.flatMap((page) => page.items) ?? [];
+  const end = useRef<HTMLDivElement>(null);
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = feed;
+
+  useEffect(() => {
+    const marker = end.current;
+    if (!marker || !hasNextPage || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting) && !isFetchingNextPage) {
+          void fetchNextPage();
+        }
+      },
+      { rootMargin: '600px' },
+    );
+    observer.observe(marker);
+    return () => {
+      observer.disconnect();
+    };
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  return (
+    <section className="grid gap-4" aria-labelledby="feed-heading">
+      <h2 id="feed-heading" className="sr-only">
+        {t('home.feed')}
+      </h2>
+      <div
+        role="group"
+        aria-label={t('home.feedChoice')}
+        className="mx-4 grid grid-cols-2 rounded-full bg-muted p-1 sm:mx-0"
+      >
+        {SCOPES.map((entry) => (
+          <button
+            key={entry.scope}
+            type="button"
+            aria-pressed={scope === entry.scope}
+            className={cn(
+              'h-10 cursor-pointer rounded-full text-sm font-semibold text-muted-foreground transition-colors',
+              scope === entry.scope && 'bg-background text-foreground shadow-sm',
+            )}
+            onClick={() => {
+              setScope(entry.scope);
+            }}
+          >
+            {entry.label()}
+          </button>
+        ))}
+      </div>
+      <FormMessage tone="error">{feed.error ? errorMessage(feed.error) : null}</FormMessage>
+      {feed.isPending ? <FeedSkeleton /> : null}
+      {feed.isSuccess && posts.length === 0 ? (
+        <div className="px-4 sm:px-0">
+          {scope === 'following' ? (
+            <EmptyState
+              icon={UsersRound}
+              title={t('home.followingEmpty')}
+              description={t('home.followingEmptyBody')}
+            >
+              <Link className={buttonLink('primary', 'sm')} to="/search">
+                <Compass aria-hidden="true" />
+                {t('home.explore')}
+              </Link>
+            </EmptyState>
+          ) : (
+            <EmptyState
+              icon={ImagePlus}
+              title={t('home.feedEmpty')}
+              description={t('home.feedEmptyBody')}
+            />
+          )}
+        </div>
+      ) : null}
+      <ul className="m-0 grid list-none gap-4 p-0 sm:gap-6" aria-busy={feed.isFetching}>
+        {posts.map((post, index) => (
+          <li key={post.id}>
+            <PostCard post={post} eager={index === 0} />
+          </li>
+        ))}
+      </ul>
+      <div ref={end} />
+      {hasNextPage ? (
+        <Button
+          variant="secondary"
+          className="mx-4 sm:mx-0"
+          loading={isFetchingNextPage}
+          onClick={() => void fetchNextPage()}
+        >
+          {t('home.morePosts')}
+        </Button>
+      ) : null}
+    </section>
+  );
+}
+
+function FeedSkeleton() {
+  return (
+    <div className="grid gap-4" aria-hidden="true">
+      {[0, 1].map((index) => (
+        <div key={index} className="grid gap-3 border-y bg-card p-4 sm:rounded-2xl sm:border">
+          <div className="flex items-center gap-3">
+            <div className="size-11 animate-pulse rounded-full bg-muted" />
+            <div className="grid flex-1 gap-2">
+              <div className="h-3.5 w-36 animate-pulse rounded-full bg-muted" />
+              <div className="h-3 w-24 animate-pulse rounded-full bg-muted" />
+            </div>
+          </div>
+          <div className="aspect-[4/5] w-full animate-pulse rounded-xl bg-muted" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Where a talent starts a post: their face and one clear action. */
+function ShareStart() {
+  const profile = useMyTalentProfile().data;
+  return (
+    <Link
+      to="/portfolio"
+      className="mx-4 flex items-center gap-3 rounded-2xl border bg-card p-3 text-foreground no-underline shadow-xs transition-colors hover:border-input sm:mx-0"
+    >
+      <Avatar name={profile?.displayName ?? ''} urls={profile?.avatarUrls ?? null} />
+      <span className="flex-1 text-muted-foreground">{t('home.sharePrompt')}</span>
+      <span className={buttonLink('primary', 'sm')}>
+        <ImagePlus aria-hidden="true" />
+        {t('home.shareAction')}
+      </span>
+    </Link>
+  );
+}
+
+/** Where an agent starts: a search box that opens the full search. */
+function SearchStart() {
+  const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+  return (
+    <form
+      role="search"
+      className="mx-4 flex items-center gap-2 rounded-full border bg-card p-1.5 pl-4 shadow-xs focus-within:border-ring sm:mx-0"
+      onSubmit={(event: SubmitEvent) => {
+        event.preventDefault();
+        const q = query.trim();
+        void navigate(q ? `/search?q=${encodeURIComponent(q)}` : '/search');
+      }}
+    >
+      <label className="sr-only" htmlFor="home-search">
+        {t('home.searchLabel')}
+      </label>
+      <Search aria-hidden="true" className="size-5 shrink-0 text-muted-foreground" />
+      <input
+        id="home-search"
+        type="search"
+        enterKeyHint="search"
+        value={query}
+        onChange={(event) => {
+          setQuery(event.target.value);
+        }}
+        placeholder={t('home.searchPlaceholder')}
+        className="h-10 min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
+        maxLength={100}
+      />
+      <Button type="submit" size="sm">
+        {t('home.findTalent')}
+      </Button>
+    </form>
+  );
+}
+
+/** What a talent must know before anything else: their photo is missing or being checked. */
+function TalentNotices() {
+  const data = useMyTalentProfile().data;
+  if (data?.photoInReview) {
+    return (
+      <p className="flex items-start gap-3 rounded-2xl border bg-card p-4 text-sm">
+        <Clock3 aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+        <span>
+          <span className="block font-semibold">{t('home.photoInReview')}</span>
+          {t('home.photoInReviewBody')}
+        </span>
+      </p>
+    );
+  }
+  if (data && !data.avatarUrls) {
+    return (
+      <Link
+        to="/onboarding/talent/photo"
+        className="flex items-center gap-3 rounded-2xl border-2 border-destructive/40 bg-destructive-surface p-4 text-sm text-foreground no-underline"
+      >
+        <ImagePlus aria-hidden="true" className="size-5 shrink-0 text-destructive" />
+        <span className="flex-1">
+          <span className="block font-semibold">{t('home.photoNeeded')}</span>
+          {t('home.photoNeededBody')}
+        </span>
+        <ArrowRight aria-hidden="true" className="size-5" />
+      </Link>
+    );
+  }
+  return null;
+}
+
+/** An agency that is not verified yet cannot contact anyone, so that comes first. */
+function AgentNotices() {
+  const data = useMyAgentProfile().data;
+  return data && !data.verified ? <VerificationCard /> : null;
+}
+
+const sideCard = 'grid gap-4 rounded-2xl border bg-card p-5 shadow-xs';
+
+function Stat({ value, label }: { readonly value: number | undefined; readonly label: string }) {
+  return (
+    <span className="grid">
+      <span className="text-lg font-bold">{value ?? '–'}</span>
+      <span className="text-xs text-muted-foreground">{label}</span>
+    </span>
+  );
+}
+
+function TalentCard() {
+  const data = useMyTalentProfile().data;
+  const social = useTalentSocial(data?.handle ?? '', Boolean(data?.isComplete)).data;
+  if (!data) return null;
+  const about = [
+    data.subcategories[0]?.name ?? data.category?.name,
+    data.city && placeLabel(data.city),
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  return (
+    <section className={sideCard} aria-label={t('home.yourProfile')}>
+      <Link
+        to={`/talents/${data.handle}`}
+        className="flex items-center gap-3 text-foreground no-underline"
+      >
+        <Avatar name={data.displayName ?? ''} urls={data.avatarUrls} size="lg" ring />
+        <span className="grid min-w-0">
+          <span className="truncate text-lg font-bold">{data.displayName}</span>
+          <span className="truncate text-sm text-muted-foreground">{about}</span>
+        </span>
+      </Link>
+      <div className="grid grid-cols-3 text-center">
+        <Stat value={social?.posts} label={t('social.posts')} />
+        <Stat value={social?.followers} label={t('social.followers')} />
+        <Stat value={social?.following} label={t('social.followingCount')} />
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <Link className={buttonLink('secondary', 'sm')} to={`/talents/${data.handle}`}>
+          {t('home.publicProfile')}
+        </Link>
+        <Link className={buttonLink('secondary', 'sm')} to="/onboarding/talent/about">
+          <PenLine aria-hidden="true" />
+          {t('home.editProfile')}
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function AgentCard() {
+  const data = useMyAgentProfile().data;
+  if (!data) return null;
+  return (
+    <section className={sideCard} aria-label={t('home.yourProfile')}>
+      <div className="flex items-center gap-3">
+        <Avatar name={data.agencyName ?? ''} urls={null} size="lg" />
+        <span className="grid min-w-0 gap-1">
+          <span className="truncate text-lg font-bold">{data.agencyName}</span>
+          <span
+            className={cn(
+              'inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold',
+              data.verified
+                ? 'bg-success-surface text-success'
+                : 'bg-spotlight text-spotlight-foreground',
+            )}
+          >
+            {data.verified ? (
+              <BadgeCheck aria-hidden="true" className="size-3.5" />
+            ) : (
+              <Clock3 aria-hidden="true" className="size-3.5" />
+            )}
+            {data.verified ? t('home.verifiedChip') : t('home.pendingChip')}
+          </span>
+        </span>
+      </div>
+      <div className="grid grid-cols-2 gap-2">
+        <Link className={buttonLink('secondary', 'sm')} to="/shortlist">
+          {t('home.yourShortlist')}
+        </Link>
+        <Link className={buttonLink('secondary', 'sm')} to="/onboarding/agent">
+          <PenLine aria-hidden="true" />
+          {t('home.editProfile')}
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+/** A way into search by what someone does. */
+function Categories() {
+  const categories = useTaxonomy().data?.categories ?? [];
+  if (categories.length === 0) return null;
+  return (
+    <section className="stack gap-3" aria-labelledby="browse-heading">
+      <SectionHeading id="browse-heading" title={t('home.browse')} />
+      <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
+        {categories.map((category) => {
+          const Icon = categoryIcon(category.slug);
+          return (
+            <li key={category.slug}>
+              <Link
+                to={`/search?category=${category.slug}`}
+                className="inline-flex h-9 items-center gap-1.5 rounded-full border bg-card px-3.5 text-sm font-semibold text-foreground no-underline transition-colors hover:border-input hover:bg-accent"
+              >
+                <Icon aria-hidden="true" className="size-4" />
+                {category.name}
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
+}
 
 function SectionHeading({
   id,
@@ -59,7 +418,7 @@ function SectionHeading({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4">
-      <h2 id={id} className="text-xl font-bold">
+      <h2 id={id} className="text-base font-semibold">
         {title}
       </h2>
       {to && action ? (
@@ -72,137 +431,6 @@ function SectionHeading({
         </Link>
       ) : null}
     </div>
-  );
-}
-
-function TalentHome() {
-  const profile = useMyTalentProfile();
-  const portfolio = useMyPortfolio();
-  if (profile.isPending) return <PageSkeleton />;
-  const data = profile.data;
-  const discipline = [data?.subcategories[0]?.name ?? data?.category?.name, data?.city?.name]
-    .filter(Boolean)
-    .join(' · ');
-  const items = portfolio.data?.items ?? [];
-  const shown = items.filter((item) => item.urls).slice(0, 4);
-  return (
-    <Page
-      title={t('home.talentReadyTitle', { name: data?.displayName ?? '' })}
-      documentTitle={t('titles.home')}
-      width="wide"
-      className="[&>div]:max-w-4xl"
-      titleClassName="sr-only"
-    >
-      <section className={stageCard} aria-label={data?.displayName ?? t('titles.home')}>
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-          {data?.avatarUrls ? (
-            <img
-              className="size-24 shrink-0 rounded-full object-cover ring-4 ring-spotlight/70 sm:size-28"
-              src={data.avatarUrls.medium}
-              alt=""
-            />
-          ) : (
-            <span
-              aria-hidden="true"
-              className="grid size-24 shrink-0 place-items-center rounded-full bg-stage-foreground/10 font-display text-4xl font-bold ring-4 ring-spotlight/70 sm:size-28"
-            >
-              {data?.displayName?.slice(0, 1)}
-            </span>
-          )}
-          <div className="grid min-w-0 gap-1">
-            <p className="m-0 text-sm font-medium text-stage-foreground/70">{t('home.greeting')}</p>
-            <p className="m-0 font-display text-3xl font-bold sm:text-4xl" aria-hidden="true">
-              {data?.displayName}
-            </p>
-            {discipline ? <p className="m-0 text-stage-foreground/80">{discipline}</p> : null}
-            <div className="mt-3 flex flex-wrap gap-2">
-              {data ? (
-                <Link className={onStageButton} to={`/talents/${data.handle}`}>
-                  <Eye aria-hidden="true" className="size-4" />
-                  {t('home.publicProfile')}
-                </Link>
-              ) : null}
-              <Link className={onStageButton} to="/onboarding/talent/about">
-                <PenLine aria-hidden="true" className="size-4" />
-                {t('home.editProfile')}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <Attention />
-
-      {data?.photoInReview ? (
-        <p className="flex items-start gap-3 rounded-2xl border bg-card p-4 text-sm">
-          <Clock3 aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
-          <span>
-            <span className="block font-semibold">{t('home.photoInReview')}</span>
-            {t('home.photoInReviewBody')}
-          </span>
-        </p>
-      ) : data && !data.avatarUrls ? (
-        <Link
-          to="/onboarding/talent/photo"
-          className="flex items-center gap-3 rounded-2xl border-2 border-destructive/40 bg-destructive-surface p-4 text-sm text-foreground no-underline"
-        >
-          <ImagePlus aria-hidden="true" className="size-5 shrink-0 text-destructive" />
-          <span className="flex-1">
-            <span className="block font-semibold">{t('home.photoNeeded')}</span>
-            {t('home.photoNeededBody')}
-          </span>
-          <ArrowRight aria-hidden="true" className="size-5" />
-        </Link>
-      ) : null}
-
-      {data ? <ShareCard profile={data} /> : null}
-
-      <section className="stack gap-4" aria-labelledby="portfolio-heading">
-        <SectionHeading
-          id="portfolio-heading"
-          title={t('home.yourPortfolio')}
-          to="/portfolio"
-          action={t('home.managePortfolio')}
-        />
-        {portfolio.data ? (
-          <p className="-mt-2 text-sm text-muted-foreground">
-            {t('home.portfolioCount', { count: items.length, max: portfolio.data.maxItems })}
-          </p>
-        ) : null}
-        <ul className="m-0 grid list-none grid-cols-3 gap-2 p-0 sm:grid-cols-5 sm:gap-3">
-          {shown.map((item) => (
-            <li key={item.id}>
-              <img
-                className="aspect-[4/5] w-full rounded-2xl bg-muted object-cover"
-                src={item.urls?.small}
-                alt={item.caption}
-                loading="lazy"
-                decoding="async"
-              />
-            </li>
-          ))}
-          <li>
-            <Link
-              to="/portfolio"
-              className="flex aspect-[4/5] w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-input p-3 text-center text-sm font-semibold text-foreground no-underline transition-colors hover:bg-accent"
-            >
-              <ImagePlus aria-hidden="true" className="size-7" />
-              {t('home.addWork')}
-            </Link>
-          </li>
-        </ul>
-        {portfolio.data && items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t('home.portfolioEmpty')}</p>
-        ) : null}
-      </section>
-
-      <RecentConversations emptyText={t('home.noMessagesTalent')} />
-
-      <p className="flex items-start gap-3 rounded-2xl bg-spotlight/15 p-4 text-sm">
-        <Lightbulb aria-hidden="true" className="mt-0.5 size-5 shrink-0" />
-        {t('home.tip')}
-      </p>
-    </Page>
   );
 }
 
@@ -288,166 +516,5 @@ function ConversationLine({ conversation }: { readonly conversation: Conversatio
         ) : null}
       </span>
     </Link>
-  );
-}
-
-function AgentHome() {
-  const profile = useMyAgentProfile();
-  const taxonomy = useTaxonomy();
-  const navigate = useNavigate();
-  const [query, setQuery] = useState('');
-  if (profile.isPending) return <PageSkeleton />;
-  const data = profile.data;
-  return (
-    <Page
-      title={t('home.agentTitle', { name: data?.agencyName ?? '' })}
-      documentTitle={t('titles.home')}
-      width="wide"
-      className="[&>div]:max-w-5xl"
-      titleClassName="sr-only"
-    >
-      <section className={stageCard} aria-labelledby="agent-hero">
-        <div className="grid gap-5">
-          <div className="flex flex-wrap items-center gap-2 text-sm text-stage-foreground/80">
-            <Building2 aria-hidden="true" className="size-4" />
-            <span className="font-semibold text-stage-foreground">{data?.agencyName}</span>
-            <span
-              className={cn(
-                'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold',
-                data?.verified
-                  ? 'bg-success-surface text-success'
-                  : 'bg-spotlight text-spotlight-foreground',
-              )}
-            >
-              {data?.verified ? (
-                <BadgeCheck aria-hidden="true" className="size-3.5" />
-              ) : (
-                <Clock3 aria-hidden="true" className="size-3.5" />
-              )}
-              {data?.verified ? t('home.verifiedChip') : t('home.pendingChip')}
-            </span>
-          </div>
-          <div className="grid gap-2">
-            <h2 id="agent-hero" className="text-3xl font-bold sm:text-5xl">
-              {t('home.agentHero')}
-            </h2>
-            <p className="m-0 text-stage-foreground/80 sm:text-lg">{t('home.agentHeroBody')}</p>
-          </div>
-          <form
-            role="search"
-            className="flex flex-col gap-2 rounded-3xl bg-white p-2 shadow-xl sm:flex-row sm:rounded-full"
-            onSubmit={(event: SubmitEvent) => {
-              event.preventDefault();
-              const q = query.trim();
-              void navigate(q ? `/search?q=${encodeURIComponent(q)}` : '/search');
-            }}
-          >
-            <label className="sr-only" htmlFor="home-search">
-              {t('home.searchLabel')}
-            </label>
-            <span className="flex flex-1 items-center gap-2 px-4">
-              <Search aria-hidden="true" className="size-5 text-[#5e5b78]" />
-              <input
-                id="home-search"
-                type="search"
-                enterKeyHint="search"
-                value={query}
-                onChange={(event) => {
-                  setQuery(event.target.value);
-                }}
-                placeholder={t('home.searchPlaceholder')}
-                className="h-12 w-full bg-transparent text-base text-[#1c1a3d] outline-none placeholder:text-[#5e5b78]"
-                maxLength={100}
-              />
-            </span>
-            <button
-              type="submit"
-              className="h-12 cursor-pointer rounded-full bg-[#1c1a3d] px-7 font-semibold text-white transition-opacity hover:opacity-90"
-            >
-              {t('home.findTalent')}
-            </button>
-          </form>
-        </div>
-      </section>
-
-      {data && !data.verified ? <VerificationCard /> : null}
-
-      <section className="stack gap-4" aria-labelledby="browse-heading">
-        <SectionHeading id="browse-heading" title={t('home.browse')} />
-        <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
-          {(taxonomy.data?.categories ?? []).map((category) => (
-            <li key={category.slug}>
-              <Link
-                to={`/search?category=${category.slug}`}
-                className="inline-flex h-11 items-center rounded-full border bg-card px-5 text-sm font-semibold text-foreground no-underline shadow-xs transition-colors hover:border-input hover:bg-accent"
-              >
-                {category.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <div className="grid gap-8 lg:grid-cols-2">
-        <RecentConversations emptyText={t('home.noMessagesAgent')} />
-        <ShortlistPreview />
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        <Link className={buttonLink('secondary', 'sm')} to="/onboarding/agent">
-          <PenLine aria-hidden="true" />
-          {t('home.editProfile')}
-        </Link>
-      </div>
-    </Page>
-  );
-}
-
-function ShortlistPreview() {
-  const shortlist = useShortlist();
-  const items = shortlist.data?.pages[0]?.items.slice(0, 4) ?? [];
-  return (
-    <section className="stack gap-4" aria-labelledby="shortlist-heading">
-      <SectionHeading
-        id="shortlist-heading"
-        title={t('home.yourShortlist')}
-        to="/shortlist"
-        action={t('home.seeAll')}
-      />
-      {shortlist.isSuccess && items.length === 0 ? (
-        <p className="rounded-2xl border border-dashed p-5 text-sm text-muted-foreground">
-          {t('home.shortlistEmpty')}
-        </p>
-      ) : null}
-      {items.length > 0 ? (
-        <ul className="m-0 grid list-none grid-cols-4 gap-3 p-0">
-          {items.map(({ talent }) => (
-            <li key={talent.handle}>
-              <Link to={`/talents/${talent.handle}`} className="group grid gap-1.5 no-underline">
-                {talent.avatarUrls ? (
-                  <img
-                    className="aspect-[4/5] w-full rounded-xl bg-muted object-cover transition-transform group-hover:scale-[1.03]"
-                    src={talent.avatarUrls.small}
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : (
-                  <span
-                    aria-hidden="true"
-                    className="grid aspect-[4/5] w-full place-items-center rounded-xl bg-stage font-display text-2xl font-bold text-stage-foreground"
-                  >
-                    {talent.displayName.slice(0, 1)}
-                  </span>
-                )}
-                <span className="truncate text-xs font-semibold text-foreground">
-                  {talent.displayName}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-    </section>
   );
 }

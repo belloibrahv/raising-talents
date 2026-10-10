@@ -28,3 +28,12 @@ afterEach(() => {
 
 // jsdom lays nothing out, so it has no scrolling. Lists that keep the active option in view call this.
 Element.prototype.scrollIntoView = () => undefined;
+
+// jsdom has the dialog element but not its methods. Opening sets the attribute; closing fires the event.
+HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
+  this.setAttribute('open', '');
+};
+HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
+  this.removeAttribute('open');
+  this.dispatchEvent(new Event('close'));
+};

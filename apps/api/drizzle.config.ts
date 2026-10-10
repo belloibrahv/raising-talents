@@ -17,6 +17,7 @@ export default defineConfig({
     'safety',
     'shortlist',
     'messaging',
+    'social',
   ],
   dbCredentials: {
     url:

@@ -13,3 +13,4 @@ export * from '../../modules/notifications/infrastructure/notification.schema.js
 export * from '../../modules/safety/infrastructure/safety.schema.js';
 export * from '../../modules/shortlists/infrastructure/shortlist.schema.js';
 export * from '../../modules/messaging/infrastructure/messaging.schema.js';
+export * from '../../modules/social/infrastructure/social.schema.js';

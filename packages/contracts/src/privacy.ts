@@ -45,6 +45,8 @@ export const dataExportSchema = z
     shortlist: z.array(
       z.object({ handle: z.string().nullable(), note: z.string(), savedAt: isoDateTimeSchema }),
     ),
+    /** Talent the person follows. The handle is null for someone who has since left. */
+    following: z.array(z.object({ handle: z.string().nullable(), followedAt: isoDateTimeSchema })),
     /**
      * Requests and chats the person is in, with the messages they wrote. The other person's
      * messages are theirs, so only the count is included.

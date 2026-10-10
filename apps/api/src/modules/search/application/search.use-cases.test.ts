@@ -215,7 +215,7 @@ describe('talent search', () => {
     expect(second.ok && [second.value.items.length, second.value.hasMore]).toEqual([6, false]);
   });
 
-  it('lets only active agents search', async () => {
+  it('lets talent and agents search once they have finished setting up', async () => {
     accounts.accounts.set('talent-viewer', {
       role: 'talent',
       status: 'active',
@@ -228,7 +228,10 @@ describe('talent search', () => {
     });
     const asTalent = await search.execute('talent-viewer', query());
     const unfinished = await search.execute('new-agent', query());
-    expect(asTalent.ok ? null : asTalent.error.code).toBe('WRONG_ROLE');
+    // Someone with no account in a role yet.
+    const undecided = await search.execute('no-role', query());
+    expect(asTalent.ok).toBe(true);
+    expect(undecided.ok ? null : undecided.error.code).toBe('WRONG_ROLE');
     expect(unfinished.ok ? null : unfinished.error.code).toBe('FORBIDDEN');
   });
 

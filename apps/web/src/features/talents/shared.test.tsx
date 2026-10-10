@@ -8,6 +8,7 @@ import {
   renderAt,
   resetSession,
   signedIn,
+  socialFor,
   stubApi,
 } from '../../test/app-harness';
 
@@ -105,14 +106,17 @@ describe('the shared talent page (ADR-042)', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Ngozi Adeyemi' })).toBeVisible();
   });
 
-  it('lets a talent turn their link on from Home and copy it', async () => {
+  it('lets a talent turn their link on from their own page and copy it', async () => {
     let current = profile;
     const calls = stubApi({
       '/v1/auth/web/refresh': () => signedIn(meFor({ role: 'talent', status: 'active' })),
       'GET /v1/me/notifications/unread': () => Response.json({ unread: 0 }),
       'GET /v1/me/conversations/unread': () => Response.json({ unread: 0 }),
       'GET /v1/me/conversations': () => Response.json({ items: [], nextCursor: null }),
-      'GET /v1/me/portfolio': () => Response.json({ items: [], maxItems: 30, version: 0 }),
+      'GET /v1/talents/ngozi.sings': () =>
+        Response.json({ ...current, ageYears: 26, verified: false }),
+      'GET /v1/talents/ngozi.sings/social': () => Response.json(socialFor({ isSelf: true })),
+      'GET /v1/talents/ngozi.sings/posts': () => Response.json({ items: [], nextCursor: null }),
       'GET /v1/me/talent-profile': () => Response.json(current),
       'PATCH /v1/me/talent-profile': () => {
         current = {
@@ -124,8 +128,12 @@ describe('the shared talent page (ADR-042)', () => {
         return Response.json(current);
       },
     });
-    renderAt('/home');
+    renderAt('/talents/ngozi.sings');
     const user = userEvent.setup({ delay: null });
+    // On your own page the actions are yours: no Follow, no Report.
+    const [addWork] = await screen.findAllByRole('link', { name: 'Add work' });
+    expect(addWork).toHaveAttribute('href', '/portfolio');
+    expect(screen.queryByRole('button', { name: /Follow/ })).toBeNull();
     await user.click(await screen.findByRole('button', { name: 'Turn on my public link' }));
     const link = await screen.findByLabelText('Link to your profile');
     expect(link).toHaveValue(`${window.location.origin}/t/ngozi.sings/Ab3dE6fG`);

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-const BRAND_INK = '#1C1A3D';
+const BRAND_VIOLET = '#6D28D9';
 
 /**
  * Opens the connection to the API while the app downloads, so the first call (restoring the
@@ -47,7 +47,7 @@ export default defineConfig(({ mode }) => ({
         display: 'standalone',
         orientation: 'portrait',
         background_color: '#FFFFFF',
-        theme_color: BRAND_INK,
+        theme_color: BRAND_VIOLET,
         categories: ['entertainment', 'social', 'sports'],
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },

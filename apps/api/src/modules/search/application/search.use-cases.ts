@@ -45,8 +45,8 @@ export const INDEXING_EVENTS = [
   'accounts.AccountReinstated',
 ] as const;
 
-/** Roles that may search. Talent find each other through links, not search, in the MVP. */
-const SEARCHING_ROLES = new Set(['agent', 'moderator', 'admin']);
+/** Everyone with a role searches: talent find and follow each other too (ADR-047). */
+const SEARCHING_ROLES = new Set(['talent', 'agent', 'moderator', 'admin']);
 
 export const SEARCH_LIMIT = { perUser: 120, windowSeconds: 60 } as const;
 
@@ -56,7 +56,7 @@ export const SearchErrors = {
       'SEARCH_UNAVAILABLE',
       'Search is not available right now. Try again in a few minutes.',
     ),
-  wrongRole: () => domainError('WRONG_ROLE', 'Only agents and scouts can search for talent.'),
+  wrongRole: () => domainError('WRONG_ROLE', 'Choose how you will use the app before searching.'),
   notActive: () => domainError('FORBIDDEN', 'Finish setting up your profile before searching.'),
 };
 

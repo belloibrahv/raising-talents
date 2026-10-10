@@ -33,6 +33,8 @@ import { NotificationsModule } from '../notifications/notifications.module.js';
 import { PortfolioModule } from '../portfolio/portfolio.module.js';
 import { SHORTLIST, type ShortlistExport } from '../shortlists/application/shortlist.use-cases.js';
 import { ShortlistsModule } from '../shortlists/shortlists.module.js';
+import { SOCIAL, type SocialExport } from '../social/application/social.use-cases.js';
+import { SocialModule } from '../social/social.module.js';
 import { MESSAGING, type MessagingExport } from '../messaging/application/messaging.use-cases.js';
 import { MessagingModule } from '../messaging/messaging.module.js';
 import type { GetMyTalentProfileQuery } from '../talent-profiles/application/get-talent-profile.queries.js';
@@ -60,6 +62,7 @@ const SOURCES = Symbol('PrivacySources');
     AgentProfilesModule,
     PortfolioModule,
     ShortlistsModule,
+    SocialModule,
     MessagingModule,
     NotificationsModule,
   ],
@@ -73,6 +76,7 @@ const SOURCES = Symbol('PrivacySources');
         VERIFICATION.GetMine,
         PORTFOLIO.GetMine,
         SHORTLIST.Export,
+        SOCIAL.Export,
         MESSAGING.Export,
         NOTIFICATIONS.Export,
       ],
@@ -82,6 +86,7 @@ const SOURCES = Symbol('PrivacySources');
         verification: GetMyVerificationQuery,
         portfolio: GetMyPortfolioQuery,
         shortlist: ShortlistExport,
+        social: SocialExport,
         conversations: MessagingExport,
         notifications: NotificationsExport,
       ): PrivacySources => ({
@@ -90,6 +95,7 @@ const SOURCES = Symbol('PrivacySources');
         agentVerification: (userId) => verification.execute(userId),
         portfolio: (userId) => portfolio.execute(userId),
         shortlist: (userId) => shortlist.forAgent(userId),
+        following: (userId) => social.forUser(userId),
         conversations: (userId) => conversations.forUser(userId),
         notifications: (userId) => notifications.forUser(userId),
       }),

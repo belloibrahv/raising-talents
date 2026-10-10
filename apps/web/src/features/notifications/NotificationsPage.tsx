@@ -13,12 +13,14 @@ import {
   MessageCircleX,
   MessageSquareText,
   UserCheck,
+  UserPlus,
   type LucideIcon,
 } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import { cn } from '@/lib/utils';
 import { t } from '../../i18n';
+import { timeAgo } from '../../shared/relative-time';
 import { errorMessage } from '../../i18n/error-message';
 import { Button } from '../../shared/ui/Button';
 import { EmptyState } from '../../shared/ui/EmptyState';
@@ -137,22 +139,17 @@ function show(notice: Notification): Shown {
         body: t('notifications.contactDeclinedBody'),
         to: '/search',
       };
+    case 'new_follower':
+      return {
+        icon: UserPlus,
+        tone: 'good',
+        title: t('notifications.newFollower', { name: notice.followerName }),
+        body: notice.followerHandle
+          ? t('notifications.newFollowerBody')
+          : t('notifications.newFollowerAgencyBody'),
+        to: notice.followerHandle ? `/talents/${notice.followerHandle}` : '/home',
+      };
   }
-}
-
-const relative = new Intl.RelativeTimeFormat('en-NG', { numeric: 'auto' });
-
-function ago(iso: string): string {
-  const seconds = (new Date(iso).getTime() - Date.now()) / 1000;
-  const steps: [Intl.RelativeTimeFormatUnit, number][] = [
-    ['day', 86_400],
-    ['hour', 3_600],
-    ['minute', 60],
-  ];
-  for (const [unit, size] of steps) {
-    if (Math.abs(seconds) >= size) return relative.format(Math.round(seconds / size), unit);
-  }
-  return t('notifications.justNow');
 }
 
 const TONE = {
@@ -242,7 +239,7 @@ export function NotificationsPage() {
                         </span>
                         <span className="text-sm text-muted-foreground">{shown.body}</span>
                         <span className="text-xs text-muted-foreground">
-                          {ago(notice.createdAt)}
+                          {timeAgo(notice.createdAt)}
                         </span>
                       </span>
                       {notice.read ? (

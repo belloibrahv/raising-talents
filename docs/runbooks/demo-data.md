@@ -32,6 +32,11 @@ nothing to the database directly.
 4. When it is done, remove `SEED_DEMO` and `SEED_DEMO_PASSWORD`, so later deploys skip it.
    Running it again is harmless: anything already in place is left alone.
 
+The last step makes the feed look lived in (ADR-047): the demo talent follow and like each
+other, and Tunde follows three of them. An environment seeded before follows existed gets
+them by running the seed once more: set `SEED_DEMO=run` and `SEED_DEMO_PASSWORD` again, let
+the worker restart, then remove them.
+
 ## Removing
 
 Set `SEED_DEMO=remove` on `worker`. On start it erases every demo account and its files, the

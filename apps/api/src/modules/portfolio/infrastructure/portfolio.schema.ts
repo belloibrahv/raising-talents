@@ -38,5 +38,7 @@ export const portfolioItems = portfolioSchema.table(
     // One file, one item. Also what stops two concurrent adds of the same file.
     uniqueIndex('items_media_unique').on(table.mediaId),
     index('items_talent_position_idx').on(table.talentId, table.position),
+    // The feed: every talent's work, newest first (ADR-047).
+    index('items_created_idx').on(table.createdAt, table.id),
   ],
 );

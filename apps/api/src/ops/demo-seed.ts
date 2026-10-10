@@ -606,6 +606,36 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
     );
   }
 
+  // A feed with some life in it: demo talent follow and like each other, and the agent
+  // follows a few. Following and liking twice changes nothing, so a second run is harmless.
+  const visible = TALENT.filter((entry) => !entry.onlyFirstSteps);
+  const followers = [
+    ...visible.map((entry) => ({ who: talentAccounts.get(entry.handle), own: entry.handle })),
+    { who: tunde, own: null },
+  ];
+  let follows = 0;
+  for (const [index, follower] of followers.entries()) {
+    if (!follower.who) continue;
+    const others = visible.filter((entry) => entry.handle !== follower.own);
+    for (let step = 1; step <= Math.min(3, others.length); step += 1) {
+      const target = others[(index + step) % others.length];
+      if (!target) continue;
+      const followed = await api.call('PUT', `/v1/talents/${target.handle}/follow`, follower.who);
+      if (followed.status !== 200) continue;
+      follows += 1;
+      const posts = await api.call<{ items?: { id: string }[] }>(
+        'GET',
+        `/v1/talents/${target.handle}/posts`,
+        follower.who,
+      );
+      const [latest] = posts.body.items ?? [];
+      if (latest) await api.call('PUT', `/v1/posts/${latest.id}/like`, follower.who);
+    }
+  }
+  report.push(
+    `social: ${String(follows)} follows, with a like on each followed talent's latest post`,
+  );
+
   logger.warn({ seeded: report }, 'demo data is in place');
 }
 

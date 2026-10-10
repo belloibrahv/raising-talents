@@ -1,6 +1,8 @@
 import { lazy, Suspense, type ReactNode } from 'react';
-import { Outlet, useOutletContext, type RouteObject } from 'react-router';
-import { useRestoreSession } from '../features/auth/use-auth';
+import { Navigate, Outlet, useOutletContext, type RouteObject } from 'react-router';
+import { useRestoreSession, useSession } from '../features/auth/use-auth';
+import { useMyTalentProfile } from '../features/profile/queries';
+import { PageSkeleton } from '../shared/ui/PageSkeleton';
 import { WelcomePage } from '../features/auth/WelcomePage';
 import { FullScreenStatus } from '../shared/ui/FullScreenStatus';
 import { t } from '../i18n';
@@ -85,6 +87,17 @@ const AccountPage = lazy(() =>
 const HomePage = lazy(() =>
   import('../features/auth/HomePage').then((m) => ({ default: m.HomePage })),
 );
+
+/** "My profile" for a talent is their own page; everyone else has their account. */
+function MyProfileRedirect() {
+  const me = useSession().me;
+  const profile = useMyTalentProfile(me?.role === 'talent');
+  if (me?.role !== 'talent') return <Navigate to="/account" replace />;
+  if (profile.isPending) return <PageSkeleton variant="profile" />;
+  // A failed request is not a missing profile: the route's error screen offers a retry.
+  if (profile.isError) throw profile.error;
+  return <Navigate to={profile.data ? `/talents/${profile.data.handle}` : '/account'} replace />;
+}
 
 /** Around every screen: the skip link, the offline banner, the update prompt and the session restore. */
 function Shell({ updatePrompt }: { readonly updatePrompt: ReactNode }) {
@@ -195,6 +208,7 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
               errorElement: <RouteError />,
               children: [
                 { path: 'home', element: <HomePage /> },
+                { path: 'me', element: <MyProfileRedirect /> },
                 { path: 'onboarding/talent/:step?', element: <TalentOnboardingPage /> },
                 { path: 'onboarding/agent', element: <AgentOnboardingPage /> },
                 { path: 'portfolio', element: <PortfolioPage /> },

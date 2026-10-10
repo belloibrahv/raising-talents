@@ -50,3 +50,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-044](044-finishing-onboarding-while-a-photo-is-checked.md)         | Finishing onboarding while a photo is checked                        | Accepted                          |
 | [ADR-045](045-email-verification-switch.md)                             | Email verification switch                                            | Accepted                          |
 | [ADR-046](046-worldwide-places-and-a-wider-taxonomy.md)                 | Worldwide places, a wider taxonomy and search that follows a profile | Accepted                          |
+| [ADR-047](047-following-likes-a-feed-and-a-new-look.md)                 | Following, likes, a feed, and a new look                             | Accepted                          |

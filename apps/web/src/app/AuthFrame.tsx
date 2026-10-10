@@ -32,7 +32,7 @@ export function AuthFrame({ children }: { readonly children: ReactNode }) {
         </div>
       </div>
       <aside
-        className="sticky top-0 hidden h-dvh flex-col justify-between overflow-hidden bg-stage p-12 text-stage-foreground [background-image:radial-gradient(ellipse_70%_55%_at_80%_0%,rgb(255_201_60/0.35),transparent_70%),radial-gradient(ellipse_60%_45%_at_0%_100%,rgb(142_162_255/0.22),transparent_70%)] lg:flex"
+        className="sticky top-0 hidden h-dvh flex-col justify-between overflow-hidden bg-stage p-12 text-stage-foreground stage-glow lg:flex"
         aria-label={t('auth.panelLabel')}
       >
         <p className="m-0 inline-flex w-fit items-center gap-2 rounded-full border border-stage-foreground/20 px-3 py-1 text-sm text-stage-foreground/85">

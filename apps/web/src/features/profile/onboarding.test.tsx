@@ -309,7 +309,7 @@ describe('talent onboarding', () => {
     expect(await screen.findByText(/Checking your photo/)).toBeVisible();
     expect(
       await screen.findByText(
-        'Your profile is complete. Agents can find you now.',
+        'Your profile is complete. People can find you now.',
         {},
         { timeout: 10_000 },
       ),
@@ -471,7 +471,7 @@ describe('agent onboarding', () => {
     await user.clear(screen.getByLabelText('Website (optional)'));
     await expectNoAxeViolations();
     await user.click(screen.getByRole('button', { name: 'Save profile' }));
-    expect(await screen.findByText(/We verify every agent/)).toBeVisible();
+    expect(await screen.findByText(/We verify every agency/)).toBeVisible();
     const patch = calls.find((call) => call.method === 'PATCH');
     expect(patch?.body).toEqual({
       agencyName: 'Eko Talent Partners',

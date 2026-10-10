@@ -86,10 +86,7 @@ export function SharedProfilePage() {
         ) : (
           <>
             <section className="overflow-hidden rounded-3xl border bg-card shadow-sm">
-              <div
-                className="h-32 bg-stage [background-image:radial-gradient(ellipse_55%_120%_at_15%_0%,rgb(255_201_60/0.55),transparent_70%),radial-gradient(ellipse_50%_120%_at_95%_100%,rgb(142_162_255/0.35),transparent_70%)] sm:h-44"
-                aria-hidden="true"
-              />
+              <div className="h-32 bg-stage stage-glow sm:h-44" aria-hidden="true" />
               <div className="flex flex-col gap-4 px-5 pb-6 sm:flex-row sm:items-end sm:gap-6 sm:px-8">
                 {talent.avatarUrls ? (
                   <img
@@ -205,7 +202,7 @@ export function SharedProfilePage() {
             ) : null}
 
             <section
-              className="grid gap-6 rounded-3xl bg-stage p-6 text-stage-foreground [background-image:radial-gradient(ellipse_60%_100%_at_100%_0%,rgb(255_201_60/0.3),transparent_70%)] sm:grid-cols-2 sm:p-10"
+              className="grid gap-6 rounded-3xl bg-stage p-6 text-stage-foreground stage-glow sm:grid-cols-2 sm:p-10"
               aria-labelledby="shared-cta"
             >
               <h2 id="shared-cta" className="sr-only">

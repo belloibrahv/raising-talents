@@ -21,7 +21,7 @@ describe('the web app', () => {
     expect(
       await screen.findByRole('heading', {
         level: 1,
-        name: /get seen by the people who scout talent/i,
+        name: /show your work\. get discovered\./i,
       }),
     ).toHaveFocus();
     expect(router.state.location.pathname).toBe('/welcome');
@@ -139,7 +139,7 @@ describe('the web app', () => {
     renderAt('/portfolio');
     const user = userEvent.setup({ delay: null });
     const banner = await screen.findByRole('region', { name: 'Email not verified' });
-    expect(banner).toHaveTextContent('Verify your email so agents can find your profile.');
+    expect(banner).toHaveTextContent('Verify your email so people can find your profile.');
     expect(screen.getByRole('link', { name: 'Account, Email not verified' })).toBeVisible();
     await expectNoAxeViolations();
 

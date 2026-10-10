@@ -32,23 +32,23 @@
     "failed": "We could not load this profile",
     "failedBody": "Something went wrong on our side. Try again in a moment.",
     "ctaLabel": "Join Raising Talents",
-    "agentTitle": "Scouting? Contact {name} on Raising Talents.",
+    "agentTitle": "Want to work with {name}?",
     "agentBody": "Verified agencies can send a contact request. Talent choose who they talk to.",
     "agentCta": "Join as an agent",
     "talentTitle": "Have a talent of your own?",
-    "talentBody": "Build a profile like this in minutes and get found by verified agents across Nigeria.",
+    "talentBody": "Create a page like this in minutes: post your work, build a following and get discovered.",
     "talentCta": "Create my profile"
   },
   "auth": {
     "panelLabel": "Why Raising Talents",
-    "panelTitle": "Where Nigeria's next stars meet the people who scout them."
+    "panelTitle": "Show your work. Build a following. Get discovered."
   },
   "messages": {
     "title": "Messages",
-    "subtitleTalent": "Requests from verified agents, and your chats with the ones you accepted.",
+    "subtitleTalent": "Requests from verified agencies, and your chats with the ones you accepted.",
     "subtitleAgent": "Your contact requests and chats with talent.",
     "emptyTalent": "No messages yet",
-    "emptyTalentBody": "When a verified agent wants to contact you, their request appears here. You choose who you talk to.",
+    "emptyTalentBody": "When a verified agency wants to contact you, their request appears here. You choose who you talk to.",
     "emptyAgent": "No conversations yet",
     "emptyAgentBody": "Find talent you like and send a contact request from their profile.",
     "loadMore": "Show older conversations",
@@ -82,7 +82,7 @@
     "withdrawnTitle": "You withdrew this request",
     "withdrawnBody": "You can send a new one from their profile at any time.",
     "declinedTitle": "{name} declined your request",
-    "declinedBody": "You can ask again 30 days after they declined. Many talented people are waiting to be discovered.",
+    "declinedBody": "You can ask again 30 days after they declined.",
     "closed": "This conversation is closed, so new messages cannot be sent.",
     "block": "Block {name}",
     "blockConfirm": "Block {name}?",
@@ -133,69 +133,71 @@
     "skipToContent": "Skip to main content",
     "loading": "Loading",
     "appName": "Raising Talents",
-    "back": "Back"
+    "back": "Back",
+    "justNow": "just now",
+    "close": "Close"
   },
   "welcome": {
-    "headline": "Get seen by the people who scout talent.",
-    "body": "Show your best work. Agents and scouts across Nigeria search here for athletes, musicians, models, actors and creators.",
+    "headline": "Show your work. Get discovered.",
+    "body": "A home for athletes, musicians, models, actors, dancers and creators. Post your work, build a following, and hear from agents and scouts anywhere in the world.",
     "createAccount": "Create an account",
     "signIn": "I already have an account",
     "disciplinesLabel": "Who uses Raising Talents",
-    "eyebrow": "Nigeria's home for rising talent",
+    "eyebrow": "For talented and creative people everywhere",
     "join": "Join free",
     "signInShort": "Sign in",
     "trust": {
-      "verified": "Verified agents only",
+      "verified": "Agencies are checked",
       "control": "You choose who you talk to",
-      "free": "Free for talent"
+      "free": "Free to join"
     },
     "preview": {
       "request": "Eko Talent Partners would like to contact you",
-      "requestBody": "Verified agency · Lagos",
+      "requestBody": "Verified agency · Lagos, Nigeria",
       "accept": "Accept",
-      "searching": "Afrobeats singer · Lagos",
+      "searching": "Singers · United Kingdom",
       "found": "128 talent found"
     },
     "sides": {
-      "title": "One stage, two sides",
+      "title": "For talent, and the people looking for it",
       "talentTitle": "For talent",
-      "talentBody": "Build a profile agents actually want to read, and let opportunities come to you.",
-      "talent1": "A portfolio of your best photos and clips, in the order you choose",
-      "talent2": "Found by verified agents searching your discipline and city",
-      "talent3": "Read every request first, then accept only the ones you want",
+      "talentBody": "Your own page for your work, in front of people who are looking for it.",
+      "talent1": "Post photos and clips of your best work",
+      "talent2": "Build a following: fans, other talent and agents can follow and like your posts",
+      "talent3": "Read every request from an agency first, and accept only the ones you want",
       "agentTitle": "For agents and scouts",
-      "agentBody": "Find the next headline act before anyone else, without the guesswork.",
-      "agent1": "Search by discipline, city and age, and see real work at a glance",
-      "agent2": "Keep a shortlist with private notes for every search you run",
-      "agent3": "Contact talent directly once your agency is verified",
+      "agentBody": "See real work first, then get in touch.",
+      "agent1": "Search by category, type, country, city and age",
+      "agent2": "Follow talent and keep a shortlist with private notes",
+      "agent3": "Contact talent once your agency is verified",
       "talentCta": "Create my profile",
-      "agentCta": "Start scouting"
+      "agentCta": "Find talent"
     },
     "how": {
       "title": "How it works",
       "step1": "Create your profile",
-      "step1Body": "Pick your discipline and city, add a photo and tell your story. It takes about five minutes.",
-      "step2": "Show your best work",
+      "step1Body": "Choose what you do and where you are, add a photo and write a few lines. It takes about five minutes.",
+      "step2": "Post your work",
       "step2Body": "Upload photos and clips. Every file is checked before anyone else can see it.",
       "step3": "Get discovered",
-      "step3Body": "Verified agents find you in search and send a request. You decide whether to chat."
+      "step3Body": "People find you in search and in their feed. Verified agencies can send a request, and you decide whether to chat."
     },
     "safety": {
-      "title": "Safety is the product",
-      "body": "Fake agents are the biggest risk on talent platforms. We designed Raising Talents around stopping them.",
+      "title": "Built to keep you safe",
+      "body": "Fake agents are the biggest risk for talent online. Agencies here are checked before they can contact anyone.",
       "verified": "Every agency is checked",
       "verifiedBody": "A moderator confirms that each agent works for the agency they name before they can contact anyone.",
       "control": "You stay in control",
-      "controlBody": "Nobody can message you until you accept. Decline or report with one tap.",
+      "controlBody": "Nobody can message you until you accept. Decline or report in one tap.",
       "private": "Private by default",
-      "privateBody": "Your date of birth, email and phone number are never shown. Agents see your age in years only."
+      "privateBody": "Your date of birth, email and phone number are never shown. Others see your age in years only."
     },
     "cta": {
-      "title": "Your next opportunity is looking for you.",
+      "title": "Your work deserves an audience.",
       "body": "Join free in a few minutes. You need to be 18 or older."
     },
     "footer": {
-      "made": "Made in Lagos for talent across Nigeria.",
+      "made": "For talented and creative people everywhere.",
       "terms": "Terms",
       "guidelines": "Community Guidelines"
     },
@@ -204,7 +206,9 @@
       "musicians": "Musicians",
       "models": "Models",
       "actors": "Actors",
-      "creators": "Creators"
+      "creators": "Creators",
+      "dancers": "Dancers",
+      "artists": "Artists"
     }
   },
   "signUp": {
@@ -244,7 +248,7 @@
     "resendIn": "Send a new code in {seconds}s",
     "resent": "New code sent. Check your inbox and spam folder.",
     "wrongEmail": "Wrong email? Start again",
-    "whyTalent": "Until you do, your profile stays private and agents cannot find you.",
+    "whyTalent": "Until you do, your profile stays private and nobody can find you.",
     "whyAgent": "You need this before asking us to verify your agency.",
     "later": "Do this later",
     "doneTitle": "Your email is verified",
@@ -255,61 +259,46 @@
     "title": "How will you use Raising Talents?",
     "body": "This decides what your profile looks like. You can change it until you finish setting up.",
     "talentTitle": "I am a talent",
-    "talentBody": "Build a portfolio of your work so agents and scouts can find you.",
+    "talentBody": "Post your work, build a following, and let agents and scouts find you.",
     "agentTitle": "I am an agent or scout",
-    "agentBody": "Search for talent and get in touch. Agents are verified before they can message anyone.",
+    "agentBody": "Search for talent, follow their work and get in touch. Agencies are verified before they can message anyone.",
     "submit": "Continue"
   },
   "home": {
-    "titleTalent": "Your portfolio starts here",
-    "titleAgent": "Your search starts here",
-    "bodyTalent": "Next you will add your discipline, a photo and your first clips.",
-    "bodyAgent": "Next you will confirm your agency details and get verified.",
-    "signedInAs": "Signed in as {email}",
-    "signOut": "Sign out",
-    "talentReadyTitle": "Welcome back, {name}",
-    "talentReadyBody": "Keep your portfolio fresh: agents look for recent work.",
-    "agentTitle": "Welcome, {name}",
-    "agentPending": "Verification pending. We will email you when your agency is verified; you can then contact talent.",
-    "agentVerified": "Your agency is verified.",
-    "agentSearchSoon": "Search by name, discipline, city and age. We verify every agent before they can contact talent.",
+    "title": "Home",
     "editProfile": "Edit profile",
-    "viewProfile": "See your profile as agents do",
-    "managePortfolio": "Manage your portfolio",
-    "finishSetup": "Finish setting up your profile",
     "findTalent": "Find talent",
-    "managePortfolioBody": "Add photos and clips, caption them and set the order.",
-    "viewProfileBody": "Check what agents see before they contact you.",
-    "editProfileBody": "Update your discipline, city, skills and story.",
-    "findTalentBody": "Search by name, discipline, city and age.",
-    "editAgencyBody": "Keep your agency details current.",
-    "greeting": "Welcome back,",
-    "publicProfile": "View public profile",
+    "publicProfile": "View profile",
     "attention": "{count} waiting for you",
-    "attentionBody": "New requests and messages from verified agents.",
-    "open": "Open",
+    "attentionBody": "New requests and messages.",
     "recentMessages": "Recent messages",
     "seeAll": "See all",
-    "noMessagesTalent": "No messages yet. Verified agents who like your work will contact you here.",
+    "noMessagesTalent": "No messages yet. Agents who like your work will contact you here.",
     "noMessagesAgent": "No conversations yet. Find talent you like and send a request.",
-    "yourPortfolio": "Your portfolio",
-    "portfolioCount": "{count} of {max} photos and clips",
-    "addWork": "Add work",
-    "portfolioEmpty": "Add your first photo or clip so agents can see what you do.",
-    "tip": "Agents look for recent work. Adding something new each month keeps you near the top of their minds.",
-    "agentHero": "Find your next star",
-    "agentHeroBody": "Search talent across Nigeria by discipline, city and age.",
     "searchLabel": "Search talent",
-    "searchPlaceholder": "Afrobeats singer, striker, runway model",
-    "browse": "Browse by discipline",
     "yourShortlist": "Your shortlist",
-    "shortlistEmpty": "Save talent from their profile to compare them here.",
     "verifiedChip": "Verified agency",
     "photoInReview": "Your photo is with a moderator",
-    "photoInReviewBody": "Agents will see your profile as soon as it is approved. Keep adding your work in the meantime.",
+    "photoInReviewBody": "People will see your profile as soon as it is approved. Keep adding your work in the meantime.",
     "photoNeeded": "Add a profile photo",
-    "photoNeededBody": "Agents only see profiles with an approved photo. Your last one was not approved.",
-    "pendingChip": "Verification pending"
+    "photoNeededBody": "Only profiles with an approved photo are shown. Your last one was not approved.",
+    "pendingChip": "Verification pending",
+    "searchPlaceholder": "Search by name, skill or city",
+    "browse": "Browse talent",
+    "aside": "Your profile and shortcuts",
+    "yourProfile": "Your profile",
+    "feed": "Posts",
+    "feedChoice": "Which posts to show",
+    "forYou": "For you",
+    "following": "Following",
+    "followingEmpty": "Nothing here yet",
+    "followingEmptyBody": "Follow talent to see their new work here.",
+    "explore": "Find people to follow",
+    "feedEmpty": "No posts yet",
+    "feedEmptyBody": "New work will show up here as soon as someone shares it.",
+    "morePosts": "Show more posts",
+    "sharePrompt": "Share your latest work",
+    "shareAction": "Post"
   },
   "restore": {
     "offlineTitle": "You are offline",
@@ -422,8 +411,6 @@
   },
   "nav": {
     "home": "Home",
-    "portfolio": "Portfolio",
-    "myProfile": "My profile",
     "signOut": "Sign out",
     "main": "Main",
     "search": "Search",
@@ -431,7 +418,10 @@
     "account": "Account",
     "shortlist": "Shortlist",
     "messages": "Messages",
-    "messagesUnread": "{count} need your attention"
+    "messagesUnread": "{count} need your attention",
+    "explore": "Explore",
+    "post": "Post",
+    "profile": "Profile"
   },
   "onboarding": {
     "stepOf": "Step {current} of {total}",
@@ -449,22 +439,22 @@
     "staleReloaded": "Your profile was changed on another device. We loaded the latest version; check it and save again.",
     "about": {
       "title": "About you",
-      "body": "This is how agents will see you.",
+      "body": "This is how people will see you.",
       "displayName": "Your name",
       "displayNameHint": "Your real name or the name you perform under.",
       "handle": "Username",
-      "handleHint": "Agents can open your profile by it. Letters, numbers, dots and underscores.",
+      "handleHint": "Your page is found by it. Letters, numbers, dots and underscores.",
       "gender": "Gender (optional)",
       "genderNone": "Prefer not to say",
       "genderFemale": "Female",
       "genderMale": "Male",
       "genderNonBinary": "Non-binary",
-      "genderSearchable": "Let agents filter by gender",
+      "genderSearchable": "Let people filter search by gender",
       "genderSearchableHint": "Some castings ask for a specific gender. Leave this off and your gender stays off search."
     },
     "discipline": {
       "title": "Your discipline",
-      "body": "Pick what you do, so the right agents find you.",
+      "body": "Pick what you do, so the right people find you.",
       "category": "Category",
       "subcategories": "What exactly do you do?",
       "subcategoriesHint": "Choose up to {max}.",
@@ -475,7 +465,7 @@
     },
     "location": {
       "title": "Where you are",
-      "body": "Agents often search near them first.",
+      "body": "People often search near them first.",
       "city": "City"
     },
     "story": {
@@ -488,7 +478,7 @@
     },
     "photo": {
       "title": "Your profile photo",
-      "body": "A clear, recent photo of your face. Agents see it first.",
+      "body": "A clear, recent photo of your face. It is the first thing people see.",
       "choose": "Choose a photo",
       "replace": "Choose a different photo",
       "preview": "Your new profile photo",
@@ -499,14 +489,14 @@
       "tips": {
         "face": "Your face, clearly visible: no sunglasses or masks",
         "light": "Good light, ideally daylight facing a window",
-        "alone": "Just you: agents should know who they are looking at",
+        "alone": "Just you, so people know who they are looking at",
         "recent": "Taken in the last year, without heavy filters"
       },
       "heldTitle": "Your photo is with a moderator",
-      "heldBody": "You do not have to wait. Start adding your work now: agents will see your profile as soon as the photo is approved, and we will let you know.",
+      "heldBody": "You do not have to wait. Start adding your work now: people will see your profile as soon as the photo is approved, and we will let you know.",
       "continue": "Continue to Raising Talents",
       "slow": "This is taking longer than usual. Try again in a moment.",
-      "done": "Your profile is complete. Agents can find you now.",
+      "done": "Your profile is complete. People can find you now.",
       "toPortfolio": "Add to your portfolio"
     },
     "agent": {
@@ -515,13 +505,13 @@
       "agencyName": "Agency or company",
       "jobTitle": "Your role",
       "jobTitleHint": "For example Talent scout or Casting director.",
-      "specializations": "Who you scout",
+      "specializations": "Who you are looking for",
       "specializationsHint": "Choose up to {max}.",
       "city": "City",
       "website": "Website (optional)",
       "websiteHint": "Must start with https://",
       "submit": "Save profile",
-      "done": "Your agency profile is saved. We verify every agent before they can contact talent; we will email you when you are verified."
+      "done": "Your agency profile is saved. We verify every agency before it can contact talent; we will email you when you are verified."
     }
   },
   "media": {
@@ -543,7 +533,7 @@
   },
   "portfolio": {
     "title": "Your portfolio",
-    "body": "Up to {max} photos and clips of your best work. Agents see them in this order.",
+    "body": "Up to {max} photos and clips of your best work. Each one appears in the feed and on your page.",
     "count": "{count} of {max} items",
     "add": "Add a photo or video",
     "full": "Your portfolio is full. Remove an item to add another.",
@@ -574,12 +564,14 @@
     "age": "{age} years old",
     "verified": "Verified",
     "skills": "Skills",
-    "portfolio": "Portfolio",
-    "noPortfolio": "No portfolio items yet.",
+    "portfolio": "Posts",
+    "noPortfolio": "No posts yet.",
     "photoAlt": "Photo {position} by {name}",
     "videoAlt": "Video {position} by {name}",
     "about": "About",
-    "contact": "Contact"
+    "contact": "Contact",
+    "addWork": "Add work",
+    "noPortfolioMine": "Share your first photo or clip"
   },
   "place": {
     "country": "Country",
@@ -753,12 +745,12 @@
     "download": "Download my data",
     "downloaded": "Your data is downloading.",
     "deleteTitle": "Delete your account",
-    "deleteBody": "Your profile and portfolio are hidden from agents at once. After {days} days we erase the account and every file for good. Until then you can change your mind.",
+    "deleteBody": "Your profile and posts are hidden at once. After {days} days we erase the account and every file for good. Until then you can change your mind.",
     "password": "Your password",
     "confirm": "I understand my profile, portfolio and files will be erased.",
     "confirmRequired": "Tick the box to confirm.",
     "delete": "Delete my account",
-    "scheduled": "Your account will be deleted on {date}. It is hidden from agents until then.",
+    "scheduled": "Your account will be deleted on {date}. It is hidden until then.",
     "keep": "Keep my account",
     "kept": "Your account is back. Nothing will be deleted.",
     "wrongPassword": "That password is not right."
@@ -835,10 +827,9 @@
     "bellUnread": "Notifications, {count} unread",
     "title": "Notifications",
     "empty": "Nothing new",
-    "emptyBody": "Decisions about your photos, videos, verification and account will appear here.",
+    "emptyBody": "New followers, and decisions about your photos, videos, verification and account, will appear here.",
     "loadMore": "Show older",
     "unread": "New:",
-    "justNow": "just now",
     "groupNew": "New",
     "groupEarlier": "Earlier",
     "file": {
@@ -855,7 +846,7 @@
     "deletionScheduled": "Your account will be deleted on {date}",
     "deletionScheduledBody": "Changed your mind? Keep your account from your account page.",
     "reinstated": "Your account is back",
-    "reinstatedBody": "You can use Raising Talents again, and agents can see your profile.",
+    "reinstatedBody": "You can use Raising Talents again, and people can see your profile.",
     "passwordChanged": "Your password was changed",
     "passwordChangedBody": "If this was not you, change your password and sign out your other devices.",
     "emailChanged": "Your email address was changed",
@@ -865,7 +856,10 @@
     "contactAccepted": "{name} accepted your request",
     "contactAcceptedBody": "You can chat now.",
     "contactDeclined": "{name} declined your request",
-    "contactDeclinedBody": "Keep searching: there are many more talented people to discover."
+    "contactDeclinedBody": "You can keep searching for other talent.",
+    "newFollower": "{name} started following you",
+    "newFollowerBody": "See their profile.",
+    "newFollowerAgencyBody": "An agency is keeping up with your work."
   },
   "emailChange": {
     "title": "Email address",
@@ -899,11 +893,25 @@
   },
   "verifyBanner": {
     "region": "Email not verified",
-    "talent": "Verify your email so agents can find your profile.",
+    "talent": "Verify your email so people can find your profile.",
     "agent": "Verify your email to ask us to verify your agency.",
     "other": "Verify your email to use everything Raising Talents offers.",
     "action": "Verify now",
     "dismiss": "Hide for now",
     "dot": "Email not verified"
+  },
+  "social": {
+    "follow": "Follow",
+    "following": "Following",
+    "followers": "Followers",
+    "followingCount": "Following",
+    "posts": "Posts",
+    "likes": "{count} likes",
+    "likesOne": "1 like",
+    "like": "Like {name}'s post",
+    "postBy": "Post by {name}",
+    "photoBy": "Photo by {name}",
+    "videoBy": "Video by {name}",
+    "suggested": "Suggested for you"
   }
 }

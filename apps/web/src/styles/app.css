@@ -7,66 +7,75 @@
 @custom-variant dark (@media (prefers-color-scheme: dark));
 
 /*
- * Raising Talents on shadcn/ui tokens. A casting call, not a dashboard: ink on white, with
- * Stagelight yellow kept for the spotlight moment only. Text and control borders meet
- * WCAG AA (4.5:1 text, 3:1 for the outline of a control) in both schemes.
+ * Raising Talents on shadcn/ui tokens (ADR-047). A social home for creative people: clean
+ * neutral surfaces so the work carries the colour, violet for actions, and the brand
+ * gradient (violet to pink to orange) for the moments that belong to the brand: the mark,
+ * the ring around a face, a like. Text and control borders meet WCAG AA (4.5:1 text, 3:1
+ * for the outline of a control) in both schemes.
  */
 :root {
   --radius: 0.875rem;
   --background: #ffffff;
-  --foreground: #1c1a3d;
+  --foreground: #14111f;
   --card: #ffffff;
-  --card-foreground: #1c1a3d;
+  --card-foreground: #14111f;
   --popover: #ffffff;
-  --popover-foreground: #1c1a3d;
-  --primary: #1c1a3d;
+  --popover-foreground: #14111f;
+  --primary: #6d28d9;
   --primary-foreground: #ffffff;
-  --secondary: #f2f1f7;
-  --secondary-foreground: #1c1a3d;
-  --muted: #f2f1f7;
-  --muted-foreground: #5e5b78;
-  --accent: #ebe9f4;
-  --accent-foreground: #1c1a3d;
+  --secondary: #f5f3fa;
+  --secondary-foreground: #14111f;
+  --muted: #f5f3fa;
+  --muted-foreground: #5d5873;
+  --accent: #ede8fd;
+  --accent-foreground: #3b1a8a;
   --destructive: #b3261e;
   --destructive-foreground: #ffffff;
   --destructive-surface: #fbedec;
   --success: #1e7a4c;
   --success-surface: #e9f5ee;
-  --spotlight: #ffc93c;
-  --spotlight-foreground: #1c1a3d;
-  /* The stage is ink in both schemes: it is the brand moment, not a surface. */
-  --stage: #1c1a3d;
+  /* The highlight: a selected tab, a badge. Light, so it also reads as text on the stage. */
+  --spotlight: #ff9ec7;
+  --spotlight-foreground: #3d0a24;
+  /* The stage is deep violet in both schemes: it is the brand moment, not a surface. */
+  --stage: #160f2e;
   --stage-foreground: #ffffff;
-  --border: #dddbe8;
-  --input: #86839c;
-  --ring: #3b5bdb;
+  /* A like. Red in every app people already use, so it needs no explaining. */
+  --like: #e11d48;
+  --brand-from: #7c3aed;
+  --brand-via: #db2777;
+  --brand-to: #f97316;
+  --border: #e6e2ef;
+  --input: #8983a0;
+  --ring: #7c3aed;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #121120;
-    --foreground: #f4f3fa;
-    --card: #1b1a2e;
-    --card-foreground: #f4f3fa;
-    --popover: #1b1a2e;
-    --popover-foreground: #f4f3fa;
-    --primary: #f4f3fa;
-    --primary-foreground: #1c1a3d;
-    --secondary: #26243b;
-    --secondary-foreground: #f4f3fa;
-    --muted: #26243b;
-    --muted-foreground: #b6b3cf;
-    --accent: #2e2c47;
-    --accent-foreground: #f4f3fa;
+    --background: #0f0d17;
+    --foreground: #f5f3fb;
+    --card: #1a1726;
+    --card-foreground: #f5f3fb;
+    --popover: #1a1726;
+    --popover-foreground: #f5f3fb;
+    --primary: #b79cff;
+    --primary-foreground: #1b0f3a;
+    --secondary: #252131;
+    --secondary-foreground: #f5f3fb;
+    --muted: #252131;
+    --muted-foreground: #b5b0c9;
+    --accent: #2e2748;
+    --accent-foreground: #ede8fd;
     /* Light red, so error text reads at 6.9:1 or better on every dark surface; buttons take ink text. */
     --destructive: #ff8f87;
-    --destructive-foreground: #1c1a3d;
+    --destructive-foreground: #1b0f3a;
     --destructive-surface: #3a1d22;
     --success: #6fd3a0;
     --success-surface: #173326;
-    --border: #34324d;
-    --input: #7a7799;
-    --ring: #8ea2ff;
+    --like: #ff5c7a;
+    --border: #322d44;
+    --input: #7d7896;
+    --ring: #b79cff;
     color-scheme: dark;
   }
 }
@@ -97,6 +106,10 @@
   --color-spotlight-foreground: var(--spotlight-foreground);
   --color-stage: var(--stage);
   --color-stage-foreground: var(--stage-foreground);
+  --color-like: var(--like);
+  --color-brand-from: var(--brand-from);
+  --color-brand-via: var(--brand-via);
+  --color-brand-to: var(--brand-to);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -168,4 +181,42 @@
 
 @utility skip-link {
   @apply absolute -top-24 left-4 z-50 rounded-full bg-primary px-4 py-2 font-semibold text-primary-foreground focus:top-4;
+}
+
+/* The brand gradient as a fill. White text on it is for large or bold type only. */
+@utility bg-brand {
+  background-image: linear-gradient(
+    120deg,
+    var(--brand-from) 0%,
+    var(--brand-via) 55%,
+    var(--brand-to) 110%
+  );
+}
+
+/* Violet to pink only: every point of it carries white text at 4.5:1 or better. */
+@utility bg-brand-cta {
+  background-image: linear-gradient(120deg, var(--brand-from) 0%, var(--brand-via) 100%);
+}
+
+@utility text-brand {
+  background-image: linear-gradient(120deg, var(--brand-from) 0%, var(--brand-via) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* The ring around a face, as on every social app: a gradient border with a gap inside. */
+@utility ring-brand {
+  background:
+    linear-gradient(var(--background), var(--background)) padding-box,
+    linear-gradient(135deg, var(--brand-to), var(--brand-via) 45%, var(--brand-from)) border-box;
+  border: 2.5px solid transparent;
+  padding: 2px;
+}
+
+/* The glow behind the stage: the brand colours as light, not as a surface. */
+@utility stage-glow {
+  background-image:
+    radial-gradient(ellipse 70% 90% at 92% 0%, rgb(219 39 119 / 0.42), transparent 62%),
+    radial-gradient(ellipse 60% 80% at 0% 100%, rgb(124 58 237 / 0.45), transparent 60%);
 }

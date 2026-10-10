@@ -62,6 +62,55 @@ export const citiesRoutes = Object.fromEntries(
   ]),
 );
 
+const imageUrls = (name: string) => ({
+  small: `https://media.test/${name}-256.webp`,
+  medium: `https://media.test/${name}-1024.webp`,
+  large: `https://media.test/${name}-2048.webp`,
+});
+
+/** A talent as a card: in search results, suggestions and on every post. */
+export const cardFor = (handle: string, displayName: string) => ({
+  handle,
+  displayName,
+  category: { slug: 'music', name: 'Music' },
+  subcategories: [{ slug: 'singer', name: 'Singer' }],
+  city: { slug: 'ng-lagos', name: 'Lagos', countryCode: 'NG' },
+  ageYears: 26,
+  verified: false,
+  avatarUrls: null,
+});
+
+/** A photo in a feed. */
+export const postFor = (n: number, overrides: Record<string, unknown> = {}) => ({
+  id: `0192a3b4-0000-7000-8000-0000000000${String(n).padStart(2, '0')}`,
+  kind: 'image',
+  caption: `Post ${String(n)}`,
+  postedAt: '2026-10-02T09:00:00.000Z',
+  talent: cardFor('tobi.sprint', 'Tobi Adebayo'),
+  likes: 0,
+  liked: false,
+  urls: imageUrls(`post-${String(n)}`),
+  ...overrides,
+});
+
+export const socialFor = (overrides: Record<string, unknown> = {}) => ({
+  followers: 0,
+  following: 0,
+  posts: 0,
+  followedByViewer: false,
+  isSelf: false,
+  ...overrides,
+});
+
+/** What the feed screen asks for, answered with these posts and people to follow. */
+export const feedRoutes = (
+  posts: readonly unknown[] = [],
+  suggestions: readonly unknown[] = [],
+): Record<string, Route> => ({
+  'GET /v1/feed': () => Response.json({ items: posts, nextCursor: null }),
+  'GET /v1/feed/suggestions': () => Response.json({ items: suggestions }),
+});
+
 export const signedIn = (me = meFor()) =>
   Response.json({ accessToken: 'access-1', accessTokenExpiresAt: '2099-01-01T00:00:00.000Z', me });
 

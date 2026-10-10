@@ -124,7 +124,7 @@ function SavedTalent({
         </span>
         <button
           type="button"
-          className="absolute top-2 right-2 grid size-9 cursor-pointer place-items-center rounded-full bg-white/90 text-[#1c1a3d] shadow-sm transition-colors hover:bg-white disabled:opacity-60"
+          className="absolute top-2 right-2 grid size-9 cursor-pointer place-items-center rounded-full bg-white/90 text-[#14111f] shadow-sm transition-colors hover:bg-white disabled:opacity-60"
           aria-label={t('shortlist.removeLabel', { name: talent.displayName })}
           disabled={remove.isPending}
           onClick={() => {

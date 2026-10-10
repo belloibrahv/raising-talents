@@ -7,6 +7,8 @@ import {
   Hand,
   Medal,
   Mic,
+  Music,
+  Palette,
   Search,
   ShieldCheck,
   Sparkles,
@@ -25,7 +27,9 @@ const DISCIPLINES = [
   { key: 'musicians', icon: Mic },
   { key: 'models', icon: Camera },
   { key: 'actors', icon: Clapperboard },
+  { key: 'dancers', icon: Music },
   { key: 'creators', icon: Sparkles },
+  { key: 'artists', icon: Palette },
 ] as const;
 
 const spotlightButton = cn(
@@ -78,7 +82,7 @@ export function WelcomePage() {
 
       <main id="main">
         <section
-          className="relative overflow-hidden bg-stage text-stage-foreground [background-image:radial-gradient(ellipse_60%_55%_at_75%_0%,rgb(255_201_60/0.30),transparent_70%),radial-gradient(ellipse_50%_40%_at_0%_100%,rgb(142_162_255/0.18),transparent_70%)]"
+          className="relative overflow-hidden bg-stage text-stage-foreground stage-glow"
           aria-labelledby="welcome-heading"
         >
           <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-8 pb-20 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:pt-16 lg:pb-28">
@@ -138,7 +142,7 @@ export function WelcomePage() {
         <Safety />
 
         <section className="px-4 py-20 sm:px-6">
-          <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 rounded-[2rem] bg-stage px-6 py-14 text-center text-stage-foreground [background-image:radial-gradient(ellipse_70%_80%_at_50%_0%,rgb(255_201_60/0.28),transparent_70%)] sm:px-12">
+          <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 rounded-[2rem] bg-stage px-6 py-14 text-center text-stage-foreground stage-glow sm:px-12">
             <h2 className="max-w-2xl text-3xl font-bold text-balance sm:text-5xl">
               {t('welcome.cta.title')}
             </h2>
@@ -181,20 +185,20 @@ function ProductPreview() {
       verified: true,
     },
     {
-      name: 'Emeka O.',
-      role: 'Dancer · Lagos',
+      name: 'Maya R.',
+      role: 'Dancer · London',
       tone: 'from-sky-300 to-indigo-800',
       verified: false,
     },
     {
-      name: 'Zainab B.',
-      role: 'Model · Abuja',
+      name: 'Amani K.',
+      role: 'Model · Nairobi',
       tone: 'from-fuchsia-300 to-purple-900',
       verified: true,
     },
     {
-      name: 'Tobi A.',
-      role: 'Sprinter · Ibadan',
+      name: 'Jordan T.',
+      role: 'Sprinter · Atlanta',
       tone: 'from-lime-300 to-emerald-800',
       verified: false,
     },
@@ -237,17 +241,17 @@ function ProductPreview() {
           ))}
         </div>
       </div>
-      <div className="absolute -bottom-8 left-1/2 w-[88%] -translate-x-1/2 rounded-2xl bg-white p-4 text-[#1c1a3d] shadow-2xl ring-1 ring-black/5 sm:-left-8 sm:w-80 sm:translate-x-0 lg:-left-12">
+      <div className="absolute -bottom-8 left-1/2 w-[88%] -translate-x-1/2 rounded-2xl bg-white p-4 text-[#14111f] shadow-2xl ring-1 ring-black/5 sm:-left-8 sm:w-80 sm:translate-x-0 lg:-left-12">
         <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#1c1a3d] text-white">
+          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#14111f] text-white">
             <ShieldCheck className="size-5" />
           </span>
           <div className="min-w-0">
             <p className="m-0 text-sm leading-snug font-bold">{t('welcome.preview.request')}</p>
-            <p className="m-0 mt-0.5 text-xs text-[#5e5b78]">{t('welcome.preview.requestBody')}</p>
+            <p className="m-0 mt-0.5 text-xs text-[#5d5873]">{t('welcome.preview.requestBody')}</p>
           </div>
         </div>
-        <span className="mt-3 flex h-9 items-center justify-center rounded-full bg-[#ffc93c] text-sm font-bold">
+        <span className="mt-3 flex h-9 items-center justify-center rounded-full bg-brand-cta text-sm font-bold text-white">
           {t('welcome.preview.accept')}
         </span>
       </div>

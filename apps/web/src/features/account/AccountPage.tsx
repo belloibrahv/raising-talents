@@ -43,7 +43,7 @@ export function AccountPage() {
     <Page title={t('account.title')} documentTitle={t('titles.account')} titleClassName="sr-only">
       {me ? (
         <section
-          className="flex items-center gap-4 rounded-3xl bg-stage p-6 text-stage-foreground [background-image:radial-gradient(ellipse_60%_120%_at_100%_0%,rgb(255_201_60/0.3),transparent_70%)]"
+          className="flex items-center gap-4 rounded-3xl bg-stage p-6 text-stage-foreground stage-glow"
           aria-label={t('account.summary')}
         >
           <span

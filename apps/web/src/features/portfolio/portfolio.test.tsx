@@ -2,8 +2,11 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
+  cardFor,
   expectNoAxeViolations,
   meFor,
+  postFor,
+  socialFor,
   problem,
   renderAt,
   resetSession,
@@ -213,14 +216,23 @@ describe('a talent profile as agents see it', () => {
           avatarMediaId: null,
           avatarUrls: null,
         }),
-      'GET /v1/talents/ngozi.adeyemi/portfolio': () =>
+      'GET /v1/talents/ngozi.adeyemi/social': () =>
+        Response.json(socialFor({ posts: 2, followers: 128, following: 14 })),
+      'GET /v1/talents/ngozi.adeyemi/posts': () =>
         Response.json({
           items: [
-            { id: ids[0], kind: 'image', caption: 'Live at Hard Rock Lagos', urls: urls(ids[0]) },
+            postFor(1, {
+              id: ids[0],
+              caption: 'Live at Hard Rock Lagos',
+              likes: 7,
+              talent: cardFor('ngozi.adeyemi', 'Ngozi Adeyemi'),
+              urls: urls(ids[0]),
+            }),
             {
-              id: ids[1],
+              ...postFor(2, { id: ids[1], caption: '' }),
               kind: 'video',
-              caption: '',
+              urls: undefined,
+              talent: cardFor('ngozi.adeyemi', 'Ngozi Adeyemi'),
               video: {
                 streamUrl: 'https://stream.video.test/play.m3u8?token=signed',
                 posterUrl: 'https://image.video.test/play/thumbnail.webp?token=signed',
@@ -229,21 +241,39 @@ describe('a talent profile as agents see it', () => {
               },
             },
           ],
+          nextCursor: null,
         }),
+      'PUT /v1/talents/ngozi.adeyemi/follow': () =>
+        Response.json(
+          socialFor({ posts: 2, followers: 129, following: 14, followedByViewer: true }),
+        ),
+      'GET /v1/me/shortlist/ngozi.adeyemi': () => problem(404, 'NOT_FOUND'),
+      'GET /v1/me/conversations': () => Response.json({ items: [], nextCursor: null }),
     });
     renderAt('/talents/ngozi.adeyemi');
+    const user = userEvent.setup({ delay: null });
     expect(await screen.findByRole('heading', { level: 1, name: 'Ngozi Adeyemi' })).toBeVisible();
-    for (const fact of ['Singer', 'Lagos, Nigeria', '26 years old']) {
+    for (const fact of ['Singer', 'Lagos, Nigeria', '26 years old', 'Vocals']) {
       expect(screen.getByText(fact)).toBeVisible();
     }
-    const photo = await screen.findByRole('img', { name: 'Photo 1 by Ngozi Adeyemi' });
-    expect(photo.closest('figure')?.querySelector('figcaption')).toHaveTextContent(
-      'Live at Hard Rock Lagos',
+    // Her numbers, and following her changes them at once.
+    expect((await screen.findByText('Followers')).nextElementSibling).toHaveTextContent('128');
+    await user.click(screen.getByRole('button', { name: 'Follow Ngozi Adeyemi' }));
+    expect(
+      await screen.findByRole('button', { name: 'Following Ngozi Adeyemi' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Followers').nextElementSibling).toHaveTextContent('129');
+
+    // Her work is a grid; a square opens the post with its caption and likes.
+    expect(
+      await screen.findByRole('button', { name: 'Video 2 by Ngozi Adeyemi' }),
+    ).toBeInTheDocument();
+    await user.click(
+      screen.getByRole('button', { name: 'Photo 1 by Ngozi Adeyemi: Live at Hard Rock Lagos' }),
     );
-    expect(document.querySelector('video')).toHaveAttribute(
-      'poster',
-      'https://image.video.test/play/thumbnail.webp?token=signed',
-    );
+    const post = await screen.findByRole('article', { name: 'Post by Ngozi Adeyemi' });
+    expect(within(post).getByText('Live at Hard Rock Lagos')).toBeInTheDocument();
+    expect(within(post).getByText('7 likes')).toBeInTheDocument();
     expect(document.title).toBe('Ngozi Adeyemi on Raising Talents | Raising Talents');
     await expectNoAxeViolations();
   });

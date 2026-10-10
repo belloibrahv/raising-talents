@@ -35,9 +35,10 @@ export function useCountryCities(countryCode: string) {
 }
 
 /** Null until the first step is saved: the API creates the profile on the first save. */
-export function useMyTalentProfile() {
+export function useMyTalentProfile(enabled = true) {
   return useQuery({
     queryKey: keys.talentProfile,
+    enabled,
     queryFn: async (): Promise<MyTalentProfile | null> => {
       try {
         return await api.call('talentProfile.getMine');

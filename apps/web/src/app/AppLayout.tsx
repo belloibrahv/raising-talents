@@ -1,12 +1,14 @@
 import type { LucideIcon } from 'lucide-react';
 import {
   Bookmark,
+  Compass,
   House,
-  Images,
   LogOut,
   MessagesSquare,
   Search,
+  Settings,
   ShieldCheck,
+  SquarePlus,
   UserRound,
 } from 'lucide-react';
 import { Suspense } from 'react';
@@ -19,6 +21,7 @@ import { useSession, useSignOut } from '../features/auth/use-auth';
 import { t } from '../i18n';
 import { NotificationBell } from '../features/notifications/NotificationBell';
 import { useMessagingUnread } from '../features/messages/queries';
+import { useMyTalentProfile } from '../features/profile/queries';
 import { useLiveUpdates } from '../shared/realtime/live-updates';
 import { InstallCard } from '../shared/pwa/InstallCard';
 import { BrandMark } from '../shared/ui/BrandMark';
@@ -45,6 +48,9 @@ export function AppLayout() {
   // A chat keeps the bottom of the screen for its message bar.
   // The install offer lives on the home screen only, so it never crowds a task.
   const onHome = useMatch('/home') !== null;
+  // A talent's last tab is their own page, as on every social app; settings sit in the header.
+  const talent = me?.role === 'talent' && !onboarding;
+  const handle = useMyTalentProfile(talent).data?.handle;
   const destinations: Destination[] = [
     ...(onboarding ? [] : [{ to: '/home', label: t('nav.home'), icon: House }]),
     ...(staff ? [{ to: '/moderation', label: t('nav.moderation'), icon: ShieldCheck }] : []),
@@ -54,12 +60,19 @@ export function AppLayout() {
           { to: '/shortlist', label: t('nav.shortlist'), icon: Bookmark },
         ]
       : []),
-    ...(me?.role === 'talent' && !onboarding
-      ? [{ to: '/portfolio', label: t('nav.portfolio'), icon: Images }]
+    ...(talent
+      ? [
+          { to: '/search', label: t('nav.explore'), icon: Compass },
+          { to: '/portfolio', label: t('nav.post'), icon: SquarePlus },
+        ]
       : []),
     ...(talks ? [{ to: '/messages', label: t('nav.messages'), icon: MessagesSquare }] : []),
-    { to: '/account', label: t('nav.account'), icon: UserRound },
+    talent
+      ? // /me finds the handle, so the tab is there before the profile has loaded.
+        { to: handle ? `/talents/${handle}` : '/me', label: t('nav.profile'), icon: UserRound }
+      : { to: '/account', label: t('nav.account'), icon: UserRound },
   ];
+  const accountInHeader = destinations.every((entry) => entry.to !== '/account');
   return (
     <div className="flex min-h-dvh flex-col">
       <header className="sticky top-0 z-30 border-b bg-background/95">
@@ -105,7 +118,7 @@ export function AppLayout() {
                             className={cn(
                               'relative grid h-7 w-12 place-items-center rounded-full transition-colors md:h-auto md:w-auto',
                               isActive &&
-                                'bg-spotlight text-spotlight-foreground md:bg-transparent md:text-current',
+                                'bg-accent text-accent-foreground md:bg-transparent md:text-current',
                             )}
                           >
                             <Icon aria-hidden="true" className="size-5 md:size-4" />
@@ -141,6 +154,31 @@ export function AppLayout() {
           )}
           <div className="ml-auto flex items-center gap-1 md:ml-0">
             <NotificationBell />
+            {accountInHeader ? (
+              <NavLink
+                to="/account"
+                // The label carries the dot's meaning: an aria-label replaces the content inside.
+                aria-label={
+                  me && !me.emailVerified
+                    ? `${t('nav.account')}, ${t('verifyBanner.dot')}`
+                    : t('nav.account')
+                }
+                className={({ isActive }) =>
+                  cn(
+                    'relative grid size-10 place-items-center rounded-full text-foreground hover:bg-accent',
+                    isActive && 'bg-accent',
+                  )
+                }
+              >
+                <Settings aria-hidden="true" className="size-5" />
+                {me && !me.emailVerified ? (
+                  <span
+                    aria-hidden="true"
+                    className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-destructive ring-2 ring-background"
+                  />
+                ) : null}
+              </NavLink>
+            ) : null}
             <Button
               variant="ghost"
               size="sm"

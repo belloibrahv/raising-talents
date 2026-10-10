@@ -238,7 +238,7 @@ describe('Portfolio over HTTP', () => {
       handle: 'adaeze.okafor',
       displayName: 'Adaeze Okafor',
       discipline: 'Singer',
-      city: 'Lagos',
+      city: 'Lagos, Nigeria',
     });
     expect(page.portfolio.length).toBeGreaterThan(0);
     // Agents see age in years; strangers on the internet see neither age nor gender.

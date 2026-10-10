@@ -21,13 +21,13 @@ import { ChoiceGroup } from '../../shared/ui/ChoiceGroup';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { PageSkeleton } from '../../shared/ui/PageSkeleton';
 import { Page } from '../../shared/ui/Page';
-import { Select } from '../../shared/ui/Select';
 import { TextArea } from '../../shared/ui/TextArea';
 import { TextField } from '../../shared/ui/TextField';
 import { useFocusFirstError } from '../../shared/ui/use-focus-first-error';
 import { fieldErrorsFrom } from '../auth/form-errors';
 import { AvatarStep } from './AvatarStep';
 import { categoryIcon } from './category-icons';
+import { PlaceFields, startingPlace, type Place } from './PlaceFields';
 import { useMyTalentProfile, useTaxonomy, useUpdateTalentProfile } from './queries';
 import {
   firstOpenStep,
@@ -413,7 +413,7 @@ function LocationStep({
 }) {
   const { save, errors, pending, formError } = useStepSave(update, onSaved);
   const form = useFocusFirstError(errors);
-  const [city, setCity] = useState(profile.city?.slug ?? '');
+  const [place, setPlace] = useState<Place>(() => startingPlace(profile.city, taxonomy.countries));
 
   return (
     <form
@@ -422,21 +422,18 @@ function LocationStep({
       noValidate
       onSubmit={(event) => {
         event.preventDefault();
-        save({ citySlug: city }, city ? {} : { city: t('validation.chooseOne') });
+        save(
+          { citySlug: place.citySlug },
+          place.citySlug ? {} : { city: t('validation.chooseOne') },
+        );
       }}
     >
       <FormMessage tone="error">{formError}</FormMessage>
-      <Select
-        label={t('onboarding.location.city')}
-        placeholder={t('onboarding.location.choose')}
-        value={city}
-        onChange={(event) => {
-          setCity(event.target.value);
-        }}
-        options={taxonomy.cities.map((entry) => ({ value: entry.slug, label: entry.name }))}
-        error={errors['city']}
-        autoComplete="address-level2"
-        required
+      <PlaceFields
+        countries={taxonomy.countries}
+        value={place}
+        onChange={setPlace}
+        cityError={errors['city']}
       />
       <Button type="submit" loading={pending} className={STICKY_ACTION}>
         {t('onboarding.save')}

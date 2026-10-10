@@ -9,6 +9,7 @@ import {
   resetSession,
   signedIn,
   stubApi,
+  citiesRoutes,
   TAXONOMY,
   type Call,
 } from '../../test/app-harness';
@@ -140,6 +141,7 @@ describe('talent onboarding', () => {
     const calls = stubApi({
       '/v1/auth/web/refresh': () => signedIn(),
       '/v1/taxonomy': () => Response.json(TAXONOMY),
+      ...citiesRoutes,
       'GET /v1/me/talent-profile': fake.get,
       'PATCH /v1/me/talent-profile': fake.patch,
     });
@@ -161,7 +163,10 @@ describe('talent onboarding', () => {
     await user.click(screen.getByRole('button', { name: 'Save and continue' }));
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Where you are' })).toBeVisible();
-    await user.selectOptions(screen.getByLabelText('City'), 'ng-lagos');
+    await user.type(screen.getByRole('combobox', { name: 'Country' }), 'naija');
+    await user.click(await screen.findByRole('option', { name: 'Nigeria' }));
+    await user.click(screen.getByRole('combobox', { name: 'City' }));
+    await user.click(await screen.findByRole('option', { name: 'Lagos' }));
     await user.click(screen.getByRole('button', { name: 'Save and continue' }));
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Your story' })).toBeVisible();
@@ -208,6 +213,7 @@ describe('talent onboarding', () => {
     stubApi({
       '/v1/auth/web/refresh': () => signedIn(),
       '/v1/taxonomy': () => Response.json(TAXONOMY),
+      ...citiesRoutes,
       'GET /v1/me/talent-profile': fake.get,
     });
     const router = renderAt('/home');
@@ -222,6 +228,7 @@ describe('talent onboarding', () => {
     stubApi({
       '/v1/auth/web/refresh': () => signedIn(),
       '/v1/taxonomy': () => Response.json(TAXONOMY),
+      ...citiesRoutes,
       'GET /v1/me/talent-profile': fake.get,
       'PATCH /v1/me/talent-profile': fake.patch,
     });
@@ -248,6 +255,7 @@ describe('talent onboarding', () => {
     const calls = stubApi({
       '/v1/auth/web/refresh': () => signedIn(),
       '/v1/taxonomy': () => Response.json(TAXONOMY),
+      ...citiesRoutes,
       'GET /v1/me/talent-profile': fake.get,
       'POST /v1/media/upload-intents': () =>
         Response.json(
@@ -338,6 +346,7 @@ describe('talent onboarding', () => {
     stubApi({
       '/v1/auth/web/refresh': () => signedIn(),
       '/v1/taxonomy': () => Response.json(TAXONOMY),
+      ...citiesRoutes,
       'GET /v1/me/talent-profile': fake.get,
       'POST /v1/media/upload-intents': () =>
         Response.json(
@@ -404,6 +413,7 @@ describe('talent onboarding', () => {
     const calls = stubApi({
       '/v1/auth/web/refresh': () => signedIn(),
       '/v1/taxonomy': () => Response.json(TAXONOMY),
+      ...citiesRoutes,
       'GET /v1/me/talent-profile': fake.get,
     });
     renderAt('/onboarding/talent/photo');
@@ -426,6 +436,7 @@ describe('agent onboarding', () => {
     const calls = stubApi({
       '/v1/auth/web/refresh': () => signedIn(meFor({ role: 'agent' })),
       '/v1/taxonomy': () => Response.json(TAXONOMY),
+      ...citiesRoutes,
       'GET /v1/me/agent-profile': () => problem(404, 'NOT_FOUND'),
       'PATCH /v1/me/agent-profile': () =>
         Response.json({
@@ -448,7 +459,10 @@ describe('agent onboarding', () => {
     await user.type(await screen.findByLabelText('Agency or company'), 'Eko Talent Partners');
     await user.type(screen.getByLabelText('Your role'), 'Talent scout');
     await user.click(screen.getByRole('checkbox', { name: 'Music' }));
-    await user.selectOptions(screen.getByLabelText('City'), 'ng-lagos');
+    await user.type(screen.getByRole('combobox', { name: 'Country' }), 'naija');
+    await user.click(await screen.findByRole('option', { name: 'Nigeria' }));
+    await user.click(screen.getByRole('combobox', { name: 'City' }));
+    await user.click(await screen.findByRole('option', { name: 'Lagos' }));
     await user.type(screen.getByLabelText('Website (optional)'), 'eko-talent.example');
     await user.click(screen.getByRole('button', { name: 'Save profile' }));
     expect(screen.getByLabelText('Website (optional)')).toHaveAccessibleDescription(

@@ -1,4 +1,4 @@
-import type { NamedRef, TaxonomyResponse } from '@rt/contracts';
+import type { CityOption, Country, NamedRef, TaxonomyResponse } from '@rt/contracts';
 import type { DomainError } from '../../../platform/domain-error.js';
 import { domainError } from '../../../platform/domain-error.js';
 import { err, ok, type Result } from '../../../platform/result.js';
@@ -7,8 +7,18 @@ export interface TaxonomySnapshot {
   readonly categories: readonly { slug: string; name: string }[];
   readonly subcategories: readonly { slug: string; name: string; categorySlug: string }[];
   readonly skills: readonly { slug: string; name: string; categorySlug: string | null }[];
-  readonly cities: readonly { slug: string; name: string; countryCode: string }[];
+  /** By name. */
+  readonly countries: readonly { code: string; name: string; searchTerms: string }[];
+  /** Largest first within each country. */
+  readonly cities: readonly {
+    slug: string;
+    name: string;
+    countryCode: string;
+    region: string | null;
+  }[];
 }
+
+type CityRow = TaxonomySnapshot['cities'][number];
 
 export interface TalentSelection {
   readonly categorySlug: string | null;
@@ -27,13 +37,33 @@ export class TaxonomyCatalog {
   private readonly categories: Map<string, { slug: string; name: string }>;
   private readonly subcategories: Map<string, { slug: string; name: string; categorySlug: string }>;
   private readonly skills: Map<string, { slug: string; name: string; categorySlug: string | null }>;
-  private readonly cities: Map<string, { slug: string; name: string; countryCode: string }>;
+  private readonly cities: Map<string, CityRow>;
+  private readonly citiesByCountry = new Map<string, CityOption[]>();
+  private readonly countries: Map<string, Country>;
 
   constructor(private readonly snapshot: TaxonomySnapshot) {
     this.categories = new Map(snapshot.categories.map((item) => [item.slug, item]));
     this.subcategories = new Map(snapshot.subcategories.map((item) => [item.slug, item]));
     this.skills = new Map(snapshot.skills.map((item) => [item.slug, item]));
     this.cities = new Map(snapshot.cities.map((item) => [item.slug, item]));
+    this.countries = new Map(
+      snapshot.countries.map((item) => [
+        item.code,
+        {
+          code: item.code,
+          name: item.name,
+          searchTerms: item.searchTerms
+            .split(',')
+            .map((term) => term.trim())
+            .filter(Boolean),
+        },
+      ]),
+    );
+    for (const city of snapshot.cities) {
+      const list = this.citiesByCountry.get(city.countryCode) ?? [];
+      list.push({ slug: city.slug, name: city.name, region: city.region });
+      this.citiesByCountry.set(city.countryCode, list);
+    }
   }
 
   validateTalentSelection(selection: TalentSelection): Result<void, DomainError> {
@@ -94,6 +124,28 @@ export class TaxonomyCatalog {
     });
   }
 
+  hasCountry(code: string): boolean {
+    return this.countries.has(code);
+  }
+
+  countryName(code: string): string | null {
+    return this.countries.get(code)?.name ?? null;
+  }
+
+  /** "London, United Kingdom": a city where only text is shown, such as a shared page. */
+  placeName(citySlug: string | null): string | null {
+    const city = citySlug === null ? undefined : this.cities.get(citySlug);
+    if (!city) return null;
+    const country = this.countries.get(city.countryCode)?.name;
+    return country ? `${city.name}, ${country}` : city.name;
+  }
+
+  /** Null for an unknown country, so the caller can answer 404. */
+  citiesIn(countryCode: string): readonly CityOption[] | null {
+    if (!this.countries.has(countryCode)) return null;
+    return this.citiesByCountry.get(countryCode) ?? [];
+  }
+
   city(slug: string | null): (NamedRef & { countryCode: string }) | null {
     const found = slug === null ? undefined : this.cities.get(slug);
     return found ? { slug: found.slug, name: found.name, countryCode: found.countryCode } : null;
@@ -113,11 +165,7 @@ export class TaxonomyCatalog {
         name,
         categorySlug,
       })),
-      cities: this.snapshot.cities.map(({ slug, name, countryCode }) => ({
-        slug,
-        name,
-        countryCode,
-      })),
+      countries: [...this.countries.values()],
     };
   }
 }

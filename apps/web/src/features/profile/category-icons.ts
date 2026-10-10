@@ -1,4 +1,14 @@
-import { Camera, Clapperboard, Medal, Mic, Sparkles, Star, type LucideIcon } from 'lucide-react';
+import {
+  Camera,
+  Clapperboard,
+  Medal,
+  Mic,
+  Music,
+  Palette,
+  Sparkles,
+  Star,
+  type LucideIcon,
+} from 'lucide-react';
 
 const CATEGORY_ICON: Record<string, LucideIcon> = {
   sports: Medal,
@@ -6,6 +16,8 @@ const CATEGORY_ICON: Record<string, LucideIcon> = {
   modelling: Camera,
   acting: Clapperboard,
   'content-creation': Sparkles,
+  dance: Music,
+  'art-design': Palette,
 };
 
 /** The picture for a discipline; new categories get a star until they have their own. */

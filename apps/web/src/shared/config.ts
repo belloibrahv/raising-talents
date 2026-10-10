@@ -7,6 +7,3 @@ export const LEGAL_URLS = {
   guidelines: 'https://raisingtalents.app/community-guidelines',
   privacy: 'https://raisingtalents.app/privacy',
 } as const;
-
-/** Nigeria first (ADR-013). Sign-up sends it until the country picker arrives. */
-export const LAUNCH_COUNTRY_CODE = 'NG';

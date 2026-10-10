@@ -65,7 +65,7 @@ import {
   verificationDecisionSchema,
   verificationQueuePageSchema,
 } from './verification.js';
-import { taxonomyResponseSchema } from './taxonomy.js';
+import { countryCitiesResponseSchema, taxonomyResponseSchema } from './taxonomy.js';
 import {
   contactResponseSchema,
   conversationPageSchema,
@@ -309,11 +309,21 @@ export const endpoints = {
   'taxonomy.get': define({
     method: 'GET',
     path: '/v1/taxonomy',
-    summary: 'Categories, subcategories, skills and cities',
+    summary: 'Categories, subcategories, skills and countries',
     auth: true,
     response: taxonomyResponseSchema,
     successStatus: 200,
     errors: [],
+    tag: 'Taxonomy',
+  }),
+  'taxonomy.cities': define({
+    method: 'GET',
+    path: '/v1/taxonomy/countries/{code}/cities',
+    summary: "A country's cities, largest first",
+    auth: true,
+    response: countryCitiesResponseSchema,
+    successStatus: 200,
+    errors: [ErrorCode.NotFound],
     tag: 'Taxonomy',
   }),
   'talentProfile.getMine': define({

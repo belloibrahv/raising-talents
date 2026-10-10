@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router';
 import { t } from '../../i18n';
+import { placeLabel } from '../../shared/places';
 import { errorMessage } from '../../i18n/error-message';
 import { isApiError } from '../../shared/api/api-error';
 import { api } from '../../shared/api/client';
@@ -50,7 +51,7 @@ export function TalentProfilePage() {
     talent.subcategories.map((entry) => entry.name).join(', ') || talent.category.name;
   const chips = [
     { icon: Sparkles, label: discipline },
-    { icon: MapPin, label: talent.city.name },
+    { icon: MapPin, label: placeLabel(talent.city, 'long') },
     ...(talent.ageYears === null
       ? []
       : [{ icon: Cake, label: t('talent.age', { age: talent.ageYears }) }]),

@@ -77,14 +77,14 @@ describe('the web app', () => {
     await waitFor(() => expect(email).toHaveFocus());
     expect(email).toHaveAttribute('aria-invalid', 'true');
     expect(email).toHaveAccessibleDescription('Enter a valid email address.');
-    expect(screen.getByLabelText('Date of birth')).toHaveAccessibleDescription(
-      /Only used to confirm your age.*Enter your date of birth as DD\/MM\/YYYY\./,
+    expect(screen.getByRole('group', { name: 'Date of birth' })).toHaveAccessibleDescription(
+      /Only used to confirm your age.*Enter your date of birth: day, month and year\./,
     );
     expect(calls.map((call) => call.path)).not.toContain('/v1/auth/web/sign-up');
     await expectNoAxeViolations();
   });
 
-  it('formats the date of birth as it is typed and shows the age rule against the field', async () => {
+  it('asks for the day, the month by name and the year, and shows the age rule against them', async () => {
     stubApi({
       '/v1/auth/web/refresh': () => problem(401, 'UNAUTHENTICATED'),
       '/v1/auth/web/sign-up': () =>
@@ -94,9 +94,11 @@ describe('the web app', () => {
     const user = userEvent.setup({ delay: null });
     await user.type(await screen.findByLabelText('Email'), 'tobi.ade@example.com');
     await user.type(screen.getByLabelText('Password'), 'drummer-from-oshogbo');
-    const dateOfBirth = screen.getByLabelText('Date of birth');
-    await user.type(dateOfBirth, '01022010');
-    expect(dateOfBirth).toHaveValue('01/02/2010');
+    const dateOfBirth = screen.getByLabelText('Day');
+    await user.type(dateOfBirth, '1x');
+    expect(dateOfBirth).toHaveValue('1');
+    await user.selectOptions(screen.getByLabelText('Month'), 'February');
+    await user.type(screen.getByLabelText('Year'), '2010');
     await user.click(screen.getByLabelText(/I agree to the Terms/));
     await user.click(screen.getByRole('button', { name: 'Create account' }));
     await waitFor(() => expect(dateOfBirth).toHaveAttribute('aria-invalid', 'true'));

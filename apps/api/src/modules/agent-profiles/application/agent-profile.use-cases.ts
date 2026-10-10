@@ -127,7 +127,7 @@ export class AgentDirectory {
     return {
       agencyName: props.agencyName,
       jobTitle: props.jobTitle ?? '',
-      city: catalog.city(props.citySlug)?.name ?? null,
+      city: catalog.placeName(props.citySlug),
       verified: props.verifiedAt !== null,
       specializations: catalog.categoryRefs(props.specializationSlugs).map((ref) => ref.name),
       website: props.website,

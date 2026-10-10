@@ -43,4 +43,16 @@ describe('TaxonomyCatalog', () => {
       ],
     });
   });
+
+  it('lists countries with the other names people type, and cities per country', () => {
+    expect(SAMPLE_TAXONOMY.toResponse().countries).toContainEqual({
+      code: 'GB',
+      name: 'United Kingdom',
+      searchTerms: ['UK', 'England'],
+    });
+    expect(SAMPLE_TAXONOMY.citiesIn('GB')).toEqual([
+      { slug: 'gb-london', name: 'London', region: 'England' },
+    ]);
+    expect(SAMPLE_TAXONOMY.citiesIn('ZZ')).toBeNull();
+  });
 });

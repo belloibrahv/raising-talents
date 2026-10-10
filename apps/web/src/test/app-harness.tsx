@@ -38,11 +38,29 @@ export const TAXONOMY = {
     { slug: 'vocals', name: 'Vocals', categorySlug: 'music' },
     { slug: 'yoruba', name: 'Yoruba', categorySlug: null },
   ],
-  cities: [
-    { slug: 'ng-lagos', name: 'Lagos', countryCode: 'NG' },
-    { slug: 'ng-abuja', name: 'Abuja', countryCode: 'NG' },
+  countries: [
+    { code: 'NG', name: 'Nigeria', searchTerms: ['Naija'] },
+    { code: 'GB', name: 'United Kingdom', searchTerms: ['UK', 'England'] },
   ],
 };
+
+/** Answers /v1/taxonomy/countries/{code}/cities for the two sample countries. */
+export const CITIES: Record<string, { slug: string; name: string; region: string | null }[]> = {
+  NG: [
+    { slug: 'ng-lagos', name: 'Lagos', region: 'Lagos' },
+    { slug: 'ng-abuja', name: 'Abuja', region: 'FCT' },
+  ],
+  GB: [
+    { slug: 'gb-london', name: 'London', region: 'England' },
+    { slug: 'gb-manchester', name: 'Manchester', region: 'England' },
+  ],
+};
+export const citiesRoutes = Object.fromEntries(
+  Object.entries(CITIES).map(([code, items]) => [
+    `/v1/taxonomy/countries/${code}/cities`,
+    () => Response.json({ items }),
+  ]),
+);
 
 export const signedIn = (me = meFor()) =>
   Response.json({ accessToken: 'access-1', accessTokenExpiresAt: '2099-01-01T00:00:00.000Z', me });

@@ -16,9 +16,14 @@ export const SAMPLE_TAXONOMY = new TaxonomyCatalog({
     { slug: 'vocals', name: 'Vocals', categorySlug: 'music' },
     { slug: 'yoruba', name: 'Yoruba', categorySlug: null },
   ],
+  countries: [
+    { code: 'NG', name: 'Nigeria', searchTerms: 'Naija' },
+    { code: 'GB', name: 'United Kingdom', searchTerms: 'UK, England' },
+  ],
   cities: [
-    { slug: 'ng-lagos', name: 'Lagos', countryCode: 'NG' },
-    { slug: 'ng-abuja', name: 'Abuja', countryCode: 'NG' },
+    { slug: 'ng-lagos', name: 'Lagos', countryCode: 'NG', region: 'Lagos' },
+    { slug: 'ng-abuja', name: 'Abuja', countryCode: 'NG', region: 'FCT' },
+    { slug: 'gb-london', name: 'London', countryCode: 'GB', region: 'England' },
   ],
 });
 

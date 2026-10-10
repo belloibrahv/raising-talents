@@ -212,9 +212,13 @@
     "subtitle": "You need to be 18 or older to join.",
     "email": "Email",
     "password": "Password",
-    "passwordHint": "At least 10 characters. A short phrase is easy to remember.",
+    "passwordHint": "At least 10 characters. Three unrelated words together are strong and easy to remember.",
     "dateOfBirth": "Date of birth",
-    "dateOfBirthPlaceholder": "DD/MM/YYYY",
+    "day": "Day",
+    "dayPlaceholder": "DD",
+    "month": "Month",
+    "year": "Year",
+    "yearPlaceholder": "YYYY",
     "dateOfBirthHint": "Only used to confirm your age. Never shown on your profile.",
     "terms": "I agree to the Terms and the Community Guidelines.",
     "readTerms": "Read the Terms",
@@ -314,7 +318,7 @@
   "validation": {
     "emailInvalid": "Enter a valid email address.",
     "passwordShort": "Use at least 10 characters.",
-    "dateInvalid": "Enter your date of birth as DD/MM/YYYY.",
+    "dateInvalid": "Enter your date of birth: day, month and year.",
     "termsRequired": "Tick the box to accept the Terms and Community Guidelines.",
     "codeInvalid": "Enter the 6-digit code from the email.",
     "nameShort": "Enter at least 2 characters.",
@@ -438,7 +442,7 @@
     "steps": {
       "about": "About",
       "discipline": "Discipline",
-      "location": "City",
+      "location": "Location",
       "story": "Story",
       "photo": "Photo"
     },
@@ -472,8 +476,7 @@
     "location": {
       "title": "Where you are",
       "body": "Agents often search near them first.",
-      "city": "City",
-      "choose": "Choose your city"
+      "city": "City"
     },
     "story": {
       "title": "Your story",
@@ -578,19 +581,30 @@
     "about": "About",
     "contact": "Contact"
   },
+  "place": {
+    "country": "Country",
+    "chooseCountry": "Choose your country",
+    "anyCountry": "Any country",
+    "noCountry": "No country matches. Check the spelling.",
+    "city": "City",
+    "chooseCity": "Choose your city",
+    "anyCity": "Any city",
+    "countryFirst": "Choose a country first",
+    "noCity": "No city matches. Pick the nearest large city.",
+    "cityHint": "Start typing to find it. If your town is not listed, pick the nearest city."
+  },
   "search": {
     "title": "Find talent",
-    "body": "Search by name, skill or discipline, then narrow it down.",
+    "body": "Pick a category and a place, or search by name or skill.",
     "query": "Search",
-    "quickCategories": "Disciplines",
     "allTalent": "All talent",
     "queryPlaceholder": "For example: afrobeats singer, striker, runway",
     "submit": "Search",
-    "filters": "Filters",
+    "filters": "More filters",
+    "apply": "Apply filters",
     "category": "Category",
-    "anyCategory": "Any category",
-    "city": "City",
-    "anyCity": "Any city",
+    "type": "Type",
+    "allOf": "All {category}",
     "ageMin": "Youngest age",
     "ageMax": "Oldest age",
     "gender": "Gender",
@@ -601,8 +615,6 @@
     "resultsOne": "1 talent found",
     "noResults": "No talent matches yet. Try fewer filters or a different word.",
     "loadMore": "Show more",
-    "optionCount": "{name} ({count})",
-    "age": "{age}",
     "ageRange": "Ages must be between 18 and 99, youngest first.",
     "resultsLabel": "Search results"
   },

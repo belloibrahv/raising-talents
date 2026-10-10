@@ -13,6 +13,7 @@ import { Select } from '../../shared/ui/Select';
 import { TextField } from '../../shared/ui/TextField';
 import { useFocusFirstError } from '../../shared/ui/use-focus-first-error';
 import { fieldErrorsFrom } from '../auth/form-errors';
+import { categoryIcon } from './category-icons';
 import { useMyAgentProfile, useTaxonomy, useUpdateAgentProfile } from './queries';
 
 export function AgentOnboardingPage() {
@@ -124,13 +125,17 @@ function AgentForm({
       />
       <ChoiceGroup
         multiple
-        layout="chips"
+        layout="tiles"
         legend={t('onboarding.agent.specializations')}
         hint={t('onboarding.agent.specializationsHint', { max: MAX_SPECIALIZATIONS })}
         max={MAX_SPECIALIZATIONS}
         value={specializations}
         onChange={setSpecializations}
-        options={taxonomy.categories.map((entry) => ({ value: entry.slug, label: entry.name }))}
+        options={taxonomy.categories.map((entry) => ({
+          value: entry.slug,
+          label: entry.name,
+          icon: categoryIcon(entry.slug),
+        }))}
         error={errors['specializationSlugs']}
       />
       <Select
@@ -165,7 +170,11 @@ function AgentForm({
           </Link>
         </>
       ) : (
-        <Button type="submit" loading={update.isPending}>
+        <Button
+          type="submit"
+          loading={update.isPending}
+          className="sticky bottom-[calc(1rem+env(safe-area-inset-bottom))] z-10 shadow-lg shadow-primary/20"
+        >
           {t('onboarding.agent.submit')}
         </Button>
       )}

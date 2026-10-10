@@ -94,6 +94,8 @@ function MyProfileRedirect() {
   const profile = useMyTalentProfile(me?.role === 'talent');
   if (me?.role !== 'talent') return <Navigate to="/account" replace />;
   if (profile.isPending) return <PageSkeleton variant="profile" />;
+  // A failed request is not a missing profile: the route's error screen offers a retry.
+  if (profile.isError) throw profile.error;
   return <Navigate to={profile.data ? `/talents/${profile.data.handle}` : '/account'} replace />;
 }
 

@@ -174,6 +174,33 @@ describe('Following, likes and the feed over HTTP', () => {
     ).toHaveLength(1);
   });
 
+  it('names a follower whose own profile is not visible yet, without a page to open', async () => {
+    // Finished setting up while the photo waits for a moderator (ADR-044).
+    const waiting = await signUp('amaka.film@example.com', 'talent');
+    const step = await call('PATCH', '/v1/me/talent-profile', waiting, {
+      displayName: 'Amaka Okafor',
+      handle: 'amaka.film',
+      categorySlug: 'sports',
+      subcategorySlugs: ['athletics'],
+      citySlug: 'ng-lagos',
+      bio: BIO,
+    });
+    const { userId } = step.json<MyTalentProfile>();
+    await testApp.moduleRef.get<AccountsFacade>(ACCOUNTS.Facade).completeOnboarding(userId);
+
+    expect((await call('PUT', '/v1/talents/tobi.sprint/follow', waiting)).statusCode).toBe(200);
+    await testApp.deliverEvents();
+    const inbox = (await call('GET', '/v1/me/notifications', tobi)).json<NotificationPage>();
+    expect(inbox.items).toContainEqual(
+      expect.objectContaining({
+        kind: 'new_follower',
+        followerName: 'Amaka Okafor',
+        followerHandle: null,
+      }),
+    );
+    await call('DELETE', '/v1/talents/tobi.sprint/follow', waiting);
+  });
+
   it('suggests talent the viewer does not follow, and never the viewer', async () => {
     const forAgent = (await call('GET', '/v1/feed/suggestions', agent)).json<Suggestions>();
     expect(forAgent.items.map((card) => card.handle)).toEqual(['ngozi.sings']);

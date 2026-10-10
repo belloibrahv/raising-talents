@@ -60,6 +60,7 @@ export interface SocialTalents {
   userIdOf(handle: string): Promise<string | null>;
   cardFor(userId: string): Promise<TalentCard | null>;
   handleOf(userId: string): Promise<string | null>;
+  nameOf(userId: string): Promise<{ displayName: string } | null>;
 }
 
 /** What social needs from agent profiles. Implemented by AgentDirectory. */
@@ -329,8 +330,11 @@ export class FollowTalentHandler {
   ): Promise<{ followerName: string; followerHandle: string | null }> {
     const card = await this.talents.cardFor(followerId);
     if (card) return { followerName: card.displayName, followerHandle: card.handle };
-    const agency = await this.agents.summaryOf(followerId);
-    return { followerName: agency?.agencyName ?? '', followerHandle: null };
+    // A talent whose photo is still being checked has no page to open yet, but has a name.
+    const name =
+      (await this.talents.nameOf(followerId))?.displayName ??
+      (await this.agents.summaryOf(followerId))?.agencyName;
+    return { followerName: name ?? '', followerHandle: null };
   }
 }
 

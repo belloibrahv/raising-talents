@@ -194,6 +194,26 @@ export function contactRequestedEmail(input: {
   });
 }
 
+export function submissionReceivedEmail(input: {
+  to: string;
+  talentName: string;
+  conversationId: string;
+  appUrl: string;
+}): EmailMessage {
+  return email({
+    to: input.to,
+    subject: `${input.talentName} sent you a submission`,
+    paragraphs: [
+      `${input.talentName} introduced themselves to you on Raising Talents, because your page says you are open for submissions.`,
+      'Read it in the app and look at their work, then accept to start chatting, or decline. They only see your answer.',
+    ],
+    link: {
+      href: `${input.appUrl}/messages/${input.conversationId}`,
+      label: 'Read the submission',
+    },
+  });
+}
+
 export function contactAcceptedEmail(input: {
   to: string;
   talentName: string;

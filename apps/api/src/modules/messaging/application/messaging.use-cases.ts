@@ -2,6 +2,7 @@ import {
   REPORT_EVIDENCE_MAX,
   CONVERSATIONS_PAGE_SIZE,
   MESSAGES_PAGE_SIZE,
+  SUBMISSIONS_PER_DAY,
   type AccountStatus,
   type ConversationPage,
   type ConversationSummary,
@@ -35,7 +36,9 @@ import {
 export const MESSAGING = {
   Conversations: Symbol('ConversationRepository'),
   RequestContact: Symbol('RequestContactHandler'),
+  Submit: Symbol('SubmitToAgentHandler'),
   WithTalent: Symbol('ConversationWithTalentQuery'),
+  WithAgent: Symbol('ConversationWithAgentQuery'),
   List: Symbol('ListConversationsQuery'),
   Get: Symbol('GetConversationQuery'),
   Messages: Symbol('ListMessagesQuery'),
@@ -54,6 +57,11 @@ export const MESSAGING = {
 
 /** Provisional (ADR-038): generous for real scouting, tight enough to stop a mass mailing. */
 export const CONTACT_REQUEST_LIMIT = { perDay: 20, windowSeconds: 24 * 60 * 60 } as const;
+/** Provisional (ADR-050): enough to approach the agents that fit, not to write to them all. */
+export const SUBMISSION_LIMIT = {
+  perDay: SUBMISSIONS_PER_DAY,
+  windowSeconds: 24 * 60 * 60,
+} as const;
 export const MESSAGE_LIMIT = { perHour: 120, windowSeconds: 60 * 60 } as const;
 
 /** What messaging needs from accounts. Implemented by AccountsFacade. */
@@ -84,6 +92,11 @@ export interface MessagingAgents {
     verifiedAt: Date | null;
     memberSince: Date;
   } | null>;
+  /**
+   * Whether talent can write to this agent first: open, closed, or null when the agent is
+   * not one talent can find at all (unverified, unfinished or not in good standing).
+   */
+  submissions(agentId: string): Promise<'open' | 'closed' | null>;
 }
 
 const toMessage = (message: StoredMessage, viewerId: string): Message => ({
@@ -168,7 +181,10 @@ export class ConversationViews {
       unread,
       canSend,
       awaitingMyAnswer:
-        side === 'talent' && props.status === 'requested' && !conversation.isBlocked,
+        conversation.responderId === viewerId &&
+        props.status === 'requested' &&
+        !conversation.isBlocked,
+      requestedByMe: conversation.askedBy(viewerId),
       blockedByMe: conversation.blockedBy(viewerId),
       requestedAt: props.requestedAt.toISOString(),
       updatedAt: props.updatedAt.toISOString(),
@@ -183,10 +199,10 @@ export class ConversationViews {
   ): Promise<Conversation | null> {
     const conversation = await this.conversations.findById(conversationId, options);
     if (!conversation?.sideOf(userId)) return null;
-    // A talent no longer sees a request that was withdrawn, or that they declined, unless
-    // they blocked the agent and may want to undo it.
+    // The person who was asked no longer sees a request that was withdrawn, or that they
+    // declined, unless they blocked the other and may want to undo it.
     if (
-      conversation.sideOf(userId) === 'talent' &&
+      conversation.responderId === userId &&
       (conversation.status === 'withdrawn' || conversation.status === 'declined') &&
       !conversation.blockedBy(userId)
     ) {
@@ -232,7 +248,11 @@ export class RequestContactHandler {
     ) {
       return ok(await this.views.summary(existing, agentId));
     }
-    if (existing?.status === 'requested') return err(MessagingErrors.pending());
+    if (existing?.status === 'requested') {
+      return err(
+        existing.askedBy(agentId) ? MessagingErrors.pending() : MessagingErrors.waitingForYou(),
+      );
+    }
     if (existing?.status === 'accepted') return err(MessagingErrors.alreadyConnected());
 
     const limit = await this.rateLimiter.consume(
@@ -259,7 +279,7 @@ export class RequestContactHandler {
         const conversation =
           locked ?? Conversation.request({ id: newId(), agentId, talentId, now });
         if (locked) {
-          const reopened = locked.requestAgain(now);
+          const reopened = locked.requestAgain('agent', now);
           if (!reopened.ok) return reopened;
         }
         await this.conversations.save(conversation);
@@ -280,6 +300,126 @@ export class RequestContactHandler {
       if (error instanceof ConversationExistsError) return err(MessagingErrors.pending());
       throw error;
     }
+  }
+}
+
+/**
+ * A talent introduces themselves to an agent who is open for submissions (ADR-050). It is
+ * the same conversation as a contact request, asked from the other side: the agent accepts
+ * or declines, and chat opens only if they accept.
+ */
+export class SubmitToAgentHandler {
+  constructor(
+    private readonly conversations: ConversationRepository,
+    private readonly views: ConversationViews,
+    private readonly accounts: MessagingAccounts,
+    private readonly talents: MessagingTalents,
+    private readonly agents: MessagingAgents,
+    private readonly rateLimiter: RateLimiter,
+    private readonly uow: UnitOfWork,
+    private readonly clock: Clock,
+  ) {}
+
+  async execute(
+    talentId: string,
+    agentId: string,
+    input: RequestContact,
+  ): Promise<Result<ConversationSummary, DomainError>> {
+    const account = await this.accounts.profileContext(talentId);
+    if (account?.role !== 'talent') return err(MessagingErrors.talentOnly());
+    if (!account.emailVerified) return err(MessagingErrors.talentEmailNotVerified());
+    // An agent will open the profile first: it has to be one others can see.
+    if (account.status !== 'active' || !(await this.talents.cardFor(talentId))) {
+      return err(MessagingErrors.talentNotVisible());
+    }
+    const taking = await this.agents.submissions(agentId);
+    if (!taking) return err(MessagingErrors.agentNotFound());
+
+    const existing = await this.conversations.findByPair(agentId, talentId);
+    // A retry of a submission that already went through answers with what it made.
+    if (
+      existing &&
+      (await this.conversations.findMessage(existing.id, talentId, input.clientMessageId))
+    ) {
+      return ok(await this.views.summary(existing, talentId));
+    }
+    if (existing?.status === 'requested') {
+      return err(
+        existing.askedBy(talentId) ? MessagingErrors.pending() : MessagingErrors.waitingForYou(),
+      );
+    }
+    if (existing?.status === 'accepted') return err(MessagingErrors.alreadyConnected());
+    if (taking !== 'open') return err(MessagingErrors.notTakingSubmissions());
+
+    const limit = await this.rateLimiter.consume(
+      `submission:${talentId}`,
+      SUBMISSION_LIMIT.perDay,
+      SUBMISSION_LIMIT.windowSeconds,
+    );
+    if (!limit.allowed) {
+      return err(
+        domainError(
+          'RATE_LIMITED',
+          `You can send ${String(SUBMISSION_LIMIT.perDay)} submissions a day. Try again tomorrow.`,
+          limit.retryAfterSeconds,
+        ),
+      );
+    }
+
+    const now = this.clock.now();
+    try {
+      const result = await this.uow.run(async () => {
+        const locked = existing
+          ? await this.conversations.findByPair(agentId, talentId, { lock: true })
+          : null;
+        const conversation =
+          locked ??
+          Conversation.request({ id: newId(), agentId, talentId, requestedBy: 'talent', now });
+        if (locked) {
+          const reopened = locked.requestAgain('talent', now);
+          if (!reopened.ok) return reopened;
+        }
+        await this.conversations.save(conversation);
+        await this.conversations.addMessage({
+          id: newId(),
+          conversationId: conversation.id,
+          senderId: talentId,
+          body: input.message.trim(),
+          clientMessageId: input.clientMessageId,
+          sentAt: now,
+        });
+        return ok(conversation);
+      });
+      if (!result.ok) return result;
+      return ok(await this.views.summary(result.value, talentId));
+    } catch (error) {
+      // The agent asked at the same moment; the database keeps one conversation per pair.
+      if (error instanceof ConversationExistsError) return err(MessagingErrors.waitingForYou());
+      throw error;
+    }
+  }
+}
+
+/** Lets an agent's page show the talent their submission or chat with that agent. */
+export class ConversationWithAgentQuery {
+  constructor(
+    private readonly conversations: ConversationRepository,
+    private readonly views: ConversationViews,
+    private readonly accounts: MessagingAccounts,
+  ) {}
+
+  async execute(
+    talentId: string,
+    agentId: string,
+  ): Promise<Result<ConversationSummary, DomainError>> {
+    const account = await this.accounts.profileContext(talentId);
+    if (account?.role !== 'talent') return err(MessagingErrors.talentOnly());
+    const pair = await this.conversations.findByPair(agentId, talentId);
+    // The same rule as the list: a request the talent declined is not shown to them again.
+    const conversation = pair ? await this.views.find(pair.id, talentId) : null;
+    return conversation
+      ? ok(await this.views.summary(conversation, talentId))
+      : err(MessagingErrors.notFound());
   }
 }
 
@@ -458,6 +598,7 @@ export class RespondToContactHandler {
     private readonly clock: Clock,
   ) {}
 
+  /** Only the person who was asked can answer: a talent for a request, an agent for a submission. */
   async execute(
     talentId: string,
     conversationId: string,
@@ -465,7 +606,7 @@ export class RespondToContactHandler {
   ): Promise<Result<ConversationSummary, DomainError>> {
     const result = await this.uow.run(async () => {
       const conversation = await this.views.find(conversationId, talentId, { lock: true });
-      if (conversation?.sideOf(talentId) !== 'talent') return err(MessagingErrors.notFound());
+      if (conversation?.responderId !== talentId) return err(MessagingErrors.notFound());
       const answered = conversation.respond(accept, this.clock.now());
       if (!answered.ok) return answered;
       await this.conversations.save(conversation);
@@ -490,7 +631,8 @@ export class WithdrawContactHandler {
   ): Promise<Result<ConversationSummary, DomainError>> {
     const result = await this.uow.run(async () => {
       const conversation = await this.views.find(conversationId, agentId, { lock: true });
-      if (conversation?.sideOf(agentId) !== 'agent') return err(MessagingErrors.notFound());
+      // Only the person who asked can take it back.
+      if (conversation?.requesterId !== agentId) return err(MessagingErrors.notFound());
       const withdrawn = conversation.withdraw(this.clock.now());
       if (!withdrawn.ok) return withdrawn;
       await this.conversations.save(conversation);
@@ -603,6 +745,7 @@ export class ContactNotices {
     agentId: string;
     talentId: string;
     status: string;
+    requestedBy: 'agent' | 'talent';
     agencyName: string;
     talentName: string;
   } | null> {
@@ -616,6 +759,7 @@ export class ContactNotices {
       agentId: conversation.agentId,
       talentId: conversation.talentId,
       status: conversation.status,
+      requestedBy: conversation.snapshot().requestedBy,
       agencyName: agent.agencyName,
       talentName: talent.displayName,
     };

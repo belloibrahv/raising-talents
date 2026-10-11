@@ -89,9 +89,9 @@ import type { RateLimiter } from '../../platform/rate-limit/rate-limiter.js';
     },
     {
       provide: AGENT.Directory,
-      inject: [AGENT.Repository, TAXONOMY.Source],
-      useFactory: (repo: AgentProfileRepository, taxonomy: TaxonomySource) =>
-        new AgentDirectory(repo, taxonomy),
+      inject: [AGENT.Repository, TAXONOMY.Source, AGENT_DIRECTORY.Listing],
+      useFactory: (repo: AgentProfileRepository, taxonomy: TaxonomySource, listing: AgentListing) =>
+        new AgentDirectory(repo, taxonomy, listing),
     },
     {
       provide: AGENT.GetMine,

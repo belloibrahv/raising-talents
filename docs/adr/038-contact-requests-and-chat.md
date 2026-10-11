@@ -1,6 +1,6 @@
 # ADR-038: Contact requests and chat
 
-- Status: Accepted. The numbers marked provisional await client sign-off.
+- Status: Accepted. The numbers marked provisional await client sign-off. ADR-050 adds the same request from the talent's side.
 - Date: 2026-10-03
 
 ## Context

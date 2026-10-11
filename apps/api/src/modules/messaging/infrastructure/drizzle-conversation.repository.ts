@@ -17,16 +17,34 @@ const isUniqueClash = (error: unknown, constraint: string): boolean => {
   return cause.code === '23505' && cause.constraint === constraint;
 };
 
-/** Agents see all of theirs; talent see requests, open chats and anyone they blocked. */
-const visibleTo = (userId: string) =>
+/** Whether the user is the one who asked: the agent of a request, the talent of a submission. */
+const askedBy = (userId: string) =>
   or(
-    eq(conversations.agentId, userId),
-    and(
-      eq(conversations.talentId, userId),
-      or(
-        inArray(conversations.status, ['requested', 'accepted']),
-        eq(conversations.blockedBy, userId),
-      ),
+    and(eq(conversations.agentId, userId), eq(conversations.requestedBy, 'agent')),
+    and(eq(conversations.talentId, userId), eq(conversations.requestedBy, 'talent')),
+  );
+
+/** Whether the user is the one who answers: the talent of a request, the agent of a submission. */
+const answeredBy = (userId: string) =>
+  or(
+    and(eq(conversations.talentId, userId), eq(conversations.requestedBy, 'agent')),
+    and(eq(conversations.agentId, userId), eq(conversations.requestedBy, 'talent')),
+  );
+
+const partOf = (userId: string) =>
+  or(eq(conversations.agentId, userId), eq(conversations.talentId, userId));
+
+/**
+ * The one who asked sees all of theirs; the one who was asked sees requests, open chats and
+ * anyone they blocked.
+ */
+const visibleTo = (userId: string) =>
+  and(
+    partOf(userId),
+    or(
+      askedBy(userId),
+      inArray(conversations.status, ['requested', 'accepted']),
+      eq(conversations.blockedBy, userId),
     ),
   );
 
@@ -132,7 +150,7 @@ export class DrizzleConversationRepository implements ConversationRepository {
       .where(
         or(
           and(
-            eq(conversations.talentId, userId),
+            answeredBy(userId),
             eq(conversations.status, 'requested'),
             isNull(conversations.blockedBy),
           ),

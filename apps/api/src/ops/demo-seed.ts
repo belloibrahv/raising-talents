@@ -657,6 +657,20 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
     `social: ${String(follows)} follows, with a like on each followed talent's latest post`,
   );
 
+  // A talent writes first to an agent who is open (ADR-050), so the agent has one to answer.
+  const amaka = talentAccounts.get('amaka.okafor');
+  if (tunde && amaka) {
+    const submitted = await api.call('POST', `/v1/agents/${tunde.id}/submission`, {
+      ...amaka,
+      body: {
+        message:
+          'Good morning. I am a left winger from Surulere, 19, with two seasons in the Lagos state league. My match clips are on my page. I would be grateful if you could take a look.',
+        clientMessageId: '0192a3b4-0000-7000-8000-00000000de05',
+      },
+    });
+    if (submitted.status === 201) report.push('submission: Amaka wrote to Eko Talent Partners');
+  }
+
   // Talent keep agents for later (ADR-049). Only a verified agency can be saved.
   if (tunde && ngozi) {
     const savedAgent = await api.call('PUT', `/v1/agents/${tunde.id}/saved`, ngozi);

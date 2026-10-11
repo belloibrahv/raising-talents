@@ -34,7 +34,9 @@ import { unwrap } from '../../../../platform/http/problem.js';
 import { body, ZodValidationPipe } from '../../../../platform/http/zod-validation.pipe.js';
 import {
   MESSAGING,
+  type ConversationWithAgentQuery,
   type ConversationWithTalentQuery,
+  type SubmitToAgentHandler,
   type BlockConversationHandler,
   type ConversationLive,
   type GetConversationQuery,
@@ -54,6 +56,8 @@ export class MessagingController {
   constructor(
     @Inject(MESSAGING.RequestContact) private readonly requestContact: RequestContactHandler,
     @Inject(MESSAGING.WithTalent) private readonly withTalent: ConversationWithTalentQuery,
+    @Inject(MESSAGING.Submit) private readonly submitToAgent: SubmitToAgentHandler,
+    @Inject(MESSAGING.WithAgent) private readonly withAgent: ConversationWithAgentQuery,
     @Inject(MESSAGING.List) private readonly list: ListConversationsQuery,
     @Inject(MESSAGING.Get) private readonly getOne: GetConversationQuery,
     @Inject(MESSAGING.Messages) private readonly listMessages: ListMessagesQuery,
@@ -99,6 +103,25 @@ export class MessagingController {
   ): Promise<ConversationSummary> {
     const summary = unwrap(await this.requestContact.execute(principal.userId, handle, input));
     return this.announce(summary.id, summary);
+  }
+
+  @Post('agents/:id/submission')
+  @HttpCode(201)
+  async submission(
+    @CurrentPrincipal() principal: Principal,
+    @Param('id', ParseUUIDPipe) agentId: string,
+    @Body(body(requestContactSchema)) input: RequestContact,
+  ): Promise<ConversationSummary> {
+    const summary = unwrap(await this.submitToAgent.execute(principal.userId, agentId, input));
+    return this.announce(summary.id, summary);
+  }
+
+  @Get('me/conversations/with-agent/:id')
+  async withAgentId(
+    @CurrentPrincipal() principal: Principal,
+    @Param('id', ParseUUIDPipe) agentId: string,
+  ): Promise<ConversationSummary> {
+    return unwrap(await this.withAgent.execute(principal.userId, agentId));
   }
 
   @Get('me/conversations')

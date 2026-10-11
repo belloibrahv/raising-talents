@@ -41,9 +41,13 @@ export const contactResponseSchema = z
   .meta({ id: 'ContactResponse' });
 export type ContactResponse = z.infer<typeof contactResponseSchema>;
 
+/** How many submissions a talent can send to agents in a day (ADR-050). */
+export const SUBMISSIONS_PER_DAY = 5;
+
 /**
- * requested: the agent asked and the talent has not answered. accepted: chat is open.
- * declined: the talent said no. withdrawn: the agent took the request back.
+ * requested: one person asked and the other has not answered. accepted: chat is open.
+ * declined: the other person said no. withdrawn: the one who asked took it back.
+ * Agents ask talent (a contact request); talent ask agents who are open (a submission).
  */
 export const conversationStatusSchema = z.enum(['requested', 'accepted', 'declined', 'withdrawn']);
 export type ConversationStatus = z.infer<typeof conversationStatusSchema>;
@@ -97,8 +101,10 @@ export const conversationSummarySchema = z
     unread: z.number().int().nonnegative(),
     /** The viewer may send a message now. */
     canSend: z.boolean(),
-    /** The viewer is the talent and has not answered the request yet. */
+    /** The viewer was asked and has not answered yet. */
     awaitingMyAnswer: z.boolean(),
+    /** The viewer is the one who asked: an agent's request, or a talent's submission. */
+    requestedByMe: z.boolean(),
     /** The viewer blocked the other person. Only the viewer can undo it (ADR-040). */
     blockedByMe: z.boolean(),
     requestedAt: isoDateTimeSchema,

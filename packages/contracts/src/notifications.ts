@@ -52,6 +52,20 @@ export const notificationSchema = z
       talentName: z.string(),
     }),
     z.object({ ...common, kind: z.literal('contact_declined'), talentName: z.string() }),
+    /** A talent wrote to an agent who is open for submissions (ADR-050). */
+    z.object({
+      ...common,
+      kind: z.literal('submission_received'),
+      conversationId: idSchema,
+      talentName: z.string(),
+    }),
+    z.object({
+      ...common,
+      kind: z.literal('submission_accepted'),
+      conversationId: idSchema,
+      agencyName: z.string(),
+    }),
+    z.object({ ...common, kind: z.literal('submission_declined'), agencyName: z.string() }),
     z.object({
       ...common,
       kind: z.literal('new_follower'),

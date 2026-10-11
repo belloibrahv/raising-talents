@@ -53,3 +53,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-047](047-following-likes-a-feed-and-a-new-look.md)                 | Following, likes, a feed, and a new look                             | Accepted                          |
 | [ADR-048](048-posting-without-a-check-first.md)                         | Posting without a check first; moderators take down                  | Accepted                          |
 | [ADR-049](049-agents-talent-can-find.md)                                | Agents talent can find: page, bio, roster status, saved agents       | Accepted                          |
+| [ADR-050](050-talent-submissions-to-agents.md)                          | Talent submissions to agents who are open                            | Accepted                          |

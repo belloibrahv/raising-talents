@@ -11,6 +11,7 @@ import {
   agentVerifiedEmail,
   contactAcceptedEmail,
   contactRequestedEmail,
+  submissionReceivedEmail,
   mediaApprovedEmail,
   mediaRejectedEmail,
 } from './emails.js';
@@ -66,6 +67,7 @@ export interface NotificationContacts {
     agentId: string;
     talentId: string;
     status: string;
+    requestedBy: 'agent' | 'talent';
     agencyName: string;
     talentName: string;
   } | null>;
@@ -148,10 +150,32 @@ export class Notifier {
     );
   }
 
-  /** A verified agent asked to contact a talent. Skipped if they withdrew before it went out. */
+  /**
+   * Someone asked: a verified agent to contact a talent, or a talent with a submission to an
+   * agent (ADR-050). The person asked is told. Skipped if it was taken back before it went out.
+   */
   async contactRequested(event: DomainEvent): Promise<void> {
     const contact = await this.contacts.describe(event.aggregateId);
     if (contact?.status !== 'requested') return;
+    if (contact.requestedBy === 'talent') {
+      await this.deliver(
+        event,
+        contact.agentId,
+        {
+          kind: 'submission_received',
+          conversationId: event.aggregateId,
+          talentName: contact.talentName,
+        },
+        (to) =>
+          submissionReceivedEmail({
+            to,
+            talentName: contact.talentName,
+            conversationId: event.aggregateId,
+            appUrl: this.appUrl,
+          }),
+      );
+      return;
+    }
     const notice: NoticeContent = {
       kind: 'contact_requested',
       conversationId: event.aggregateId,
@@ -167,10 +191,33 @@ export class Notifier {
     );
   }
 
-  /** The talent answered. A decline is told in the app only, which is gentler. */
+  /** The person asked has answered. A decline is told in the app only, which is gentler. */
   async contactAnswered(event: DomainEvent, accepted: boolean): Promise<void> {
     const contact = await this.contacts.describe(event.aggregateId);
     if (!contact) return;
+    if (contact.requestedBy === 'talent') {
+      await this.deliver(
+        event,
+        contact.talentId,
+        accepted
+          ? {
+              kind: 'submission_accepted',
+              conversationId: event.aggregateId,
+              agencyName: contact.agencyName,
+            }
+          : { kind: 'submission_declined', agencyName: contact.agencyName },
+        accepted
+          ? (to) =>
+              contactAcceptedEmail({
+                to,
+                talentName: contact.agencyName,
+                conversationId: event.aggregateId,
+                appUrl: this.appUrl,
+              })
+          : null,
+      );
+      return;
+    }
     const notice: NoticeContent = accepted
       ? {
           kind: 'contact_accepted',

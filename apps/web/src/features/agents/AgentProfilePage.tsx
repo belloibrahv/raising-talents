@@ -14,6 +14,7 @@ import { VerifiedBadge } from '../../shared/ui/VerifiedBadge';
 import { RemoveMedia } from '../moderation/RemoveMedia';
 import { RosterBadge, SaveAgentButton } from './AgentCard';
 import { useAgent } from './queries';
+import { SubmissionPanel } from './SubmissionPanel';
 
 /** The address without the scheme, as people say it. */
 const shortAddress = (url: string) => url.replace(/^https:\/\//, '').replace(/\/$/, '');
@@ -127,9 +128,11 @@ export function AgentProfilePage() {
         )}
       </section>
       {agent.isSelf ? null : (
-        <p className="m-0 max-w-2xl rounded-2xl bg-muted/60 p-4 text-sm text-muted-foreground">
-          {t(agent.rosterStatus === 'full' ? 'agents.howContactFull' : 'agents.howContact')}
-        </p>
+        <SubmissionPanel
+          agentId={agent.id}
+          name={agent.agencyName}
+          rosterStatus={agent.rosterStatus}
+        />
       )}
     </Page>
   );

@@ -28,13 +28,32 @@ export const MessagingErrors = {
   pending: () =>
     domainError(
       ErrorCode.ContactRequestPending,
-      'You have already asked. The talent has not answered yet.',
+      'You have already asked. They have not answered yet.',
     ),
   declinedRecently: (retryAfterSeconds: number) =>
     domainError(
       ErrorCode.ContactDeclinedRecently,
-      'This talent declined your request recently. You can ask again later.',
+      'They declined your request recently. You can ask again later.',
       retryAfterSeconds,
+    ),
+  agentNotFound: () => domainError(ErrorCode.NotFound, 'This agent is not available.'),
+  talentOnly: () => domainError(ErrorCode.WrongRole, 'Only talent send submissions to agents.'),
+  talentNotVisible: () =>
+    domainError(
+      ErrorCode.Forbidden,
+      'Finish your profile and add a photo before you write to agents. They will want to see your work.',
+    ),
+  talentEmailNotVerified: () =>
+    domainError(ErrorCode.EmailNotVerified, 'Verify your email before you write to agents.'),
+  notTakingSubmissions: () =>
+    domainError(
+      ErrorCode.Forbidden,
+      'This agent is not open for submissions right now. Save them and check back later.',
+    ),
+  waitingForYou: () =>
+    domainError(
+      ErrorCode.Conflict,
+      'They have already asked to contact you. Answer their request in Messages.',
     ),
   alreadyConnected: () =>
     domainError(ErrorCode.Conflict, 'You are already in touch. Open the conversation.'),
@@ -47,11 +66,15 @@ export const MessagingErrors = {
     ),
 };
 
+export type ConversationSide = 'agent' | 'talent';
+
 export interface ConversationProps {
   readonly id: string;
   readonly agentId: string;
   readonly talentId: string;
   readonly status: ConversationStatus;
+  /** Who asked. The other person is the one who accepts or declines. */
+  readonly requestedBy: ConversationSide;
   readonly requestedAt: Date;
   readonly respondedAt: Date | null;
   /** The latest message or answer, for ordering the list. */
@@ -64,9 +87,10 @@ export interface ConversationProps {
 }
 
 /**
- * One agent and one talent. It starts as a contact request whose first message is the
- * agent's introduction, and becomes a chat when the talent accepts (ADR-011, ADR-038).
- * A pair only ever has one conversation, so a later request reopens the same one.
+ * One agent and one talent. It starts as a request whose first message is an introduction:
+ * an agent asking to contact a talent (ADR-011, ADR-038), or a talent's submission to an
+ * agent who is open (ADR-050). It becomes a chat when the other person accepts. A pair only
+ * ever has one conversation, so a later request from either side reopens the same one.
  */
 export class Conversation {
   private pendingEvents: DomainEvent[] = [];
@@ -77,18 +101,21 @@ export class Conversation {
     id: string;
     agentId: string;
     talentId: string;
+    requestedBy?: ConversationSide;
     now: Date;
   }): Conversation {
+    const requestedBy = input.requestedBy ?? 'agent';
     const conversation = new Conversation({
       id: input.id,
       agentId: input.agentId,
       talentId: input.talentId,
       status: 'requested',
+      requestedBy,
       requestedAt: input.now,
       respondedAt: null,
       updatedAt: input.now,
-      agentReadAt: input.now,
-      talentReadAt: null,
+      agentReadAt: requestedBy === 'agent' ? input.now : null,
+      talentReadAt: requestedBy === 'talent' ? input.now : null,
       blockedBy: null,
       blockedAt: null,
     });
@@ -124,6 +151,19 @@ export class Conversation {
     return null;
   }
 
+  /** The one who asked, and the one who answers. */
+  get requesterId(): string {
+    return this.props.requestedBy === 'agent' ? this.props.agentId : this.props.talentId;
+  }
+  get responderId(): string {
+    return this.props.requestedBy === 'agent' ? this.props.talentId : this.props.agentId;
+  }
+
+  /** Whether this person is waiting to be answered, or has been turned down or taken it back. */
+  askedBy(userId: string): boolean {
+    return this.requesterId === userId;
+  }
+
   otherThan(userId: string): string {
     return userId === this.props.agentId ? this.props.talentId : this.props.agentId;
   }
@@ -141,18 +181,18 @@ export class Conversation {
   }
 
   /**
-   * Either person stops the other from writing. Blocking a request the talent has not
-   * answered also declines it, so the agent hears the same as any decline (ADR-040).
+   * Either person stops the other from writing. Blocking a request you have not answered
+   * also declines it, so the one who asked hears the same as any decline (ADR-040).
    */
   block(userId: string, now: Date): Result<void, DomainError> {
     if (!this.sideOf(userId)) return err(MessagingErrors.notFound());
     if (this.props.blockedBy === userId) return ok(undefined);
     if (this.props.blockedBy) return err(MessagingErrors.closed());
     const pending = this.props.status === 'requested';
-    const declining = pending && this.sideOf(userId) === 'talent';
-    // An agent blocking their own unanswered request takes it back, so the talent stops
+    const declining = pending && this.responderId === userId;
+    // Blocking your own unanswered request takes it back, so the other person stops
     // seeing a request nobody will follow up.
-    const withdrawing = pending && this.sideOf(userId) === 'agent';
+    const withdrawing = pending && this.requesterId === userId;
     this.props = {
       ...this.props,
       blockedBy: userId,
@@ -170,10 +210,15 @@ export class Conversation {
     return ok(undefined);
   }
 
-  /** The agent asks again after a withdrawal, or once the decline cooldown has passed. */
-  requestAgain(now: Date): Result<void, DomainError> {
-    if (this.props.blockedBy === this.props.talentId) {
-      // The agent is not told they were blocked: they get what any recent decline gets.
+  /**
+   * One of the two asks again: after a withdrawal, or once the decline cooldown has passed.
+   * The cooldown binds the person who was turned down. The one who declined may change
+   * their mind and reach out at any time.
+   */
+  requestAgain(by: ConversationSide, now: Date): Result<void, DomainError> {
+    const askerId = by === 'agent' ? this.props.agentId : this.props.talentId;
+    if (this.props.blockedBy && this.props.blockedBy !== askerId) {
+      // Nobody is told they were blocked: they get what any recent decline gets.
       const since = (this.props.blockedAt ?? now).getTime();
       const waitUntil = Math.max(since, now.getTime()) + CONTACT_DECLINE_COOLDOWN_DAYS * DAY_MS;
       return err(MessagingErrors.declinedRecently(Math.ceil((waitUntil - now.getTime()) / 1000)));
@@ -181,13 +226,17 @@ export class Conversation {
     if (this.props.blockedBy) return err(MessagingErrors.closed());
     switch (this.props.status) {
       case 'requested':
-        return err(MessagingErrors.pending());
+        return err(
+          this.requesterId === askerId
+            ? MessagingErrors.pending()
+            : MessagingErrors.waitingForYou(),
+        );
       case 'accepted':
         return err(MessagingErrors.alreadyConnected());
       case 'declined': {
         const waitUntil =
           (this.props.respondedAt ?? now).getTime() + CONTACT_DECLINE_COOLDOWN_DAYS * DAY_MS;
-        if (now.getTime() < waitUntil) {
+        if (this.requesterId === askerId && now.getTime() < waitUntil) {
           return err(
             MessagingErrors.declinedRecently(Math.ceil((waitUntil - now.getTime()) / 1000)),
           );
@@ -200,10 +249,11 @@ export class Conversation {
     this.props = {
       ...this.props,
       status: 'requested',
+      requestedBy: by,
       requestedAt: now,
       respondedAt: null,
       updatedAt: now,
-      agentReadAt: now,
+      ...(by === 'agent' ? { agentReadAt: now } : { talentReadAt: now }),
     };
     this.raise(ConversationEvents.ContactRequested, now);
     return ok(undefined);
@@ -218,7 +268,7 @@ export class Conversation {
       status: accept ? 'accepted' : 'declined',
       respondedAt: now,
       updatedAt: now,
-      talentReadAt: now,
+      ...(this.props.requestedBy === 'agent' ? { talentReadAt: now } : { agentReadAt: now }),
     };
     this.raise(
       accept ? ConversationEvents.ContactAccepted : ConversationEvents.ContactDeclined,
@@ -256,7 +306,11 @@ export class Conversation {
       type,
       aggregateId: this.props.id,
       occurredAt,
-      payload: { agentId: this.props.agentId, talentId: this.props.talentId },
+      payload: {
+        agentId: this.props.agentId,
+        talentId: this.props.talentId,
+        requestedBy: this.props.requestedBy,
+      },
     });
   }
 }
@@ -286,16 +340,16 @@ export interface ConversationRepository {
   /** Inserts or updates, and records the conversation's events in the same transaction. */
   save(conversation: Conversation): Promise<void>;
   /**
-   * Conversations the user can see, newest activity first. Talent do not see requests that
-   * were withdrawn or that they declined, unless they blocked the agent (so they can
-   * unblock); agents see all of theirs.
+   * Conversations the user can see, newest activity first. The person who was asked does
+   * not see a request that was withdrawn or that they declined, unless they blocked the
+   * other (so they can unblock); the person who asked sees all of theirs.
    */
   pageFor(
     userId: string,
     after: { updatedAt: Date; id: string } | null,
     limit: number,
   ): Promise<Conversation[]>;
-  /** Requests waiting for this talent, plus open chats with messages they have not read. */
+  /** Requests waiting for this person's answer, plus open chats with messages they have not read. */
   countNeedingAttention(userId: string): Promise<number>;
   allFor(userId: string): Promise<Conversation[]>;
 

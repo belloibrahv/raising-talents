@@ -1,0 +1,2 @@
+CREATE TYPE "messaging"."conversation_side" AS ENUM('agent', 'talent');--> statement-breakpoint
+ALTER TABLE "messaging"."conversations" ADD COLUMN "requested_by" "messaging"."conversation_side" DEFAULT 'agent' NOT NULL;

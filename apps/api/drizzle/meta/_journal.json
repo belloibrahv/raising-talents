@@ -204,6 +204,13 @@
       "when": 1791727374956,
       "tag": "0028_agents_for_talent",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1791733515151,
+      "tag": "0029_talent_submissions",
+      "breakpoints": true
     }
   ]
 }

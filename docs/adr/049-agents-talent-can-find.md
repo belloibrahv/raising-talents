@@ -1,6 +1,6 @@
 # ADR-049: Agents talent can find
 
-- Status: Accepted
+- Status: Accepted. Talent can now write first to agents who are open (ADR-050)
 - Date: 2026-10-11
 
 ## Context

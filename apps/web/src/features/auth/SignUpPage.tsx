@@ -64,6 +64,8 @@ export function SignUpPage() {
       },
       {
         onError: (error) => {
+          // No account came of it, so nothing is remembered for whoever signs in next.
+          joiningAs.set(null);
           const fromServer: Errors = fieldErrorsFrom(error);
           if (isApiError(error, 'UNDER_MINIMUM_AGE')) fromServer.dateOfBirth = errorMessage(error);
           if (isApiError(error, 'WEAK_PASSWORD')) fromServer.password = errorMessage(error);

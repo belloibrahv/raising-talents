@@ -1,4 +1,9 @@
-import { CONTACT_MESSAGE_MAX, CONTACT_MESSAGE_MIN, type RosterStatus } from '@rt/contracts';
+import {
+  CONTACT_DECLINE_COOLDOWN_DAYS,
+  CONTACT_MESSAGE_MAX,
+  CONTACT_MESSAGE_MIN,
+  type RosterStatus,
+} from '@rt/contracts';
 import { CheckCircle2, Clock3, Send } from 'lucide-react';
 import { useState, type ReactNode, type SubmitEvent } from 'react';
 import { Link } from 'react-router';
@@ -9,6 +14,8 @@ import { FormMessage } from '../../shared/ui/FormMessage';
 import { TextArea } from '../../shared/ui/TextArea';
 import { useSession } from '../auth/use-auth';
 import { useConversationWithAgent, useSubmitToAgent } from '../messages/queries';
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const panel = 'stack gap-3 rounded-2xl border bg-card p-5 text-card-foreground shadow-xs sm:p-6';
 
@@ -57,7 +64,13 @@ export function SubmissionPanel({ agentId, name, rosterStatus }: SubmissionPanel
       );
     }
     // Declined: only shown to the one who asked, so this is the talent's own submission.
-    return <Panel icon={Clock3} title={t('submission.declined', { name })} />;
+    // Once the wait is over the form comes back, if the agent is still open.
+    const waitOver =
+      Date.now() >=
+      new Date(conversation.updatedAt).getTime() + CONTACT_DECLINE_COOLDOWN_DAYS * DAY_MS;
+    if (!waitOver || rosterStatus !== 'open') {
+      return <Panel icon={Clock3} title={t('submission.declined', { name })} />;
+    }
   }
 
   if (rosterStatus !== 'open') {

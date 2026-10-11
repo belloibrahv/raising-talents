@@ -142,6 +142,13 @@ describe('home', () => {
     );
   });
 
+  it("shows no removal control to members: that is the moderator's", async () => {
+    talentHome();
+    renderAt('/home');
+    await screen.findAllByRole('article', { name: 'Post by Tobi Adebayo' });
+    expect(screen.queryByRole('button', { name: /^Remove / })).toBeNull();
+  });
+
   it('lets an agent search straight from home, or browse a category', async () => {
     stubApi({
       '/v1/auth/web/refresh': () => signedIn(meFor({ role: 'agent', status: 'active' })),

@@ -83,6 +83,7 @@ export const cardFor = (handle: string, displayName: string) => ({
 /** A photo in a feed. */
 export const postFor = (n: number, overrides: Record<string, unknown> = {}) => ({
   id: `0192a3b4-0000-7000-8000-0000000000${String(n).padStart(2, '0')}`,
+  mediaId: `0192a3b4-0000-7000-8000-0000000001${String(n).padStart(2, '0')}`,
   kind: 'image',
   caption: `Post ${String(n)}`,
   postedAt: '2026-10-02T09:00:00.000Z',

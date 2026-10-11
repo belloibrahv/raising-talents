@@ -26,6 +26,8 @@ export const cursorQuerySchema = z.object({ cursor: z.string().max(200).optional
 const postBase = {
   /** The portfolio item's id. */
   id: idSchema,
+  /** The photo or video itself, which is what a moderator removes. */
+  mediaId: idSchema,
   caption: z.string(),
   postedAt: isoDateTimeSchema,
   talent: talentCardSchema,

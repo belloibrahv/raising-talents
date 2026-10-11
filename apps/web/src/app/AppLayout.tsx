@@ -53,7 +53,13 @@ export function AppLayout() {
   const handle = useMyTalentProfile(talent).data?.handle;
   const destinations: Destination[] = [
     ...(onboarding ? [] : [{ to: '/home', label: t('nav.home'), icon: House }]),
-    ...(staff ? [{ to: '/moderation', label: t('nav.moderation'), icon: ShieldCheck }] : []),
+    ...(staff
+      ? [
+          { to: '/moderation', label: t('nav.moderation'), icon: ShieldCheck },
+          // Posts go live without a check first, so moderators browse like anyone else (ADR-048).
+          { to: '/search', label: t('nav.explore'), icon: Compass },
+        ]
+      : []),
     ...(me?.role === 'agent' && !onboarding
       ? [
           { to: '/search', label: t('nav.search'), icon: Search },

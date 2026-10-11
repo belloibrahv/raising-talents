@@ -13,9 +13,10 @@ import type { UnitOfWork } from '../platform/unit-of-work.js';
  *
  * Runs inside the worker when SEED_DEMO=run, and goes through the API like a person would,
  * so every rule, scan and moderation step applies. Nothing is written to the database
- * directly: it needs EMAIL_VERIFICATION=off (ADR-045), and it approves photos and agencies
- * only once an operator has made the demo moderator a moderator (STAFF_GRANT). Until then it
- * leaves them waiting, like any new member's. Every account uses the DEMO_DOMAIN, so
+ * directly: it needs EMAIL_VERIFICATION=off (ADR-045), and it approves held photos and
+ * verifies agencies only once an operator has made the demo moderator a moderator
+ * (STAFF_GRANT). Until then it leaves them waiting, like any new member's; where photos go
+ * live without a check (ADR-048) the profiles, follows and likes are in place regardless. Every account uses the DEMO_DOMAIN, so
  * SEED_DEMO=remove can find and erase all of them. Running it again changes nothing that is
  * already in place, and finishes what the moderator could not do before.
  */
@@ -511,32 +512,28 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
     report.push(`agent: ${persona.email} (${persona.agencyName}, verification ${state})`);
   }
 
-  if (!canModerate) {
-    logger.warn(
-      { seeded: report },
-      'demo data is in place; set STAFF_GRANT for the demo moderator and run again to approve photos and agencies',
-    );
-    return;
-  }
-
   // Photos sent before the moderator had the role are still waiting: approve the demo ones.
-  const demoIds = new Set([...talentAccounts.values()].map((talent) => talent.id));
-  const held = await api.expect<{ items: { id: string; ownerId: string }[] }>(
-    'GET',
-    '/v1/moderation/media',
-    moderator,
-  );
-  for (const item of held.items.filter((entry) => demoIds.has(entry.ownerId))) {
-    await api.expect('POST', `/v1/moderation/media/${item.id}/decision`, {
-      ...moderator,
-      body: { decision: 'approve' },
-    });
+  if (canModerate) {
+    const demoIds = new Set([...talentAccounts.values()].map((talent) => talent.id));
+    const held = await api.expect<{ items: { id: string; ownerId: string }[] }>(
+      'GET',
+      '/v1/moderation/media',
+      moderator,
+    );
+    for (const item of held.items.filter((entry) => demoIds.has(entry.ownerId))) {
+      await api.expect('POST', `/v1/moderation/media/${item.id}/decision`, {
+        ...moderator,
+        body: { decision: 'approve' },
+      });
+    }
   }
-  // The worker attaches approved photos, which makes the profiles visible to agents.
+  // The worker attaches photos once they are live, which makes the profiles visible. Where
+  // photos wait for a moderator nobody has appointed, this gives up after a minute and a half.
+  const waitUntil = Date.now() + 90_000;
   for (const persona of TALENT.filter((entry) => !entry.onlyFirstSteps)) {
     const talent = talentAccounts.get(persona.handle);
     if (!talent) continue;
-    for (let attempt = 0; attempt < 30; attempt += 1) {
+    while (Date.now() < waitUntil) {
       const profile = await api.expect<{ isComplete: boolean }>(
         'GET',
         '/v1/me/talent-profile',
@@ -548,10 +545,11 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
   }
 
   // Conversations, so messaging can be tried from both sides at once.
+  // Only a verified agency may write to talent, so this part needs the demo moderator.
   const tunde = agentAccounts.get(at('tunde'));
   const ngozi = talentAccounts.get('ngozi.adeyemi');
   const zainab = talentAccounts.get('zainab.bello');
-  if (tunde && ngozi && zainab) {
+  if (canModerate && tunde && ngozi && zainab) {
     const conversationWith = async (handle: string) => {
       const found = await api.call<{ id: string; status: string }>(
         'GET',
@@ -636,7 +634,12 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
     `social: ${String(follows)} follows, with a like on each followed talent's latest post`,
   );
 
-  logger.warn({ seeded: report }, 'demo data is in place');
+  logger.warn(
+    { seeded: report },
+    canModerate
+      ? 'demo data is in place'
+      : 'demo data is in place; set STAFF_GRANT for the demo moderator and run again to verify the agency and start the conversations',
+  );
 }
 
 /** Erases every demo account, and its files, the way account deletion does. */

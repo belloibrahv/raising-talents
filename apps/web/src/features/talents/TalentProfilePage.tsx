@@ -31,6 +31,7 @@ import { ContactPanel } from '../messages/ContactPanel';
 import { useMyTalentProfile } from '../profile/queries';
 import { SaveToggle } from '../shortlist/SaveToggle';
 import { FollowButton } from '../social/FollowButton';
+import { RemoveMedia } from '../moderation/RemoveMedia';
 import { PostCard } from '../social/PostCard';
 import { useTalentPosts, useTalentSocial } from '../social/queries';
 import { ReportProfile } from './ReportProfile';
@@ -172,6 +173,9 @@ export function TalentProfilePage() {
               </>
             ) : null}
           </div>
+          {talent.avatarMediaId ? (
+            <RemoveMedia mediaId={talent.avatarMediaId} what="photo" owner={talent.displayName} />
+          ) : null}
         </section>
       }
     >

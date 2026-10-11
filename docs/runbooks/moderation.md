@@ -24,6 +24,22 @@ The scanner holds files it is unsure about (design section 10, ADR-007 for video
 
 Every decision is recorded on the file (who and when) and in the API log as `held media reviewed`.
 
+## Take down something that is live
+
+Where posts go live without a check first (`CONTENT_SCANNER=off`, ADR-048), nothing reaches
+the queue above. Instead:
+
+- Read the Reports tab daily and open each reported profile.
+- Under a post, choose **Remove post**; on a profile, **Remove profile photo**. Pick the
+  closest reason. The files are deleted and the owner is told which rule it broke. A profile
+  without its photo is hidden from others until the owner adds a new one.
+- Use **Explore** to look around without waiting for a report.
+- For someone who keeps doing it, suspend or ban the account from the Reports tab: that
+  hides everything of theirs at once.
+
+Every removal is recorded on the file (who and when) and in the API log as
+`published media removed`.
+
 ## Verify agents
 
 The Agents tab lists agents who asked to be verified, oldest first. For each:
@@ -42,5 +58,6 @@ Verified agents get the badge at once. If they rename their agency, the badge go
 | A moderator gets "Only moderators can do this."        | The grant ran against another environment, or they did not sign in again |
 | An approved photo is not on the profile after a minute | The worker is down or behind; see outbox-dead-letter.md                  |
 | The queue keeps growing                                | Scan thresholds may be too strict: `SCAN_REVIEW_AT` (default 50)         |
+| Photos wait although `CONTENT_SCANNER=off`             | The worker releases them at start and every ten minutes; check it is up  |
 
 To try the queue locally, set `CONTENT_SCANNER=development-hold-all` in `apps/api/.env`: every image is held.

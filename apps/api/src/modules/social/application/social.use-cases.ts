@@ -128,6 +128,7 @@ export class PostAssembler {
       if (!talent || file?.status !== 'ready') return [];
       const shared = {
         id: row.itemId,
+        mediaId: row.mediaId,
         caption: row.caption,
         postedAt: row.postedAt.toISOString(),
         talent,

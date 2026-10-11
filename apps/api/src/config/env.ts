@@ -72,11 +72,13 @@ const envSchema = z.object({
   S3_FORCE_PATH_STYLE: booleanFromString.default(false),
   /**
    * rekognition scans automatically; manual-review holds every image for a moderator, for
-   * hosts without Rekognition (ADR-036). development-allow-all approves every image and
+   * hosts without Rekognition (ADR-036). off publishes every photo and video as soon as it is
+   * processed and releases what manual-review was holding: members report, and moderators
+   * take down what breaks the rules (ADR-048). development-allow-all approves every image and
    * development-hold-all fakes a borderline label; both are refused in staging and production.
    */
   CONTENT_SCANNER: z
-    .enum(['rekognition', 'manual-review', 'development-allow-all', 'development-hold-all'])
+    .enum(['rekognition', 'manual-review', 'off', 'development-allow-all', 'development-hold-all'])
     .default('rekognition'),
   SCAN_REVIEW_AT: z.coerce.number().min(0).max(100).default(50),
   SCAN_REJECT_AT: z.coerce.number().min(0).max(100).default(80),
@@ -202,11 +204,12 @@ const checkedEnvSchema = envSchema.superRefine((env, ctx) => {
       });
     }
     // Video may be off (uploads are refused, so nothing goes unprocessed), but never faked.
-    if (env.CONTENT_SCANNER !== 'rekognition' && env.CONTENT_SCANNER !== 'manual-review') {
+    if (!['rekognition', 'manual-review', 'off'].includes(env.CONTENT_SCANNER)) {
       ctx.addIssue({
         code: 'custom',
         path: ['CONTENT_SCANNER'],
-        message: 'Staging and production must scan with Rekognition or hold every image for review',
+        message:
+          'Staging and production must scan with Rekognition, hold every image for review, or be off',
       });
     }
     // Plain connections are allowed only inside an encrypted private network (ADR-036).

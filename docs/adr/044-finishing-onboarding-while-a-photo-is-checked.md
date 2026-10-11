@@ -1,6 +1,6 @@
 # ADR-044: Finishing onboarding while a photo is checked
 
-- Status: Accepted
+- Status: Accepted. Still how a held photo behaves; on Railway photos are no longer held (ADR-048)
 - Date: 2026-10-06
 
 ## Context

@@ -1,6 +1,6 @@
 # ADR-036: Hosting on Railway
 
-Status: Accepted. The AWS design (ADR-018, ADR-023) stays the target for scale; Railway runs the app now.
+Status: Accepted; holding every photo for a moderator was replaced by ADR-048. The AWS design (ADR-018, ADR-023) stays the target for scale; Railway runs the app now.
 
 ## Context
 

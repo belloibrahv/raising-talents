@@ -8,6 +8,7 @@ import { VideoPlayer } from '../../shared/media/VideoPlayer';
 import { placeLabel } from '../../shared/places';
 import { timeAgo } from '../../shared/relative-time';
 import { Avatar } from '../../shared/ui/Avatar';
+import { RemoveMedia } from '../moderation/RemoveMedia';
 import { useLike } from './queries';
 
 const likesLabel = (likes: number) =>
@@ -135,6 +136,7 @@ export function PostCard({ post, eager = false }: PostCardProps) {
             {post.caption}
           </p>
         ) : null}
+        <RemoveMedia mediaId={post.mediaId} what="post" owner={talent.displayName} />
       </div>
     </article>
   );

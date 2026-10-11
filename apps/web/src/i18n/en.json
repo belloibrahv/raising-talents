@@ -141,8 +141,9 @@
     "headlineStart": "Share your talent",
     "headlineEnd": "with the world.",
     "body": "Post your work, grow a following and get discovered. Everyone is welcome, wherever you are.",
-    "createAccount": "Create an account",
-    "signIn": "I already have an account",
+    "joinTalent": "Join as talent",
+    "joinAgent": "Join as agent",
+    "signIn": "Already have an account? Sign in",
     "free": "Free to join. You need to be 18 or older.",
     "disciplinesLabel": "Who is here",
     "eyebrow": "Open in 244 countries and territories",
@@ -194,6 +195,11 @@
   "signUp": {
     "title": "Create your account",
     "subtitle": "You need to be 18 or older to join.",
+    "joiningAs": "I am joining as",
+    "as": {
+      "talent": "Talent",
+      "agent": "Agent or scout"
+    },
     "email": "Email",
     "password": "Password",
     "passwordHint": "At least 10 characters. Three unrelated words together are strong and easy to remember.",

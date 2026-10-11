@@ -61,7 +61,7 @@ const joinButton = cn(
   buttonVariants({ size: 'lg' }),
   'bg-brand-cta text-white no-underline shadow-lg shadow-primary/25 hover:opacity-95',
 );
-const signInButton = cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'no-underline');
+const agentButton = cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'no-underline');
 
 /**
  * The front door. One screen says what this is: a place to post your work and be followed,
@@ -132,14 +132,16 @@ export function WelcomePage() {
               {t('welcome.body')}
             </p>
             <div className="flex flex-col gap-3 sm:flex-row">
-              <Link className={joinButton} to="/sign-up">
-                {t('welcome.createAccount')}
+              <Link className={joinButton} to="/sign-up?as=talent">
+                {t('welcome.joinTalent')}
               </Link>
-              <Link className={signInButton} to="/sign-in">
-                {t('welcome.signIn')}
+              <Link className={agentButton} to="/sign-up?as=agent">
+                {t('welcome.joinAgent')}
               </Link>
             </div>
-            <p className="m-0 text-sm text-muted-foreground">{t('welcome.free')}</p>
+            <p className="m-0 text-sm text-muted-foreground">
+              {t('welcome.free')} <Link to="/sign-in">{t('welcome.signIn')}</Link>
+            </p>
           </div>
           <FeedPreview />
         </section>
@@ -202,9 +204,12 @@ export function WelcomePage() {
             <ShieldCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-success" />
             {t('welcome.safe')}
           </p>
-          <div className="flex justify-center">
-            <Link className={joinButton} to="/sign-up">
-              {t('welcome.createAccount')}
+          <div className="flex flex-col justify-center gap-3 sm:flex-row">
+            <Link className={joinButton} to="/sign-up?as=talent">
+              {t('welcome.joinTalent')}
+            </Link>
+            <Link className={agentButton} to="/sign-up?as=agent">
+              {t('welcome.joinAgent')}
             </Link>
           </div>
         </section>

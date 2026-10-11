@@ -1,11 +1,12 @@
 import type { SelectableRole } from '@rt/contracts';
 import { Binoculars, Star, type LucideIcon } from 'lucide-react';
-import { useState, type SubmitEvent } from 'react';
+import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { Button } from '../../shared/ui/Button';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { Page } from '../../shared/ui/Page';
+import { joiningAs } from './joining-as';
 import { useChooseRole } from './use-auth';
 
 const OPTIONS: readonly { role: SelectableRole; title: string; body: string; icon: LucideIcon }[] =
@@ -26,7 +27,19 @@ const OPTIONS: readonly { role: SelectableRole; title: string; body: string; ico
 
 export function ChooseRolePage() {
   const chooseRole = useChooseRole();
-  const [role, setRole] = useState<SelectableRole | null>(null);
+  const [role, setRole] = useState<SelectableRole | null>(() => joiningAs.get());
+  const { mutate } = chooseRole;
+  const applied = useRef(false);
+
+  // They already said which on the way in ("Join as talent"): carry on without asking again.
+  // If that fails the choice stays selected below, with the reason above it.
+  useEffect(() => {
+    const chosen = joiningAs.get();
+    if (!chosen || applied.current) return;
+    applied.current = true;
+    joiningAs.set(null);
+    mutate(chosen);
+  }, [mutate]);
 
   const submit = (event: SubmitEvent) => {
     event.preventDefault();

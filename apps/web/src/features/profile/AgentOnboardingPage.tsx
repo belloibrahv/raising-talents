@@ -1,4 +1,10 @@
-import { MAX_SPECIALIZATIONS, type MyAgentProfile, type TaxonomyResponse } from '@rt/contracts';
+import {
+  AGENT_BIO_MAX,
+  MAX_SPECIALIZATIONS,
+  type MyAgentProfile,
+  type RosterStatus,
+  type TaxonomyResponse,
+} from '@rt/contracts';
 import { useState, type SubmitEvent } from 'react';
 import { Link } from 'react-router';
 import { t } from '../../i18n';
@@ -9,8 +15,10 @@ import { ChoiceGroup } from '../../shared/ui/ChoiceGroup';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { PageSkeleton } from '../../shared/ui/PageSkeleton';
 import { Page } from '../../shared/ui/Page';
+import { TextArea } from '../../shared/ui/TextArea';
 import { TextField } from '../../shared/ui/TextField';
 import { useFocusFirstError } from '../../shared/ui/use-focus-first-error';
+import { AgentPhoto } from '../agents/AgentPhoto';
 import { fieldErrorsFrom } from '../auth/form-errors';
 import { categoryIcon } from './category-icons';
 import { PlaceFields, startingPlace, type Place } from './PlaceFields';
@@ -21,6 +29,9 @@ export function AgentOnboardingPage() {
   const taxonomy = useTaxonomy();
   // Owned here so the saved confirmation survives the form reloading the new version.
   const update = useUpdateAgentProfile();
+  // The form starts again from the server's copy only when that copy replaced what was being
+  // edited. A new photo also changes the version, and must not wipe what is being typed.
+  const [reloads, setReloads] = useState(0);
   if (profile.isPending || taxonomy.isPending) return <PageSkeleton />;
   return (
     <Page
@@ -31,12 +42,18 @@ export function AgentOnboardingPage() {
       {profile.isError || taxonomy.isError ? (
         <FormMessage tone="error">{errorMessage(profile.error ?? taxonomy.error)}</FormMessage>
       ) : (
-        <AgentForm
-          key={profile.data?.version ?? 0}
-          profile={profile.data}
-          taxonomy={taxonomy.data}
-          update={update}
-        />
+        <>
+          {profile.data ? <AgentPhoto profile={profile.data} /> : null}
+          <AgentForm
+            key={reloads}
+            profile={profile.data}
+            taxonomy={taxonomy.data}
+            update={update}
+            onStale={() => {
+              setReloads((count) => count + 1);
+            }}
+          />
+        </>
       )}
     </Page>
   );
@@ -48,10 +65,12 @@ function AgentForm({
   profile,
   taxonomy,
   update,
+  onStale,
 }: {
   profile: MyAgentProfile | null;
   taxonomy: TaxonomyResponse;
   update: ReturnType<typeof useUpdateAgentProfile>;
+  onStale: () => void;
 }) {
   const [agencyName, setAgencyName] = useState(profile?.agencyName ?? '');
   const [jobTitle, setJobTitle] = useState(profile?.jobTitle ?? '');
@@ -62,6 +81,8 @@ function AgentForm({
     startingPlace(profile?.city ?? null, taxonomy.countries),
   );
   const [website, setWebsite] = useState(profile?.website ?? '');
+  const [bio, setBio] = useState(profile?.bio ?? '');
+  const [roster, setRoster] = useState<RosterStatus | 'unset'>(profile?.rosterStatus ?? 'unset');
   const [errors, setErrors] = useState<Errors>({});
   const form = useFocusFirstError(errors);
 
@@ -83,10 +104,14 @@ function AgentForm({
         specializationSlugs: [...specializations],
         citySlug: place.citySlug,
         website: website.trim() || null,
+        bio: bio.trim(),
+        rosterStatus: roster === 'unset' ? null : roster,
       },
       {
         onError: (error) => {
           setErrors(fieldErrorsFrom(error));
+          // The hook has already fetched the newer copy: show it.
+          if (isApiError(error, 'PRECONDITION_FAILED')) onStale();
         },
       },
     );
@@ -159,12 +184,42 @@ function AgentForm({
         autoComplete="url"
         placeholder="https://"
       />
+      <ChoiceGroup
+        layout="chips"
+        legend={t('onboarding.agent.roster')}
+        hint={t('onboarding.agent.rosterHint')}
+        value={roster}
+        onChange={(value) => {
+          setRoster(value as RosterStatus | 'unset');
+        }}
+        options={[
+          { value: 'open', label: t('agents.roster.open') },
+          { value: 'full', label: t('agents.roster.full') },
+          { value: 'unset', label: t('onboarding.agent.rosterUnset') },
+        ]}
+      />
+      <TextArea
+        label={t('onboarding.agent.bio')}
+        hint={t('onboarding.agent.bioHint')}
+        value={bio}
+        onChange={(event) => {
+          setBio(event.target.value);
+        }}
+        error={errors['bio']}
+        maxLength={AGENT_BIO_MAX}
+        rows={6}
+      />
       {saved ? (
         <>
           <FormMessage tone="success">{t('onboarding.agent.done')}</FormMessage>
           <Link className={buttonLink('primary')} to="/home">
             {t('nav.home')}
           </Link>
+          {profile ? (
+            <Link className={buttonLink('secondary')} to={`/agents/${profile.userId}`}>
+              {t('onboarding.agent.viewPage')}
+            </Link>
+          ) : null}
         </>
       ) : (
         <Button

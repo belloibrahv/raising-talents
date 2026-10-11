@@ -52,3 +52,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-046](046-worldwide-places-and-a-wider-taxonomy.md)                 | Worldwide places, a wider taxonomy and search that follows a profile | Accepted                          |
 | [ADR-047](047-following-likes-a-feed-and-a-new-look.md)                 | Following, likes, a feed, and a new look                             | Accepted                          |
 | [ADR-048](048-posting-without-a-check-first.md)                         | Posting without a check first; moderators take down                  | Accepted                          |
+| [ADR-049](049-agents-talent-can-find.md)                                | Agents talent can find: page, bio, roster status, saved agents       | Accepted                          |

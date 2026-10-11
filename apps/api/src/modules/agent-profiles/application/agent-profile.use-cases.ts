@@ -1,6 +1,7 @@
 import type { MyAgentProfile } from '@rt/contracts';
 import type { Clock } from '../../../platform/clock.js';
 import type { DomainError } from '../../../platform/domain-error.js';
+import type { DomainEvent } from '../../../platform/domain-event.js';
 import { err, ok, type Result } from '../../../platform/result.js';
 import type { UnitOfWork } from '../../../platform/unit-of-work.js';
 import type {
@@ -14,15 +15,22 @@ import {
   type AgentProfilePatch,
   type AgentProfileRepository,
 } from '../domain/agent-profile.js';
+import type { AgentAvatarUrls } from './agent-directory.use-cases.js';
 
 export const AGENT = {
   Repository: Symbol('AgentProfileRepository'),
   UpdateMine: Symbol('UpdateMyAgentProfileHandler'),
   GetMine: Symbol('GetMyAgentProfileQuery'),
   Directory: Symbol('AgentDirectory'),
+  EventHandlers: Symbol('AgentEventHandlers'),
+  AvatarUrls: Symbol('AgentAvatarUrls'),
 } as const;
 
-export function toMyAgentProfile(profile: AgentProfile, catalog: TaxonomyCatalog): MyAgentProfile {
+export function toMyAgentProfile(
+  profile: AgentProfile,
+  catalog: TaxonomyCatalog,
+  urls: AgentAvatarUrls,
+): MyAgentProfile {
   const props = profile.snapshot();
   return {
     userId: props.userId,
@@ -31,6 +39,10 @@ export function toMyAgentProfile(profile: AgentProfile, catalog: TaxonomyCatalog
     specializations: catalog.categoryRefs(props.specializationSlugs),
     city: catalog.city(props.citySlug),
     website: props.website,
+    bio: props.bio,
+    rosterStatus: props.rosterStatus,
+    avatarMediaId: props.avatarMediaId,
+    avatarUrls: props.avatarMediaId ? urls(props.userId, props.avatarMediaId) : null,
     verified: props.verifiedAt !== null,
     isComplete: profile.isComplete,
     missing: profile.missing(),
@@ -52,6 +64,7 @@ export class UpdateMyAgentProfileHandler {
     private readonly taxonomy: TaxonomySource,
     private readonly uow: UnitOfWork,
     private readonly clock: Clock,
+    private readonly urls: AgentAvatarUrls,
   ) {}
 
   async execute(
@@ -82,7 +95,7 @@ export class UpdateMyAgentProfileHandler {
         const completed = await this.accounts.completeOnboarding(command.userId);
         if (!completed.ok) return completed;
       }
-      return ok(toMyAgentProfile(profile, catalog));
+      return ok(toMyAgentProfile(profile, catalog, this.urls));
     });
   }
 }
@@ -92,6 +105,7 @@ export class GetMyAgentProfileQuery {
     private readonly profiles: AgentProfileRepository,
     private readonly accounts: ProfileAccounts,
     private readonly taxonomy: TaxonomySource,
+    private readonly urls: AgentAvatarUrls,
   ) {}
 
   async execute(userId: string): Promise<Result<MyAgentProfile, DomainError>> {
@@ -99,7 +113,7 @@ export class GetMyAgentProfileQuery {
     if (account?.role !== 'agent') return err(AgentProfileErrors.wrongRole());
     const profile = await this.profiles.findByUserId(userId);
     if (!profile) return err(AgentProfileErrors.notFound());
-    return ok(toMyAgentProfile(profile, await this.taxonomy.current()));
+    return ok(toMyAgentProfile(profile, await this.taxonomy.current(), this.urls));
   }
 }
 
@@ -134,5 +148,46 @@ export class AgentDirectory {
       verifiedAt: props.verifiedAt,
       memberSince: props.createdAt,
     };
+  }
+}
+
+/**
+ * Runs in the worker when a profile photo goes live or is taken down. Talent have their own
+ * handler; this one acts only when the owner has an agent profile. The photo is optional for
+ * agents, so it never changes whether the profile is complete.
+ */
+export class AgentAvatarHandler {
+  constructor(
+    private readonly profiles: AgentProfileRepository,
+    private readonly uow: UnitOfWork,
+    private readonly clock: Clock,
+  ) {}
+
+  ready(event: DomainEvent): Promise<void> {
+    return this.change(event, (profile, now) => {
+      profile.setAvatar(event.aggregateId, now);
+    });
+  }
+
+  removed(event: DomainEvent): Promise<void> {
+    return this.change(event, (profile, now) => {
+      profile.removeAvatar(event.aggregateId, now);
+    });
+  }
+
+  private async change(
+    event: DomainEvent,
+    apply: (profile: AgentProfile, now: Date) => void,
+  ): Promise<void> {
+    if (event.payload['purpose'] !== 'avatar') return;
+    const ownerId = event.payload['ownerId'];
+    if (typeof ownerId !== 'string') return;
+    await this.uow.run(async () => {
+      const profile = await this.profiles.findByUserId(ownerId, { lock: true });
+      if (!profile) return;
+      const before = profile.version;
+      apply(profile, this.clock.now());
+      if (profile.version !== before) await this.profiles.save(profile);
+    });
   }
 }

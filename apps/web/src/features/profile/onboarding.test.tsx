@@ -446,6 +446,10 @@ describe('agent onboarding', () => {
           specializations: [{ slug: 'music', name: 'Music' }],
           city: { slug: 'ng-lagos', name: 'Lagos', countryCode: 'NG' },
           website: null,
+          bio: '',
+          rosterStatus: null,
+          avatarMediaId: null,
+          avatarUrls: null,
           verified: false,
           isComplete: true,
           missing: [],
@@ -479,6 +483,8 @@ describe('agent onboarding', () => {
       specializationSlugs: ['music'],
       citySlug: 'ng-lagos',
       website: null,
+      bio: '',
+      rosterStatus: null,
     });
     const main = screen.getByRole('main');
     expect(within(main).getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/home');

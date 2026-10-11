@@ -260,26 +260,20 @@ describe('Image pipeline', () => {
     expect(again.ok && again.value.status).toBe('processing');
   });
 
-  it('keeps agents from uploading profile media, but lets unverified talent set up (ADR-037)', async () => {
+  it('lets agents upload a profile photo but not a portfolio, and lets unverified talent set up (ADR-037)', async () => {
     const agent = await accounts.createAccount({ email: 'chidi@example.com', role: 'agent' });
     const unverified = await accounts.createAccount({
       email: 'new@example.com',
       role: 'talent',
       verified: false,
     });
-    const asAgent = await createIntent.execute({
-      userId: agent,
-      purpose: 'avatar',
-      contentType: 'image/jpeg',
-      bytes: 1000,
-    });
-    const asUnverified = await createIntent.execute({
-      userId: unverified,
-      purpose: 'avatar',
-      contentType: 'image/jpeg',
-      bytes: 1000,
-    });
-    expect(!asAgent.ok && asAgent.error.code).toBe('WRONG_ROLE');
+    const upload = (userId: string, purpose: 'avatar' | 'portfolio') =>
+      createIntent.execute({ userId, purpose, contentType: 'image/jpeg', bytes: 1000 });
+    const agentPhoto = await upload(agent, 'avatar');
+    const agentPortfolio = await upload(agent, 'portfolio');
+    const asUnverified = await upload(unverified, 'avatar');
+    expect(agentPhoto.ok).toBe(true);
+    expect(!agentPortfolio.ok && agentPortfolio.error.code).toBe('WRONG_ROLE');
     expect(asUnverified.ok).toBe(true);
   });
 });

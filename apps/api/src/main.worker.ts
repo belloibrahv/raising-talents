@@ -12,6 +12,7 @@ import {
   type JobLock,
   type ScheduledJob,
 } from './platform/scheduling/job-scheduler.js';
+import { AGENT } from './modules/agent-profiles/application/agent-profile.use-cases.js';
 import { IDENTITY } from './modules/identity/application/identity.tokens.js';
 import type { ModuleEventHandlers } from './modules/identity/identity.module.js';
 import { MEDIA } from './modules/media/application/media.use-cases.js';
@@ -38,6 +39,7 @@ for (const token of [
   IDENTITY.EventHandlers,
   MEDIA.EventHandlers,
   TALENT.EventHandlers,
+  AGENT.EventHandlers,
   SEARCH.EventHandlers,
   NOTIFICATIONS.EventHandlers,
 ]) {

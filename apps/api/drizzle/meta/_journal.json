@@ -197,6 +197,13 @@
       "when": 1791641313811,
       "tag": "0027_social",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1791727374956,
+      "tag": "0028_agents_for_talent",
+      "breakpoints": true
     }
   ]
 }

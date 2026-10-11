@@ -53,9 +53,9 @@ export const MEDIA = {
   EventHandlers: Symbol('MediaEventHandlers'),
 } as const;
 
-/** Which roles may upload for which purpose. Agents gain avatars with their own profile screens. */
+/** Which roles may upload for which purpose. An agent's photo is optional (ADR-049). */
 const PURPOSE_ROLES: Record<MediaPurpose, readonly string[]> = {
-  avatar: ['talent'],
+  avatar: ['talent', 'agent'],
   portfolio: ['talent'],
 };
 

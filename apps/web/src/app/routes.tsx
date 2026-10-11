@@ -24,6 +24,12 @@ const SignInPage = lazy(() =>
 const VerifyEmailPage = lazy(() =>
   import('../features/auth/VerifyEmailPage').then((m) => ({ default: m.VerifyEmailPage })),
 );
+const AgentsPage = lazy(() =>
+  import('../features/agents/AgentsPage').then((m) => ({ default: m.AgentsPage })),
+);
+const AgentProfilePage = lazy(() =>
+  import('../features/agents/AgentProfilePage').then((m) => ({ default: m.AgentProfilePage })),
+);
 const ChooseRolePage = lazy(() =>
   import('../features/auth/ChooseRolePage').then((m) => ({ default: m.ChooseRolePage })),
 );
@@ -214,6 +220,8 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
                 { path: 'portfolio', element: <PortfolioPage /> },
                 { path: 'talents/:handle', element: <TalentProfilePage /> },
                 { path: 'search', element: <SearchPage /> },
+                { path: 'agents', element: <AgentsPage /> },
+                { path: 'agents/:id', element: <AgentProfilePage /> },
                 { path: 'shortlist', element: <ShortlistPage /> },
                 { path: 'moderation', element: <ModerationPage /> },
                 { path: 'moderation/agents', element: <AgentQueuePage /> },

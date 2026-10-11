@@ -345,7 +345,7 @@ function AgentCard() {
   return (
     <section className={sideCard} aria-label={t('home.yourProfile')}>
       <div className="flex items-center gap-3">
-        <Avatar name={data.agencyName ?? ''} urls={null} size="lg" />
+        <Avatar name={data.agencyName ?? ''} urls={data.avatarUrls} size="lg" />
         <span className="grid min-w-0 gap-1">
           <span className="truncate text-lg font-bold">{data.agencyName}</span>
           <span
@@ -365,6 +365,9 @@ function AgentCard() {
           </span>
         </span>
       </div>
+      <Link className="text-sm font-semibold" to={`/agents/${data.userId}`}>
+        {t('onboarding.agent.viewPage')}
+      </Link>
       <div className="grid grid-cols-2 gap-2">
         <Link className={buttonLink('secondary', 'sm')} to="/shortlist">
           {t('home.yourShortlist')}

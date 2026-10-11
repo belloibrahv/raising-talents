@@ -11,6 +11,11 @@ export const BIO_MIN_FOR_COMPLETE = 50;
 export const MAX_SUBCATEGORIES = 5;
 export const MAX_SKILLS = 15;
 export const MAX_SPECIALIZATIONS = 5;
+export const AGENT_BIO_MAX = 1000;
+
+/** Whether an agent is taking on new talent: "Open for submissions" or "Roster full". */
+export const rosterStatusSchema = z.enum(['open', 'full']);
+export type RosterStatus = z.infer<typeof rosterStatusSchema>;
 
 /** Lowercase letters, digits, dots and underscores, starting and ending with a letter or digit. */
 export const handleSchema = z
@@ -127,6 +132,10 @@ export const updateAgentProfileRequestSchema = z
       .max(200)
       .nullable()
       .optional(),
+    /** Certifications, who they have worked with, what they look for. Optional. */
+    bio: z.string().trim().max(AGENT_BIO_MAX).optional(),
+    /** Null clears it: the profile then says nothing either way. */
+    rosterStatus: rosterStatusSchema.nullable().optional(),
   })
   .strict()
   .meta({ id: 'UpdateAgentProfileRequest' });
@@ -140,6 +149,10 @@ export const myAgentProfileSchema = z
     specializations: z.array(namedRefSchema),
     city: namedRefSchema.extend({ countryCode: z.string().length(2) }).nullable(),
     website: z.string().nullable(),
+    bio: z.string(),
+    rosterStatus: rosterStatusSchema.nullable(),
+    avatarMediaId: idSchema.nullable(),
+    avatarUrls: imageUrlsSchema.nullable(),
     verified: z.boolean(),
     isComplete: z.boolean(),
     missing: z.array(agentMissingFieldSchema),

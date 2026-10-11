@@ -14,20 +14,57 @@ import { categories, cities } from '../../taxonomy/infrastructure/taxonomy.schem
 
 export const agentSchema = pgSchema('agent');
 
-export const agentProfiles = agentSchema.table('profiles', {
-  userId: uuid('user_id')
-    .primaryKey()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  agencyName: text('agency_name'),
-  jobTitle: text('job_title'),
-  citySlug: text('city_slug').references(() => cities.slug),
-  website: text('website'),
-  completedAt: timestamp('completed_at', { withTimezone: true }),
-  verifiedAt: timestamp('verified_at', { withTimezone: true }),
-  version: integer('version').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
-});
+export const rosterStatusEnum = agentSchema.enum('roster_status', ['open', 'full']);
+
+export const agentProfiles = agentSchema.table(
+  'profiles',
+  {
+    userId: uuid('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    agencyName: text('agency_name'),
+    jobTitle: text('job_title'),
+    citySlug: text('city_slug').references(() => cities.slug),
+    website: text('website'),
+    bio: text('bio').notNull().default(''),
+    rosterStatus: rosterStatusEnum('roster_status'),
+    /** No foreign key: media is another module's table, and its files outlive nothing here. */
+    avatarMediaId: uuid('avatar_media_id'),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    verifiedAt: timestamp('verified_at', { withTimezone: true }),
+    version: integer('version').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    // The directory talent browse: verified, finished profiles, most recently verified first.
+    index('profiles_listed_idx')
+      .on(table.verifiedAt, table.userId)
+      .where(sql`verified_at is not null and completed_at is not null`),
+    index('profiles_city_idx').on(table.citySlug),
+  ],
+);
+
+/** One row per member and saved agent. Both sides cascade: an erased account takes its rows. */
+export const savedAgents = agentSchema.table(
+  'saved',
+  {
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    agentId: uuid('agent_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    savedAt: timestamp('saved_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.userId, table.agentId] }),
+    // The list itself: newest first for one member.
+    index('saved_user_saved_idx').on(table.userId, table.savedAt, table.agentId),
+    // Erasing an agent finds their rows without a full scan.
+    index('saved_agent_idx').on(table.agentId),
+  ],
+);
 
 export const agentSpecializations = agentSchema.table(
   'profile_specializations',

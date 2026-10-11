@@ -19,6 +19,11 @@ import {
   InMemorySessionRepository,
 } from '../../src/modules/identity/testing/fakes.js';
 import { generateTestSigningKeys } from '../../src/modules/identity/testing/identity-test-harness.js';
+import { AGENT_DIRECTORY } from '../../src/modules/agent-profiles/application/agent-directory.use-cases.js';
+import {
+  InMemoryAgentListing,
+  InMemorySavedAgentRepository,
+} from '../../src/modules/agent-profiles/testing/in-memory-agent-listing.js';
 import { AGENT } from '../../src/modules/agent-profiles/application/agent-profile.use-cases.js';
 import { InMemoryAgentProfileRepository } from '../../src/modules/agent-profiles/testing/in-memory-agent-profile.repository.js';
 import { VERIFICATION } from '../../src/modules/agent-profiles/application/verification.use-cases.js';
@@ -110,6 +115,7 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
   const email = new CapturingEmailSender();
   const talentProfiles = new InMemoryTalentProfileRepository(events);
   const agentProfiles = new InMemoryAgentProfileRepository(events);
+  const accounts = new InMemoryAccountRepository(events);
   const realtime = new InMemoryRealtime();
   const storage = new InMemoryObjectStorage();
   const mediaAssets = new InMemoryMediaAssetRepository(events);
@@ -134,7 +140,7 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
     .overrideProvider(PLATFORM.Redis)
     .useValue({ ping: async () => 'PONG', quit: async () => 'OK' })
     .overrideProvider(ACCOUNTS.Repository)
-    .useValue(new InMemoryAccountRepository(events))
+    .useValue(accounts)
     .overrideProvider(IDENTITY.Sessions)
     .useValue(new InMemorySessionRepository())
     .overrideProvider(IDENTITY.Credentials)
@@ -155,6 +161,15 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
     .useValue(talentProfiles)
     .overrideProvider(AGENT.Repository)
     .useValue(agentProfiles)
+    .overrideProvider(AGENT_DIRECTORY.Listing)
+    .useValue(
+      new InMemoryAgentListing(
+        agentProfiles,
+        async (userId) => (await accounts.findById(userId))?.snapshot().status === 'active',
+      ),
+    )
+    .overrideProvider(AGENT_DIRECTORY.Saved)
+    .useValue(new InMemorySavedAgentRepository())
     .overrideProvider(VERIFICATION.Requests)
     .useValue(new InMemoryVerificationRequestRepository(events))
     .overrideProvider(MEDIA.Repository)
@@ -194,6 +209,7 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
     IDENTITY.EventHandlers,
     MEDIA.EventHandlers,
     TALENT.EventHandlers,
+    AGENT.EventHandlers,
     NOTIFICATIONS.EventHandlers,
   ]) {
     moduleRef.get<ModuleEventHandlers>(token).register(dispatcher);

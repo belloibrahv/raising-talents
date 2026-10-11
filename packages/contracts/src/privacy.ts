@@ -45,6 +45,10 @@ export const dataExportSchema = z
     shortlist: z.array(
       z.object({ handle: z.string().nullable(), note: z.string(), savedAt: isoDateTimeSchema }),
     ),
+    /** Talent only: the agencies they saved. The name is null for one that has since left. */
+    savedAgents: z.array(
+      z.object({ agencyName: z.string().nullable(), savedAt: isoDateTimeSchema }),
+    ),
     /** Talent the person follows. The handle is null for someone who has since left. */
     following: z.array(z.object({ handle: z.string().nullable(), followedAt: isoDateTimeSchema })),
     /**

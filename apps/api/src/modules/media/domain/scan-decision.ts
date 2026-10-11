@@ -5,6 +5,9 @@ export interface ModerationLabel {
   readonly confidence: number;
 }
 
+/** What manual review puts on a file nothing scanned: it waits only because nobody has looked. */
+export const NO_SCAN_LABEL = 'No automatic scan: check by eye';
+
 /** Thresholds live in configuration so trust and safety can tune them without a release. */
 export interface ScanPolicy {
   /** Any label at or above this confidence sends the asset to a moderator. */

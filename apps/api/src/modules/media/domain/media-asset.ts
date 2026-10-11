@@ -12,6 +12,7 @@ import { domainError, type DomainError } from '../../../platform/domain-error.js
 import type { DomainEvent } from '../../../platform/domain-event.js';
 import { err, ok, type Result } from '../../../platform/result.js';
 import {
+  NO_SCAN_LABEL,
   rejectionReason,
   type ModerationLabel,
   type RejectionCategory,
@@ -248,6 +249,38 @@ export class MediaAsset {
       this.raise(MediaEvents.Rejected, now);
     }
     return ok(undefined);
+  }
+
+  /**
+   * A moderator takes down something that is already live. It ends like a rejection: the
+   * files are removed, it leaves every feed and profile, and the owner reads the reason.
+   */
+  takeDown(category: RejectionCategory, moderatorId: string, now: Date): Result<void, DomainError> {
+    if (this.props.status !== 'ready') return err(MediaErrors.wrongState(this.props.status));
+    this.props = {
+      ...this.props,
+      status: 'rejected',
+      rejectionReason: rejectionReason(category, this.kind),
+      reviewedBy: moderatorId,
+      reviewedAt: now,
+      updatedAt: now,
+    };
+    this.raise(MediaEvents.Rejected, now);
+    return ok(undefined);
+  }
+
+  /**
+   * Held only because nothing scanned it, and photos no longer wait for anyone (ADR-048).
+   * It goes live like a clean scan. No moderator decided, so none is recorded and the owner
+   * gets no "approved" notice. Anything a scanner flagged stays in the queue.
+   */
+  releaseUnscanned(now: Date): boolean {
+    const labels = this.props.moderationLabels;
+    if (this.props.status !== 'held_for_review') return false;
+    if (labels.length === 0 || labels.some((label) => label.name !== NO_SCAN_LABEL)) return false;
+    this.props = { ...this.props, status: 'ready', readyAt: now, updatedAt: now };
+    this.raise(MediaEvents.Ready, now);
+    return true;
   }
 
   /** Nobody finished the upload in time. */

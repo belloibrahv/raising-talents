@@ -59,12 +59,17 @@ const verifyPending =
       )
     : null;
 
+// With the scanner off, what manual review was holding is published (ADR-048).
+const releaseUnscanned =
+  config.CONTENT_SCANNER === 'off' ? app.get<ScheduledJob>(MEDIA.ReleaseUnscanned) : null;
+
 const scheduler = new JobScheduler(
   [
     app.get<ScheduledJob>(MEDIA.AbandonedUploads),
     app.get<ScheduledJob>(PRIVACY.Erasure),
     app.get<ScheduledJob>(NOTIFICATIONS.Prune),
     ...(verifyPending ? [verifyPending] : []),
+    ...(releaseUnscanned ? [releaseUnscanned] : []),
   ],
   app.get<JobLock>(PLATFORM.JobLock),
   logger,
@@ -73,6 +78,7 @@ const scheduler = new JobScheduler(
 scheduler.start();
 // Straight away too, rather than ten minutes after a deploy.
 if (verifyPending) void scheduler.runOnce(verifyPending);
+if (releaseUnscanned) void scheduler.runOnce(releaseUnscanned);
 logger.info('worker process started');
 
 // Operators make moderators and admins here on Railway, where there is no shell (STAFF_GRANT).

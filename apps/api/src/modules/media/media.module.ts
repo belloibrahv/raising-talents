@@ -42,6 +42,7 @@ import {
   DevelopmentAllowAllScanner,
   DevelopmentHoldAllScanner,
   ManualReviewScanner,
+  NoContentScanner,
   RekognitionContentScanner,
 } from './infrastructure/rekognition-content-scanner.js';
 import {
@@ -52,7 +53,12 @@ import {
 } from './infrastructure/mux-video-provider.js';
 import { S3ObjectStorage } from './infrastructure/s3-object-storage.js';
 import { SharpImageProcessor } from './infrastructure/sharp-image-processor.js';
-import { DecideHeldMediaHandler, ListHeldMediaQuery } from './application/moderation.use-cases.js';
+import {
+  DecideHeldMediaHandler,
+  ListHeldMediaQuery,
+  ReleaseUnscannedMediaJob,
+  RemovePublishedMediaHandler,
+} from './application/moderation.use-cases.js';
 import { MediaController } from './interface/http/media.controller.js';
 import { ModerationController } from './interface/http/moderation.controller.js';
 import { VideoWebhookController } from './interface/http/video-webhook.controller.js';
@@ -146,9 +152,11 @@ interface VideoParts {
           ? new RekognitionContentScanner(new RekognitionClient({}))
           : config.CONTENT_SCANNER === 'manual-review'
             ? new ManualReviewScanner(config.SCAN_REVIEW_AT)
-            : config.CONTENT_SCANNER === 'development-hold-all'
-              ? new DevelopmentHoldAllScanner()
-              : new DevelopmentAllowAllScanner(),
+            : config.CONTENT_SCANNER === 'off'
+              ? new NoContentScanner()
+              : config.CONTENT_SCANNER === 'development-hold-all'
+                ? new DevelopmentHoldAllScanner()
+                : new DevelopmentAllowAllScanner(),
     },
     {
       provide: MEDIA.ScanPolicy,
@@ -322,6 +330,23 @@ interface VideoParts {
       ) => new DecideHeldMediaHandler(repo, accounts, uow, clock, logger),
     },
     {
+      provide: MEDIA.RemovePublished,
+      inject: [
+        MEDIA.Repository,
+        ACCOUNTS.Facade,
+        PLATFORM.UnitOfWork,
+        PLATFORM.Clock,
+        PLATFORM.Logger,
+      ],
+      useFactory: (
+        repo: MediaAssetRepository,
+        accounts: AccountsFacade,
+        uow: UnitOfWork,
+        clock: Clock,
+        logger: Logger,
+      ) => new RemovePublishedMediaHandler(repo, accounts, uow, clock, logger),
+    },
+    {
       provide: MEDIA.AbandonedUploads,
       inject: [
         MEDIA.Repository,
@@ -341,6 +366,12 @@ interface VideoParts {
       ) => new AbandonedUploadsJob(repo, storage, video, uow, clock, logger),
     },
     {
+      provide: MEDIA.ReleaseUnscanned,
+      inject: [MEDIA.Repository, PLATFORM.UnitOfWork, PLATFORM.Clock, PLATFORM.Logger],
+      useFactory: (repo: MediaAssetRepository, uow: UnitOfWork, clock: Clock, logger: Logger) =>
+        new ReleaseUnscannedMediaJob(repo, uow, clock, logger),
+    },
+    {
       provide: MEDIA.EventHandlers,
       inject: [MEDIA.Process, MEDIA.ScanVideo, MEDIA.RemoveDeleted],
       useFactory: (
@@ -357,6 +388,12 @@ interface VideoParts {
       }),
     },
   ],
-  exports: [MEDIA.Urls, MEDIA.Facade, MEDIA.EventHandlers, MEDIA.AbandonedUploads],
+  exports: [
+    MEDIA.Urls,
+    MEDIA.Facade,
+    MEDIA.EventHandlers,
+    MEDIA.AbandonedUploads,
+    MEDIA.ReleaseUnscanned,
+  ],
 })
 export class MediaModule {}

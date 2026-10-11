@@ -36,7 +36,7 @@ The app runs on Railway (ADR-036): project `raising-talents`, environment `produ
 | `AWS_REGION`                                                                | `auto`                                                                                                                                                                                                   |
 | `MEDIA_DELIVERY`                                                            | `api`                                                                                                                                                                                                    |
 | `MEDIA_CDN_URL`                                                             | The web address (images come back through the web server)                                                                                                                                                |
-| `CONTENT_SCANNER`                                                           | `manual-review`                                                                                                                                                                                          |
+| `CONTENT_SCANNER`                                                           | `off`: posts and profile photos go live at once (ADR-048). `manual-review` holds every photo for a moderator                                                                                             |
 | `VIDEO_PROVIDER`                                                            | `disabled`                                                                                                                                                                                               |
 | `SEARCH_INDEX`, `TYPESENSE_URL`, `TYPESENSE_API_KEY`                        | `typesense`, `http://typesense.railway.internal:8108`, the typesense service's key                                                                                                                       |
 | `WEB_ORIGINS`, `WEB_APP_URL`                                                | The web address                                                                                                                                                                                          |
@@ -92,4 +92,6 @@ separated by a comma and a space respectively. The app itself calls one address 
 
 ## Every day
 
-The moderation queue holds every photo (`CONTENT_SCANNER=manual-review`). A moderator should clear it at least daily; grant the role with `pnpm --filter @rt/api staff:grant` run through `railway run --service api`.
+Posts and profile photos go live without a check first (`CONTENT_SCANNER=off`, ADR-048), so a moderator should read the reports queue at least daily and take down what breaks the rules: "Remove post" under a post, "Remove profile photo" on a profile. Grant the role with `STAFF_GRANT` on `worker` (above).
+
+To go back to a check first, set `CONTENT_SCANNER=manual-review` on `api` and `worker`: every new photo then waits in the moderation queue. Setting it to `off` again publishes whatever is waiting.

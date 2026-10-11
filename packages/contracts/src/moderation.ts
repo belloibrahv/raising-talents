@@ -53,3 +53,10 @@ export const moderationDecisionSchema = z
   ])
   .meta({ id: 'ModerationDecision' });
 export type ModerationDecision = z.infer<typeof moderationDecisionSchema>;
+
+/** Taking down a photo or video that is already live, for a stated reason. */
+export const mediaRemovalSchema = z
+  .object({ category: rejectionCategorySchema })
+  .strict()
+  .meta({ id: 'MediaRemoval' });
+export type MediaRemoval = z.infer<typeof mediaRemovalSchema>;

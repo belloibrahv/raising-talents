@@ -35,6 +35,7 @@ import {
 } from './portfolio.js';
 import {
   heldMediaPageSchema,
+  mediaRemovalSchema,
   moderationDecisionSchema,
   moderationQueueQuerySchema,
 } from './moderation.js';
@@ -564,6 +565,17 @@ export const endpoints = {
     summary: 'Approve held media, or reject it for a stated reason. Recorded with the moderator',
     auth: true,
     request: moderationDecisionSchema,
+    successStatus: 204,
+    errors: [ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.MediaWrongState],
+    tag: 'Moderation',
+  }),
+  'moderation.removeMedia': define({
+    method: 'POST',
+    path: '/v1/moderation/media/{mediaId}/removal',
+    summary:
+      'Take down a photo or video that is already live, for a stated reason. The owner is told why. Recorded with the moderator',
+    auth: true,
+    request: mediaRemovalSchema,
     successStatus: 204,
     errors: [ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.MediaWrongState],
     tag: 'Moderation',

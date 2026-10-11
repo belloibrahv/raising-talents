@@ -11,9 +11,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  mediaRemovalSchema,
   moderationDecisionSchema,
   moderationQueueQuerySchema,
   type HeldMediaPage,
+  type MediaRemoval,
   type ModerationDecision,
 } from '@rt/contracts';
 import type { z } from 'zod';
@@ -26,6 +28,7 @@ import { MEDIA } from '../../application/media.use-cases.js';
 import type {
   DecideHeldMediaHandler,
   ListHeldMediaQuery,
+  RemovePublishedMediaHandler,
 } from '../../application/moderation.use-cases.js';
 
 @Controller('v1/moderation/media')
@@ -34,6 +37,7 @@ export class ModerationController {
   constructor(
     @Inject(MEDIA.ListHeld) private readonly listHeld: ListHeldMediaQuery,
     @Inject(MEDIA.Decide) private readonly decide: DecideHeldMediaHandler,
+    @Inject(MEDIA.RemovePublished) private readonly remove: RemovePublishedMediaHandler,
   ) {}
 
   @Get()
@@ -53,5 +57,15 @@ export class ModerationController {
     @Body(body(moderationDecisionSchema)) decision: ModerationDecision,
   ): Promise<void> {
     unwrap(await this.decide.execute({ moderatorId: principal.userId, mediaId, decision }));
+  }
+
+  @Post(':mediaId/removal')
+  @HttpCode(204)
+  async removal(
+    @CurrentPrincipal() principal: Principal,
+    @Param('mediaId', ParseUUIDPipe) mediaId: string,
+    @Body(body(mediaRemovalSchema)) removal: MediaRemoval,
+  ): Promise<void> {
+    unwrap(await this.remove.execute({ moderatorId: principal.userId, mediaId, removal }));
   }
 }

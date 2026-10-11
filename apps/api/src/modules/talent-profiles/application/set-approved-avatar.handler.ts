@@ -40,7 +40,7 @@ export class SetApprovedAvatarHandler {
 /**
  * Runs in the worker when an avatar is held for a moderator or turned down. A held photo is
  * enough to leave onboarding when every other step is done (ADR-044); a rejected one stops
- * waiting, so the talent is asked for another.
+ * waiting, and one a moderator took down comes off the profile, so the talent is asked for another.
  */
 export class AvatarReviewHandler {
   constructor(
@@ -76,7 +76,9 @@ export class AvatarReviewHandler {
     if (typeof ownerId !== 'string') return;
     await this.uow.run(async () => {
       const profile = await this.profiles.findByUserId(ownerId, { lock: true });
-      if (profile?.snapshot().pendingAvatarMediaId !== event.aggregateId) return;
+      const props = profile?.snapshot();
+      if (!profile || !props) return;
+      if (![props.pendingAvatarMediaId, props.avatarMediaId].includes(event.aggregateId)) return;
       profile.avatarRejected(event.aggregateId, this.clock.now());
       await this.profiles.save(profile);
     });

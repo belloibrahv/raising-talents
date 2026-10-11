@@ -26,7 +26,14 @@ import {
   CreateUploadIntentHandler,
   ProcessImageHandler,
 } from './media.use-cases.js';
-import { DecideHeldMediaHandler, ListHeldMediaQuery } from './moderation.use-cases.js';
+import {
+  DecideHeldMediaHandler,
+  ListHeldMediaQuery,
+  ReleaseUnscannedMediaJob,
+  RemovePublishedMediaHandler,
+} from './moderation.use-cases.js';
+import { NO_SCAN_LABEL } from '../domain/scan-decision.js';
+import { AvatarReviewHandler } from '../../talent-profiles/application/set-approved-avatar.handler.js';
 
 const BIO = 'Left winger from Surulere. Fast on the break, comfortable on either foot.';
 const BORDERLINE = [{ name: 'Swimwear or Underwear', parentName: null, confidence: 64 }];
@@ -46,6 +53,8 @@ describe('Moderation of held media', () => {
   let remove: RemoveDeletedMediaHandler;
   let list: ListHeldMediaQuery;
   let decide: DecideHeldMediaHandler;
+  let takeDown: RemovePublishedMediaHandler;
+  let avatarReview: AvatarReviewHandler;
   let talentId: string;
   let moderatorId: string;
 
@@ -72,7 +81,10 @@ describe('Moderation of held media', () => {
       const event = events.events.shift();
       if (event?.type === MediaEvents.Uploaded) await process.handle(event);
       if (event?.type === MediaEvents.Ready) await setAvatar.handle(event);
-      if (event?.type === MediaEvents.Rejected) await remove.handle(event);
+      if (event?.type === MediaEvents.Rejected) {
+        await avatarReview.rejected(event);
+        await remove.handle(event);
+      }
     }
   }
 
@@ -112,6 +124,8 @@ describe('Moderation of held media', () => {
     remove = new RemoveDeletedMediaHandler(assets, storage, video, logger);
     list = new ListHeldMediaQuery(assets, accounts.facade, presenter);
     decide = new DecideHeldMediaHandler(assets, accounts.facade, uow, clock, logger);
+    takeDown = new RemovePublishedMediaHandler(assets, accounts.facade, uow, clock, logger);
+    avatarReview = new AvatarReviewHandler(profiles, accounts.facade, uow, clock);
 
     talentId = await accounts.createAccount({ email: 'amaka.okafor@example.com', role: 'talent' });
     moderatorId = await accounts.createAccount({
@@ -218,6 +232,82 @@ describe('Moderation of held media', () => {
     });
     expect(asTalent.ok ? null : asTalent.error.code).toBe('FORBIDDEN');
     expect(decideAsTalent.ok ? null : decideAsTalent.error.code).toBe('FORBIDDEN');
+  });
+
+  it('lets a moderator take down a live post, with a reason the owner can read', async () => {
+    scanner.labels = [];
+    const mediaId = await upload('portfolio');
+    await runWorker();
+    expect(assets.rows.get(mediaId)?.status).toBe('ready');
+
+    const asTalent = await takeDown.execute({
+      moderatorId: talentId,
+      mediaId,
+      removal: { category: 'violence' },
+    });
+    expect(asTalent.ok ? null : asTalent.error.code).toBe('FORBIDDEN');
+
+    const removed = await takeDown.execute({
+      moderatorId,
+      mediaId,
+      removal: { category: 'violence' },
+    });
+    expect(removed.ok).toBe(true);
+    await runWorker();
+    expect(assets.rows.get(mediaId)).toMatchObject({
+      status: 'rejected',
+      reviewedBy: moderatorId,
+      rejectionReason:
+        'This image looks like it shows graphic violence, which the Community Guidelines do not allow.',
+    });
+    expect([...storage.objects.keys()].filter((key) => key.includes(mediaId))).toEqual([]);
+
+    const again = await takeDown.execute({ moderatorId, mediaId, removal: { category: 'other' } });
+    expect(again.ok ? null : again.error.code).toBe('MEDIA_WRONG_STATE');
+  });
+
+  it('takes a removed profile photo off the profile, which hides it until a new one is sent', async () => {
+    scanner.labels = [];
+    const mediaId = await upload();
+    await runWorker();
+    expect((await profiles.findByUserId(talentId))?.isComplete).toBe(true);
+
+    await takeDown.execute({ moderatorId, mediaId, removal: { category: 'sexual' } });
+    await runWorker();
+    const profile = await profiles.findByUserId(talentId);
+    expect(profile?.snapshot().avatarMediaId).toBeNull();
+    expect(profile?.isComplete).toBe(false);
+    expect(profile?.missing()).toEqual(['avatar']);
+  });
+
+  it('publishes what waited only for want of a scanner, and leaves what a scanner flagged', async () => {
+    scanner.labels = [{ name: NO_SCAN_LABEL, parentName: null, confidence: 50 }];
+    const avatar = await upload();
+    const post = await upload('portfolio');
+    await runWorker();
+    scanner.labels = BORDERLINE;
+    const flagged = await upload('portfolio');
+    await runWorker();
+    expect((await profiles.findByUserId(talentId))?.isComplete).toBe(false);
+
+    const job = new ReleaseUnscannedMediaJob(
+      assets,
+      new InMemoryUnitOfWork(),
+      clock,
+      pino({ level: 'silent' }),
+    );
+    await job.run();
+    await runWorker();
+
+    expect(assets.rows.get(avatar)).toMatchObject({ status: 'ready', reviewedBy: null });
+    expect(assets.rows.get(post)?.status).toBe('ready');
+    expect(assets.rows.get(flagged)?.status).toBe('held_for_review');
+    expect((await profiles.findByUserId(talentId))?.snapshot().avatarMediaId).toBe(avatar);
+    expect((await profiles.findByUserId(talentId))?.isComplete).toBe(true);
+
+    // Nothing left to do: a second run changes nothing.
+    await job.run();
+    expect(events.events).toEqual([]);
   });
 
   it('pages through a long queue, oldest first', async () => {

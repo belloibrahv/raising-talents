@@ -55,6 +55,10 @@ describe('production configuration', () => {
     expect(problems({ CONTENT_SCANNER: 'development-hold-all' })).toContain('CONTENT_SCANNER');
   });
 
+  it('accepts publishing without a scan, which is a decision and not a fake', () => {
+    expect(problems({ CONTENT_SCANNER: 'off' })).toBe('');
+  });
+
   it('still requires https origins and secure cookies', () => {
     expect(problems({ WEB_ORIGINS: 'http://app.example.com' })).toContain('WEB_ORIGINS');
     expect(problems({ WEB_COOKIE_SECURE: 'false' })).toContain('WEB_COOKIE_SECURE');

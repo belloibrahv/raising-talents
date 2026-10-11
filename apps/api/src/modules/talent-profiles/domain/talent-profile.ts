@@ -208,12 +208,18 @@ export class TalentProfile {
     return { canFinishOnboarding: this.canFinishOnboarding };
   }
 
-  /** The waiting photo was turned down: nothing is waiting any more. */
+  /**
+   * The waiting photo was turned down, or a moderator took down the one in use. Either way
+   * the profile has no photo until a new one is sent, so it stops being shown to others.
+   */
   avatarRejected(mediaId: string, now: Date): void {
-    if (this.props.pendingAvatarMediaId !== mediaId) return;
+    const waiting = this.props.pendingAvatarMediaId === mediaId;
+    const inUse = this.props.avatarMediaId === mediaId;
+    if (!waiting && !inUse) return;
     this.props = {
       ...this.props,
-      pendingAvatarMediaId: null,
+      pendingAvatarMediaId: waiting ? null : this.props.pendingAvatarMediaId,
+      avatarMediaId: inUse ? null : this.props.avatarMediaId,
       version: this.props.version + 1,
       updatedAt: now,
     };

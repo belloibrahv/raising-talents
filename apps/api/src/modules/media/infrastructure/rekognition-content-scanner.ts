@@ -1,5 +1,6 @@
 import { DetectModerationLabelsCommand, type RekognitionClient } from '@aws-sdk/client-rekognition';
 import type { ContentScanner } from '../application/ports.js';
+import { NO_SCAN_LABEL } from '../domain/scan-decision.js';
 
 /** Amazon Rekognition image moderation. Returns every label at 40% or more; the policy decides. */
 export class RekognitionContentScanner implements ContentScanner {
@@ -37,9 +38,18 @@ export class ManualReviewScanner implements ContentScanner {
   constructor(private readonly reviewAt: number) {}
 
   scanImage(): Promise<readonly { name: string; parentName: string | null; confidence: number }[]> {
-    return Promise.resolve([
-      { name: 'No automatic scan: check by eye', parentName: null, confidence: this.reviewAt },
-    ]);
+    return Promise.resolve([{ name: NO_SCAN_LABEL, parentName: null, confidence: this.reviewAt }]);
+  }
+}
+
+/**
+ * Publishing without a check first (ADR-048): nothing is looked at before it goes live, so
+ * there is nothing to report here. Members report what breaks the rules and moderators take
+ * it down.
+ */
+export class NoContentScanner implements ContentScanner {
+  scanImage(): Promise<readonly { name: string; parentName: string | null; confidence: number }[]> {
+    return Promise.resolve([]);
   }
 }
 

@@ -8,7 +8,10 @@ import { VideoPlayer } from '../../shared/media/VideoPlayer';
 import { placeLabel } from '../../shared/places';
 import { timeAgo } from '../../shared/relative-time';
 import { Avatar } from '../../shared/ui/Avatar';
+import { useSession } from '../auth/use-auth';
 import { RemoveMedia } from '../moderation/RemoveMedia';
+import { useMyTalentProfile } from '../profile/queries';
+import { ReportPost } from '../talents/ReportProfile';
 import { useLike } from './queries';
 
 const likesLabel = (likes: number) =>
@@ -56,6 +59,10 @@ interface PostCardProps {
 export function PostCard({ post, eager = false }: PostCardProps) {
   const like = useLike();
   const [burst, setBurst] = useState(false);
+  // Members report what breaks the rules; moderators remove it; nobody reports their own.
+  const me = useSession().me;
+  const mine = useMyTalentProfile(me?.role === 'talent').data?.handle === post.talent.handle;
+  const canReport = (me?.role === 'talent' || me?.role === 'agent') && !mine;
   const { talent } = post;
   const discipline = talent.subcategories[0]?.name ?? talent.category.name;
   const profile = `/talents/${talent.handle}`;
@@ -137,6 +144,7 @@ export function PostCard({ post, eager = false }: PostCardProps) {
           </p>
         ) : null}
         <RemoveMedia mediaId={post.mediaId} what="post" owner={talent.displayName} />
+        {canReport ? <ReportPost postId={post.id} /> : null}
       </div>
     </article>
   );

@@ -29,7 +29,8 @@ Every decision is recorded on the file (who and when) and in the API log as `hel
 Where posts go live without a check first (`CONTENT_SCANNER=off`, ADR-048), nothing reaches
 the queue above. Instead:
 
-- Read the Reports tab daily and open each reported profile.
+- Read the Reports tab daily. Reported posts are shown on each entry with **Remove post**;
+  for a report about the profile as a whole, open the profile.
 - Under a post, choose **Remove post**; on a profile, **Remove profile photo**. Pick the
   closest reason. The files are deleted and the owner is told which rule it broke. A profile
   without its photo is hidden from others until the owner adds a new one.

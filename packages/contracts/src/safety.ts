@@ -16,7 +16,7 @@ export const reportCategorySchema = z.enum([
 export type ReportCategory = z.infer<typeof reportCategorySchema>;
 
 /**
- * What is reported: a talent's public profile, or the other person in a conversation the
+ * What is reported: a talent's public profile, one of their posts, or the other person in a conversation the
  * reporter is part of (ADR-039). Agents have no public page, so a conversation is how they
  * are reported.
  */
@@ -24,6 +24,8 @@ export const reportSubjectSchema = z
   .discriminatedUnion('kind', [
     z.object({ kind: z.literal('talent'), handle: handleSchema }),
     z.object({ kind: z.literal('conversation'), conversationId: idSchema }),
+    /** One post. The report is about its owner, and the moderator is shown the post (ADR-051). */
+    z.object({ kind: z.literal('post'), postId: idSchema }),
   ])
   .meta({ id: 'ReportSubject' });
 
@@ -40,6 +42,9 @@ export const createReportSchema = z
   .meta({ id: 'CreateReport' });
 export type CreateReport = z.input<typeof createReportSchema>;
 
+/** How many reported posts a queue entry shows, most reported first. */
+export const REPORTED_MEDIA_SHOWN = 6;
+
 /** One reported account with all of its open reports. Staff only. */
 export const reportedAccountSchema = z
   .object({
@@ -55,6 +60,19 @@ export const reportedAccountSchema = z
      * conversation, oldest first. Empty for profile reports.
      */
     evidence: z.array(z.object({ body: z.string(), sentAt: isoDateTimeSchema })),
+    /**
+     * Posts and photos named in open reports that are still live, most reported first. A
+     * moderator can take each one down from here.
+     */
+    reportedMedia: z.array(
+      z.object({
+        mediaId: idSchema,
+        reports: z.number().int().positive(),
+        /** A still image to look at: the photo, or the video's poster. */
+        previewUrl: z.string(),
+        kind: z.enum(['image', 'video']),
+      }),
+    ),
     openReports: z.number().int().positive(),
     categories: z.array(
       z.object({ category: reportCategorySchema, count: z.number().int().positive() }),

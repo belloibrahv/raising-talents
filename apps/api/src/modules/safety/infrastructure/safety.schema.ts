@@ -35,6 +35,8 @@ export const reports = safetySchema.table(
     note: text('note').notNull().default(''),
     /** Messages kept from a conversation report, as { body, sentAt } with ISO times. */
     evidence: jsonb('evidence').$type<{ body: string; sentAt: string }[]>().notNull().default([]),
+    /** The post's photo or video, for a report about one post (ADR-051). No foreign key: media is another module's. */
+    mediaId: uuid('media_id'),
     status: reportStatusEnum('status').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
     closedAt: timestamp('closed_at', { withTimezone: true }),
@@ -48,7 +50,14 @@ export const reports = safetySchema.table(
     // One open report per reporter and account, even if two arrive at once.
     uniqueIndex('reports_one_open_per_reporter')
       .on(table.reporterId, table.subjectId)
-      .where(sql`status = 'open'`),
+      .where(sql`status = 'open' and media_id is null`),
+    // And one per reporter and post, so several posts of one person can each be reported.
+    uniqueIndex('reports_one_open_per_reporter_post')
+      .on(table.reporterId, table.mediaId)
+      .where(sql`status = 'open' and media_id is not null`),
+    index('reports_open_media_idx')
+      .on(table.subjectId, table.mediaId)
+      .where(sql`status = 'open' and media_id is not null`),
   ],
 );
 

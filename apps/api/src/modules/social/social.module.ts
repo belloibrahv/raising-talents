@@ -174,6 +174,6 @@ const providers: Provider[] = [
   imports: [AccountsModule, TalentProfilesModule, AgentProfilesModule, MediaModule],
   controllers: [SocialController],
   providers,
-  exports: [SOCIAL.Export],
+  exports: [SOCIAL.Export, SOCIAL.Posts],
 })
 export class SocialModule {}

@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, inArray, ne, sql } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm';
 import type { DrizzleUnitOfWork } from '../../../platform/database/drizzle-unit-of-work.js';
 import {
   NOTES_SHOWN,
@@ -25,10 +25,8 @@ export class DrizzleReportRepository implements ReportRepository {
           sentAt: entry.sentAt.toISOString(),
         })),
       })
-      .onConflictDoNothing({
-        target: [reports.reporterId, reports.subjectId],
-        where: sql`status = 'open'`,
-      })
+      // Either unique index: one open report per reporter and account, and per post.
+      .onConflictDoNothing()
       .returning({ id: reports.id });
     return inserted.length > 0;
   }
@@ -54,7 +52,7 @@ export class DrizzleReportRepository implements ReportRepository {
     if (subjects.length === 0) return [];
 
     const ids = subjects.map((subject) => subject.subjectId);
-    const [categoryRows, noteRows, evidenceRows] = await Promise.all([
+    const [categoryRows, noteRows, evidenceRows, mediaRows] = await Promise.all([
       db
         .select({ subjectId: reports.subjectId, category: reports.category, count: count() })
         .from(reports)
@@ -82,6 +80,11 @@ export class DrizzleReportRepository implements ReportRepository {
           ),
         )
         .orderBy(desc(reports.createdAt)),
+      db
+        .select({ subjectId: reports.subjectId, mediaId: reports.mediaId, count: count() })
+        .from(reports)
+        .where(and(isOpen, inArray(reports.subjectId, ids), isNotNull(reports.mediaId)))
+        .groupBy(reports.subjectId, reports.mediaId),
     ]);
 
     return subjects.map((subject) => ({
@@ -100,6 +103,10 @@ export class DrizzleReportRepository implements ReportRepository {
       evidence: (
         evidenceRows.find((row) => row.subjectId === subject.subjectId)?.evidence ?? []
       ).map((entry) => ({ body: entry.body, sentAt: new Date(entry.sentAt) })),
+      media: mediaRows
+        .filter((row) => row.subjectId === subject.subjectId)
+        .flatMap((row) => (row.mediaId ? [{ mediaId: row.mediaId, count: row.count }] : []))
+        .sort((a, b) => b.count - a.count || a.mediaId.localeCompare(b.mediaId)),
     }));
   }
 

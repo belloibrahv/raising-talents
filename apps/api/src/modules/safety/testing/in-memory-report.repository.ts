@@ -16,7 +16,8 @@ export class InMemoryReportRepository implements ReportRepository {
       (existing) =>
         existing.status === 'open' &&
         existing.reporterId === report.reporterId &&
-        existing.subjectId === report.subjectId,
+        existing.subjectId === report.subjectId &&
+        existing.mediaId === report.mediaId,
     );
     if (!duplicate) this.reports.push(report);
     return Promise.resolve(!duplicate);
@@ -50,6 +51,19 @@ export class InMemoryReportRepository implements ReportRepository {
           [...reports]
             .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
             .find((report) => report.evidence.length > 0)?.evidence ?? [],
+        media: [
+          ...reports
+            .reduce(
+              (counts, report) =>
+                report.mediaId
+                  ? counts.set(report.mediaId, (counts.get(report.mediaId) ?? 0) + 1)
+                  : counts,
+              new Map<string, number>(),
+            )
+            .entries(),
+        ]
+          .map(([mediaId, count]) => ({ mediaId, count }))
+          .sort((a, b) => b.count - a.count || a.mediaId.localeCompare(b.mediaId)),
       };
     });
     const key = (subject: { firstReportedAt: Date; subjectId: string }) =>

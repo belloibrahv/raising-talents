@@ -149,6 +149,31 @@ describe('home', () => {
     expect(screen.queryByRole('button', { name: /^Remove / })).toBeNull();
   });
 
+  it('reports a post from the post itself, and never offers that on your own', async () => {
+    const calls = talentHome({
+      ...feedRoutes([postFor(1), postFor(2, { talent: cardFor('ngozi.sings', 'Ngozi Adeyemi') })]),
+      'POST /v1/reports': () => new Response(null, { status: 204 }),
+    });
+    renderAt('/home');
+    const user = userEvent.setup({ delay: null });
+    const own = await screen.findByRole('article', { name: 'Post by Ngozi Adeyemi' });
+    await waitFor(() => {
+      expect(within(own).queryByRole('button', { name: 'Report post' })).toBeNull();
+    });
+    const post = screen.getByRole('article', { name: 'Post by Tobi Adebayo' });
+    await user.click(within(post).getByRole('button', { name: 'Report post' }));
+    const form = within(post).getByRole('form', { name: 'Report this post' });
+    await user.click(within(form).getByLabelText('Inappropriate photos, video or text'));
+    await user.click(within(form).getByRole('button', { name: 'Send report' }));
+    expect(
+      await within(post).findByText('Thank you. A moderator will look at this post.'),
+    ).toBeVisible();
+    expect(calls.find((call) => call.path === '/v1/reports')?.body).toEqual({
+      subject: { kind: 'post', postId: '0192a3b4-0000-7000-8000-000000000001' },
+      category: 'inappropriate_content',
+    });
+  });
+
   it('lets an agent search straight from home, or browse a category', async () => {
     stubApi({
       '/v1/auth/web/refresh': () => signedIn(meFor({ role: 'agent', status: 'active' })),

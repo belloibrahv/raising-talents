@@ -19,6 +19,7 @@ import { ModerationTabs } from './ModerationTabs';
 import { Badge } from '@/components/ui/badge';
 import { CircleCheckBig } from 'lucide-react';
 import { EmptyState } from '../../shared/ui/EmptyState';
+import { RemoveMedia } from './RemoveMedia';
 
 const QUEUE_KEY = ['moderation', 'reports'] as const;
 
@@ -151,6 +152,34 @@ function ReportedAccountCard({
           <ul className="m-0 grid list-disc gap-1.5 ps-5">
             {item.notes.map((entry) => (
               <li key={entry.reportedAt + entry.note}>{entry.note}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+      {item.reportedMedia.length > 0 ? (
+        <section className="stack gap-2" aria-label={t('moderation.reportedPosts')}>
+          <h3 className="text-sm text-muted-foreground">{t('moderation.reportedPosts')}</h3>
+          <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3">
+            {item.reportedMedia.map((entry) => (
+              <li key={entry.mediaId} className="grid content-start gap-2">
+                <img
+                  className="aspect-[4/5] w-full rounded-xl bg-muted object-cover"
+                  src={entry.previewUrl}
+                  alt={t(
+                    entry.kind === 'video'
+                      ? 'moderation.reportedVideoAlt'
+                      : 'moderation.reportedPhotoAlt',
+                    { name },
+                  )}
+                  loading="lazy"
+                />
+                <span className="text-xs text-muted-foreground">
+                  {t(entry.reports === 1 ? 'moderation.reportedOnce' : 'moderation.reportedTimes', {
+                    count: entry.reports,
+                  })}
+                </span>
+                <RemoveMedia mediaId={entry.mediaId} what="post" owner={name} />
+              </li>
             ))}
           </ul>
         </section>

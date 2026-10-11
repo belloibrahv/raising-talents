@@ -20,6 +20,13 @@ import {
 
 const CONVERSATION = '0192a3b4-0000-7000-8000-0000000000e9';
 
+const POST_A = '0192a3b4-0000-7000-8000-0000000000a1';
+const POST_B = '0192a3b4-0000-7000-8000-0000000000a2';
+const POST_GONE = '0192a3b4-0000-7000-8000-0000000000a3';
+const MEDIA_A = '0192a3b4-0000-7000-8000-0000000000b1';
+const MEDIA_B = '0192a3b4-0000-7000-8000-0000000000b2';
+const MEDIA_GONE = '0192a3b4-0000-7000-8000-0000000000b3';
+
 describe('Reports and enforcement', () => {
   let clock: FixedClock;
   let events: InMemoryEventRecorder;
@@ -71,7 +78,32 @@ describe('Reports and enforcement', () => {
             ? { profile: { handle: 'tobi.adewale', displayName: 'Tobi Adewale' } }
             : null,
         ),
+      cardFor: async (userId) =>
+        userId === talentId && (await accounts.facade.profileContext(talentId))?.status === 'active'
+          ? { handle: 'tobi.adewale' }
+          : null,
     };
+    // The talent has two live posts and one that was taken down.
+    const posts = new Map([
+      [POST_A, { talentId, mediaId: MEDIA_A }],
+      [POST_B, { talentId, mediaId: MEDIA_B }],
+      [POST_GONE, { talentId, mediaId: MEDIA_GONE }],
+    ]);
+    const mediaFile = (id: string, status: string) =>
+      [
+        id,
+        {
+          kind: 'image' as const,
+          status,
+          urls: { medium: `https://media.test/${id}/1024.webp` },
+          video: null,
+        },
+      ] as const;
+    const files = new Map([
+      mediaFile(MEDIA_A, 'ready'),
+      mediaFile(MEDIA_B, 'ready'),
+      mediaFile(MEDIA_GONE, 'rejected'),
+    ]);
     const uow = new InMemoryUnitOfWork();
     // One conversation, between the first agent and the talent; the agent wrote twice.
     const conversations: SafetyConversations = {
@@ -96,15 +128,24 @@ describe('Reports and enforcement', () => {
       accounts.facade,
       talents,
       conversations,
+      { find: (postId) => Promise.resolve(posts.get(postId) ?? null) },
       new InMemoryRateLimiter(),
       clock,
     );
-    list = new ListReportedAccountsQuery(reports, accounts.facade, talents, {
-      summaryOf: (userId) =>
-        Promise.resolve(
-          userId === agentId ? { agencyName: 'Fake Stars Agency', verified: true } : null,
-        ),
-    });
+    list = new ListReportedAccountsQuery(
+      reports,
+      accounts.facade,
+      talents,
+      {
+        summaryOf: (userId) =>
+          Promise.resolve(
+            userId === agentId ? { agencyName: 'Fake Stars Agency', verified: true } : null,
+          ),
+      },
+      {
+        describe: (ids) => Promise.resolve(new Map([...files].filter(([id]) => ids.includes(id)))),
+      },
+    );
     decide = new DecideReportsHandler(
       reports,
       accounts.facade,
@@ -132,6 +173,7 @@ describe('Reports and enforcement', () => {
           status: 'active',
           talent: { handle: 'tobi.adewale', displayName: 'Tobi Adewale' },
           agent: null,
+          reportedMedia: [],
           openReports: 2,
           categories: [{ category: 'scam_or_harassment', count: 2 }],
           notes: [
@@ -171,6 +213,45 @@ describe('Reports and enforcement', () => {
       category: 'other',
     });
     expect(notMine.ok ? null : notMine.error.code).toBe('NOT_FOUND');
+  });
+
+  it('takes a report about one post, and shows moderators the posts that are still live', async () => {
+    const about = (reporterId: string, postId: string) =>
+      file.execute(reporterId, {
+        subject: { kind: 'post', postId },
+        category: 'inappropriate_content',
+      });
+    expect((await about(agentId, POST_A)).ok).toBe(true);
+    expect((await about(otherAgentId, POST_A)).ok).toBe(true);
+    // The same person can report another post of the same talent, and the profile too.
+    expect((await about(agentId, POST_B)).ok).toBe(true);
+    expect((await about(agentId, POST_GONE)).ok).toBe(true);
+    expect((await report(agentId)).ok).toBe(true);
+    // Reporting the same post twice adds nothing.
+    expect((await about(agentId, POST_A)).ok).toBe(true);
+    expect(reports.reports).toHaveLength(5);
+
+    const queue = await list.execute(moderatorId);
+    if (!queue.ok) throw new Error(queue.error.message);
+    expect(queue.value.items).toHaveLength(1);
+    expect(queue.value.items[0]).toMatchObject({
+      accountId: talentId,
+      openReports: 5,
+      reportedMedia: [
+        {
+          mediaId: MEDIA_A,
+          reports: 2,
+          kind: 'image',
+          previewUrl: `https://media.test/${MEDIA_A}/1024.webp`,
+        },
+        { mediaId: MEDIA_B, reports: 1 },
+      ],
+    });
+
+    const own = await about(talentId, POST_A);
+    expect(own.ok ? null : own.error.code).toBe('FORBIDDEN');
+    const missing = await about(agentId, '0192a3b4-0000-7000-8000-00000000dead');
+    expect(missing.ok ? null : missing.error.code).toBe('NOT_FOUND');
   });
 
   it('refuses reports on yourself, on unknown profiles, and from unverified accounts', async () => {

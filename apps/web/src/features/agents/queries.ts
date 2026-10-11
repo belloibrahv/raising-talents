@@ -73,7 +73,9 @@ export function useSaveAgent() {
   return useMutation({
     mutationFn: ({ id, save }: { id: string; save: boolean }) =>
       api.call(save ? 'agents.save' : 'agents.unsave', { params: { id } }),
-    onMutate: ({ id, save }) => {
+    onMutate: async ({ id, save }) => {
+      // A list still loading would put the old answer back over this one.
+      await queryClient.cancelQueries({ queryKey: agentKeys.all });
       show(id, save);
     },
     onError: (_error, { id, save }) => {

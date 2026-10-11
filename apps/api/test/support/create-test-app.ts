@@ -209,6 +209,7 @@ export async function createTestApp(overrides: Record<string, string> = {}): Pro
     IDENTITY.EventHandlers,
     MEDIA.EventHandlers,
     TALENT.EventHandlers,
+    AGENT.EventHandlers,
     NOTIFICATIONS.EventHandlers,
   ]) {
     moduleRef.get<ModuleEventHandlers>(token).register(dispatcher);

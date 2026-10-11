@@ -52,22 +52,31 @@ export function SaveAgentButton({
   const Icon = saved ? BookmarkCheck : Bookmark;
   const label = t(saved ? 'agents.savedNamed' : 'agents.saveNamed', { name });
   const toggle = () => {
-    save.mutate({ id, save: !saved });
+    // A second press while saving would undo the first.
+    if (!save.isPending) save.mutate({ id, save: !saved });
   };
+  const refused = save.error ? (
+    <p role="alert" className="m-0 text-sm text-destructive">
+      {errorMessage(save.error)}
+    </p>
+  ) : null;
   if (compact) {
     return (
-      <button
-        type="button"
-        aria-pressed={saved}
-        aria-label={label}
-        className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full transition-colors hover:bg-accent active:scale-90"
-        onClick={toggle}
-      >
-        <Icon
-          aria-hidden="true"
-          className={cn('size-5', saved && 'fill-primary/15 text-primary')}
-        />
-      </button>
+      <span className="flex shrink-0 flex-col items-end gap-1">
+        <button
+          type="button"
+          aria-pressed={saved}
+          aria-label={label}
+          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full transition-colors hover:bg-accent active:scale-90"
+          onClick={toggle}
+        >
+          <Icon
+            aria-hidden="true"
+            className={cn('size-5', saved && 'fill-primary/15 text-primary')}
+          />
+        </button>
+        {refused}
+      </span>
     );
   }
   return (
@@ -82,11 +91,7 @@ export function SaveAgentButton({
         <Icon aria-hidden="true" />
         {t(saved ? 'agents.saved' : 'agents.save')}
       </Button>
-      {save.error ? (
-        <p role="alert" className="m-0 text-sm text-destructive">
-          {errorMessage(save.error)}
-        </p>
-      ) : null}
+      {refused}
     </div>
   );
 }

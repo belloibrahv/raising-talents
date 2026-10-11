@@ -73,6 +73,7 @@ describe('Notifier', () => {
       agentId: AGENT,
       talentId: OWNER,
       status: 'requested',
+      requestedBy: 'agent' as const,
       agencyName: 'Eko Talent Partners',
       talentName: 'Amaka Okafor',
     };
@@ -101,6 +102,7 @@ describe('Notifier', () => {
       agentId: AGENT,
       talentId: OWNER,
       status: 'withdrawn',
+      requestedBy: 'agent' as const,
       agencyName: 'Eko Talent Partners',
       talentName: 'Amaka Okafor',
     });
@@ -243,5 +245,37 @@ describe('Notifier', () => {
     expect(sent.map((message) => message.subject)).toEqual([
       'Your Raising Talents account is suspended',
     ]);
+  });
+
+  it('tells the agent about a submission, and the talent about the answer (ADR-050)', async () => {
+    const submission = {
+      agentId: AGENT,
+      talentId: OWNER,
+      status: 'requested',
+      requestedBy: 'talent' as const,
+      agencyName: 'Eko Talent Partners',
+      talentName: 'Amaka Okafor',
+    };
+    contacts.set('s1', submission);
+    await notifier.contactRequested(event('messaging.ContactRequested', 's1'));
+    expect(sent.at(-1)).toMatchObject({
+      to: 'tunde@eko-talent.example',
+      subject: 'Amaka Okafor sent you a submission',
+    });
+    expect((await inbox.page(AGENT, null, 10))[0]?.content).toEqual({
+      kind: 'submission_received',
+      conversationId: 's1',
+      talentName: 'Amaka Okafor',
+    });
+
+    contacts.set('s1', { ...submission, status: 'declined' });
+    const before = sent.length;
+    await notifier.contactAnswered(event('messaging.ContactDeclined', 's1'), false);
+    // A decline is told in the app only.
+    expect(sent).toHaveLength(before);
+    expect((await inbox.page(OWNER, null, 10))[0]?.content).toEqual({
+      kind: 'submission_declined',
+      agencyName: 'Eko Talent Partners',
+    });
   });
 });

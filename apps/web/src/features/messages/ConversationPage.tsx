@@ -185,9 +185,9 @@ function NextStep({
 }) {
   if (summary.blockedByMe) return <Blocked summary={summary} name={name} />;
   if (summary.awaitingMyAnswer) return <Answer summary={summary} name={name} />;
-  // The talent's side of a request they cannot answer: the agent blocked it.
-  const viewerIsTalent = summary.counterpart.kind === 'agent';
-  if (viewerIsTalent && summary.status !== 'accepted') {
+  // The side that was asked, with nothing left to answer: they declined it, or the other
+  // person blocked it.
+  if (!summary.requestedByMe && summary.status !== 'accepted') {
     return summary.status === 'declined' ? (
       <Note icon={Info} title={t('messages.youDeclined', { name })} />
     ) : (
@@ -197,7 +197,15 @@ function NextStep({
   if (summary.status === 'requested') return <Waiting summary={summary} name={name} />;
   if (summary.status === 'withdrawn') {
     return (
-      <Note icon={Info} title={t('messages.withdrawnTitle')} body={t('messages.withdrawnBody')} />
+      <Note
+        icon={Info}
+        title={t('messages.withdrawnTitle')}
+        body={t(
+          summary.counterpart.kind === 'agent'
+            ? 'messages.withdrawnSubmissionBody'
+            : 'messages.withdrawnBody',
+        )}
+      />
     );
   }
   if (summary.status === 'declined') {
@@ -205,7 +213,11 @@ function NextStep({
       <Note
         icon={Info}
         title={t('messages.declinedTitle', { name })}
-        body={t('messages.declinedBody')}
+        body={t(
+          summary.counterpart.kind === 'agent'
+            ? 'messages.declinedSubmissionBody'
+            : 'messages.declinedBody',
+        )}
       />
     );
   }
@@ -248,20 +260,26 @@ function Answer({
 }) {
   const respond = useRespond(summary.id);
   const [confirming, setConfirming] = useState(false);
+  // An agent answering a talent's submission, rather than a talent answering an agent.
+  const submission = summary.counterpart.kind === 'talent';
   return (
     <section
       className="stack gap-4 rounded-2xl border-2 border-spotlight bg-spotlight/10 p-5"
       aria-labelledby="answer-heading"
     >
       <h2 id="answer-heading" className="text-lg font-semibold">
-        {t('messages.requestTitle', { agency: name })}
+        {t(submission ? 'messages.submissionTitle' : 'messages.requestTitle', { agency: name })}
       </h2>
-      <p className="m-0 text-sm">{t('messages.requestBody')}</p>
+      <p className="m-0 text-sm">
+        {t(submission ? 'messages.submissionBody' : 'messages.requestBody')}
+      </p>
       <FormMessage tone="error">{respond.error ? errorMessage(respond.error) : null}</FormMessage>
       {confirming ? (
         <div className="stack gap-3" role="group" aria-labelledby="decline-confirm">
           <p id="decline-confirm" className="m-0 font-medium">
-            {t('messages.declineConfirm', { agency: name })}
+            {t(submission ? 'messages.declineSubmissionConfirm' : 'messages.declineConfirm', {
+              agency: name,
+            })}
           </p>
           <div className="row gap-2">
             <Button

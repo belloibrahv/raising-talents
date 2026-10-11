@@ -81,6 +81,24 @@ export function useConversationWithTalent(handle: string, enabled: boolean) {
   });
 }
 
+const withAgentKey = (agentId: string) => ['conversations', 'with-agent', agentId] as const;
+
+/** The talent's conversation with one agent, for that agent's page. Null when there is none. */
+export function useConversationWithAgent(agentId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: withAgentKey(agentId),
+    enabled,
+    queryFn: async (): Promise<ConversationSummary | null> => {
+      try {
+        return await api.call('messaging.withAgent', { params: { id: agentId } });
+      } catch (error) {
+        if (isApiError(error, 'NOT_FOUND')) return null;
+        throw error;
+      }
+    },
+  });
+}
+
 function useRefreshAfter() {
   const queryClient = useQueryClient();
   return (summary: ConversationSummary) => {
@@ -88,6 +106,8 @@ function useRefreshAfter() {
     if (summary.counterpart.kind === 'talent') {
       queryClient.setQueryData(withTalentKey(summary.counterpart.handle), summary);
     }
+    // An agent's page shows the same conversation: let it ask again.
+    else void queryClient.invalidateQueries({ queryKey: ['conversations', 'with-agent'] });
     void queryClient.invalidateQueries({ queryKey: listKey });
     void queryClient.invalidateQueries({ queryKey: unreadKey });
     void queryClient.invalidateQueries({ queryKey: threadKey(summary.id) });
@@ -103,6 +123,23 @@ export function useRequestContact() {
         body: { message: input.message, clientMessageId: input.clientMessageId },
       }),
     onSuccess: refresh,
+  });
+}
+
+/** A talent's first message to an agent who is open for submissions (ADR-050). */
+export function useSubmitToAgent() {
+  const refresh = useRefreshAfter();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: { agentId: string; message: string; clientMessageId: string }) =>
+      api.call('messaging.submitToAgent', {
+        params: { id: input.agentId },
+        body: { message: input.message, clientMessageId: input.clientMessageId },
+      }),
+    onSuccess: (summary, input) => {
+      queryClient.setQueryData(withAgentKey(input.agentId), summary);
+      refresh(summary);
+    },
   });
 }
 

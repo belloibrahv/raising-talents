@@ -139,6 +139,30 @@ function show(notice: Notification): Shown {
         body: t('notifications.contactDeclinedBody'),
         to: '/search',
       };
+    case 'submission_received':
+      return {
+        icon: MessageSquareText,
+        tone: 'neutral',
+        title: t('notifications.submissionReceived', { name: notice.talentName }),
+        body: t('notifications.submissionReceivedBody'),
+        to: `/messages/${notice.conversationId}`,
+      };
+    case 'submission_accepted':
+      return {
+        icon: MessageCircleHeart,
+        tone: 'good',
+        title: t('notifications.submissionAccepted', { agency: notice.agencyName }),
+        body: t('notifications.contactAcceptedBody'),
+        to: `/messages/${notice.conversationId}`,
+      };
+    case 'submission_declined':
+      return {
+        icon: MessageCircleX,
+        tone: 'neutral',
+        title: t('notifications.submissionDeclined', { agency: notice.agencyName }),
+        body: t('notifications.submissionDeclinedBody'),
+        to: '/agents',
+      };
     case 'new_follower':
       return {
         icon: UserPlus,

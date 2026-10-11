@@ -10,6 +10,8 @@ export const conversationStatus = messagingSchema.enum('conversation_status', [
   'withdrawn',
 ]);
 
+export const conversationSide = messagingSchema.enum('conversation_side', ['agent', 'talent']);
+
 /** One per agent and talent. Both sides cascade: an erased account takes its conversations. */
 export const conversations = messagingSchema.table(
   'conversations',
@@ -22,6 +24,8 @@ export const conversations = messagingSchema.table(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     status: conversationStatus('status').notNull(),
+    /** Who asked: the agent (a contact request) or the talent (a submission, ADR-050). */
+    requestedBy: conversationSide('requested_by').notNull().default('agent'),
     requestedAt: timestamp('requested_at', { withTimezone: true }).notNull(),
     respondedAt: timestamp('responded_at', { withTimezone: true }),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),

@@ -12,6 +12,7 @@ import type { ProfileAccounts } from '../../talent-profiles/application/ports.js
 import {
   AgentProfile,
   AgentProfileErrors,
+  type AgentListing,
   type AgentProfilePatch,
   type AgentProfileRepository,
 } from '../domain/agent-profile.js';
@@ -122,7 +123,18 @@ export class AgentDirectory {
   constructor(
     private readonly profiles: AgentProfileRepository,
     private readonly taxonomy: TaxonomySource,
+    private readonly listing: AgentListing,
   ) {}
+
+  /**
+   * Whether talent can write to this agent first (ADR-050): open, closed, or null when the
+   * agent is not one talent can find (unverified, unfinished or not in good standing).
+   */
+  async submissions(agentId: string): Promise<'open' | 'closed' | null> {
+    const [listed] = await this.listing.listedAmong([agentId]);
+    if (!listed) return null;
+    return listed.snapshot().rosterStatus === 'open' ? 'open' : 'closed';
+  }
 
   async summaryOf(agentId: string): Promise<{
     agencyName: string;

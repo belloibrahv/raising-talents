@@ -20,7 +20,9 @@ import {
   MarkConversationReadHandler,
   MessagingExport,
   MessagingUnreadQuery,
+  ConversationWithAgentQuery,
   RequestContactHandler,
+  SubmitToAgentHandler,
   RespondToContactHandler,
   SendMessageHandler,
   WithdrawContactHandler,
@@ -65,6 +67,12 @@ class FakeTalents implements MessagingTalents {
 
 class FakeAgents implements MessagingAgents {
   readonly verified = new Set<string>();
+  /** Agents talent can write to first. */
+  readonly open = new Set<string>();
+  async submissions(agentId: string) {
+    if (!this.verified.has(agentId)) return null;
+    return this.open.has(agentId) ? ('open' as const) : ('closed' as const);
+  }
   async summaryOf(agentId: string) {
     return {
       agencyName: 'Eko Talent Partners',
@@ -88,6 +96,8 @@ describe('contact requests and chat (ADR-011, ADR-038)', () => {
   let agents: FakeAgents;
   let limiter: InMemoryRateLimiter;
   let ask: RequestContactHandler;
+  let submit: SubmitToAgentHandler;
+  let withAgent: ConversationWithAgentQuery;
   let respond: RespondToContactHandler;
   let withdraw: WithdrawContactHandler;
   let send: SendMessageHandler;
@@ -121,6 +131,17 @@ describe('contact requests and chat (ADR-011, ADR-038)', () => {
       uow,
       clock,
     );
+    submit = new SubmitToAgentHandler(
+      conversations,
+      views,
+      accounts.facade,
+      talents,
+      agents,
+      limiter,
+      uow,
+      clock,
+    );
+    withAgent = new ConversationWithAgentQuery(conversations, views, accounts.facade);
     respond = new RespondToContactHandler(conversations, views, uow, clock);
     withdraw = new WithdrawContactHandler(conversations, views, uow, clock);
     send = new SendMessageHandler(conversations, views, limiter, uow, clock);
@@ -391,5 +412,138 @@ describe('contact requests and chat (ADR-011, ADR-038)', () => {
     expect(blocked.ok && blocked.value).toMatchObject({ status: 'withdrawn', blockedByMe: true });
     expect((await get.execute(talentId, id)).ok).toBe(false);
     expect(await unread.execute(talentId)).toEqual({ unread: 0 });
+  });
+
+  describe('submissions: a talent writes first (ADR-050)', () => {
+    const SUBMISSION =
+      'Hello, I am a singer from Lagos with two EPs out. I would love you to hear my latest set.';
+    const apply = (clientMessageId = ids.a) =>
+      submit.execute(talentId, agentId, { message: SUBMISSION, clientMessageId });
+
+    beforeEach(() => {
+      agents.open.add(agentId);
+    });
+
+    it('lets a talent write to an open agent, who is the one to answer', async () => {
+      const sent = await apply();
+      expect(sent.ok && sent.value).toMatchObject({
+        status: 'requested',
+        counterpart: { kind: 'agent', agencyName: 'Eko Talent Partners' },
+        requestedByMe: true,
+        awaitingMyAnswer: false,
+        canSend: false,
+      });
+      const id = sent.ok ? sent.value.id : '';
+      expect(events.ofType(ConversationEvents.ContactRequested)[0]?.payload).toMatchObject({
+        requestedBy: 'talent',
+      });
+      // The agent has something to answer; the talent does not.
+      expect(await unread.execute(agentId)).toEqual({ unread: 1 });
+      expect(await unread.execute(talentId)).toEqual({ unread: 0 });
+      const forAgent = await get.execute(agentId, id);
+      expect(forAgent.ok && forAgent.value).toMatchObject({
+        awaitingMyAnswer: true,
+        requestedByMe: false,
+        counterpart: { kind: 'talent', displayName: 'Ngozi Adeyemi' },
+      });
+      // The talent cannot accept their own submission.
+      const self = await respond.execute(talentId, id, true);
+      expect(self.ok ? null : self.error.code).toBe('NOT_FOUND');
+
+      const accepted = await respond.execute(agentId, id, true);
+      expect(accepted.ok && accepted.value).toMatchObject({ status: 'accepted', canSend: true });
+      const reply = await send.execute(talentId, id, {
+        body: 'Thank you!',
+        clientMessageId: ids.b,
+      });
+      expect(reply.ok).toBe(true);
+      const found = await withAgent.execute(talentId, agentId);
+      expect(found.ok && found.value.id).toBe(id);
+    });
+
+    it('is safe to retry, and says so when one is already waiting', async () => {
+      const first = await apply();
+      const retry = await apply();
+      expect(retry.ok && first.ok && retry.value.id).toBe(first.ok ? first.value.id : '');
+      const second = await apply(ids.b);
+      expect(second.ok ? null : second.error.code).toBe('CONTACT_REQUEST_PENDING');
+    });
+
+    it('refuses agents who are not open, not listed, or already asking', async () => {
+      agents.open.delete(agentId);
+      const closed = await apply();
+      expect(closed.ok ? null : [closed.error.code, closed.error.message]).toEqual([
+        'FORBIDDEN',
+        'This agent is not open for submissions right now. Save them and check back later.',
+      ]);
+
+      agents.verified.delete(agentId);
+      const unlisted = await apply();
+      expect(unlisted.ok ? null : unlisted.error.code).toBe('NOT_FOUND');
+
+      agents.verified.add(agentId);
+      agents.open.add(agentId);
+      await request(ids.c);
+      const crossed = await apply(ids.b);
+      expect(crossed.ok ? null : crossed.error.code).toBe('CONFLICT');
+    });
+
+    it('keeps it to talent whose profile others can see', async () => {
+      const asAgent = await submit.execute(agentId, agentId, {
+        message: SUBMISSION,
+        clientMessageId: ids.a,
+      });
+      expect(asAgent.ok ? null : asAgent.error.code).toBe('WRONG_ROLE');
+      talents.visible.delete('ngozi');
+      const hidden = await apply();
+      expect(hidden.ok ? null : hidden.error.code).toBe('FORBIDDEN');
+    });
+
+    it('makes a declined talent wait, but lets the agent reach out at once', async () => {
+      const sent = await apply();
+      const id = sent.ok ? sent.value.id : '';
+      const declined = await respond.execute(agentId, id, false);
+      expect(declined.ok && declined.value.status).toBe('declined');
+      // The agent no longer sees what they declined; the talent still sees their own.
+      expect((await get.execute(agentId, id)).ok).toBe(false);
+      expect((await get.execute(talentId, id)).ok).toBe(true);
+
+      const tooSoon = await apply(ids.b);
+      expect(tooSoon.ok ? null : tooSoon.error.code).toBe('CONTACT_DECLINED_RECENTLY');
+      // The agent changed their mind: that is their call to make.
+      const reachedOut = await request(ids.c);
+      expect(reachedOut.ok && reachedOut.value).toMatchObject({
+        id,
+        status: 'requested',
+        requestedByMe: true,
+      });
+      expect(await unread.execute(talentId)).toEqual({ unread: 1 });
+    });
+
+    it('lets the talent take a submission back, and limits how many go out in a day', async () => {
+      const sent = await apply();
+      const id = sent.ok ? sent.value.id : '';
+      const byAgent = await withdraw.execute(agentId, id);
+      expect(byAgent.ok ? null : byAgent.error.code).toBe('NOT_FOUND');
+      const withdrawn = await withdraw.execute(talentId, id);
+      expect(withdrawn.ok && withdrawn.value.status).toBe('withdrawn');
+      expect(await unread.execute(agentId)).toEqual({ unread: 0 });
+
+      for (let n = 0; n < 4; n += 1) {
+        const other = await accounts.createAccount({
+          email: `agent${String(n)}@x.example`,
+          role: 'agent',
+        });
+        agents.verified.add(other);
+        agents.open.add(other);
+        const ok = await submit.execute(talentId, other, {
+          message: SUBMISSION,
+          clientMessageId: `0192a3b4-0000-7000-8000-0000000000${String(n).padStart(2, '0')}`,
+        });
+        expect(ok.ok).toBe(true);
+      }
+      const sixth = await apply(ids.b);
+      expect(sixth.ok ? null : sixth.error.code).toBe('RATE_LIMITED');
+    });
   });
 });

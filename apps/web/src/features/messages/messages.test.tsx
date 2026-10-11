@@ -50,6 +50,7 @@ const summary = (overrides: Partial<ConversationSummary>): ConversationSummary =
   unread: 1,
   canSend: false,
   awaitingMyAnswer: true,
+  requestedByMe: false,
   blockedByMe: false,
   requestedAt: '2026-10-03T09:00:00.000Z',
   updatedAt: '2026-10-03T09:00:00.000Z',
@@ -201,6 +202,7 @@ describe('messages', () => {
           lastMessage: intro(true),
           unread: 0,
           awaitingMyAnswer: false,
+          requestedByMe: true,
         });
         return Response.json(existing, { status: 201 });
       },
@@ -264,6 +266,7 @@ describe('messages', () => {
       lastMessage: intro(true),
       unread: 0,
       awaitingMyAnswer: false,
+      requestedByMe: true,
     });
     stubApi({
       '/v1/auth/web/refresh': () => signedIn(agent),

@@ -1,11 +1,13 @@
-import type { FeedScope, Post, PostPage, TalentSocial } from '@rt/contracts';
+import type { CommentPage, FeedScope, Post, PostPage, TalentSocial } from '@rt/contracts';
 import {
   useInfiniteQuery,
   useMutation,
   useQuery,
   useQueryClient,
   type InfiniteData,
+  type QueryClient,
 } from '@tanstack/react-query';
+import { isApiError } from '../../shared/api/api-error';
 import { api } from '../../shared/api/client';
 
 /** Every list of posts shares the 'posts' prefix, so a like can update all of them at once. */
@@ -16,6 +18,9 @@ export const socialKeys = {
   social: (handle: string) => ['social', handle] as const,
   suggestions: ['suggestions'] as const,
   following: ['following'] as const,
+  /** One post on its own. Kept apart from the lists, which hold pages. */
+  post: (id: string) => ['post', id] as const,
+  comments: (postId: string) => ['comments', postId] as const,
 };
 
 const nextPage = (last: PostPage) => last.nextCursor ?? undefined;
@@ -103,13 +108,19 @@ const withPost = (pages: Pages | undefined, id: string, change: (post: Post) => 
     })),
   };
 
+/** Changes one post in every list that shows it, and on its own page. */
+function changePost(queryClient: QueryClient, id: string, change: (post: Post) => Post) {
+  queryClient.setQueriesData<Pages>({ queryKey: socialKeys.posts }, (pages) =>
+    withPost(pages, id, change),
+  );
+  queryClient.setQueryData<Post>(socialKeys.post(id), (post) => post && change(post));
+}
+
 /** Like or take a like back. Every list showing the post updates at once. */
 export function useLike() {
   const queryClient = useQueryClient();
   const everywhere = (id: string, change: (post: Post) => Post) => {
-    queryClient.setQueriesData<Pages>({ queryKey: socialKeys.posts }, (pages) =>
-      withPost(pages, id, change),
-    );
+    changePost(queryClient, id, change);
   };
   return useMutation({
     mutationFn: ({ id, like }: { id: string; like: boolean }) =>
@@ -130,6 +141,78 @@ export function useLike() {
     },
     onSuccess: (state, { id }) => {
       everywhere(id, (post) => ({ ...post, ...state }));
+    },
+  });
+}
+
+export function usePost(id: string) {
+  return useQuery({
+    queryKey: socialKeys.post(id),
+    queryFn: () => api.call('posts.get', { params: { id } }),
+    retry: (failures, error) => !isApiError(error, 'NOT_FOUND') && failures < 2,
+  });
+}
+
+type CommentPages = InfiniteData<CommentPage>;
+
+export function useComments(postId: string) {
+  return useInfiniteQuery({
+    queryKey: socialKeys.comments(postId),
+    queryFn: ({ pageParam }) =>
+      api.call('posts.comments', {
+        params: { id: postId },
+        query: pageParam ? { cursor: pageParam } : {},
+      }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: (last: CommentPage) => last.nextCursor ?? undefined,
+  });
+}
+
+/** Adds a comment at the top of the list and to the count on the post. */
+export function useAddComment(postId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (body: string) =>
+      api.call('posts.comment', { params: { id: postId }, body: { body } }),
+    onSuccess: (comment) => {
+      queryClient.setQueryData<CommentPages>(socialKeys.comments(postId), (data) =>
+        data
+          ? {
+              ...data,
+              pages: data.pages.map((page, index) => ({
+                ...page,
+                items: index === 0 ? [comment, ...page.items] : page.items,
+                total: page.total + 1,
+              })),
+            }
+          : data,
+      );
+      changePost(queryClient, postId, (post) => ({ ...post, comments: post.comments + 1 }));
+    },
+  });
+}
+
+export function useDeleteComment(postId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => api.call('comments.delete', { params: { id } }),
+    onSuccess: (_nothing, id) => {
+      queryClient.setQueryData<CommentPages>(socialKeys.comments(postId), (data) =>
+        data
+          ? {
+              ...data,
+              pages: data.pages.map((page) => ({
+                ...page,
+                items: page.items.filter((comment) => comment.id !== id),
+                total: Math.max(0, page.total - 1),
+              })),
+            }
+          : data,
+      );
+      changePost(queryClient, postId, (post) => ({
+        ...post,
+        comments: Math.max(0, post.comments - 1),
+      }));
     },
   });
 }

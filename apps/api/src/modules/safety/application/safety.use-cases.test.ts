@@ -23,6 +23,7 @@ const CONVERSATION = '0192a3b4-0000-7000-8000-0000000000e9';
 const POST_A = '0192a3b4-0000-7000-8000-0000000000a1';
 const POST_B = '0192a3b4-0000-7000-8000-0000000000a2';
 const POST_GONE = '0192a3b4-0000-7000-8000-0000000000a3';
+const COMMENT = '0192a3b4-0000-7000-8000-0000000000c1';
 const MEDIA_A = '0192a3b4-0000-7000-8000-0000000000b1';
 const MEDIA_B = '0192a3b4-0000-7000-8000-0000000000b2';
 const MEDIA_GONE = '0192a3b4-0000-7000-8000-0000000000b3';
@@ -41,6 +42,7 @@ describe('Reports and enforcement', () => {
   let otherAgentId: string;
   let moderatorId: string;
   let signedOut: string[];
+  let comments: Map<string, { authorId: string; body: string; postedAt: Date }>;
 
   const activeMember = async (email: string, role: 'talent' | 'agent') => {
     const id = await accounts.createAccount({ email, role });
@@ -89,6 +91,12 @@ describe('Reports and enforcement', () => {
       [POST_B, { talentId, mediaId: MEDIA_B }],
       [POST_GONE, { talentId, mediaId: MEDIA_GONE }],
     ]);
+    comments = new Map([
+      [
+        COMMENT,
+        { authorId: agentId, body: 'Pay me and I will get you signed.', postedAt: clock.now() },
+      ],
+    ]);
     const mediaFile = (id: string, status: string) =>
       [
         id,
@@ -129,6 +137,7 @@ describe('Reports and enforcement', () => {
       talents,
       conversations,
       { find: (postId) => Promise.resolve(posts.get(postId) ?? null) },
+      { forReport: (commentId) => Promise.resolve(comments.get(commentId) ?? null) },
       new InMemoryRateLimiter(),
       clock,
     );
@@ -252,6 +261,36 @@ describe('Reports and enforcement', () => {
     expect(own.ok ? null : own.error.code).toBe('FORBIDDEN');
     const missing = await about(agentId, '0192a3b4-0000-7000-8000-00000000dead');
     expect(missing.ok ? null : missing.error.code).toBe('NOT_FOUND');
+  });
+
+  it('takes a report about a comment, about its author, and keeps the words', async () => {
+    const about = (reporterId: string, commentId: string) =>
+      file.execute(reporterId, {
+        subject: { kind: 'comment', commentId },
+        category: 'scam_or_harassment',
+      });
+    expect((await about(talentId, COMMENT)).ok).toBe(true);
+    // The author deletes it; the moderator still reads what was reported.
+    comments.clear();
+
+    const queue = await list.execute(moderatorId);
+    if (!queue.ok) throw new Error(queue.error.message);
+    expect(queue.value.items[0]).toMatchObject({
+      accountId: agentId,
+      openReports: 1,
+      evidence: [{ body: 'Pay me and I will get you signed.' }],
+    });
+
+    const missing = await about(talentId, COMMENT);
+    expect(missing.ok ? null : missing.error.code).toBe('NOT_FOUND');
+  });
+
+  it('refuses a report on your own comment', async () => {
+    const own = await file.execute(agentId, {
+      subject: { kind: 'comment', commentId: COMMENT },
+      category: 'other',
+    });
+    expect(own.ok ? null : own.error.code).toBe('FORBIDDEN');
   });
 
   it('refuses reports on yourself, on unknown profiles, and from unverified accounts', async () => {

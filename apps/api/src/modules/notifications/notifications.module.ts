@@ -158,6 +158,7 @@ import { NotificationsController } from './interface/http/notifications.controll
               notifier.contactAnswered(event, false),
             );
             dispatcher.on(SocialEvents.TalentFollowed, (event) => notifier.newFollower(event));
+            dispatcher.on(SocialEvents.PostCommented, (event) => notifier.postCommented(event));
           },
         };
       },

@@ -26,6 +26,8 @@ export const reportSubjectSchema = z
     z.object({ kind: z.literal('conversation'), conversationId: idSchema }),
     /** One post. The report is about its owner, and the moderator is shown the post (ADR-051). */
     z.object({ kind: z.literal('post'), postId: idSchema }),
+    /** One comment. The report is about its author, and keeps what they wrote (ADR-052). */
+    z.object({ kind: z.literal('comment'), commentId: idSchema }),
   ])
   .meta({ id: 'ReportSubject' });
 
@@ -57,7 +59,7 @@ export const reportedAccountSchema = z
     agent: z.object({ agencyName: z.string(), verified: z.boolean() }).nullable(),
     /**
      * From the newest conversation report: the reported person's own latest messages in that
-     * conversation, oldest first. Empty for profile reports.
+     * conversation, oldest first; or the reported comment. Empty for profile reports.
      */
     evidence: z.array(z.object({ body: z.string(), sentAt: isoDateTimeSchema })),
     /**

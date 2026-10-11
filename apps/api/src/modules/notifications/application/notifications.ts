@@ -306,6 +306,28 @@ export class Notifier {
     await this.realtime?.publish([event.aggregateId], { type: 'notifications' });
   }
 
+  /** Told in the app only, once per comment. */
+  async postCommented(event: DomainEvent): Promise<void> {
+    const { commentId, postId, commenterName } = event.payload;
+    if (
+      typeof commentId !== 'string' ||
+      typeof postId !== 'string' ||
+      typeof commenterName !== 'string' ||
+      !commenterName
+    ) {
+      return;
+    }
+    await this.inbox.add({
+      id: newId(),
+      key: `${event.type}:${commentId}`,
+      userId: event.aggregateId,
+      content: { kind: 'post_commented', postId, commenterName },
+      createdAt: event.occurredAt,
+      readAt: null,
+    });
+    await this.realtime?.publish([event.aggregateId], { type: 'notifications' });
+  }
+
   private async deliver(
     event: DomainEvent,
     userId: string,

@@ -1,4 +1,4 @@
-import { index, pgSchema, primaryKey, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { index, pgSchema, primaryKey, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 import { users } from '../../accounts/infrastructure/account.schema.js';
 import { portfolioItems } from '../../portfolio/infrastructure/portfolio.schema.js';
 
@@ -41,5 +41,27 @@ export const likes = socialSchema.table(
     primaryKey({ columns: [table.userId, table.itemId] }),
     // Counting the likes on a page of posts.
     index('likes_item_idx').on(table.itemId),
+  ],
+);
+
+/** Comments under a piece of work (ADR-052). Removing the work or the account removes them. */
+export const comments = socialSchema.table(
+  'comments',
+  {
+    id: uuid('id').primaryKey(),
+    itemId: uuid('item_id')
+      .notNull()
+      .references(() => portfolioItems.id, { onDelete: 'cascade' }),
+    authorId: uuid('author_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    body: text('body').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    // A post's comments, newest first, and the count on a page of posts.
+    index('comments_item_recent_idx').on(table.itemId, table.createdAt, table.id),
+    // What one person wrote, for their data export.
+    index('comments_author_idx').on(table.authorId, table.createdAt),
   ],
 );

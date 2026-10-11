@@ -51,6 +51,8 @@ export const dataExportSchema = z
     ),
     /** Talent the person follows. The handle is null for someone who has since left. */
     following: z.array(z.object({ handle: z.string().nullable(), followedAt: isoDateTimeSchema })),
+    /** Comments the person wrote under posts, newest first. */
+    comments: z.array(z.object({ body: z.string(), postedAt: isoDateTimeSchema })),
     /**
      * Requests and chats the person is in, with the messages they wrote. The other person's
      * messages are theirs, so only the count is included.

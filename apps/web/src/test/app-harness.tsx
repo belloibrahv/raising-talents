@@ -90,6 +90,7 @@ export const postFor = (n: number, overrides: Record<string, unknown> = {}) => (
   talent: cardFor('tobi.sprint', 'Tobi Adebayo'),
   likes: 0,
   liked: false,
+  comments: 0,
   urls: imageUrls(`post-${String(n)}`),
   ...overrides,
 });

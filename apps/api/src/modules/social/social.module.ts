@@ -20,6 +20,15 @@ import type { TalentDirectory } from '../talent-profiles/application/get-talent-
 import { TALENT } from '../talent-profiles/application/talent-profile.tokens.js';
 import { TalentProfilesModule } from '../talent-profiles/talent-profiles.module.js';
 import {
+  AddCommentHandler,
+  CommentAuthors,
+  CommentEvidence,
+  COMMENTS,
+  DeleteCommentHandler,
+  GetPostQuery,
+  ListCommentsQuery,
+} from './application/comments.use-cases.js';
+import {
   FeedQuery,
   FollowingQuery,
   FollowTalentHandler,
@@ -33,8 +42,14 @@ import {
   UnfollowTalentHandler,
   UnlikePostHandler,
 } from './application/social.use-cases.js';
-import type { FollowRepository, LikeRepository, PostSource } from './domain/social.js';
+import type {
+  CommentRepository,
+  FollowRepository,
+  LikeRepository,
+  PostSource,
+} from './domain/social.js';
 import {
+  DrizzleCommentRepository,
   DrizzleFollowRepository,
   DrizzleLikeRepository,
   DrizzlePostSource,
@@ -61,9 +76,88 @@ const providers: Provider[] = [
   },
   {
     provide: ASSEMBLER,
-    inject: [TALENT.Directory, MEDIA.Facade, SOCIAL.Likes],
-    useFactory: (talents: TalentDirectory, media: MediaFacade, likes: LikeRepository) =>
-      new PostAssembler(talents, media, likes),
+    inject: [TALENT.Directory, MEDIA.Facade, SOCIAL.Likes, COMMENTS.Repository],
+    useFactory: (
+      talents: TalentDirectory,
+      media: MediaFacade,
+      likes: LikeRepository,
+      comments: CommentRepository,
+    ) => new PostAssembler(talents, media, likes, comments),
+  },
+  {
+    provide: COMMENTS.Repository,
+    inject: [PLATFORM.UnitOfWork],
+    useFactory: (uow: DrizzleUnitOfWork) => new DrizzleCommentRepository(uow),
+  },
+  {
+    provide: COMMENTS.Authors,
+    inject: [ACCOUNTS.Facade, TALENT.Directory, AGENT.Directory],
+    useFactory: (accounts: AccountsFacade, talents: TalentDirectory, agents: AgentDirectory) =>
+      new CommentAuthors(accounts, talents, agents),
+  },
+  {
+    provide: COMMENTS.GetPost,
+    inject: [SOCIAL.Posts, ASSEMBLER, ACCOUNTS.Facade],
+    useFactory: (posts: PostSource, assembler: PostAssembler, accounts: AccountsFacade) =>
+      new GetPostQuery(posts, assembler, accounts),
+  },
+  {
+    provide: COMMENTS.List,
+    inject: [COMMENTS.Repository, SOCIAL.Posts, ASSEMBLER, COMMENTS.Authors, ACCOUNTS.Facade],
+    useFactory: (
+      comments: CommentRepository,
+      posts: PostSource,
+      assembler: PostAssembler,
+      authors: CommentAuthors,
+      accounts: AccountsFacade,
+    ) => new ListCommentsQuery(comments, posts, assembler, authors, accounts),
+  },
+  {
+    provide: COMMENTS.Add,
+    inject: [
+      COMMENTS.Repository,
+      SOCIAL.Posts,
+      ASSEMBLER,
+      COMMENTS.Authors,
+      ACCOUNTS.Facade,
+      PLATFORM.EventRecorder,
+      PLATFORM.UnitOfWork,
+      PLATFORM.RateLimiter,
+      PLATFORM.Clock,
+    ],
+    useFactory: (
+      comments: CommentRepository,
+      posts: PostSource,
+      assembler: PostAssembler,
+      authors: CommentAuthors,
+      accounts: AccountsFacade,
+      events: EventRecorder,
+      uow: UnitOfWork,
+      rateLimiter: RateLimiter,
+      clock: Clock,
+    ) =>
+      new AddCommentHandler(
+        comments,
+        posts,
+        assembler,
+        authors,
+        accounts,
+        events,
+        uow,
+        rateLimiter,
+        clock,
+      ),
+  },
+  {
+    provide: COMMENTS.Delete,
+    inject: [COMMENTS.Repository, SOCIAL.Posts, ACCOUNTS.Facade],
+    useFactory: (comments: CommentRepository, posts: PostSource, accounts: AccountsFacade) =>
+      new DeleteCommentHandler(comments, posts, accounts),
+  },
+  {
+    provide: COMMENTS.Evidence,
+    inject: [COMMENTS.Repository],
+    useFactory: (comments: CommentRepository) => new CommentEvidence(comments),
   },
   {
     provide: SOCIAL.Feed,
@@ -169,11 +263,11 @@ const providers: Provider[] = [
   },
 ];
 
-/** Following talent, liking their work, and the feed (ADR-047). */
+/** Following talent, liking their work, the feed (ADR-047) and comments (ADR-052). */
 @Module({
   imports: [AccountsModule, TalentProfilesModule, AgentProfilesModule, MediaModule],
   controllers: [SocialController],
   providers,
-  exports: [SOCIAL.Export, SOCIAL.Posts],
+  exports: [SOCIAL.Export, SOCIAL.Posts, COMMENTS.Evidence],
 })
 export class SocialModule {}

@@ -27,6 +27,9 @@ const VerifyEmailPage = lazy(() =>
 const AgentsPage = lazy(() =>
   import('../features/agents/AgentsPage').then((m) => ({ default: m.AgentsPage })),
 );
+const PostPage = lazy(() =>
+  import('../features/social/PostPage').then((m) => ({ default: m.PostPage })),
+);
 const AgentProfilePage = lazy(() =>
   import('../features/agents/AgentProfilePage').then((m) => ({ default: m.AgentProfilePage })),
 );
@@ -219,6 +222,7 @@ export function buildRoutes(updatePrompt: ReactNode = null): RouteObject[] {
                 { path: 'onboarding/agent', element: <AgentOnboardingPage /> },
                 { path: 'portfolio', element: <PortfolioPage /> },
                 { path: 'talents/:handle', element: <TalentProfilePage /> },
+                { path: 'posts/:id', element: <PostPage /> },
                 { path: 'search', element: <SearchPage /> },
                 { path: 'agents', element: <AgentsPage /> },
                 { path: 'agents/:id', element: <AgentProfilePage /> },

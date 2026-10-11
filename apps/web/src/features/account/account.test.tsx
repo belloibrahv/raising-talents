@@ -46,6 +46,7 @@ describe('account page', () => {
           portfolio: null,
           shortlist: [],
           following: [],
+          comments: [],
           savedAgents: [],
           conversations: [],
           notifications: [],

@@ -39,6 +39,7 @@ import { MessagingModule } from '../messaging/messaging.module.js';
 import type { MediaFacade } from '../media/application/media.facade.js';
 import { MEDIA } from '../media/application/media.use-cases.js';
 import { MediaModule } from '../media/media.module.js';
+import { COMMENTS, type CommentEvidence } from '../social/application/comments.use-cases.js';
 import { SOCIAL } from '../social/application/social.use-cases.js';
 import type { PostSource } from '../social/domain/social.js';
 import { SocialModule } from '../social/social.module.js';
@@ -69,6 +70,7 @@ import { SocialModule } from '../social/social.module.js';
         TALENT.Directory,
         MESSAGING.Evidence,
         SOCIAL.Posts,
+        COMMENTS.Evidence,
         PLATFORM.RateLimiter,
         PLATFORM.Clock,
       ],
@@ -78,9 +80,20 @@ import { SocialModule } from '../social/social.module.js';
         talents: TalentDirectory,
         conversations: ConversationEvidence,
         posts: PostSource,
+        comments: CommentEvidence,
         limiter: RateLimiter,
         clock: Clock,
-      ) => new FileReportHandler(reports, accounts, talents, conversations, posts, limiter, clock),
+      ) =>
+        new FileReportHandler(
+          reports,
+          accounts,
+          talents,
+          conversations,
+          posts,
+          comments,
+          limiter,
+          clock,
+        ),
     },
     {
       provide: SAFETY.List,

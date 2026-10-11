@@ -1,5 +1,5 @@
 import type { Post } from '@rt/contracts';
-import { BadgeCheck, Heart } from 'lucide-react';
+import { BadgeCheck, Heart, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { cn } from '@/lib/utils';
@@ -12,10 +12,13 @@ import { useSession } from '../auth/use-auth';
 import { RemoveMedia } from '../moderation/RemoveMedia';
 import { useMyTalentProfile } from '../profile/queries';
 import { ReportPost } from '../talents/ReportProfile';
+import { Comments } from './Comments';
 import { useLike } from './queries';
 
 const likesLabel = (likes: number) =>
   likes === 1 ? t('social.likesOne') : t('social.likes', { count: likes });
+const commentsLabel = (count: number) =>
+  count === 1 ? t('comments.countOne') : t('comments.count', { count });
 
 /** The heart under a post. Filled and red once liked, as people expect from every feed. */
 export function LikeButton({ post }: { readonly post: Post }) {
@@ -50,15 +53,18 @@ interface PostCardProps {
   readonly post: Post;
   /** The first posts on screen load at once; the rest wait until they are scrolled to. */
   readonly eager?: boolean;
+  /** Comments are folded away in a feed and open on the post's own page. */
+  readonly commentsOpen?: boolean;
 }
 
 /**
- * One piece of work in a feed: who posted it, the photo or clip, the like, and the caption.
- * Pressing the photo twice likes it, the gesture people already know.
+ * One piece of work in a feed: who posted it, the photo or clip, the like, the caption and the
+ * comments. Pressing the photo twice likes it, the gesture people already know.
  */
-export function PostCard({ post, eager = false }: PostCardProps) {
+export function PostCard({ post, eager = false, commentsOpen = false }: PostCardProps) {
   const like = useLike();
   const [burst, setBurst] = useState(false);
+  const [showComments, setShowComments] = useState(commentsOpen);
   // Members report what breaks the rules; moderators remove it; nobody reports their own.
   const me = useSession().me;
   const own = useMyTalentProfile(me?.role === 'talent');
@@ -137,7 +143,21 @@ export function PostCard({ post, eager = false }: PostCardProps) {
       )}
 
       <div className="grid gap-1 px-4 pt-1 pb-4">
-        <LikeButton post={post} />
+        <div className="flex items-center gap-3">
+          <LikeButton post={post} />
+          <button
+            type="button"
+            aria-expanded={showComments}
+            aria-label={t('comments.toggle', { name: talent.displayName })}
+            className="flex h-11 cursor-pointer items-center gap-1.5 rounded-full px-2.5 text-sm font-semibold transition-colors hover:bg-accent"
+            onClick={() => {
+              setShowComments((shown) => !shown);
+            }}
+          >
+            <MessageCircle aria-hidden="true" className="size-6" />
+            {commentsLabel(post.comments)}
+          </button>
+        </div>
         {post.caption ? (
           <p className="m-0 leading-relaxed">
             <Link to={profile} className="mr-1.5 font-semibold text-foreground no-underline">
@@ -153,6 +173,7 @@ export function PostCard({ post, eager = false }: PostCardProps) {
             <ReportPost postId={post.id} />
           </div>
         ) : null}
+        {showComments ? <Comments postId={post.id} owner={talent.displayName} /> : null}
       </div>
     </article>
   );

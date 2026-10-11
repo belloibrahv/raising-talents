@@ -47,6 +47,7 @@ export interface PrivacySources {
   portfolio(userId: string): Promise<Result<MyPortfolio, DomainError>>;
   shortlist(userId: string): Promise<DataExport['shortlist']>;
   following(userId: string): Promise<DataExport['following']>;
+  comments(userId: string): Promise<DataExport['comments']>;
   savedAgents(userId: string): Promise<DataExport['savedAgents']>;
   conversations(userId: string): Promise<DataExport['conversations']>;
   notifications(userId: string): Promise<DataExport['notifications']>;
@@ -141,6 +142,7 @@ export class ExportMyDataQuery {
       portfolio,
       shortlist,
       following,
+      comments,
       savedAgents,
       conversations,
       notifications,
@@ -152,6 +154,7 @@ export class ExportMyDataQuery {
       this.sources.portfolio(userId),
       this.sources.shortlist(userId),
       this.sources.following(userId),
+      this.sources.comments(userId),
       this.sources.savedAgents(userId),
       this.sources.conversations(userId),
       this.sources.notifications(userId),
@@ -167,6 +170,7 @@ export class ExportMyDataQuery {
       shortlist,
       savedAgents,
       following,
+      comments,
       conversations,
       notifications,
       media: media.map((file) => ({

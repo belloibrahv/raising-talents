@@ -82,6 +82,11 @@ export interface SafetyPosts {
   find(postId: string): Promise<{ talentId: string; mediaId: string } | null>;
 }
 
+/** What safety needs from comments. Implemented by CommentEvidence (ADR-052). */
+export interface SafetyComments {
+  forReport(commentId: string): Promise<{ authorId: string; body: string; postedAt: Date } | null>;
+}
+
 /** What safety needs from media. Implemented by MediaFacade. */
 export interface SafetyMedia {
   describe(ids: readonly string[]): Promise<
@@ -108,7 +113,7 @@ export const SafetyErrors = {
   cannotReport: () => domainError('FORBIDDEN', 'Verify your email before reporting a profile.'),
   ownProfile: () => domainError('FORBIDDEN', 'You cannot report your own profile.'),
   subjectNotFound: () =>
-    domainError('NOT_FOUND', 'This profile, post or conversation is not available.'),
+    domainError('NOT_FOUND', 'This profile, post, comment or conversation is not available.'),
   noOpenReports: () =>
     domainError(
       'NOT_FOUND',
@@ -129,6 +134,7 @@ export class FileReportHandler {
     private readonly talents: SafetyTalents,
     private readonly conversations: SafetyConversations,
     private readonly posts: SafetyPosts,
+    private readonly comments: SafetyComments,
     private readonly rateLimiter: RateLimiter,
     private readonly clock: Clock,
   ) {}
@@ -151,6 +157,17 @@ export class FileReportHandler {
       // A post nobody else can see answers like a missing one.
       if (!post || !(await this.talents.cardFor(post.talentId))) return null;
       return { subjectId: post.talentId, evidence: [], mediaId: post.mediaId };
+    }
+    if (target.kind === 'comment') {
+      const comment = await this.comments.forReport(target.commentId);
+      // The words are kept with the report, so they are there if the comment is deleted.
+      return comment
+        ? {
+            subjectId: comment.authorId,
+            evidence: [{ body: comment.body, sentAt: comment.postedAt }],
+            mediaId: null,
+          }
+        : null;
     }
     const found = await this.conversations.forReport(target.conversationId, reporterId);
     return found ? { ...found, mediaId: null } : null;

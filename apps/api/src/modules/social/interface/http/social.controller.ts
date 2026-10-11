@@ -1,19 +1,26 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
+  HttpCode,
   Inject,
   Param,
   ParseUUIDPipe,
+  Post as HttpPost,
   Put,
   Query,
   UseGuards,
 } from '@nestjs/common';
 import {
+  createCommentSchema,
   cursorQuerySchema,
   feedQuerySchema,
+  type Comment,
+  type CommentPage,
   type FeedQuery as FeedQueryParams,
   type LikeState,
+  type Post,
   type PostPage,
   type Suggestions,
   type TalentCardPage,
@@ -25,6 +32,13 @@ import type { Principal } from '../../../../platform/http/authenticated-request.
 import { CurrentPrincipal } from '../../../../platform/http/current-principal.decorator.js';
 import { unwrap } from '../../../../platform/http/problem.js';
 import { ZodValidationPipe } from '../../../../platform/http/zod-validation.pipe.js';
+import {
+  COMMENTS,
+  type AddCommentHandler,
+  type DeleteCommentHandler,
+  type GetPostQuery,
+  type ListCommentsQuery,
+} from '../../application/comments.use-cases.js';
 import {
   SOCIAL,
   type FeedQuery,
@@ -40,7 +54,7 @@ import {
 
 type CursorQuery = z.infer<typeof cursorQuerySchema>;
 
-/** Following talent, liking their work, and the feed (ADR-047). */
+/** Following talent, liking their work, the feed (ADR-047) and comments (ADR-052). */
 @Controller('v1')
 @UseGuards(AuthGuard)
 export class SocialController {
@@ -54,6 +68,10 @@ export class SocialController {
     @Inject(SOCIAL.Unfollow) private readonly unfollowTalent: UnfollowTalentHandler,
     @Inject(SOCIAL.Like) private readonly likePost: LikePostHandler,
     @Inject(SOCIAL.Unlike) private readonly unlikePost: UnlikePostHandler,
+    @Inject(COMMENTS.GetPost) private readonly onePost: GetPostQuery,
+    @Inject(COMMENTS.List) private readonly listComments: ListCommentsQuery,
+    @Inject(COMMENTS.Add) private readonly addComment: AddCommentHandler,
+    @Inject(COMMENTS.Delete) private readonly deleteComment: DeleteCommentHandler,
   ) {}
 
   @Get('feed')
@@ -124,5 +142,42 @@ export class SocialController {
     @Param('id', ParseUUIDPipe) id: string,
   ): Promise<LikeState> {
     return unwrap(await this.unlikePost.execute(principal.userId, id));
+  }
+
+  @Get('posts/:id')
+  async post(
+    @CurrentPrincipal() principal: Principal,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<Post> {
+    return unwrap(await this.onePost.execute(principal.userId, id));
+  }
+
+  @Get('posts/:id/comments')
+  async comments(
+    @CurrentPrincipal() principal: Principal,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query(new ZodValidationPipe(cursorQuerySchema)) query: CursorQuery,
+  ): Promise<CommentPage> {
+    return unwrap(await this.listComments.execute(principal.userId, id, query.cursor));
+  }
+
+  @HttpPost('posts/:id/comments')
+  async comment(
+    @CurrentPrincipal() principal: Principal,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(new ZodValidationPipe(createCommentSchema)) body: z.output<typeof createCommentSchema>,
+  ): Promise<Comment> {
+    return unwrap(
+      await this.addComment.execute({ userId: principal.userId, itemId: id, body: body.body }),
+    );
+  }
+
+  @Delete('comments/:id')
+  @HttpCode(204)
+  async removeComment(
+    @CurrentPrincipal() principal: Principal,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<void> {
+    unwrap(await this.deleteComment.execute(principal.userId, id));
   }
 }

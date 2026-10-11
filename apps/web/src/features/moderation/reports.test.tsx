@@ -132,7 +132,7 @@ describe('the reports queue', () => {
     });
     expect(within(card).getByText('Agent at Fake Stars Agency')).toBeVisible();
     const evidence = within(card).getByRole('region', {
-      name: 'What they wrote in the reported conversation',
+      name: 'What they wrote',
     });
     expect(evidence).toHaveTextContent('Pay a registration fee first.');
     await expectNoAxeViolations();

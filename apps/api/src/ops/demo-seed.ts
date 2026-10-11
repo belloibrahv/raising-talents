@@ -634,7 +634,17 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
     ...visible.map((entry) => ({ who: talentAccounts.get(entry.handle), own: entry.handle })),
     { who: tunde, own: null },
   ];
+  // One comment from each on the first talent they follow. A second run finds its own
+  // comment there and writes nothing.
+  const remarks = [
+    'This is brilliant. Well done.',
+    'Great work. Looking forward to the next one.',
+    'So much progress since the last post.',
+    'Love the energy in this.',
+    'Clean. You make it look easy.',
+  ];
   let follows = 0;
+  let comments = 0;
   for (const [index, follower] of followers.entries()) {
     if (!follower.who) continue;
     const others = visible.filter((entry) => entry.handle !== follower.own);
@@ -650,11 +660,24 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
         follower.who,
       );
       const [latest] = posts.body.items ?? [];
-      if (latest) await api.call('PUT', `/v1/posts/${latest.id}/like`, follower.who);
+      if (!latest) continue;
+      await api.call('PUT', `/v1/posts/${latest.id}/like`, follower.who);
+      if (step !== 1) continue;
+      const existing = await api.call<{ items?: { mine: boolean }[] }>(
+        'GET',
+        `/v1/posts/${latest.id}/comments`,
+        follower.who,
+      );
+      if (existing.status !== 200 || existing.body.items?.some((entry) => entry.mine)) continue;
+      const written = await api.call('POST', `/v1/posts/${latest.id}/comments`, {
+        ...follower.who,
+        body: { body: remarks[index % remarks.length] },
+      });
+      if (written.status === 201) comments += 1;
     }
   }
   report.push(
-    `social: ${String(follows)} follows, with a like on each followed talent's latest post`,
+    `social: ${String(follows)} follows, with a like on each followed talent's latest post, and ${String(comments)} new comments`,
   );
 
   // A talent writes first to an agent who is open (ADR-050), so the agent has one to answer.

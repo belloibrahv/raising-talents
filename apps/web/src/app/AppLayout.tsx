@@ -103,9 +103,10 @@ export function AppLayout() {
           ) : (
             <nav
               aria-label={t('nav.main')}
-              className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:static md:ml-auto md:border-0 md:bg-transparent md:pb-0"
+              // A floating bar on phones, clear of the home indicator; inline in the header when wide.
+              className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-30 mx-auto max-w-md rounded-full border bg-background/85 px-1.5 shadow-xl shadow-black/10 backdrop-blur-xl md:static md:mx-0 md:ml-auto md:max-w-none md:rounded-none md:border-0 md:bg-transparent md:px-0 md:shadow-none md:backdrop-blur-none"
             >
-              <ul className="mx-auto flex max-w-md list-none justify-around p-0 md:max-w-none md:gap-1">
+              <ul className="m-0 flex list-none justify-around p-0 md:gap-1">
                 {destinations.map(({ to, label, icon: Icon }) => (
                   <li key={to} className="flex-1 md:flex-none">
                     <NavLink
@@ -113,7 +114,7 @@ export function AppLayout() {
                       end={to === '/home'}
                       className={({ isActive }) =>
                         cn(
-                          'flex min-h-14 flex-col items-center justify-center gap-1 rounded-xl px-3 text-xs font-semibold text-muted-foreground no-underline transition-colors hover:text-foreground md:min-h-10 md:flex-row md:gap-2 md:rounded-full md:px-4 md:text-sm',
+                          'flex min-h-15 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[0.6875rem] font-semibold text-muted-foreground no-underline transition-colors hover:text-foreground md:min-h-10 md:flex-row md:gap-2 md:px-4 md:text-sm',
                           isActive && 'text-foreground md:bg-accent',
                         )
                       }
@@ -122,22 +123,23 @@ export function AppLayout() {
                         <>
                           <span
                             className={cn(
-                              'relative grid h-7 w-12 place-items-center rounded-full transition-colors md:h-auto md:w-auto',
+                              'relative grid size-9 place-items-center rounded-full transition-colors md:size-auto',
+                              // The tab you are on is a filled circle, as in the bar's design.
                               isActive &&
-                                'bg-accent text-accent-foreground md:bg-transparent md:text-current',
+                                'bg-primary text-primary-foreground shadow-md shadow-primary/30 md:bg-transparent md:text-current md:shadow-none',
                             )}
                           >
                             <Icon aria-hidden="true" className="size-5 md:size-4" />
                             {to === '/account' && me && !me.emailVerified ? (
                               <span
                                 aria-hidden="true"
-                                className="absolute top-0.5 right-2.5 size-2.5 rounded-full bg-destructive ring-2 ring-background md:-top-0.5 md:-right-1"
+                                className="absolute top-0 right-0 size-2.5 rounded-full bg-destructive ring-2 ring-background md:-top-0.5 md:-right-1"
                               />
                             ) : null}
                             {to === '/messages' && waiting > 0 ? (
                               <span
                                 aria-hidden="true"
-                                className="absolute -top-1 right-0.5 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-destructive px-1 text-[10px] leading-none font-bold text-destructive-foreground ring-2 ring-background md:-top-2 md:-right-3"
+                                className="absolute -top-1 -right-1.5 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-destructive px-1 text-[10px] leading-none font-bold text-destructive-foreground ring-2 ring-background md:-top-2 md:-right-3"
                               >
                                 {waiting > 9 ? '9+' : waiting}
                               </span>

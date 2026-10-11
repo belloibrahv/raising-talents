@@ -202,9 +202,7 @@ describe('comments', () => {
     const post = await openPost();
     const comment = await within(post).findByRole('article', { name: 'Comment by Zainab Bello' });
     expect(within(comment).getByRole('button', { name: 'Delete' })).toBeVisible();
-    expect(
-      within(comment).queryByRole('button', { name: 'Report' }),
-    ).not.toBeInTheDocument();
+    expect(within(comment).queryByRole('button', { name: 'Report' })).not.toBeInTheDocument();
     expect(within(post).queryByRole('textbox')).not.toBeInTheDocument();
   });
 

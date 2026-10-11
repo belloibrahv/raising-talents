@@ -474,7 +474,7 @@ function Composer({ conversationId }: { readonly conversationId: string }) {
   const nearLimit = body.length > MESSAGE_MAX * 0.9;
   return (
     <form
-      className="sticky bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-20 -mx-2 grid gap-2 rounded-3xl border bg-card/95 p-2 shadow-lg backdrop-blur md:bottom-4"
+      className="sticky bottom-[calc(5.25rem+env(safe-area-inset-bottom))] z-20 -mx-2 grid gap-2 rounded-3xl border bg-card/95 p-2 shadow-lg backdrop-blur md:bottom-4"
       noValidate
       onSubmit={(event: SubmitEvent) => {
         event.preventDefault();

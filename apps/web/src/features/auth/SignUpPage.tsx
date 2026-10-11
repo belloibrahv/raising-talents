@@ -1,6 +1,6 @@
-import { PASSWORD_MIN_LENGTH } from '@rt/contracts';
+import { PASSWORD_MIN_LENGTH, type SelectableRole } from '@rt/contracts';
 import { useState, type SubmitEvent } from 'react';
-import { Link } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { z } from 'zod';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
@@ -16,6 +16,7 @@ import { useFocusFirstError } from '../../shared/ui/use-focus-first-error';
 import { DateOfBirthField } from './DateOfBirthField';
 import { EMPTY_DATE, toIsoDate, type DateParts } from './date-of-birth';
 import { fieldErrorsFrom } from './form-errors';
+import { joiningAs, roleFromLink } from './joining-as';
 import { useSignUp } from './use-auth';
 
 type Field = 'email' | 'password' | 'dateOfBirth' | 'acceptedTerms';
@@ -23,8 +24,14 @@ type Errors = Partial<Record<Field, string>>;
 
 const emailSchema = z.email();
 
+const ROLES: readonly SelectableRole[] = ['talent', 'agent'];
+
 export function SignUpPage() {
   const signUp = useSignUp();
+  const [search] = useSearchParams();
+  const [role, setRole] = useState<SelectableRole | null>(
+    () => roleFromLink(search) ?? joiningAs.get(),
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState<DateParts>(EMPTY_DATE);
@@ -44,6 +51,8 @@ export function SignUpPage() {
     setErrors(found);
     if (Object.keys(found).length > 0 || !isoDate) return;
 
+    // Remembered for the next screen, which sets the account up as this without asking again.
+    joiningAs.set(role);
     signUp.mutate(
       {
         email: normalisedEmail,
@@ -76,6 +85,29 @@ export function SignUpPage() {
     <Page title={t('signUp.title')} subtitle={t('signUp.subtitle')}>
       <form ref={form} className="stack" onSubmit={submit} noValidate>
         <FormMessage tone="error">{formError}</FormMessage>
+        <fieldset className="m-0 grid gap-2 border-0 p-0">
+          <legend className="mb-2 p-0 text-sm font-medium">{t('signUp.joiningAs')}</legend>
+          <div className="grid grid-cols-2 gap-2">
+            {ROLES.map((value) => (
+              <label
+                key={value}
+                className="flex min-h-12 cursor-pointer items-center justify-center rounded-xl border-2 border-border bg-card px-3 text-center text-sm font-semibold transition-colors hover:border-input has-checked:border-primary has-checked:bg-accent has-checked:text-primary has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
+              >
+                <input
+                  type="radio"
+                  name="role"
+                  value={value}
+                  checked={role === value}
+                  className="sr-only"
+                  onChange={() => {
+                    setRole(value);
+                  }}
+                />
+                {t(`signUp.as.${value}`)}
+              </label>
+            ))}
+          </div>
+        </fieldset>
         <TextField
           label={t('signUp.email')}
           type="email"

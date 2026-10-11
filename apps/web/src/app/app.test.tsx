@@ -26,7 +26,37 @@ describe('the web app', () => {
     ).toHaveFocus();
     expect(router.state.location.pathname).toBe('/welcome');
     expect(document.title).toBe('Raising Talents');
+    const [asTalent] = screen.getAllByRole('link', { name: 'Join as talent' });
+    const [asAgent] = screen.getAllByRole('link', { name: 'Join as agent' });
+    expect(asTalent).toHaveAttribute('href', '/sign-up?as=talent');
+    expect(asAgent).toHaveAttribute('href', '/sign-up?as=agent');
     await expectNoAxeViolations();
+  });
+
+  it('sets up someone who joined as an agent without asking which again', async () => {
+    const calls = stubApi({
+      '/v1/auth/web/refresh': () => problem(401, 'UNAUTHENTICATED'),
+      '/v1/auth/web/sign-up': () => signedIn(meFor({ emailVerified: false, role: null })),
+      'POST /v1/me/role': () => Response.json(meFor({ role: 'agent', status: 'onboarding' })),
+      'GET /v1/me/agent-profile': () => problem(404, 'NOT_FOUND'),
+      'GET /v1/taxonomy': () => Response.json(TAXONOMY),
+    });
+    const router = renderAt('/sign-up?as=agent');
+    const user = userEvent.setup({ delay: null });
+    expect(await screen.findByRole('radio', { name: 'Agent or scout' })).toBeChecked();
+    expect(screen.getByRole('radio', { name: 'Talent' })).not.toBeChecked();
+    await user.type(screen.getByLabelText('Email'), 'ada.obi@ekotalent.example');
+    await user.type(screen.getByLabelText('Password'), 'relay-baton-ikorodu-26');
+    await user.type(screen.getByLabelText('Day'), '4');
+    await user.selectOptions(screen.getByLabelText('Month'), 'March');
+    await user.type(screen.getByLabelText('Year'), '1988');
+    await user.click(screen.getByLabelText(/I agree to the Terms/));
+    await user.click(screen.getByRole('button', { name: 'Create account' }));
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe('/onboarding/agent');
+    });
+    expect(calls.find((call) => call.path === '/v1/me/role')?.body).toEqual({ role: 'agent' });
+    expect(sessionStorage.getItem('rt.joining-as')).toBeNull();
   });
 
   it('signs in a talent who has not finished setting up, and resumes the profile wizard', async () => {

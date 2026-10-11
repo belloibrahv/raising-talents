@@ -178,7 +178,15 @@ function ReportedAccountCard({
                     count: entry.reports,
                   })}
                 </span>
-                <RemoveMedia mediaId={entry.mediaId} what="post" owner={name} />
+                <RemoveMedia
+                  mediaId={entry.mediaId}
+                  what="post"
+                  owner={name}
+                  onRemoved={() => {
+                    onDecided(t('moderation.removed'));
+                    void queryClient.invalidateQueries({ queryKey: QUEUE_KEY });
+                  }}
+                />
               </li>
             ))}
           </ul>

@@ -61,8 +61,11 @@ export function PostCard({ post, eager = false }: PostCardProps) {
   const [burst, setBurst] = useState(false);
   // Members report what breaks the rules; moderators remove it; nobody reports their own.
   const me = useSession().me;
-  const mine = useMyTalentProfile(me?.role === 'talent').data?.handle === post.talent.handle;
-  const canReport = (me?.role === 'talent' || me?.role === 'agent') && !mine;
+  const own = useMyTalentProfile(me?.role === 'talent');
+  // A talent is offered it only once we know the post is not theirs.
+  const canReport =
+    me?.role === 'agent' ||
+    (me?.role === 'talent' && own.isSuccess && own.data?.handle !== post.talent.handle);
   const { talent } = post;
   const discipline = talent.subcategories[0]?.name ?? talent.category.name;
   const profile = `/talents/${talent.handle}`;

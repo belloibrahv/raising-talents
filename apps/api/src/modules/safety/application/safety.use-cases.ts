@@ -29,6 +29,9 @@ export const SAFETY = {
   Reinstate: Symbol('ReinstateAccountHandler'),
 } as const;
 
+/** How many of an account's reported posts are looked up to find the live ones to show. */
+const REPORTED_MEDIA_CHECKED = 30;
+
 export const REPORT_LIMIT = { perDay: 10, windowSeconds: 86_400 } as const;
 
 /** What safety needs from accounts. Implemented by AccountsFacade. */
@@ -215,10 +218,11 @@ export class ListReportedAccountsQuery {
     }
     const rows = await this.reports.openSubjects(pageAfter(cursor), MODERATION_PAGE_SIZE + 1);
     const page = rows.slice(0, MODERATION_PAGE_SIZE);
-    // One read for every reported post on the page. Posts already taken down are left out.
+    // One read for every reported post on the page. Posts already taken down are left out
+    // before the limit is applied, so a live one is never hidden behind removed ones.
     const files = await this.media.describe(
       page.flatMap((subject) =>
-        subject.media.slice(0, REPORTED_MEDIA_SHOWN).map((entry) => entry.mediaId),
+        subject.media.slice(0, REPORTED_MEDIA_CHECKED).map((entry) => entry.mediaId),
       ),
     );
     const items = await Promise.all(
@@ -237,13 +241,16 @@ export class ListReportedAccountsQuery {
             ? { handle: talent.profile.handle, displayName: talent.profile.displayName }
             : null,
           agent: agent ? { agencyName: agent.agencyName, verified: agent.verified } : null,
-          reportedMedia: subject.media.slice(0, REPORTED_MEDIA_SHOWN).flatMap((entry) => {
-            const file = files.get(entry.mediaId);
-            const previewUrl = file?.urls?.medium ?? file?.video?.posterUrl;
-            return file?.status === 'ready' && previewUrl
-              ? [{ mediaId: entry.mediaId, reports: entry.count, previewUrl, kind: file.kind }]
-              : [];
-          }),
+          reportedMedia: subject.media
+            .slice(0, REPORTED_MEDIA_CHECKED)
+            .flatMap((entry) => {
+              const file = files.get(entry.mediaId);
+              const previewUrl = file?.urls?.medium ?? file?.video?.posterUrl;
+              return file?.status === 'ready' && previewUrl
+                ? [{ mediaId: entry.mediaId, reports: entry.count, previewUrl, kind: file.kind }]
+                : [];
+            })
+            .slice(0, REPORTED_MEDIA_SHOWN),
           openReports: subject.total,
           categories: [...subject.categories],
           notes: subject.notes.map((entry) => ({

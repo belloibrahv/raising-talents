@@ -18,13 +18,15 @@ interface RemoveMediaProps {
   readonly what: 'post' | 'photo';
   /** Whose it is, so each control has its own name on a screen full of them. */
   readonly owner: string;
+  /** Called once it is down, for a list that should let go of it. */
+  readonly onRemoved?: () => void;
 }
 
 /**
  * Moderators only: takes down a photo or video that is already live. Posts go live without
  * a check first (ADR-048), so this is where a moderator acts. Nobody else sees it.
  */
-export function RemoveMedia({ mediaId, what, owner }: RemoveMediaProps) {
+export function RemoveMedia({ mediaId, what, owner, onRemoved }: RemoveMediaProps) {
   const role = useSession().me?.role;
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -33,6 +35,7 @@ export function RemoveMedia({ mediaId, what, owner }: RemoveMediaProps) {
     mutationFn: (category: RejectionCategory) =>
       api.call('moderation.removeMedia', { params: { mediaId }, body: { category } }),
     onSuccess: () => {
+      onRemoved?.();
       // A removed post leaves every list. The profile itself is left as it is on screen, so
       // the confirmation stays in view; without its photo it is hidden on the next visit.
       if (what === 'post') {

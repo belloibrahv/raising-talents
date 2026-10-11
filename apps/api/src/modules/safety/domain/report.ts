@@ -12,6 +12,8 @@ export interface Report {
   readonly note: string;
   /** For a conversation report, the reported person's latest messages there (ADR-039). */
   readonly evidence: readonly ReportEvidence[];
+  /** For a report about one post: its photo or video (ADR-051). */
+  readonly mediaId: string | null;
   readonly status: ReportStatus;
   readonly createdAt: Date;
   readonly closedAt: Date | null;
@@ -44,12 +46,14 @@ export interface OpenSubject {
   readonly notes: readonly { note: string; reportedAt: Date }[];
   /** From the newest open report that has any. */
   readonly evidence: readonly ReportEvidence[];
+  /** Posts named in open reports, most reported first. */
+  readonly media: readonly { mediaId: string; count: number }[];
 }
 
 export const NOTES_SHOWN = 5;
 
 export interface ReportRepository {
-  /** False when the reporter already has an open report on this account: nothing is added. */
+  /** False when the reporter already has an open report on this account, or this post: nothing is added. */
   add(report: Report): Promise<boolean>;
   /** Accounts with open reports, the longest waiting first. */
   openSubjects(

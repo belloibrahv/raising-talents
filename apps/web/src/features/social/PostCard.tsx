@@ -8,7 +8,10 @@ import { VideoPlayer } from '../../shared/media/VideoPlayer';
 import { placeLabel } from '../../shared/places';
 import { timeAgo } from '../../shared/relative-time';
 import { Avatar } from '../../shared/ui/Avatar';
+import { useSession } from '../auth/use-auth';
 import { RemoveMedia } from '../moderation/RemoveMedia';
+import { useMyTalentProfile } from '../profile/queries';
+import { ReportPost } from '../talents/ReportProfile';
 import { useLike } from './queries';
 
 const likesLabel = (likes: number) =>
@@ -56,6 +59,13 @@ interface PostCardProps {
 export function PostCard({ post, eager = false }: PostCardProps) {
   const like = useLike();
   const [burst, setBurst] = useState(false);
+  // Members report what breaks the rules; moderators remove it; nobody reports their own.
+  const me = useSession().me;
+  const own = useMyTalentProfile(me?.role === 'talent');
+  // A talent is offered it only once we know the post is not theirs.
+  const canReport =
+    me?.role === 'agent' ||
+    (me?.role === 'talent' && own.isSuccess && own.data?.handle !== post.talent.handle);
   const { talent } = post;
   const discipline = talent.subcategories[0]?.name ?? talent.category.name;
   const profile = `/talents/${talent.handle}`;
@@ -137,6 +147,7 @@ export function PostCard({ post, eager = false }: PostCardProps) {
           </p>
         ) : null}
         <RemoveMedia mediaId={post.mediaId} what="post" owner={talent.displayName} />
+        {canReport ? <ReportPost postId={post.id} /> : null}
       </div>
     </article>
   );

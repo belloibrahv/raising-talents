@@ -1,5 +1,6 @@
 import {
   MODERATION_PAGE_SIZE,
+  REPORTED_MEDIA_SHOWN,
   type AccountStatus,
   type CreateReport,
   type ReportCategory,
@@ -27,6 +28,9 @@ export const SAFETY = {
   Decide: Symbol('DecideReportsHandler'),
   Reinstate: Symbol('ReinstateAccountHandler'),
 } as const;
+
+/** How many of an account's reported posts are looked up to find the live ones to show. */
+const REPORTED_MEDIA_CHECKED = 30;
 
 export const REPORT_LIMIT = { perDay: 10, windowSeconds: 86_400 } as const;
 
@@ -57,6 +61,8 @@ export interface SafetyTalents {
   visibleUserId(handle: string): Promise<string | null>;
   /** The handle and name while the profile is complete, whatever the account's status. */
   searchable(userId: string): Promise<{ profile: { handle: string; displayName: string } } | null>;
+  /** Not null while others can see the talent. */
+  cardFor(userId: string): Promise<object | null>;
 }
 
 /** What safety needs from messaging. Implemented by ConversationEvidence (ADR-039). */
@@ -71,15 +77,38 @@ export interface SafetyConversations {
   ): Promise<{ subjectId: string; evidence: { body: string; sentAt: Date }[] } | null>;
 }
 
+/** What safety needs from posts. Implemented by the feed's PostSource. */
+export interface SafetyPosts {
+  find(postId: string): Promise<{ talentId: string; mediaId: string } | null>;
+}
+
+/** What safety needs from media. Implemented by MediaFacade. */
+export interface SafetyMedia {
+  describe(ids: readonly string[]): Promise<
+    Map<
+      string,
+      {
+        kind: 'image' | 'video';
+        status: string;
+        urls: { medium: string } | null;
+        video: { posterUrl: string } | null;
+      }
+    >
+  >;
+}
+
 /** What safety needs from agent profiles. Implemented by AgentDirectory. */
 export interface SafetyAgents {
   summaryOf(agentId: string): Promise<{ agencyName: string; verified: boolean } | null>;
 }
 
+type ReportEvidenceInput = { body: string; sentAt: Date };
+
 export const SafetyErrors = {
   cannotReport: () => domainError('FORBIDDEN', 'Verify your email before reporting a profile.'),
   ownProfile: () => domainError('FORBIDDEN', 'You cannot report your own profile.'),
-  subjectNotFound: () => domainError('NOT_FOUND', 'This profile or conversation is not available.'),
+  subjectNotFound: () =>
+    domainError('NOT_FOUND', 'This profile, post or conversation is not available.'),
   noOpenReports: () =>
     domainError(
       'NOT_FOUND',
@@ -99,22 +128,41 @@ export class FileReportHandler {
     private readonly accounts: SafetyAccounts,
     private readonly talents: SafetyTalents,
     private readonly conversations: SafetyConversations,
+    private readonly posts: SafetyPosts,
     private readonly rateLimiter: RateLimiter,
     private readonly clock: Clock,
   ) {}
+
+  /** Who a report is about, with what the moderator should be shown. */
+  private async subjectOf(
+    reporterId: string,
+    target: CreateReport['subject'],
+  ): Promise<{
+    subjectId: string;
+    evidence: ReportEvidenceInput[];
+    mediaId: string | null;
+  } | null> {
+    if (target.kind === 'talent') {
+      const subjectId = await this.talents.visibleUserId(target.handle);
+      return subjectId ? { subjectId, evidence: [], mediaId: null } : null;
+    }
+    if (target.kind === 'post') {
+      const post = await this.posts.find(target.postId);
+      // A post nobody else can see answers like a missing one.
+      if (!post || !(await this.talents.cardFor(post.talentId))) return null;
+      return { subjectId: post.talentId, evidence: [], mediaId: post.mediaId };
+    }
+    const found = await this.conversations.forReport(target.conversationId, reporterId);
+    return found ? { ...found, mediaId: null } : null;
+  }
 
   async execute(reporterId: string, input: CreateReport): Promise<Result<void, DomainError>> {
     if (!canReport(await this.accounts.profileContext(reporterId))) {
       return err(SafetyErrors.cannotReport());
     }
-    const subject =
-      input.subject.kind === 'talent'
-        ? await this.talents
-            .visibleUserId(input.subject.handle)
-            .then((subjectId) => (subjectId ? { subjectId, evidence: [] } : null))
-        : await this.conversations.forReport(input.subject.conversationId, reporterId);
+    const subject = await this.subjectOf(reporterId, input.subject);
     if (!subject) return err(SafetyErrors.subjectNotFound());
-    const { subjectId, evidence } = subject;
+    const { subjectId, evidence, mediaId } = subject;
     if (subjectId === reporterId) return err(SafetyErrors.ownProfile());
 
     const limit = await this.rateLimiter.consume(
@@ -140,6 +188,7 @@ export class FileReportHandler {
       category: input.category,
       note: input.note ?? '',
       evidence,
+      mediaId,
       status: 'open',
       createdAt: this.clock.now(),
       closedAt: null,
@@ -160,6 +209,7 @@ export class ListReportedAccountsQuery {
     private readonly accounts: SafetyAccounts,
     private readonly talents: SafetyTalents,
     private readonly agents: SafetyAgents,
+    private readonly media: SafetyMedia,
   ) {}
 
   async execute(viewerId: string, cursor?: string): Promise<Result<ReportQueuePage, DomainError>> {
@@ -168,6 +218,13 @@ export class ListReportedAccountsQuery {
     }
     const rows = await this.reports.openSubjects(pageAfter(cursor), MODERATION_PAGE_SIZE + 1);
     const page = rows.slice(0, MODERATION_PAGE_SIZE);
+    // One read for every reported post on the page. Posts already taken down are left out
+    // before the limit is applied, so a live one is never hidden behind removed ones.
+    const files = await this.media.describe(
+      page.flatMap((subject) =>
+        subject.media.slice(0, REPORTED_MEDIA_CHECKED).map((entry) => entry.mediaId),
+      ),
+    );
     const items = await Promise.all(
       page.map(async (subject) => {
         const [account, talent, agent, previousActions] = await Promise.all([
@@ -184,6 +241,16 @@ export class ListReportedAccountsQuery {
             ? { handle: talent.profile.handle, displayName: talent.profile.displayName }
             : null,
           agent: agent ? { agencyName: agent.agencyName, verified: agent.verified } : null,
+          reportedMedia: subject.media
+            .slice(0, REPORTED_MEDIA_CHECKED)
+            .flatMap((entry) => {
+              const file = files.get(entry.mediaId);
+              const previewUrl = file?.urls?.medium ?? file?.video?.posterUrl;
+              return file?.status === 'ready' && previewUrl
+                ? [{ mediaId: entry.mediaId, reports: entry.count, previewUrl, kind: file.kind }]
+                : [];
+            })
+            .slice(0, REPORTED_MEDIA_SHOWN),
           openReports: subject.total,
           categories: [...subject.categories],
           notes: subject.notes.map((entry) => ({

@@ -36,6 +36,12 @@ import {
   type ConversationEvidence,
 } from '../messaging/application/messaging.use-cases.js';
 import { MessagingModule } from '../messaging/messaging.module.js';
+import type { MediaFacade } from '../media/application/media.facade.js';
+import { MEDIA } from '../media/application/media.use-cases.js';
+import { MediaModule } from '../media/media.module.js';
+import { SOCIAL } from '../social/application/social.use-cases.js';
+import type { PostSource } from '../social/domain/social.js';
+import { SocialModule } from '../social/social.module.js';
 
 /** Reports from members and the suspensions and bans that follow them (ADR-028). */
 @Module({
@@ -45,6 +51,8 @@ import { MessagingModule } from '../messaging/messaging.module.js';
     TalentProfilesModule,
     AgentProfilesModule,
     MessagingModule,
+    SocialModule,
+    MediaModule,
   ],
   controllers: [ReportsController, ReportModerationController],
   providers: [
@@ -60,6 +68,7 @@ import { MessagingModule } from '../messaging/messaging.module.js';
         ACCOUNTS.Facade,
         TALENT.Directory,
         MESSAGING.Evidence,
+        SOCIAL.Posts,
         PLATFORM.RateLimiter,
         PLATFORM.Clock,
       ],
@@ -68,19 +77,21 @@ import { MessagingModule } from '../messaging/messaging.module.js';
         accounts: AccountsFacade,
         talents: TalentDirectory,
         conversations: ConversationEvidence,
+        posts: PostSource,
         limiter: RateLimiter,
         clock: Clock,
-      ) => new FileReportHandler(reports, accounts, talents, conversations, limiter, clock),
+      ) => new FileReportHandler(reports, accounts, talents, conversations, posts, limiter, clock),
     },
     {
       provide: SAFETY.List,
-      inject: [SAFETY.Reports, ACCOUNTS.Facade, TALENT.Directory, AGENT.Directory],
+      inject: [SAFETY.Reports, ACCOUNTS.Facade, TALENT.Directory, AGENT.Directory, MEDIA.Facade],
       useFactory: (
         reports: ReportRepository,
         accounts: AccountsFacade,
         talents: TalentDirectory,
         agents: AgentDirectory,
-      ) => new ListReportedAccountsQuery(reports, accounts, talents, agents),
+        media: MediaFacade,
+      ) => new ListReportedAccountsQuery(reports, accounts, talents, agents, media),
     },
     {
       provide: SAFETY.Decide,

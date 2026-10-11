@@ -46,7 +46,6 @@ wrong. It remains the better long-term answer and needs no code change, only
 - Nothing looks at a photo before the public does. Something that breaks the rules stays up
   until a member reports it or a moderator sees it, so the reports queue matters more and
   someone should read it daily.
-- Posts cannot be reported one by one yet, only the profile. Reporting a single post is the
-  natural next step.
+- Posts can be reported one by one since ADR-051; moderators see them in the reports queue.
 - Returning to a check first is a setting: `rekognition` or `manual-review`. Files already
   live stay live.

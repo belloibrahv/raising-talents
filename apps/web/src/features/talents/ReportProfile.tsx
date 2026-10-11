@@ -1,7 +1,7 @@
 import { REPORT_NOTE_MAX, type CreateReport, type ReportCategory } from '@rt/contracts';
 import { useMutation } from '@tanstack/react-query';
 import { Flag } from 'lucide-react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { api } from '../../shared/api/client';
@@ -28,22 +28,41 @@ export function ReportConversation({ conversationId }: { readonly conversationId
   return <ReportForm subject={{ kind: 'conversation', conversationId }} about="conversation" />;
 }
 
+/** One post. The moderator is shown the post itself (ADR-051). */
+export function ReportPost({ postId }: { readonly postId: string }) {
+  return <ReportForm subject={{ kind: 'post', postId }} about="post" />;
+}
+
 /** A quiet link that opens a short form. The reported person never learns who sent it. */
 function ReportForm({
   subject,
   about,
 }: {
   readonly subject: CreateReport['subject'];
-  readonly about: 'profile' | 'conversation';
+  readonly about: 'profile' | 'conversation' | 'post';
 }) {
-  const copy =
-    about === 'profile'
-      ? { open: t('report.open'), title: t('report.title'), thanks: t('report.thanks') }
-      : {
-          open: t('report.conversationOpen'),
-          title: t('report.conversationTitle'),
-          thanks: t('report.conversationThanks'),
-        };
+  const copy = {
+    profile: {
+      open: t('report.open'),
+      title: t('report.title'),
+      body: t('report.body'),
+      thanks: t('report.thanks'),
+    },
+    conversation: {
+      open: t('report.conversationOpen'),
+      title: t('report.conversationTitle'),
+      body: t('report.conversationBody'),
+      thanks: t('report.conversationThanks'),
+    },
+    post: {
+      open: t('report.postOpen'),
+      title: t('report.postTitle'),
+      body: t('report.postBody'),
+      thanks: t('report.postThanks'),
+    },
+  }[about];
+  // Several posts can be on screen at once, so each form names its own heading.
+  const headingId = useId();
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<ReportCategory | null>(null);
   const [note, setNote] = useState('');
@@ -80,7 +99,7 @@ function ReportForm({
   return (
     <form
       className="flex flex-col gap-5 rounded-2xl border bg-card p-5 text-card-foreground shadow-sm sm:p-6"
-      aria-labelledby="report-heading"
+      aria-labelledby={headingId}
       noValidate
       onSubmit={(event) => {
         event.preventDefault();
@@ -91,12 +110,10 @@ function ReportForm({
         report.mutate({ category, note });
       }}
     >
-      <h2 id="report-heading" className="text-base font-semibold">
+      <h2 id={headingId} className="text-base font-semibold">
         {copy.title}
       </h2>
-      <p className="text-sm text-muted-foreground">
-        {about === 'profile' ? t('report.body') : t('report.conversationBody')}
-      </p>
+      <p className="text-sm text-muted-foreground">{copy.body}</p>
       <ChoiceGroup
         legend={t('report.category')}
         value={category}

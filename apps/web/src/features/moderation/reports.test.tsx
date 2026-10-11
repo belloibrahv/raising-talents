@@ -36,6 +36,7 @@ const reported = {
   talent: { handle: 'dayo.guitar', displayName: 'Dayo Ajayi' },
   agent: null,
   evidence: [],
+  reportedMedia: [],
   openReports: 3,
   categories: [
     { category: 'fake_or_impersonation', count: 2 },

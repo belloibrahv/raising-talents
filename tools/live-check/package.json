@@ -1,0 +1,12 @@
+{
+  "name": "rt-live-check",
+  "private": true,
+  "type": "module",
+  "description": "Browser walk-through of a deployed environment as the demo accounts",
+  "scripts": {
+    "check": "node live-check.mjs"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}

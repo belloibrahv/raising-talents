@@ -147,7 +147,12 @@ export function PostCard({ post, eager = false }: PostCardProps) {
           </p>
         ) : null}
         <RemoveMedia mediaId={post.mediaId} what="post" owner={talent.displayName} />
-        {canReport ? <ReportPost postId={post.id} /> : null}
+        {canReport ? (
+          // The form's button sizes itself; the row keeps it at the start of the line.
+          <div className="flex flex-col items-start">
+            <ReportPost postId={post.id} />
+          </div>
+        ) : null}
       </div>
     </article>
   );

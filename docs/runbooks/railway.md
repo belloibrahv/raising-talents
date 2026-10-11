@@ -90,6 +90,25 @@ settings follow it. The old address stops answering, the browser refuses the API
 To keep both addresses working for a while, give `WEB_ORIGINS` and `storage:cors` both,
 separated by a comma and a space respectively. The app itself calls one address only.
 
+## After every deploy
+
+Check the live site, not only the build:
+
+1. All three services show `SUCCESS` (`railway deployment list --service web|api|worker`), the
+   API log says `Migrations applied` and `api process listening`, and the worker log says
+   `worker process started` with no errors after it.
+2. Walk the site as the demo people (docs/runbooks/demo-data.md):
+
+   ```bash
+   cd tools/live-check && npm install
+   PASSWORD=<demo password> node live-check.mjs
+   ```
+
+   It signs in as a demo talent, agent and moderator and goes through the feed, Explore,
+   Agents, saving an agent, a submission, reporting a post and the moderator's queue, and
+   prints PASS or FAIL for each step. It acts only on demo accounts, and dismisses the one
+   report it files.
+
 ## Every day
 
 Posts and profile photos go live without a check first (`CONTENT_SCANNER=off`, ADR-048), so a moderator should read the reports queue at least daily and take down what breaks the rules: "Remove post" under a post, "Remove profile photo" on a profile. Grant the role with `STAFF_GRANT` on `worker` (above).

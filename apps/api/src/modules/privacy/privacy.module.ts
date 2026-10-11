@@ -16,6 +16,10 @@ import {
   VERIFICATION,
   type GetMyVerificationQuery,
 } from '../agent-profiles/application/verification.use-cases.js';
+import {
+  AGENT_DIRECTORY,
+  type SavedAgentsExport,
+} from '../agent-profiles/application/agent-directory.use-cases.js';
 import { AgentProfilesModule } from '../agent-profiles/agent-profiles.module.js';
 import type { IdentityFacade } from '../identity/application/identity.facade.js';
 import { IDENTITY } from '../identity/application/identity.tokens.js';
@@ -77,6 +81,7 @@ const SOURCES = Symbol('PrivacySources');
         PORTFOLIO.GetMine,
         SHORTLIST.Export,
         SOCIAL.Export,
+        AGENT_DIRECTORY.Export,
         MESSAGING.Export,
         NOTIFICATIONS.Export,
       ],
@@ -87,6 +92,7 @@ const SOURCES = Symbol('PrivacySources');
         portfolio: GetMyPortfolioQuery,
         shortlist: ShortlistExport,
         social: SocialExport,
+        savedAgents: SavedAgentsExport,
         conversations: MessagingExport,
         notifications: NotificationsExport,
       ): PrivacySources => ({
@@ -96,6 +102,7 @@ const SOURCES = Symbol('PrivacySources');
         portfolio: (userId) => portfolio.execute(userId),
         shortlist: (userId) => shortlist.forAgent(userId),
         following: (userId) => social.forUser(userId),
+        savedAgents: (userId) => savedAgents.forUser(userId),
         conversations: (userId) => conversations.forUser(userId),
         notifications: (userId) => notifications.forUser(userId),
       }),

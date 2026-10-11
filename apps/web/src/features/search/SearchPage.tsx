@@ -30,6 +30,7 @@ import {
   X,
 } from 'lucide-react';
 import { EmptyState } from '../../shared/ui/EmptyState';
+import { ExploreTabs } from '../agents/ExploreTabs';
 
 /** The filters that live in the address, so back, refresh and sharing a search all work. */
 const FILTER_KEYS = [
@@ -130,6 +131,7 @@ export function SearchPage() {
       subtitle={t('search.body')}
       width="wide"
     >
+      <ExploreTabs current="talent" />
       <form className="stack" role="search" onSubmit={submit} noValidate>
         <div className="flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-end">
           <TextField
@@ -336,7 +338,13 @@ export function SearchPage() {
 const MAX_TYPES = 5;
 
 /** One line of choices that scrolls sideways on a phone and wraps on a wide screen. */
-function FilterRow({ label, children }: { readonly label: string; readonly children: ReactNode }) {
+export function FilterRow({
+  label,
+  children,
+}: {
+  readonly label: string;
+  readonly children: ReactNode;
+}) {
   return (
     <div role="group" aria-label={label} className="grid gap-2">
       <span className="text-sm font-semibold">{label}</span>
@@ -347,7 +355,7 @@ function FilterRow({ label, children }: { readonly label: string; readonly child
   );
 }
 
-function Chip({
+export function Chip({
   active,
   onClick,
   children,

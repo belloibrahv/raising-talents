@@ -1,5 +1,6 @@
 import { Module, type DynamicModule } from '@nestjs/common';
 import { AccountsModule } from './modules/accounts/accounts.module.js';
+import { AgentProfilesModule } from './modules/agent-profiles/agent-profiles.module.js';
 import { IdentityModule } from './modules/identity/identity.module.js';
 import { MediaModule } from './modules/media/media.module.js';
 import { NotificationsModule } from './modules/notifications/notifications.module.js';
@@ -23,6 +24,7 @@ export class WorkerModule {
         IdentityModule,
         MediaModule,
         TalentProfilesModule,
+        AgentProfilesModule,
         SearchModule,
         NotificationsModule,
         PrivacyModule,

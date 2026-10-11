@@ -68,6 +68,7 @@ describe('Account deletion and data export', () => {
       portfolio: async () => ok({ items: [], maxItems: 30, version: 0 }),
       shortlist: async () => [],
       following: async () => [],
+      savedAgents: async () => [],
       conversations: async () => [],
       notifications: async () => [],
     };

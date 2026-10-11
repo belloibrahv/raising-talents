@@ -29,6 +29,11 @@ describe('UpdateMyAgentProfileHandler', () => {
       sampleTaxonomySource,
       new InMemoryUnitOfWork(),
       clock,
+      (ownerId, mediaId) => ({
+        small: `https://media.test/${ownerId}/${mediaId}/256.webp`,
+        medium: `https://media.test/${ownerId}/${mediaId}/1024.webp`,
+        large: `https://media.test/${ownerId}/${mediaId}/2048.webp`,
+      }),
     );
     agentId = await accounts.createAccount({ email: 'chidi.eze@example.com', role: 'agent' });
   });

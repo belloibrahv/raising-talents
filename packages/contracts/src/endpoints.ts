@@ -67,6 +67,12 @@ import {
   talentCardPageSchema,
   talentSocialSchema,
 } from './social.js';
+import {
+  agentPageSchema,
+  publicAgentProfileSchema,
+  savedAgentStateSchema,
+  searchAgentsQuerySchema,
+} from './agents.js';
 import { createReportSchema, reportDecisionSchema, reportQueuePageSchema } from './safety.js';
 import { searchTalentsQuerySchema, talentSearchResponseSchema } from './search.js';
 import {
@@ -736,6 +742,59 @@ export const endpoints = {
     successStatus: 204,
     errors: [ErrorCode.WrongRole],
     tag: 'Shortlist',
+  }),
+  'agents.search': define({
+    method: 'GET',
+    path: '/v1/agents',
+    summary:
+      'Verified agents and scouts, most recently verified first, filtered by words, category, place and whether they are open for submissions',
+    auth: true,
+    query: searchAgentsQuerySchema,
+    response: agentPageSchema,
+    successStatus: 200,
+    errors: [ErrorCode.Forbidden, ErrorCode.RateLimited],
+    tag: 'Agents',
+  }),
+  'agents.get': define({
+    method: 'GET',
+    path: '/v1/agents/{id}',
+    summary: "A verified agent's page. Your own is always available to you",
+    auth: true,
+    response: publicAgentProfileSchema,
+    successStatus: 200,
+    errors: [ErrorCode.Forbidden, ErrorCode.NotFound],
+    tag: 'Agents',
+  }),
+  'agents.save': define({
+    method: 'PUT',
+    path: '/v1/agents/{id}/saved',
+    summary: 'Save an agent to come back to. Talent only. Safe to repeat; the agent is not told',
+    auth: true,
+    response: savedAgentStateSchema,
+    successStatus: 200,
+    errors: [ErrorCode.WrongRole, ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.Conflict],
+    tag: 'Agents',
+  }),
+  'agents.unsave': define({
+    method: 'DELETE',
+    path: '/v1/agents/{id}/saved',
+    summary: 'Remove a saved agent. Safe to repeat',
+    auth: true,
+    response: savedAgentStateSchema,
+    successStatus: 200,
+    errors: [ErrorCode.WrongRole],
+    tag: 'Agents',
+  }),
+  'agents.saved': define({
+    method: 'GET',
+    path: '/v1/me/saved-agents',
+    summary: 'The agents the talent saved, newest first, as they are now',
+    auth: true,
+    query: cursorQuerySchema,
+    response: agentPageSchema,
+    successStatus: 200,
+    errors: [ErrorCode.WrongRole],
+    tag: 'Agents',
   }),
   'feed.list': define({
     method: 'GET',

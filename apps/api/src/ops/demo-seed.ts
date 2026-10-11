@@ -139,6 +139,9 @@ interface AgentPersona {
   readonly specializations: readonly string[];
   readonly city: string;
   readonly website: string;
+  readonly bio: string;
+  readonly rosterStatus: 'open' | 'full';
+  readonly palette: number;
   /** Verified by the moderator, or left waiting. */
   readonly verified: boolean;
 }
@@ -152,6 +155,9 @@ const AGENTS: readonly AgentPersona[] = [
     specializations: ['music', 'modelling'],
     city: 'lagos',
     website: 'https://eko-talent.example',
+    bio: 'Twelve years placing singers and models with labels, festivals and fashion houses across West Africa and the UK. Member of the Performing Musicians Association of Nigeria. Recent work: two Felabration line-ups and Lagos Fashion Week castings. I look for people with a clear sound or look and the discipline to match.',
+    rosterStatus: 'open',
+    palette: 2,
     verified: true,
   },
   {
@@ -162,6 +168,9 @@ const AGENTS: readonly AgentPersona[] = [
     specializations: ['sports'],
     city: 'abuja',
     website: 'https://northstar-scouting.example',
+    bio: 'CAF-licensed intermediary scouting under-23 footballers in northern Nigeria. Trials arranged with academies in Belgium and Portugal.',
+    rosterStatus: 'full',
+    palette: 5,
     verified: false,
   },
 ];
@@ -459,11 +468,12 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
   for (const persona of AGENTS) {
     const agent = await account(persona.email, persona.ip, 'agent');
     agentAccounts.set(persona.email, agent);
-    const current = await api.call<{ version: number; isComplete: boolean }>(
-      'GET',
-      '/v1/me/agent-profile',
-      agent,
-    );
+    const current = await api.call<{
+      version: number;
+      isComplete: boolean;
+      bio: string;
+      avatarMediaId: string | null;
+    }>('GET', '/v1/me/agent-profile', agent);
     if (current.status !== 200 || !current.body.isComplete) {
       await api.expect('PATCH', '/v1/me/agent-profile', {
         ...agent,
@@ -476,8 +486,21 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
           ),
           citySlug: pick(cities, persona.city).slug,
           website: persona.website,
+          bio: persona.bio,
+          rosterStatus: persona.rosterStatus,
         },
       });
+    } else if (!current.body.bio) {
+      // Seeded before agents had a page of their own: only what is new is added, so a
+      // verified agency keeps its badge.
+      await api.expect('PATCH', '/v1/me/agent-profile', {
+        ...agent,
+        ifMatch: current.body.version,
+        body: { bio: persona.bio, rosterStatus: persona.rosterStatus },
+      });
+    }
+    if (current.status !== 200 || !current.body.avatarMediaId) {
+      await upload(agent, 'avatar', await portrait(persona.palette));
     }
     const verification = await api.expect<{ state: string }>(
       'GET',
@@ -633,6 +656,12 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
   report.push(
     `social: ${String(follows)} follows, with a like on each followed talent's latest post`,
   );
+
+  // Talent keep agents for later (ADR-049). Only a verified agency can be saved.
+  if (tunde && ngozi) {
+    const savedAgent = await api.call('PUT', `/v1/agents/${tunde.id}/saved`, ngozi);
+    if (savedAgent.status === 200) report.push('saved agents: Ngozi saved Eko Talent Partners');
+  }
 
   logger.warn(
     { seeded: report },

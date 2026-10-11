@@ -9,6 +9,7 @@ import {
   Images,
   KeyRound,
   Mail,
+  MessageCircle,
   MessageCircleHeart,
   MessageCircleX,
   MessageSquareText,
@@ -172,6 +173,14 @@ function show(notice: Notification): Shown {
           ? t('notifications.newFollowerBody')
           : t('notifications.newFollowerAgencyBody'),
         to: notice.followerHandle ? `/talents/${notice.followerHandle}` : '/home',
+      };
+    case 'post_commented':
+      return {
+        icon: MessageCircle,
+        tone: 'good',
+        title: t('notifications.postCommented', { name: notice.commenterName }),
+        body: t('notifications.postCommentedBody'),
+        to: `/posts/${notice.postId}`,
       };
   }
 }

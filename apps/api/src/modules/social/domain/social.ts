@@ -6,6 +6,12 @@ export const SocialEvents = {
    * follower (followerId, followerName, followerHandle) so the talent can be told.
    */
   TalentFollowed: 'social.TalentFollowed',
+  /**
+   * Someone commented on a talent's post. The aggregate is the talent who owns the post; the
+   * payload names the comment, the post and the commenter (commentId, postId, commenterId,
+   * commenterName).
+   */
+  PostCommented: 'social.PostCommented',
 } as const;
 
 export interface Follow {
@@ -68,4 +74,29 @@ export interface PostSource {
   countFor(talentId: string): Promise<number>;
   /** Visible talent the viewer does not follow, newest profiles first. Never the viewer. */
   suggestions(viewerId: string, limit: number): Promise<string[]>;
+}
+
+/** A few words under a post (ADR-052). Removing the post or the author's account removes it. */
+export interface Comment {
+  readonly id: string;
+  readonly itemId: string;
+  readonly authorId: string;
+  readonly body: string;
+  readonly createdAt: Date;
+}
+
+export interface CommentRepository {
+  add(comment: Comment): Promise<void>;
+  find(id: string): Promise<Comment | null>;
+  remove(id: string): Promise<void>;
+  /** Newest first, from authors whose accounts are in good standing. */
+  page(
+    itemId: string,
+    after: { createdAt: Date; id: string } | null,
+    limit: number,
+  ): Promise<Comment[]>;
+  /** Counted the same way as the page. Items with no comments are absent from the map. */
+  counts(itemIds: readonly string[]): Promise<Map<string, number>>;
+  /** Everything one person wrote, newest first, for their data export. */
+  byAuthor(authorId: string, limit: number): Promise<Comment[]>;
 }

@@ -756,7 +756,7 @@
     "reportedFor": "Reported for",
     "categoryCount": "{category} ({count})",
     "firstReported": "First reported",
-    "conversationEvidence": "What they wrote in the reported conversation",
+    "conversationEvidence": "What they wrote",
     "agency": "Agent at {agency}",
     "agencyVerified": "Agent at {agency} (verified agency)",
     "reporterNotes": "What reporters wrote",
@@ -848,7 +848,11 @@
     "conversationOpen": "Report this conversation",
     "conversationTitle": "Report this conversation",
     "conversationBody": "A moderator will see the messages the other person sent here, not yours. They will not know who reported them.",
-    "conversationThanks": "Thank you. A moderator will look at this conversation. You do not have to reply in the meantime."
+    "conversationThanks": "Thank you. A moderator will look at this conversation. You do not have to reply in the meantime.",
+    "commentOpen": "Report",
+    "commentTitle": "Report this comment",
+    "commentBody": "A moderator will read this comment. The person will not know who reported it.",
+    "commentThanks": "Thank you. A moderator will read this comment."
   },
   "shortlist": {
     "title": "Your shortlist",
@@ -938,7 +942,9 @@
     "contactDeclinedBody": "You can keep searching for other talent.",
     "newFollower": "{name} started following you",
     "newFollowerBody": "See their profile.",
-    "newFollowerAgencyBody": "An agency is keeping up with your work."
+    "newFollowerAgencyBody": "An agency is keeping up with your work.",
+    "postCommented": "{name} commented on your post",
+    "postCommentedBody": "Open the post to read it and reply."
   },
   "emailChange": {
     "title": "Email address",
@@ -992,5 +998,25 @@
     "photoBy": "Photo by {name}",
     "videoBy": "Video by {name}",
     "suggested": "Suggested for you"
+  },
+  "comments": {
+    "title": "Comments on {name}'s post",
+    "toggle": "Comments on {name}'s post",
+    "count": "{count} comments",
+    "countOne": "1 comment",
+    "field": "Comment on {name}'s post",
+    "placeholder": "Add a comment",
+    "send": "Post comment",
+    "left": "{count} characters left",
+    "loading": "Loading comments",
+    "empty": "No comments yet.",
+    "emptyWrite": "No comments yet. Be the first.",
+    "more": "Show more comments",
+    "by": "Comment by {name}",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this comment?",
+    "postGone": "Post not available",
+    "postGoneBody": "This post was removed or is no longer visible.",
+    "backHome": "Back to Home"
   }
 }

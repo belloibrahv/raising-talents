@@ -5,6 +5,8 @@ import { assets } from '../../media/infrastructure/media.schema.js';
 import { portfolioItems } from '../../portfolio/infrastructure/portfolio.schema.js';
 import { profiles } from '../../talent-profiles/infrastructure/talent-profile.schema.js';
 import type {
+  Comment,
+  CommentRepository,
   Follow,
   FollowRepository,
   LikeRepository,
@@ -12,7 +14,7 @@ import type {
   PostRow,
   PostSource,
 } from '../domain/social.js';
-import { follows, likes } from './social.schema.js';
+import { comments, follows, likes } from './social.schema.js';
 
 export class DrizzleFollowRepository implements FollowRepository {
   constructor(private readonly uow: DrizzleUnitOfWork) {}
@@ -221,5 +223,66 @@ export class DrizzlePostSource implements PostSource {
       .orderBy(desc(profiles.completedAt), desc(profiles.userId))
       .limit(limit);
     return rows.map((row) => row.userId);
+  }
+}
+
+export class DrizzleCommentRepository implements CommentRepository {
+  constructor(private readonly uow: DrizzleUnitOfWork) {}
+
+  async add(comment: Comment): Promise<void> {
+    await this.uow.executor().insert(comments).values(comment);
+  }
+
+  async find(id: string): Promise<Comment | null> {
+    const [row] = await this.uow.executor().select().from(comments).where(eq(comments.id, id));
+    return row ?? null;
+  }
+
+  async remove(id: string): Promise<void> {
+    await this.uow.executor().delete(comments).where(eq(comments.id, id));
+  }
+
+  async page(
+    itemId: string,
+    after: { createdAt: Date; id: string } | null,
+    limit: number,
+  ): Promise<Comment[]> {
+    const before = after
+      ? or(
+          lt(comments.createdAt, after.createdAt),
+          and(eq(comments.createdAt, after.createdAt), lt(comments.id, after.id)),
+        )
+      : undefined;
+    const rows = await this.uow
+      .executor()
+      .select({ comment: comments })
+      .from(comments)
+      .innerJoin(users, and(eq(users.id, comments.authorId), eq(users.status, 'active')))
+      .where(and(eq(comments.itemId, itemId), before))
+      .orderBy(desc(comments.createdAt), desc(comments.id))
+      .limit(limit);
+    return rows.map((row) => row.comment);
+  }
+
+  async counts(itemIds: readonly string[]): Promise<Map<string, number>> {
+    if (itemIds.length === 0) return new Map();
+    const rows = await this.uow
+      .executor()
+      .select({ itemId: comments.itemId, total: count() })
+      .from(comments)
+      .innerJoin(users, and(eq(users.id, comments.authorId), eq(users.status, 'active')))
+      .where(inArray(comments.itemId, [...itemIds]))
+      .groupBy(comments.itemId);
+    return new Map(rows.map((row) => [row.itemId, row.total]));
+  }
+
+  async byAuthor(authorId: string, limit: number): Promise<Comment[]> {
+    return this.uow
+      .executor()
+      .select()
+      .from(comments)
+      .where(eq(comments.authorId, authorId))
+      .orderBy(desc(comments.createdAt), desc(comments.id))
+      .limit(limit);
   }
 }

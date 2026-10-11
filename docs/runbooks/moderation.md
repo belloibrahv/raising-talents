@@ -34,6 +34,9 @@ the queue above. Instead:
 - Under a post, choose **Remove post**; on a profile, **Remove profile photo**. Pick the
   closest reason. The files are deleted and the owner is told which rule it broke. A profile
   without its photo is hidden from others until the owner adds a new one.
+- A reported comment is shown on the entry under "What they wrote", even if it has been
+  deleted since. To delete a comment, open the post, open its comments and choose **Delete**
+  (ADR-052). Comments from a suspended or banned account disappear with the account.
 - Use **Explore** to look around without waiting for a report.
 - For someone who keeps doing it, suspend or ban the account from the Reports tab: that
   hides everything of theirs at once.

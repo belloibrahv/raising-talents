@@ -3,8 +3,8 @@
 //   PASSWORD=<demo password> node live-check.mjs [screenshot directory]
 //
 // It signs in only as *@demo.raisingtalents.app (docs/runbooks/demo-data.md) and acts only on
-// demo people: the post it reports and the agent it writes to are demo accounts, and the
-// report is dismissed at the end. BASE picks another environment; CHROME another browser.
+// demo people: the post it comments on and reports and the agent it writes to are demo
+// accounts, its comment is deleted again, and the report is dismissed at the end. BASE picks another environment; CHROME another browser.
 import puppeteer from 'puppeteer-core';
 import { mkdirSync } from 'node:fs';
 
@@ -123,6 +123,58 @@ let agentPath = null;
     if (images < 1) throw new Error('post images did not load');
     await s.shot('02-feed');
     return `${posts} posts, ${images} images loaded`;
+  });
+  await step('talent comments on a demo post, then deletes the comment', async () => {
+    const words = `Live check ${Date.now().toString(36)}`;
+    const opened = await s.page.evaluate((names) => {
+      const post = [...document.querySelectorAll('article')].find((node) =>
+        names.some((name) => node.getAttribute('aria-label') === `Post by ${name}`),
+      );
+      const toggle = post?.querySelector('button[aria-expanded]');
+      if (!post || !toggle) return false;
+      post.setAttribute('data-e2e', 'commented');
+      toggle.click();
+      return true;
+    }, DEMO_NAMES);
+    if (!opened) throw new Error('no demo post with a comments button in the feed');
+    const scope = 'article[data-e2e=commented]';
+    await s.page.waitForSelector(`${scope} input[placeholder="Add a comment"]`, { timeout: 10000 });
+    await s.page.type(`${scope} input[placeholder="Add a comment"]`, words);
+    await s.page.keyboard.press('Enter');
+    await s.page.waitForFunction(
+      (sel, wanted) => document.querySelector(sel)?.innerText.includes(wanted),
+      { timeout: 10000 },
+      scope,
+      words,
+    );
+    await s.shot('02a-comment');
+    const press = (label) =>
+      s.page.evaluate(
+        (sel, wanted, text) => {
+          const mine = [...document.querySelectorAll(`${sel} article`)].find((node) =>
+            node.innerText.includes(wanted),
+          );
+          const button = [...(mine?.querySelectorAll('button') ?? [])]
+            .reverse()
+            .find((node) => node.textContent.trim() === text);
+          if (!button) return false;
+          button.click();
+          return true;
+        },
+        scope,
+        words,
+        label,
+      );
+    if (!(await press('Delete'))) throw new Error('no Delete on my comment');
+    await sleep(500);
+    // The second Delete is the confirmation.
+    if (!(await press('Delete'))) throw new Error('no confirmation');
+    await s.page.waitForFunction(
+      (sel, wanted) => !document.querySelector(sel)?.innerText.includes(wanted),
+      { timeout: 10000 },
+      scope,
+      words,
+    );
   });
   await step('talent reports a post from the feed', async () => {
     const opened = await s.page.evaluate((names) => {

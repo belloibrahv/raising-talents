@@ -37,6 +37,7 @@ import { NotificationsModule } from '../notifications/notifications.module.js';
 import { PortfolioModule } from '../portfolio/portfolio.module.js';
 import { SHORTLIST, type ShortlistExport } from '../shortlists/application/shortlist.use-cases.js';
 import { ShortlistsModule } from '../shortlists/shortlists.module.js';
+import { COMMENTS, type CommentEvidence } from '../social/application/comments.use-cases.js';
 import { SOCIAL, type SocialExport } from '../social/application/social.use-cases.js';
 import { SocialModule } from '../social/social.module.js';
 import { MESSAGING, type MessagingExport } from '../messaging/application/messaging.use-cases.js';
@@ -81,6 +82,7 @@ const SOURCES = Symbol('PrivacySources');
         PORTFOLIO.GetMine,
         SHORTLIST.Export,
         SOCIAL.Export,
+        COMMENTS.Evidence,
         AGENT_DIRECTORY.Export,
         MESSAGING.Export,
         NOTIFICATIONS.Export,
@@ -92,6 +94,7 @@ const SOURCES = Symbol('PrivacySources');
         portfolio: GetMyPortfolioQuery,
         shortlist: ShortlistExport,
         social: SocialExport,
+        comments: CommentEvidence,
         savedAgents: SavedAgentsExport,
         conversations: MessagingExport,
         notifications: NotificationsExport,
@@ -102,6 +105,7 @@ const SOURCES = Symbol('PrivacySources');
         portfolio: (userId) => portfolio.execute(userId),
         shortlist: (userId) => shortlist.forAgent(userId),
         following: (userId) => social.forUser(userId),
+        comments: (userId) => comments.writtenBy(userId),
         savedAgents: (userId) => savedAgents.forUser(userId),
         conversations: (userId) => conversations.forUser(userId),
         notifications: (userId) => notifications.forUser(userId),

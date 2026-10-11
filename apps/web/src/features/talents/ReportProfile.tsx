@@ -33,13 +33,18 @@ export function ReportPost({ postId }: { readonly postId: string }) {
   return <ReportForm subject={{ kind: 'post', postId }} about="post" />;
 }
 
+/** One comment. The moderator is shown the words, even if it is deleted later (ADR-052). */
+export function ReportComment({ commentId }: { readonly commentId: string }) {
+  return <ReportForm subject={{ kind: 'comment', commentId }} about="comment" />;
+}
+
 /** A quiet link that opens a short form. The reported person never learns who sent it. */
 function ReportForm({
   subject,
   about,
 }: {
   readonly subject: CreateReport['subject'];
-  readonly about: 'profile' | 'conversation' | 'post';
+  readonly about: 'profile' | 'conversation' | 'post' | 'comment';
 }) {
   const copy = {
     profile: {
@@ -59,6 +64,12 @@ function ReportForm({
       title: t('report.postTitle'),
       body: t('report.postBody'),
       thanks: t('report.postThanks'),
+    },
+    comment: {
+      open: t('report.commentOpen'),
+      title: t('report.commentTitle'),
+      body: t('report.commentBody'),
+      thanks: t('report.commentThanks'),
     },
   }[about];
   // Several posts can be on screen at once, so each form names its own heading.

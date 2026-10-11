@@ -27,6 +27,7 @@ import { err, ok, type Result } from '../../../platform/result.js';
 import type { UnitOfWork } from '../../../platform/unit-of-work.js';
 import {
   SocialEvents,
+  type CommentRepository,
   type FollowRepository,
   type LikeRepository,
   type PostRow,
@@ -110,14 +111,16 @@ export class PostAssembler {
     private readonly talents: SocialTalents,
     private readonly media: SocialMedia,
     private readonly likes: LikeRepository,
+    private readonly comments: Pick<CommentRepository, 'counts'>,
   ) {}
 
   async assemble(rows: readonly PostRow[], viewerId: string): Promise<Post[]> {
     const itemIds = rows.map((row) => row.itemId);
     const talentIds = [...new Set(rows.map((row) => row.talentId))];
-    const [files, counts, liked, cards] = await Promise.all([
+    const [files, counts, comments, liked, cards] = await Promise.all([
       this.media.describe(rows.map((row) => row.mediaId)),
       this.likes.counts(itemIds),
+      this.comments.counts(itemIds),
       this.likes.likedBy(viewerId, itemIds),
       Promise.all(talentIds.map((id) => this.talents.cardFor(id))),
     ]);
@@ -134,6 +137,7 @@ export class PostAssembler {
         talent,
         likes: counts.get(row.itemId) ?? 0,
         liked: liked.has(row.itemId),
+        comments: comments.get(row.itemId) ?? 0,
       };
       if (file.urls) return [{ ...shared, kind: 'image', urls: file.urls }];
       if (file.video) return [{ ...shared, kind: 'video', video: file.video }];

@@ -74,6 +74,13 @@ export const notificationSchema = z
       /** Set when the follower is a talent with a page to open. */
       followerHandle: z.string().nullable(),
     }),
+    z.object({
+      ...common,
+      kind: z.literal('post_commented'),
+      postId: idSchema,
+      /** The commenter's name: a talent's display name or an agent's agency. */
+      commenterName: z.string(),
+    }),
   ])
   .meta({ id: 'Notification' });
 export type Notification = z.infer<typeof notificationSchema>;

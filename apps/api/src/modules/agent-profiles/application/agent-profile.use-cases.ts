@@ -1,4 +1,4 @@
-import type { MyAgentProfile } from '@rt/contracts';
+import type { ImageUrls, MyAgentProfile } from '@rt/contracts';
 import type { Clock } from '../../../platform/clock.js';
 import type { DomainError } from '../../../platform/domain-error.js';
 import type { DomainEvent } from '../../../platform/domain-event.js';
@@ -124,7 +124,29 @@ export class AgentDirectory {
     private readonly profiles: AgentProfileRepository,
     private readonly taxonomy: TaxonomySource,
     private readonly listing: AgentListing,
+    private readonly urls: AgentAvatarUrls,
   ) {}
+
+  /**
+   * How an agent is shown beside something they wrote in public, such as a comment. `listed`
+   * says whether talent can open their page (ADR-049).
+   */
+  async publicFace(agentId: string): Promise<{
+    agencyName: string;
+    avatarUrls: ImageUrls | null;
+    verified: boolean;
+    listed: boolean;
+  } | null> {
+    const props = (await this.profiles.findByUserId(agentId))?.snapshot();
+    if (!props?.agencyName) return null;
+    const [listed] = await this.listing.listedAmong([agentId]);
+    return {
+      agencyName: props.agencyName,
+      avatarUrls: props.avatarMediaId ? this.urls(agentId, props.avatarMediaId) : null,
+      verified: props.verifiedAt !== null,
+      listed: listed !== undefined,
+    };
+  }
 
   /**
    * Whether talent can write to this agent first (ADR-050): open, closed, or null when the

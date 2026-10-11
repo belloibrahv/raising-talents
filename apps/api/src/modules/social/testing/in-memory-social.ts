@@ -2,6 +2,8 @@ import type { InMemoryPortfolioRepository } from '../../portfolio/testing/in-mem
 import { TalentProfile } from '../../talent-profiles/domain/talent-profile.js';
 import type { InMemoryTalentProfileRepository } from '../../talent-profiles/testing/in-memory-talent-profile.repository.js';
 import type {
+  Comment,
+  CommentRepository,
   Follow,
   FollowRepository,
   LikeRepository,
@@ -160,6 +162,60 @@ export class InMemoryPostSource implements PostSource {
         .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
         .map((row) => row.userId)
         .slice(0, limit),
+    );
+  }
+}
+
+/** Does not check the author's standing: the use cases do that again, as with posts. */
+export class InMemoryCommentRepository implements CommentRepository {
+  readonly rows: Comment[] = [];
+
+  add(comment: Comment): Promise<void> {
+    this.rows.push(comment);
+    return Promise.resolve();
+  }
+
+  find(id: string): Promise<Comment | null> {
+    return Promise.resolve(this.rows.find((row) => row.id === id) ?? null);
+  }
+
+  remove(id: string): Promise<void> {
+    const index = this.rows.findIndex((row) => row.id === id);
+    if (index >= 0) this.rows.splice(index, 1);
+    return Promise.resolve();
+  }
+
+  private newestFirst(rows: Comment[]): Comment[] {
+    return rows.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime() || b.id.localeCompare(a.id),
+    );
+  }
+
+  page(
+    itemId: string,
+    after: { createdAt: Date; id: string } | null,
+    limit: number,
+  ): Promise<Comment[]> {
+    const rows = this.newestFirst(this.rows.filter((row) => row.itemId === itemId)).filter(
+      (row) =>
+        !after ||
+        row.createdAt < after.createdAt ||
+        (row.createdAt.getTime() === after.createdAt.getTime() && row.id < after.id),
+    );
+    return Promise.resolve(rows.slice(0, limit));
+  }
+
+  counts(itemIds: readonly string[]): Promise<Map<string, number>> {
+    const totals = new Map<string, number>();
+    for (const row of this.rows) {
+      if (itemIds.includes(row.itemId)) totals.set(row.itemId, (totals.get(row.itemId) ?? 0) + 1);
+    }
+    return Promise.resolve(totals);
+  }
+
+  byAuthor(authorId: string, limit: number): Promise<Comment[]> {
+    return Promise.resolve(
+      this.newestFirst(this.rows.filter((row) => row.authorId === authorId)).slice(0, limit),
     );
   }
 }

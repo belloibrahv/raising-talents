@@ -8,6 +8,8 @@ export const FOLLOW_PAGE_SIZE = 24;
 /** Enough for anyone following by hand; stops a script following everyone. */
 export const FOLLOWING_MAX = 5000;
 export const SUGGESTIONS_MAX = 12;
+export const COMMENT_MAX = 500;
+export const COMMENTS_PAGE_SIZE = 20;
 
 /** following: talent the viewer follows. discover: everyone, newest first. */
 export const feedScopeSchema = z.enum(['following', 'discover']);
@@ -34,6 +36,7 @@ const postBase = {
   likes: z.number().int().nonnegative(),
   /** Whether the viewer liked it. */
   liked: z.boolean(),
+  comments: z.number().int().nonnegative(),
 };
 
 /** A piece of work as it appears in a feed: the portfolio item, who posted it, and its likes. */
@@ -85,3 +88,48 @@ export const suggestionsSchema = z
   .object({ items: z.array(talentCardSchema) })
   .meta({ id: 'Suggestions' });
 export type Suggestions = z.infer<typeof suggestionsSchema>;
+
+/** Who wrote a comment: a talent with their page, or an agent with their agency. */
+export const commentAuthorSchema = z
+  .object({
+    name: z.string(),
+    /** Set when the author is a talent whose page can be opened. */
+    handle: z.string().nullable(),
+    /** Set when the author is an agent talent can find (ADR-049). */
+    agentId: idSchema.nullable(),
+    avatarUrls: imageUrlsSchema.nullable(),
+    verified: z.boolean(),
+  })
+  .meta({ id: 'CommentAuthor' });
+export type CommentAuthor = z.infer<typeof commentAuthorSchema>;
+
+export const commentSchema = z
+  .object({
+    id: idSchema,
+    body: z.string(),
+    postedAt: isoDateTimeSchema,
+    author: commentAuthorSchema,
+    /** The viewer wrote it. */
+    mine: z.boolean(),
+    /** The viewer wrote it, owns the post, or is a moderator. */
+    canDelete: z.boolean(),
+  })
+  .meta({ id: 'Comment' });
+export type Comment = z.infer<typeof commentSchema>;
+
+/** Newest first. */
+export const commentPageSchema = z
+  .object({
+    items: z.array(commentSchema),
+    nextCursor: z.string().nullable(),
+    /** Every comment on the post, not only this page. */
+    total: z.number().int().nonnegative(),
+  })
+  .meta({ id: 'CommentPage' });
+export type CommentPage = z.infer<typeof commentPageSchema>;
+
+export const createCommentSchema = z
+  .object({ body: z.string().trim().min(1).max(COMMENT_MAX) })
+  .strict()
+  .meta({ id: 'CreateComment' });
+export type CreateComment = z.input<typeof createCommentSchema>;

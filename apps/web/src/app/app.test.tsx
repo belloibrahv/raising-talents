@@ -21,7 +21,7 @@ describe('the web app', () => {
     expect(
       await screen.findByRole('heading', {
         level: 1,
-        name: /show your work\. get discovered\./i,
+        name: /share your talent with the world\./i,
       }),
     ).toHaveFocus();
     expect(router.state.location.pathname).toBe('/welcome');

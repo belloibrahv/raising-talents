@@ -87,38 +87,33 @@ export function TalentProfilePage() {
       className="[&>div]:max-w-4xl [&>div>header]:sr-only"
       hero={
         <section className="grid gap-5" aria-label={talent.displayName}>
-          <div className="flex items-center gap-5 sm:gap-10">
-            <Avatar name={talent.displayName} urls={talent.avatarUrls} size="xl" ring />
-            <div className="grid min-w-0 flex-1 gap-4">
-              <div className="hidden flex-wrap items-center gap-x-3 gap-y-1 sm:flex">
-                <p className="m-0 font-display text-3xl leading-tight font-bold" aria-hidden="true">
-                  {talent.displayName}
-                </p>
-                {talent.verified ? <VerifiedBadge /> : null}
-              </div>
-              <dl className="m-0 grid max-w-sm grid-cols-3 text-center sm:text-left">
-                {stats.map((stat) => (
-                  <div
-                    key={stat.label}
-                    className="flex flex-col-reverse sm:flex-row-reverse sm:justify-end sm:gap-1.5"
-                  >
-                    <dt className="text-sm text-muted-foreground sm:text-base">{stat.label}</dt>
-                    <dd className="m-0 text-lg font-bold sm:text-base">{stat.value ?? '–'}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
+          {/* A lit stage behind the face: the cover every profile shares. */}
+          <div className="grid justify-items-center">
+            <div
+              aria-hidden="true"
+              className="h-28 w-full rounded-3xl bg-stage stage-glow sm:h-44"
+            />
+            <Avatar
+              name={talent.displayName}
+              urls={talent.avatarUrls}
+              size="xl"
+              ring
+              className="-mt-12 shadow-lg sm:-mt-18"
+            />
           </div>
 
-          <div className="grid gap-2">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:hidden">
-              <p className="m-0 font-display text-2xl leading-tight font-bold" aria-hidden="true">
+          <div className="grid justify-items-center gap-2 text-center">
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+              <p
+                className="m-0 font-display text-2xl leading-tight font-bold sm:text-3xl"
+                aria-hidden="true"
+              >
                 {talent.displayName}
               </p>
               {talent.verified ? <VerifiedBadge /> : null}
             </div>
             <p className="m-0 font-semibold">{discipline}</p>
-            <ul className="m-0 flex list-none flex-wrap gap-x-4 gap-y-1 p-0 text-sm text-muted-foreground">
+            <ul className="m-0 flex list-none flex-wrap justify-center gap-x-4 gap-y-1 p-0 text-sm text-muted-foreground">
               <li className="inline-flex items-center gap-1.5">
                 <MapPin aria-hidden="true" className="size-4" />
                 {placeLabel(talent.city, 'long')}
@@ -130,9 +125,14 @@ export function TalentProfilePage() {
                 </li>
               )}
             </ul>
-            <p className="m-0 max-w-2xl leading-relaxed whitespace-pre-line">{talent.bio}</p>
+            <p className="m-0 max-w-xl leading-relaxed whitespace-pre-line text-muted-foreground">
+              {talent.bio}
+            </p>
             {talent.skills.length > 0 ? (
-              <ul className="row m-0 mt-1 list-none gap-2 p-0" aria-label={t('talent.skills')}>
+              <ul
+                className="m-0 mt-1 flex list-none flex-wrap justify-center gap-2 p-0"
+                aria-label={t('talent.skills')}
+              >
                 {talent.skills.map((skill) => (
                   <li key={skill.slug}>
                     <Badge variant="secondary" className="px-3 py-1 text-sm">
@@ -144,7 +144,16 @@ export function TalentProfilePage() {
             ) : null}
           </div>
 
-          <div className="flex flex-wrap items-start gap-2">
+          <dl className="m-0 mx-auto grid w-full max-w-sm grid-cols-3 divide-x text-center">
+            {stats.map((stat) => (
+              <div key={stat.label} className="flex flex-col-reverse px-2">
+                <dt className="text-sm text-muted-foreground">{stat.label}</dt>
+                <dd className="m-0 text-xl font-bold">{stat.value ?? '–'}</dd>
+              </div>
+            ))}
+          </dl>
+
+          <div className="flex flex-wrap items-start justify-center gap-2">
             {isSelf ? (
               <>
                 <Link className={buttonLink('secondary', 'sm')} to="/onboarding/talent/about">
@@ -199,7 +208,7 @@ export function TalentProfilePage() {
             ) : null}
           </EmptyState>
         ) : null}
-        <ul className="m-0 grid list-none grid-cols-3 gap-1 p-0 sm:gap-3">
+        <ul className="m-0 grid list-none grid-cols-3 gap-1.5 p-0 sm:gap-3">
           {items.map((post, index) => (
             <li key={post.id}>
               <Tile
@@ -258,7 +267,7 @@ function Tile({
   return (
     <button
       type="button"
-      className="group relative block aspect-square w-full cursor-pointer overflow-hidden bg-muted sm:rounded-xl"
+      className="group relative block aspect-square w-full cursor-pointer overflow-hidden rounded-xl bg-muted sm:rounded-2xl"
       aria-label={post.caption ? `${name}: ${post.caption}` : name}
       onClick={onOpen}
     >
@@ -324,7 +333,7 @@ function PostDialog({
           >
             <X aria-hidden="true" className="size-5" />
           </button>
-          <div className="max-h-[82dvh] overflow-y-auto rounded-2xl">
+          <div className="max-h-[82dvh] overflow-y-auto rounded-3xl">
             <PostCard post={post} eager />
           </div>
         </div>

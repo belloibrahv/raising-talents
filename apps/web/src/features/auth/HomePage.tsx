@@ -154,7 +154,10 @@ function Feed() {
           )}
         </div>
       ) : null}
-      <ul className="m-0 grid list-none gap-4 p-0 sm:gap-6" aria-busy={feed.isFetching}>
+      <ul
+        className="m-0 grid list-none gap-4 px-3 py-0 sm:gap-6 sm:px-0"
+        aria-busy={feed.isFetching}
+      >
         {posts.map((post, index) => (
           <li key={post.id}>
             <PostCard post={post} eager={index === 0} />
@@ -180,7 +183,7 @@ function FeedSkeleton() {
   return (
     <div className="grid gap-4" aria-hidden="true">
       {[0, 1].map((index) => (
-        <div key={index} className="grid gap-3 border-y bg-card p-4 sm:rounded-2xl sm:border">
+        <div key={index} className="mx-3 grid gap-3 rounded-3xl border bg-card p-4 sm:mx-0">
           <div className="flex items-center gap-3">
             <div className="size-11 animate-pulse rounded-full bg-muted" />
             <div className="grid flex-1 gap-2">

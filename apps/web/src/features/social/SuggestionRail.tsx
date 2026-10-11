@@ -10,7 +10,7 @@ function Suggestion({ card }: { readonly card: TalentCard }) {
   const social = useTalentSocial(card.handle, false);
   const discipline = card.subcategories[0]?.name ?? card.category.name;
   return (
-    <li className="flex w-32 shrink-0 flex-col items-center gap-2 rounded-2xl border bg-card p-3 text-center">
+    <li className="flex w-28 shrink-0 flex-col items-center gap-2 text-center">
       <Link
         to={`/talents/${card.handle}`}
         className="flex w-full flex-col items-center gap-2 text-foreground no-underline"
@@ -26,6 +26,7 @@ function Suggestion({ card }: { readonly card: TalentCard }) {
         handle={card.handle}
         name={card.displayName}
         following={social.data?.followedByViewer ?? false}
+        className="h-8 px-3 text-xs"
       />
     </li>
   );
@@ -41,7 +42,7 @@ export function SuggestionRail() {
       <h2 id="suggestions-heading" className="px-4 text-base font-semibold sm:px-0">
         {t('social.suggested')}
       </h2>
-      <ul className="m-0 flex list-none gap-3 overflow-x-auto px-4 pb-2 sm:px-0">
+      <ul className="m-0 flex list-none gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:px-0">
         {items.map((card) => (
           <Suggestion key={card.handle} card={card} />
         ))}

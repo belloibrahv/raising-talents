@@ -86,61 +86,90 @@ export function PostCard({ post, eager = false, commentsOpen = false }: PostCard
 
   return (
     <article
-      className="overflow-hidden border-y bg-card text-card-foreground sm:rounded-2xl sm:border"
+      className="overflow-hidden rounded-3xl border bg-card text-card-foreground shadow-xs"
       aria-label={t('social.postBy', { name: talent.displayName })}
     >
-      <header className="flex items-center gap-3 px-4 py-3">
-        <Link to={profile} className="rounded-full" tabIndex={-1} aria-hidden="true">
-          <Avatar name={talent.displayName} urls={talent.avatarUrls} ring />
-        </Link>
-        <div className="grid min-w-0 flex-1">
-          <Link
-            to={profile}
-            className="flex items-center gap-1 font-semibold text-foreground no-underline hover:underline"
-          >
-            <span className="truncate">{talent.displayName}</span>
-            {talent.verified ? (
-              <>
-                <BadgeCheck aria-hidden="true" className="size-4 shrink-0 text-success" />
-                <span className="sr-only">{`, ${t('talent.verified')}`}</span>
-              </>
-            ) : null}
+      <div className="relative">
+        {/* Who posted it sits on the photo, over a shade that keeps the words readable. */}
+        <header
+          className={cn(
+            'flex items-center gap-3 px-4 py-3',
+            post.kind === 'image' &&
+              'absolute inset-x-0 top-0 z-10 bg-gradient-to-b from-black/70 via-black/35 to-transparent pb-10 text-white',
+          )}
+        >
+          <Link to={profile} className="rounded-full" tabIndex={-1} aria-hidden="true">
+            <Avatar name={talent.displayName} urls={talent.avatarUrls} ring />
           </Link>
-          <span className="truncate text-sm text-muted-foreground">
-            {`${discipline} · ${placeLabel(talent.city)}`}
-          </span>
-        </div>
-        <time className="shrink-0 text-sm text-muted-foreground" dateTime={post.postedAt}>
-          {timeAgo(post.postedAt)}
-        </time>
-      </header>
+          <div className="grid min-w-0 flex-1">
+            <Link
+              to={profile}
+              className={cn(
+                'flex items-center gap-1 font-semibold no-underline hover:underline',
+                post.kind === 'image' ? 'text-white' : 'text-foreground',
+              )}
+            >
+              <span className="truncate">{talent.displayName}</span>
+              {talent.verified ? (
+                <>
+                  <BadgeCheck
+                    aria-hidden="true"
+                    className={cn(
+                      'size-4 shrink-0',
+                      post.kind === 'image' ? 'text-white' : 'text-success',
+                    )}
+                  />
+                  <span className="sr-only">{`, ${t('talent.verified')}`}</span>
+                </>
+              ) : null}
+            </Link>
+            <span
+              className={cn(
+                'truncate text-sm',
+                post.kind === 'image' ? 'text-white/85' : 'text-muted-foreground',
+              )}
+            >
+              {`${discipline} · ${placeLabel(talent.city)}`}
+            </span>
+          </div>
+          <time
+            className={cn(
+              'shrink-0 text-sm',
+              post.kind === 'image' ? 'text-white/85' : 'text-muted-foreground',
+            )}
+            dateTime={post.postedAt}
+          >
+            {timeAgo(post.postedAt)}
+          </time>
+        </header>
 
-      {post.kind === 'video' ? (
-        <div className="bg-black">
-          <VideoPlayer
-            playback={post.video}
-            label={t('social.videoBy', { name: talent.displayName })}
-          />
-        </div>
-      ) : (
-        <div className="relative bg-muted" onDoubleClick={likeFromPhoto}>
-          <img
-            className="aspect-[4/5] w-full object-cover"
-            src={post.urls.medium}
-            srcSet={`${post.urls.small} 256w, ${post.urls.medium} 1024w, ${post.urls.large} 2048w`}
-            sizes="(max-width: 40rem) 100vw, 36rem"
-            alt={post.caption || t('social.photoBy', { name: talent.displayName })}
-            loading={eager ? 'eager' : 'lazy'}
-            decoding="async"
-          />
-          {burst ? (
-            <Heart
-              aria-hidden="true"
-              className="pointer-events-none absolute top-1/2 left-1/2 size-24 -translate-1/2 animate-ping fill-white text-white drop-shadow-lg [animation-iteration-count:1]"
+        {post.kind === 'video' ? (
+          <div className="bg-black">
+            <VideoPlayer
+              playback={post.video}
+              label={t('social.videoBy', { name: talent.displayName })}
             />
-          ) : null}
-        </div>
-      )}
+          </div>
+        ) : (
+          <div className="relative bg-muted" onDoubleClick={likeFromPhoto}>
+            <img
+              className="aspect-[4/5] w-full object-cover"
+              src={post.urls.medium}
+              srcSet={`${post.urls.small} 256w, ${post.urls.medium} 1024w, ${post.urls.large} 2048w`}
+              sizes="(max-width: 40rem) 100vw, 36rem"
+              alt={post.caption || t('social.photoBy', { name: talent.displayName })}
+              loading={eager ? 'eager' : 'lazy'}
+              decoding="async"
+            />
+            {burst ? (
+              <Heart
+                aria-hidden="true"
+                className="pointer-events-none absolute top-1/2 left-1/2 size-24 -translate-1/2 animate-ping fill-white text-white drop-shadow-lg [animation-iteration-count:1]"
+              />
+            ) : null}
+          </div>
+        )}
+      </div>
 
       <div className="grid gap-1 px-4 pt-1 pb-4">
         <div className="flex items-center gap-3">

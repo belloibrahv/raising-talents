@@ -138,63 +138,43 @@
     "close": "Close"
   },
   "welcome": {
-    "headline": "Show your work. Get discovered.",
-    "body": "A home for athletes, musicians, models, actors, dancers and creators. Post your work, build a following, and hear from agents and scouts anywhere in the world.",
+    "headlineStart": "Share your talent",
+    "headlineEnd": "with the world.",
+    "body": "Post your work, grow a following and get discovered. Everyone is welcome, wherever you are.",
     "createAccount": "Create an account",
     "signIn": "I already have an account",
-    "disciplinesLabel": "Who uses Raising Talents",
-    "eyebrow": "For talented and creative people everywhere",
+    "free": "Free to join. You need to be 18 or older.",
+    "disciplinesLabel": "Who is here",
+    "eyebrow": "Open in 244 countries and territories",
     "join": "Join free",
     "signInShort": "Sign in",
-    "trust": {
-      "verified": "Agencies are checked",
-      "control": "You choose who you talk to",
-      "free": "Free to join"
-    },
+    "world": "Wherever you are, you are welcome",
+    "worldMore": "and everywhere else",
     "preview": {
-      "request": "Eko Talent Partners would like to contact you",
-      "requestBody": "Verified agency · Lagos, Nigeria",
-      "accept": "Accept",
-      "searching": "Singers · United Kingdom",
-      "found": "128 talent found"
+      "role": "Dancer · London, UK",
+      "likes": "1,204 likes",
+      "caption": "Rehearsal day. Opening night is Friday.",
+      "follower": "Lucas started following you",
+      "followerFrom": "São Paulo, Brazil",
+      "liked": "Aiko liked your post"
     },
-    "sides": {
-      "title": "For talent, and the people looking for it",
-      "talentTitle": "For talent",
-      "talentBody": "Your own page for your work, in front of people who are looking for it.",
-      "talent1": "Post photos and clips of your best work",
-      "talent2": "Build a following: fans, other talent and agents can follow and like your posts",
-      "talent3": "Read every request from an agency first, and accept only the ones you want",
-      "agentTitle": "For agents and scouts",
-      "agentBody": "See real work first, then get in touch.",
-      "agent1": "Search by category, type, country, city and age",
-      "agent2": "Follow talent and keep a shortlist with private notes",
-      "agent3": "Contact talent once your agency is verified",
-      "talentCta": "Create my profile",
-      "agentCta": "Find talent"
-    },
-    "how": {
+    "steps": {
       "title": "How it works",
-      "step1": "Create your profile",
-      "step1Body": "Choose what you do and where you are, add a photo and write a few lines. It takes about five minutes.",
-      "step2": "Post your work",
-      "step2Body": "Upload photos and clips. Every file is checked before anyone else can see it.",
-      "step3": "Get discovered",
-      "step3Body": "People find you in search and in their feed. Verified agencies can send a request, and you decide whether to chat."
+      "post": "Post your work",
+      "postBody": "Photos and clips of what you do, on a page of your own.",
+      "follow": "Grow a following",
+      "followBody": "People follow you and like your posts, from your city and from the other side of the world.",
+      "found": "Get discovered",
+      "foundBody": "Agents and scouts search by what you do and where you are, and get in touch."
     },
+    "safe": "Agencies are checked before they can message anyone, and you choose who you talk to. Your date of birth, email and phone number are never shown.",
     "safety": {
-      "title": "Built to keep you safe",
-      "body": "Fake agents are the biggest risk for talent online. Agencies here are checked before they can contact anyone.",
       "verified": "Every agency is checked",
       "verifiedBody": "A moderator confirms that each agent works for the agency they name before they can contact anyone.",
       "control": "You stay in control",
       "controlBody": "Nobody can message you until you accept. Decline or report in one tap.",
       "private": "Private by default",
       "privateBody": "Your date of birth, email and phone number are never shown. Others see your age in years only."
-    },
-    "cta": {
-      "title": "Your work deserves an audience.",
-      "body": "Join free in a few minutes. You need to be 18 or older."
     },
     "footer": {
       "made": "For talented and creative people everywhere.",

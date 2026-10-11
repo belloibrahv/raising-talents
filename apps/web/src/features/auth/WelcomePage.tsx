@@ -1,10 +1,11 @@
 import {
   BadgeCheck,
   Camera,
-  Check,
   Clapperboard,
-  EyeOff,
-  Hand,
+  Globe,
+  Heart,
+  ImagePlus,
+  MapPin,
   Medal,
   Mic,
   Music,
@@ -12,6 +13,8 @@ import {
   Search,
   ShieldCheck,
   Sparkles,
+  UserPlus,
+  UsersRound,
   type LucideIcon,
 } from 'lucide-react';
 import { useLayoutEffect, useRef } from 'react';
@@ -32,18 +35,37 @@ const DISCIPLINES = [
   { key: 'artists', icon: Palette },
 ] as const;
 
-const spotlightButton = cn(
-  buttonVariants({ variant: 'spotlight', size: 'lg' }),
-  'no-underline shadow-lg shadow-spotlight/20',
+/** Places people will recognise from every continent. A flavour of "anywhere", not a list of where we are. */
+const CITIES = [
+  'Lagos',
+  'London',
+  'New York',
+  'Mumbai',
+  'São Paulo',
+  'Nairobi',
+  'Toronto',
+  'Paris',
+  'Dubai',
+  'Seoul',
+  'Johannesburg',
+  'Sydney',
+] as const;
+
+const STEPS: readonly { key: 'post' | 'follow' | 'found'; icon: LucideIcon }[] = [
+  { key: 'post', icon: ImagePlus },
+  { key: 'follow', icon: UsersRound },
+  { key: 'found', icon: Search },
+];
+
+const joinButton = cn(
+  buttonVariants({ size: 'lg' }),
+  'bg-brand-cta text-white no-underline shadow-lg shadow-primary/25 hover:opacity-95',
 );
-const ghostOnStage = cn(
-  buttonVariants({ variant: 'outline', size: 'lg' }),
-  'border-stage-foreground/40 bg-transparent text-stage-foreground no-underline hover:bg-stage-foreground/10 hover:text-stage-foreground',
-);
+const signInButton = cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'no-underline');
 
 /**
- * The front door. A visitor should understand in one screen what this is, who it is for and
- * why it is safe, then find the way in from anywhere on the page.
+ * The front door. One screen says what this is: a place to post your work and be followed,
+ * open to anyone in the world. The picture is the product itself, a post in a feed.
  */
 export function WelcomePage() {
   const heading = useRef<HTMLHeadingElement>(null);
@@ -53,26 +75,33 @@ export function WelcomePage() {
   }, []);
 
   return (
-    <div className="min-h-dvh bg-background text-foreground">
-      <header className="bg-stage text-stage-foreground">
+    <div className="relative min-h-dvh overflow-hidden bg-background text-foreground">
+      {/* Soft colour behind the page: the brand as light, so the content stays simple. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -top-40 -right-40 size-[36rem] rounded-full bg-brand opacity-20 blur-3xl"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute top-[28rem] -left-48 size-[30rem] rounded-full bg-brand-cta opacity-10 blur-3xl"
+      />
+
+      <header className="relative">
         <div className="mx-auto flex h-18 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
           <span className="flex items-center gap-2.5 font-display text-base font-bold whitespace-nowrap sm:text-lg">
-            <BrandMark className="size-9 ring-1 ring-spotlight/50" />
+            <BrandMark className="size-9" />
             {t('common.appName')}
           </span>
           <nav aria-label={t('titles.welcome')} className="flex items-center gap-2">
             <Link
               to="/sign-in"
-              className="rounded-full px-3 py-2 text-sm font-semibold whitespace-nowrap text-stage-foreground no-underline hover:bg-stage-foreground/10 sm:px-4"
+              className="rounded-full px-3 py-2 text-sm font-semibold whitespace-nowrap text-foreground no-underline hover:bg-accent sm:px-4"
             >
               {t('welcome.signInShort')}
             </Link>
             <Link
               to="/sign-up"
-              className={cn(
-                buttonVariants({ variant: 'spotlight', size: 'sm' }),
-                'whitespace-nowrap no-underline',
-              )}
+              className={cn(buttonVariants({ size: 'sm' }), 'whitespace-nowrap no-underline')}
             >
               {t('welcome.join')}
             </Link>
@@ -80,81 +109,108 @@ export function WelcomePage() {
         </div>
       </header>
 
-      <main id="main">
+      <main id="main" className="relative">
         <section
-          className="relative overflow-hidden bg-stage text-stage-foreground stage-glow"
+          className="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-8 pb-14 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-8 lg:pt-14 lg:pb-20"
           aria-labelledby="welcome-heading"
         >
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-8 pb-20 sm:px-6 lg:grid-cols-[1.1fr_1fr] lg:pt-16 lg:pb-28">
-            <div className="flex flex-col gap-6">
-              <p className="inline-flex w-fit items-center gap-2 rounded-full border border-stage-foreground/20 bg-stage-foreground/5 px-3 py-1 text-sm font-medium text-stage-foreground/90">
-                <span className="size-2 rounded-full bg-spotlight" aria-hidden="true" />
-                {t('welcome.eyebrow')}
-              </p>
-              <h1
-                id="welcome-heading"
-                ref={heading}
-                tabIndex={-1}
-                className="text-5xl leading-[1.02] font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl"
-              >
-                {t('welcome.headline')}
-              </h1>
-              <p className="max-w-xl text-lg text-pretty text-stage-foreground/80 sm:text-xl">
-                {t('welcome.body')}
-              </p>
-              <div className="flex flex-col gap-3 sm:flex-row">
-                <Link className={spotlightButton} to="/sign-up">
-                  {t('welcome.createAccount')}
-                </Link>
-                <Link className={ghostOnStage} to="/sign-in">
-                  {t('welcome.signIn')}
-                </Link>
-              </div>
-              <ul className="m-0 flex list-none flex-wrap gap-x-5 gap-y-2 p-0 text-sm text-stage-foreground/80">
-                {(['verified', 'control', 'free'] as const).map((key) => (
-                  <li key={key} className="inline-flex items-center gap-1.5">
-                    <Check aria-hidden="true" className="size-4 text-spotlight" />
-                    {t(`welcome.trust.${key}`)}
-                  </li>
-                ))}
-              </ul>
+          <div className="flex flex-col gap-6">
+            <p className="inline-flex w-fit items-center gap-2 rounded-full border bg-card px-3 py-1 text-sm font-medium shadow-xs">
+              <Globe aria-hidden="true" className="size-4 text-primary" />
+              {t('welcome.eyebrow')}
+            </p>
+            <h1
+              id="welcome-heading"
+              ref={heading}
+              tabIndex={-1}
+              className="text-5xl leading-[1.04] font-bold tracking-tight text-balance sm:text-6xl lg:text-7xl"
+            >
+              {t('welcome.headlineStart')}{' '}
+              <span className="text-brand">{t('welcome.headlineEnd')}</span>
+            </h1>
+            <p className="max-w-xl text-lg text-pretty text-muted-foreground sm:text-xl">
+              {t('welcome.body')}
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link className={joinButton} to="/sign-up">
+                {t('welcome.createAccount')}
+              </Link>
+              <Link className={signInButton} to="/sign-in">
+                {t('welcome.signIn')}
+              </Link>
             </div>
-            <ProductPreview />
+            <p className="m-0 text-sm text-muted-foreground">{t('welcome.free')}</p>
+          </div>
+          <FeedPreview />
+        </section>
+
+        <section className="border-y bg-card/60" aria-labelledby="world-heading">
+          <div className="mx-auto grid max-w-6xl gap-4 px-4 py-8 text-center sm:px-6">
+            <h2 id="world-heading" className="text-base font-semibold">
+              {t('welcome.world')}
+            </h2>
+            <ul className="m-0 flex list-none flex-wrap justify-center gap-2 p-0">
+              {CITIES.map((city) => (
+                <li
+                  key={city}
+                  className="inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1.5 text-sm font-medium"
+                >
+                  <MapPin aria-hidden="true" className="size-3.5 text-primary" />
+                  {city}
+                </li>
+              ))}
+              <li className="inline-flex items-center rounded-full px-2 py-1.5 text-sm text-muted-foreground">
+                {t('welcome.worldMore')}
+              </li>
+            </ul>
           </div>
         </section>
 
-        <section className="border-b bg-muted/40" aria-label={t('welcome.disciplinesLabel')}>
-          <ul className="mx-auto flex max-w-6xl list-none flex-wrap justify-center gap-3 px-4 py-6 sm:px-6">
+        <section
+          className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 sm:py-20"
+          aria-labelledby="steps-heading"
+        >
+          <h2 id="steps-heading" className="text-center text-3xl font-bold sm:text-4xl">
+            {t('welcome.steps.title')}
+          </h2>
+          <ol className="m-0 grid list-none gap-4 p-0 sm:grid-cols-3">
+            {STEPS.map(({ key, icon: Icon }) => (
+              <li key={key} className="grid gap-3 rounded-3xl border bg-card p-6 shadow-xs">
+                <span className="grid size-12 place-items-center rounded-2xl bg-brand text-white">
+                  <Icon aria-hidden="true" className="size-6" />
+                </span>
+                <h3 className="text-xl font-semibold">{t(`welcome.steps.${key}`)}</h3>
+                <p className="m-0 text-muted-foreground">{t(`welcome.steps.${key}Body`)}</p>
+              </li>
+            ))}
+          </ol>
+          <ul
+            className="m-0 flex list-none flex-wrap justify-center gap-2 p-0"
+            aria-label={t('welcome.disciplinesLabel')}
+          >
             {DISCIPLINES.map(({ key, icon: Icon }) => (
               <li
                 key={key}
-                className="inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm font-semibold shadow-xs"
+                className="inline-flex items-center gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-accent-foreground"
               >
-                <Icon aria-hidden="true" className="size-4 text-foreground" />
+                <Icon aria-hidden="true" className="size-4" />
                 {t(`welcome.disciplines.${key}`)}
               </li>
             ))}
           </ul>
-        </section>
-
-        <Sides />
-        <HowItWorks />
-        <Safety />
-
-        <section className="px-4 py-20 sm:px-6">
-          <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 rounded-[2rem] bg-stage px-6 py-14 text-center text-stage-foreground stage-glow sm:px-12">
-            <h2 className="max-w-2xl text-3xl font-bold text-balance sm:text-5xl">
-              {t('welcome.cta.title')}
-            </h2>
-            <p className="text-lg text-stage-foreground/80">{t('welcome.cta.body')}</p>
-            <Link className={spotlightButton} to="/sign-up">
+          <p className="mx-auto flex max-w-2xl items-start gap-3 rounded-2xl border bg-card p-4 text-sm text-muted-foreground">
+            <ShieldCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-success" />
+            {t('welcome.safe')}
+          </p>
+          <div className="flex justify-center">
+            <Link className={joinButton} to="/sign-up">
               {t('welcome.createAccount')}
             </Link>
           </div>
         </section>
       </main>
 
-      <footer className="border-t">
+      <footer className="relative border-t">
         <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <span className="flex items-center gap-2 font-semibold text-foreground">
             <BrandMark className="size-6" />
@@ -175,204 +231,90 @@ export function WelcomePage() {
   );
 }
 
-/** What the product looks like, drawn in HTML: search results and a request arriving. */
-function ProductPreview() {
-  const cards = [
-    {
-      name: 'Ngozi A.',
-      role: 'Singer · Lagos',
-      tone: 'from-amber-300 to-rose-700',
-      verified: true,
-    },
-    {
-      name: 'Maya R.',
-      role: 'Dancer · London',
-      tone: 'from-sky-300 to-indigo-800',
-      verified: false,
-    },
-    {
-      name: 'Amani K.',
-      role: 'Model · Nairobi',
-      tone: 'from-fuchsia-300 to-purple-900',
-      verified: true,
-    },
-    {
-      name: 'Jordan T.',
-      role: 'Sprinter · Atlanta',
-      tone: 'from-lime-300 to-emerald-800',
-      verified: false,
-    },
-  ];
+/** A face drawn with shapes: no photos of real people on a page everyone sees. */
+function Face({ tone, className }: { readonly tone: string; readonly className?: string }) {
   return (
-    <div aria-hidden="true" className="relative mx-auto w-full max-w-md select-none lg:max-w-none">
-      <div className="rounded-3xl border border-stage-foreground/15 bg-stage-foreground/[0.06] p-4 shadow-2xl backdrop-blur sm:p-5">
-        <div className="flex items-center gap-2 rounded-full bg-stage-foreground/10 px-4 py-2.5 text-sm text-stage-foreground/90">
-          <Search className="size-4" />
-          {t('welcome.preview.searching')}
-          <span className="ml-auto text-xs text-stage-foreground/60">
-            {t('welcome.preview.found')}
-          </span>
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-3 pb-4">
-          {cards.map((card, index) => (
-            <div
-              key={card.name}
-              className={cn(
-                'overflow-hidden rounded-2xl bg-stage-foreground/10',
-                index % 2 === 1 && 'translate-y-4',
-              )}
-            >
-              <div className={cn('relative aspect-[4/5] bg-gradient-to-br', card.tone)}>
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/40 to-transparent" />
-                <div className="absolute bottom-[18%] left-1/2 size-16 -translate-x-1/2 rounded-full bg-black/25 sm:size-20" />
-                <div className="absolute -bottom-6 left-1/2 h-16 w-32 -translate-x-1/2 rounded-t-full bg-black/25 sm:w-36" />
-                {card.verified ? (
-                  <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
-                    <BadgeCheck className="size-3" />
-                    {t('talent.verified')}
-                  </span>
-                ) : null}
-              </div>
-              <div className="px-3 py-2.5">
-                <p className="m-0 text-sm font-semibold">{card.name}</p>
-                <p className="m-0 text-xs text-stage-foreground/65">{card.role}</p>
-              </div>
-            </div>
+    <span
+      className={cn(
+        'relative block overflow-hidden rounded-full bg-gradient-to-br',
+        tone,
+        className,
+      )}
+    >
+      <span className="absolute top-[22%] left-1/2 size-[38%] -translate-x-1/2 rounded-full bg-black/25" />
+      <span className="absolute -bottom-[18%] left-1/2 h-[52%] w-[78%] -translate-x-1/2 rounded-t-full bg-black/25" />
+    </span>
+  );
+}
+
+const PEOPLE = [
+  { name: 'Ngozi', place: 'Lagos', tone: 'from-amber-300 to-rose-600' },
+  { name: 'Jordan', place: 'New York', tone: 'from-lime-300 to-emerald-700' },
+  { name: 'Aiko', place: 'Seoul', tone: 'from-sky-300 to-indigo-700' },
+  { name: 'Lucas', place: 'São Paulo', tone: 'from-fuchsia-300 to-purple-800' },
+  { name: 'Amara', place: 'Nairobi', tone: 'from-teal-300 to-cyan-700' },
+] as const;
+
+/** What the product looks like, drawn in HTML: a post in the feed, a new follower, people far apart. */
+function FeedPreview() {
+  return (
+    <div aria-hidden="true" className="relative mx-auto w-full max-w-sm select-none">
+      <div className="overflow-hidden rounded-[2rem] border bg-card shadow-2xl">
+        <div className="flex justify-between gap-2 overflow-hidden border-b px-4 py-3">
+          {PEOPLE.map((person) => (
+            <span key={person.name} className="grid w-14 shrink-0 justify-items-center gap-1">
+              <span className="rounded-full ring-brand">
+                <Face tone={person.tone} className="size-11" />
+              </span>
+              <span className="w-full truncate text-center text-[11px] text-muted-foreground">
+                {person.place}
+              </span>
+            </span>
           ))}
         </div>
-      </div>
-      <div className="absolute -bottom-8 left-1/2 w-[88%] -translate-x-1/2 rounded-2xl bg-white p-4 text-[#14111f] shadow-2xl ring-1 ring-black/5 sm:-left-8 sm:w-80 sm:translate-x-0 lg:-left-12">
-        <div className="flex items-start gap-3">
-          <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#14111f] text-white">
-            <ShieldCheck className="size-5" />
+        <div className="flex items-center gap-3 px-4 py-3">
+          <span className="rounded-full ring-brand">
+            <Face tone="from-orange-300 to-pink-600" className="size-9" />
           </span>
-          <div className="min-w-0">
-            <p className="m-0 text-sm leading-snug font-bold">{t('welcome.preview.request')}</p>
-            <p className="m-0 mt-0.5 text-xs text-[#5d5873]">{t('welcome.preview.requestBody')}</p>
-          </div>
+          <span className="grid flex-1">
+            <span className="flex items-center gap-1 text-sm font-semibold">
+              Maya R.
+              <BadgeCheck className="size-4 text-success" />
+            </span>
+            <span className="text-xs text-muted-foreground">{t('welcome.preview.role')}</span>
+          </span>
+          <span className="rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+            {t('social.follow')}
+          </span>
         </div>
-        <span className="mt-3 flex h-9 items-center justify-center rounded-full bg-brand-cta text-sm font-bold text-white">
-          {t('welcome.preview.accept')}
+        <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-orange-300 via-pink-500 to-violet-700">
+          <span className="absolute top-[20%] left-1/2 size-28 -translate-x-1/2 rounded-full bg-black/25" />
+          <span className="absolute -bottom-8 left-1/2 h-48 w-64 -translate-x-1/2 rounded-t-full bg-black/25" />
+        </div>
+        <div className="grid gap-1 px-4 py-3">
+          <span className="flex items-center gap-2 text-sm font-semibold">
+            <Heart className="size-5 fill-like text-like" />
+            {t('welcome.preview.likes')}
+          </span>
+          <span className="text-sm">
+            <span className="font-semibold">Maya R.</span> {t('welcome.preview.caption')}
+          </span>
+        </div>
+      </div>
+
+      <div className="absolute top-48 -left-3 flex items-center gap-2.5 rounded-2xl border bg-card px-3 py-2.5 shadow-xl sm:-left-16">
+        <span className="grid size-9 place-items-center rounded-full bg-accent text-accent-foreground">
+          <UserPlus className="size-4" />
+        </span>
+        <span className="grid text-xs">
+          <span className="font-semibold">{t('welcome.preview.follower')}</span>
+          <span className="text-muted-foreground">{t('welcome.preview.followerFrom')}</span>
         </span>
       </div>
+      <div className="absolute -right-2 bottom-28 flex items-center gap-2 rounded-full border bg-card px-3 py-2 text-xs font-semibold shadow-xl sm:-right-10">
+        <Heart className="size-4 fill-like text-like" />
+        {t('welcome.preview.liked')}
+      </div>
     </div>
-  );
-}
-
-function Sides() {
-  const sides = [
-    {
-      title: t('welcome.sides.talentTitle'),
-      body: t('welcome.sides.talentBody'),
-      points: [t('welcome.sides.talent1'), t('welcome.sides.talent2'), t('welcome.sides.talent3')],
-      cta: t('welcome.sides.talentCta'),
-      icon: Sparkles,
-      tone: 'bg-spotlight text-spotlight-foreground',
-    },
-    {
-      title: t('welcome.sides.agentTitle'),
-      body: t('welcome.sides.agentBody'),
-      points: [t('welcome.sides.agent1'), t('welcome.sides.agent2'), t('welcome.sides.agent3')],
-      cta: t('welcome.sides.agentCta'),
-      icon: Search,
-      tone: 'bg-stage text-stage-foreground',
-    },
-  ];
-  return (
-    <section className="px-4 py-20 sm:px-6" aria-labelledby="sides-heading">
-      <div className="mx-auto max-w-6xl">
-        <h2 id="sides-heading" className="text-center text-3xl font-bold sm:text-4xl">
-          {t('welcome.sides.title')}
-        </h2>
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
-          {sides.map(({ title, body, points, cta, icon: Icon, tone }) => (
-            <article
-              key={title}
-              className="flex flex-col gap-5 rounded-3xl border bg-card p-7 shadow-sm sm:p-9"
-            >
-              <span className={cn('grid size-12 place-items-center rounded-2xl', tone)}>
-                <Icon aria-hidden="true" className="size-6" />
-              </span>
-              <div className="grid gap-2">
-                <h3 className="text-2xl font-bold">{title}</h3>
-                <p className="m-0 text-muted-foreground">{body}</p>
-              </div>
-              <ul className="m-0 grid list-none gap-3 p-0">
-                {points.map((point) => (
-                  <li key={point} className="flex items-start gap-3">
-                    <Check aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-success" />
-                    {point}
-                  </li>
-                ))}
-              </ul>
-              <Link
-                className={cn(buttonVariants({ variant: 'outline' }), 'mt-auto w-fit no-underline')}
-                to="/sign-up"
-              >
-                {cta}
-              </Link>
-            </article>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HowItWorks() {
-  const steps = [1, 2, 3] as const;
-  return (
-    <section className="bg-muted/50 px-4 py-20 sm:px-6" aria-labelledby="how-heading">
-      <div className="mx-auto max-w-6xl">
-        <h2 id="how-heading" className="text-center text-3xl font-bold sm:text-4xl">
-          {t('welcome.how.title')}
-        </h2>
-        <ol className="m-0 mt-10 grid list-none gap-6 p-0 md:grid-cols-3">
-          {steps.map((step) => (
-            <li key={step} className="flex flex-col gap-3 rounded-3xl bg-card p-7 shadow-xs">
-              <span className="grid size-10 place-items-center rounded-full bg-stage font-display text-lg font-bold text-spotlight">
-                {step}
-              </span>
-              <h3 className="text-xl font-bold">{t(`welcome.how.step${step}`)}</h3>
-              <p className="m-0 text-muted-foreground">{t(`welcome.how.step${step}Body`)}</p>
-            </li>
-          ))}
-        </ol>
-      </div>
-    </section>
-  );
-}
-
-function Safety() {
-  const points: { key: 'verified' | 'control' | 'private'; icon: LucideIcon }[] = [
-    { key: 'verified', icon: BadgeCheck },
-    { key: 'control', icon: Hand },
-    { key: 'private', icon: EyeOff },
-  ];
-  return (
-    <section className="px-4 py-20 sm:px-6" aria-labelledby="safety-heading">
-      <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[1fr_1.4fr] lg:items-center">
-        <div className="grid gap-4">
-          <span className="grid size-12 place-items-center rounded-2xl bg-success-surface text-success">
-            <ShieldCheck aria-hidden="true" className="size-6" />
-          </span>
-          <h2 id="safety-heading" className="text-3xl font-bold text-balance sm:text-4xl">
-            {t('welcome.safety.title')}
-          </h2>
-          <p className="m-0 text-lg text-muted-foreground">{t('welcome.safety.body')}</p>
-        </div>
-        <ul className="m-0 grid list-none gap-4 p-0">
-          {points.map(({ key, icon: Icon }) => (
-            <li key={key} className="flex items-start gap-4 rounded-2xl border bg-card p-5">
-              <Icon aria-hidden="true" className="mt-0.5 size-6 shrink-0 text-foreground" />
-              <div className="grid gap-1">
-                <h3 className="text-lg font-semibold">{t(`welcome.safety.${key}`)}</h3>
-                <p className="m-0 text-muted-foreground">{t(`welcome.safety.${key}Body`)}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </section>
   );
 }

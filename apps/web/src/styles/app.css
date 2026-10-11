@@ -45,6 +45,9 @@
   --brand-from: #7c3aed;
   --brand-via: #db2777;
   --brand-to: #f97316;
+  /* The gradient as text: these ends read at 4.5:1 or better on the background. */
+  --brand-text-from: #7c3aed;
+  --brand-text-to: #db2777;
   --border: #e6e2ef;
   --input: #8983a0;
   --ring: #7c3aed;
@@ -73,6 +76,8 @@
     --success: #6fd3a0;
     --success-surface: #173326;
     --like: #ff5c7a;
+    --brand-text-from: #b79cff;
+    --brand-text-to: #ff7ab8;
     --border: #322d44;
     --input: #7d7896;
     --ring: #b79cff;
@@ -199,7 +204,7 @@
 }
 
 @utility text-brand {
-  background-image: linear-gradient(120deg, var(--brand-from) 0%, var(--brand-via) 100%);
+  background-image: linear-gradient(120deg, var(--brand-text-from) 0%, var(--brand-text-to) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

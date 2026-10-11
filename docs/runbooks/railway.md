@@ -69,6 +69,27 @@ Set `RAILWAY_DOCKERFILE_PATH` on each service to its Dockerfile. After the first
 pnpm --filter @rt/api storage:cors https://<web address>
 ```
 
+## When the web address changes
+
+Renaming the web service's domain, or adding a custom one, breaks the app until five
+settings follow it. The old address stops answering, the browser refuses the API call
+(the console shows a CORS error) and the app says "You are offline".
+
+1. On `web`: set `VITE_API_URL` and `PUBLIC_ORIGIN` to the new address, then deploy it
+   again. The API address is built into the app, so a restart is not enough.
+2. On `api` and `worker`: set `WEB_ORIGINS`, `WEB_APP_URL` and `MEDIA_CDN_URL` to the new
+   address. Saving restarts them.
+3. Allow uploads from the new address on the bucket:
+
+   ```bash
+   railway run --service api pnpm --filter @rt/api storage:cors https://<new address>
+   ```
+
+4. Open the new address and check the console is clean and sign-in works.
+
+To keep both addresses working for a while, give `WEB_ORIGINS` and `storage:cors` both,
+separated by a comma and a space respectively. The app itself calls one address only.
+
 ## Every day
 
 The moderation queue holds every photo (`CONTENT_SCANNER=manual-review`). A moderator should clear it at least daily; grant the role with `pnpm --filter @rt/api staff:grant` run through `railway run --service api`.

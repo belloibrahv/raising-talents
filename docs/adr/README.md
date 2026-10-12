@@ -56,3 +56,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-050](050-talent-submissions-to-agents.md)                          | Talent submissions to agents who are open                            | Accepted                          |
 | [ADR-051](051-reporting-a-post.md)                                      | Reporting a post                                                     | Accepted                          |
 | [ADR-052](052-comments-on-posts.md)                                     | Comments on posts                                                    | Accepted                          |
+| [ADR-053](053-an-easier-password-rule.md)                               | An easier password rule                                              | Accepted                          |

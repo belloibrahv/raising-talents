@@ -2,7 +2,8 @@ import { z } from 'zod';
 import { deviceIdSchema, isoDateSchema, isoDateTimeSchema } from './common.js';
 import { meResponseSchema } from './accounts.js';
 
-export const PASSWORD_MIN_LENGTH = 10;
+/** Eight, as most services ask: long enough to matter, short enough not to turn people away. */
+export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 128;
 export const MINIMUM_AGE_YEARS = 18;
 export const VERIFICATION_CODE_LENGTH = 6;

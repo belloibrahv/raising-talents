@@ -55,7 +55,7 @@ describe('SignUpHandler', () => {
     expect(!second.ok && second.error.code).toBe(ErrorCode.EmailAlreadyRegistered);
   });
 
-  it('refuses a password found in data breaches', async () => {
+  it('refuses one of the most common passwords', async () => {
     const result = await harness.signUp.execute({ ...AMAKA, password: 'password1234' });
     expect(!result.ok && result.error.code).toBe(ErrorCode.WeakPassword);
   });

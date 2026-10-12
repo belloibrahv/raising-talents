@@ -7,7 +7,7 @@ export interface PasswordHasher {
 }
 
 export interface BreachedPasswordChecker {
-  /** True when the password appears in known data breaches. */
+  /** True when the password is among the most common ones found in data breaches. */
   isBreached(password: string): Promise<boolean>;
 }
 

@@ -18,7 +18,7 @@
     "subtitle": "You need to be 18 or older to join.",
     "email": "Email",
     "password": "Password",
-    "passwordHint": "At least 10 characters. A short phrase is easy to remember.",
+    "passwordHint": "At least 8 characters.",
     "dateOfBirth": "Date of birth",
     "dateOfBirthPlaceholder": "DD/MM/YYYY",
     "dateOfBirthHint": "Only used to confirm your age. Never shown on your profile.",
@@ -68,7 +68,7 @@
   },
   "validation": {
     "emailInvalid": "Enter a valid email address.",
-    "passwordShort": "Use at least 10 characters.",
+    "passwordShort": "Use at least 8 characters.",
     "dateInvalid": "Enter your date of birth as DD/MM/YYYY.",
     "termsRequired": "Tick the box to accept the Terms and Community Guidelines.",
     "codeInvalid": "Enter the 6-digit code from the email."

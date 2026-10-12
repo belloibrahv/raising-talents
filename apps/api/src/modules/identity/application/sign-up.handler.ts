@@ -62,7 +62,7 @@ export class SignUpHandler {
     );
     if (!limit.allowed) return err(IdentityErrors.rateLimited(limit.retryAfterSeconds));
 
-    const policy = checkPasswordPolicy(command.password, command.email);
+    const policy = checkPasswordPolicy(command.password);
     if (!policy.ok) return policy;
     if (this.settings.breachedPasswordCheck && (await this.breached.isBreached(command.password))) {
       return err(IdentityErrors.breachedPassword());

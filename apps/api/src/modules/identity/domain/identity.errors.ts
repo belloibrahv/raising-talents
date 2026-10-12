@@ -29,7 +29,7 @@ export const IdentityErrors = {
   breachedPassword: () =>
     domainError(
       ErrorCode.WeakPassword,
-      'This password has appeared in a data breach, so someone could guess it. Try three unrelated words together.',
+      'This is one of the most common passwords, so it is easy to guess. Choose a different one.',
     ),
   rateLimited: (retryAfterSeconds: number) =>
     domainError(ErrorCode.RateLimited, 'Too many attempts. Try again shortly.', retryAfterSeconds),

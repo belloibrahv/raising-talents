@@ -28,7 +28,16 @@ export const taxonomyResponseSchema = z
         subcategories: z.array(namedSchema),
       }),
     ),
-    skills: z.array(namedSchema.extend({ categorySlug: slugSchema.nullable() })),
+    skills: z.array(
+      namedSchema.extend({
+        categorySlug: slugSchema.nullable(),
+        /**
+         * The subcategories the skill belongs to. Empty: it applies to its whole category,
+         * or to everyone when categorySlug is null (languages).
+         */
+        subcategorySlugs: z.array(slugSchema),
+      }),
+    ),
     /** Every country with cities to pick, by name. Cities load per country. */
     countries: z.array(countrySchema),
   })

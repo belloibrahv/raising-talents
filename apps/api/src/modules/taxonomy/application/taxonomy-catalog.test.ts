@@ -26,6 +26,28 @@ describe('TaxonomyCatalog', () => {
     expect(!wrongSkill.ok && wrongSkill.error.message).toContain('vocals');
   });
 
+  it('offers a skill only to the subcategories it belongs to', () => {
+    const footballer = { ...valid, skillSlugs: ['goalkeeping', 'sprinting', 'yoruba'] };
+    expect(SAMPLE_TAXONOMY.validateTalentSelection(footballer).ok).toBe(true);
+    const hurdler = SAMPLE_TAXONOMY.validateTalentSelection({ ...valid, skillSlugs: ['hurdles'] });
+    expect(!hurdler.ok && hurdler.error.message).toContain('hurdles');
+    // After a change of subcategory, what no longer fits is left out.
+    expect(
+      SAMPLE_TAXONOMY.fittingSkills(['goalkeeping', 'sprinting', 'yoruba', 'gone'], {
+        categorySlug: 'sports',
+        subcategorySlugs: ['athletics'],
+      }),
+    ).toEqual(['sprinting', 'yoruba']);
+    expect(
+      SAMPLE_TAXONOMY.toResponse().skills.find((skill) => skill.slug === 'goalkeeping'),
+    ).toEqual({
+      slug: 'goalkeeping',
+      name: 'Goalkeeping',
+      categorySlug: 'sports',
+      subcategorySlugs: ['football'],
+    });
+  });
+
   it('refuses slugs that do not exist', () => {
     expect(SAMPLE_TAXONOMY.validateTalentSelection({ ...valid, citySlug: 'ng-atlantis' }).ok).toBe(
       false,

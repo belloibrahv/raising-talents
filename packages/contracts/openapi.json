@@ -10027,12 +10027,21 @@
                       "type": "null"
                     }
                   ]
+                },
+                "subcategorySlugs": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "maxLength": 64,
+                    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  }
                 }
               },
               "required": [
                 "slug",
                 "name",
-                "categorySlug"
+                "categorySlug",
+                "subcategorySlugs"
               ],
               "additionalProperties": false
             }

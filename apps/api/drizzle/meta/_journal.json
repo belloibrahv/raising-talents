@@ -225,6 +225,13 @@
       "when": 1791755400873,
       "tag": "0031_comments",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1791824840949,
+      "tag": "0032_skills_by_subcategory",
+      "breakpoints": true
     }
   ]
 }

@@ -83,6 +83,12 @@ export class UpdateMyTalentProfileHandler {
         const applied = profile.apply(patch, now);
         if (!applied.ok) return applied;
 
+        // Skills follow the subcategories: ones that no longer fit are dropped, unless this
+        // request chose the skills itself, in which case a wrong one is refused below.
+        if (command.patch.skillSlugs === undefined) {
+          const before = profile.snapshot();
+          profile.keepSkills(catalog.fittingSkills(before.skillSlugs, before));
+        }
         const props = profile.snapshot();
         const valid = catalog.validateTalentSelection(props);
         if (!valid.ok) return valid;

@@ -138,6 +138,14 @@ export class TalentProfile {
     return photo && this.missing().every((field) => field === 'avatar');
   }
 
+  /** Narrows the skills to these, when a change of subcategory left some behind. */
+  keepSkills(slugs: readonly string[]): void {
+    const kept = this.props.skillSlugs.filter((slug) => slugs.includes(slug));
+    if (kept.length !== this.props.skillSlugs.length) {
+      this.props = { ...this.props, skillSlugs: kept };
+    }
+  }
+
   /** Applies one wizard step. Returns whether this change completed the profile for the first time. */
   apply(patch: TalentProfilePatch, now: Date): Result<{ becameComplete: boolean }, DomainError> {
     if (

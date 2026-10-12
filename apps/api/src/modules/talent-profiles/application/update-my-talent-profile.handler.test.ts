@@ -130,6 +130,32 @@ describe('UpdateMyTalentProfileHandler', () => {
     });
   });
 
+  it('drops skills that no longer fit when the subcategory changes, and refuses a wrong one', async () => {
+    const first = await handler.execute({
+      userId: talentId,
+      expectedVersion: null,
+      patch: {
+        categorySlug: 'sports',
+        subcategorySlugs: ['football'],
+        skillSlugs: ['goalkeeping', 'sprinting'],
+      },
+    });
+    if (!first.ok) throw new Error(first.error.message);
+    const moved = await handler.execute({
+      userId: talentId,
+      expectedVersion: first.value.version,
+      patch: { subcategorySlugs: ['athletics'] },
+    });
+    expect(moved.ok && moved.value.skills.map((skill) => skill.slug)).toEqual(['sprinting']);
+    if (!moved.ok) throw new Error(moved.error.message);
+    const wrong = await handler.execute({
+      userId: talentId,
+      expectedVersion: moved.value.version,
+      patch: { skillSlugs: ['goalkeeping'] },
+    });
+    expect(!wrong.ok && wrong.error.code).toBe('UNKNOWN_TAXONOMY');
+  });
+
   it('refuses a subcategory from another category and saves nothing', async () => {
     const result = await handler.execute({
       userId: talentId,

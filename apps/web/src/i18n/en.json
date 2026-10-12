@@ -463,7 +463,7 @@
       "subcategories": "What exactly do you do?",
       "subcategoriesHint": "Choose up to {max}.",
       "skills": "Skills (optional)",
-      "skillsHint": "Choose up to {max}.",
+      "skillsHint": "These match what you chose above. Choose up to {max}.",
       "pickCategoryFirst": "Choose a category to see the options.",
       "tooMany": "You can choose up to {max}."
     },

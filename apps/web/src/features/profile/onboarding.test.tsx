@@ -158,7 +158,12 @@ describe('talent onboarding', () => {
 
     expect(await screen.findByRole('heading', { level: 1, name: 'Your discipline' })).toBeVisible();
     await user.click(screen.getByRole('radio', { name: 'Music' }));
+    // Skills appear once a subcategory is chosen, and only the ones that belong to it.
+    expect(screen.queryByRole('checkbox', { name: 'Vocals' })).not.toBeInTheDocument();
     await user.click(screen.getByRole('checkbox', { name: 'Singer' }));
+    expect(screen.queryByRole('checkbox', { name: 'Drums' })).not.toBeInTheDocument();
+    await user.click(screen.getByRole('checkbox', { name: 'Vocals' }));
+    await user.click(screen.getByRole('checkbox', { name: 'Yoruba' }));
     await expectNoAxeViolations();
     await user.click(screen.getByRole('button', { name: 'Save and continue' }));
 
@@ -193,7 +198,7 @@ describe('talent onboarding', () => {
     expect(patches[1]?.body).toEqual({
       categorySlug: 'music',
       subcategorySlugs: ['singer'],
-      skillSlugs: [],
+      skillSlugs: ['vocals', 'yoruba'],
     });
   });
 

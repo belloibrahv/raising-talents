@@ -2,7 +2,14 @@ import { asc, desc, eq } from 'drizzle-orm';
 import type { Clock } from '../../../platform/clock.js';
 import type { Database } from '../../../platform/database/client.js';
 import { TaxonomyCatalog, type TaxonomySource } from '../application/taxonomy-catalog.js';
-import { categories, cities, countries, skills, subcategories } from './taxonomy.schema.js';
+import {
+  categories,
+  cities,
+  countries,
+  skills,
+  skillSubcategories,
+  subcategories,
+} from './taxonomy.schema.js';
 
 const REFRESH_AFTER_MS = 5 * 60 * 1000;
 
@@ -29,38 +36,51 @@ export class CachedTaxonomySource implements TaxonomySource {
   }
 
   private async load(now: number): Promise<TaxonomyCatalog> {
-    const [categoryRows, subcategoryRows, skillRows, countryRows, cityRows] = await Promise.all([
-      this.db
-        .select()
-        .from(categories)
-        .where(eq(categories.active, true))
-        .orderBy(asc(categories.position)),
-      this.db
-        .select()
-        .from(subcategories)
-        .where(eq(subcategories.active, true))
-        .orderBy(asc(subcategories.position)),
-      this.db.select().from(skills).where(eq(skills.active, true)).orderBy(asc(skills.name)),
-      this.db
-        .select({ code: countries.code, name: countries.name, searchTerms: countries.searchTerms })
-        .from(countries)
-        .where(eq(countries.active, true))
-        .orderBy(asc(countries.name)),
-      this.db
-        .select({
-          slug: cities.slug,
-          name: cities.name,
-          countryCode: cities.countryCode,
-          region: cities.region,
-        })
-        .from(cities)
-        .where(eq(cities.active, true))
-        .orderBy(desc(cities.population), asc(cities.name)),
-    ]);
+    const [categoryRows, subcategoryRows, skillRows, linkRows, countryRows, cityRows] =
+      await Promise.all([
+        this.db
+          .select()
+          .from(categories)
+          .where(eq(categories.active, true))
+          .orderBy(asc(categories.position)),
+        this.db
+          .select()
+          .from(subcategories)
+          .where(eq(subcategories.active, true))
+          .orderBy(asc(subcategories.position)),
+        this.db.select().from(skills).where(eq(skills.active, true)).orderBy(asc(skills.name)),
+        this.db.select().from(skillSubcategories),
+        this.db
+          .select({
+            code: countries.code,
+            name: countries.name,
+            searchTerms: countries.searchTerms,
+          })
+          .from(countries)
+          .where(eq(countries.active, true))
+          .orderBy(asc(countries.name)),
+        this.db
+          .select({
+            slug: cities.slug,
+            name: cities.name,
+            countryCode: cities.countryCode,
+            region: cities.region,
+          })
+          .from(cities)
+          .where(eq(cities.active, true))
+          .orderBy(desc(cities.population), asc(cities.name)),
+      ]);
+    const linksOf = new Map<string, string[]>();
+    for (const link of linkRows) {
+      linksOf.set(link.skillSlug, [...(linksOf.get(link.skillSlug) ?? []), link.subcategorySlug]);
+    }
     const catalog = new TaxonomyCatalog({
       categories: categoryRows,
       subcategories: subcategoryRows,
-      skills: skillRows,
+      skills: skillRows.map((skill) => ({
+        ...skill,
+        subcategorySlugs: linksOf.get(skill.slug) ?? [],
+      })),
       countries: countryRows,
       cities: cityRows,
     });

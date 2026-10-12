@@ -11,6 +11,7 @@ import { timeAgo } from '../../shared/relative-time';
 import { Avatar } from '../../shared/ui/Avatar';
 import { useSession } from '../auth/use-auth';
 import { RemoveMedia } from '../moderation/RemoveMedia';
+import { RemoveTextPost } from '../moderation/RemoveTextPost';
 import { useMyTalentProfile } from '../profile/queries';
 import { ReportPost } from '../talents/ReportProfile';
 import { Comments } from './Comments';
@@ -95,6 +96,8 @@ export function PostCard({ post, eager = false, commentsOpen = false }: PostCard
         <header
           className={cn(
             'flex items-center gap-3 px-4 py-3',
+            // Words on their own keep their header close; a picture carries its header on it.
+            post.kind === 'text' && 'pb-1',
             post.kind === 'image' &&
               'absolute inset-x-0 top-0 z-10 bg-gradient-to-b from-black/70 via-black/35 to-transparent pb-10 text-white',
           )}
@@ -144,7 +147,11 @@ export function PostCard({ post, eager = false, commentsOpen = false }: PostCard
           </time>
         </header>
 
-        {post.kind === 'audio' ? (
+        {post.kind === 'text' ? (
+          <p className="m-0 px-4 pt-2 pb-1 text-lg leading-relaxed break-words whitespace-pre-line">
+            {post.caption}
+          </p>
+        ) : post.kind === 'audio' ? (
           <AudioPlayer
             playback={post.audio}
             label={t('social.audioBy', { name: talent.displayName })}
@@ -194,7 +201,7 @@ export function PostCard({ post, eager = false, commentsOpen = false }: PostCard
             {commentsLabel(post.comments)}
           </button>
         </div>
-        {post.caption ? (
+        {post.caption && post.kind !== 'text' ? (
           <p className="m-0 leading-relaxed">
             <Link to={profile} className="mr-1.5 font-semibold text-foreground no-underline">
               {talent.displayName}
@@ -202,7 +209,11 @@ export function PostCard({ post, eager = false, commentsOpen = false }: PostCard
             {post.caption}
           </p>
         ) : null}
-        <RemoveMedia mediaId={post.mediaId} what="post" owner={talent.displayName} />
+        {post.mediaId ? (
+          <RemoveMedia mediaId={post.mediaId} what="post" owner={talent.displayName} />
+        ) : (
+          <RemoveTextPost postId={post.id} owner={talent.displayName} />
+        )}
         {canReport ? (
           // The form's button sizes itself; the row keeps it at the start of the line.
           <div className="flex flex-col items-start">

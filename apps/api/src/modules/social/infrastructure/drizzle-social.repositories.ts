@@ -1,4 +1,17 @@
-import { and, count, desc, eq, inArray, isNotNull, lt, ne, notExists, or, sql } from 'drizzle-orm';
+import {
+  and,
+  count,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  lt,
+  ne,
+  notExists,
+  or,
+  sql,
+} from 'drizzle-orm';
 import type { DrizzleUnitOfWork } from '../../../platform/database/drizzle-unit-of-work.js';
 import { users } from '../../accounts/infrastructure/account.schema.js';
 import { assets } from '../../media/infrastructure/media.schema.js';
@@ -127,6 +140,9 @@ export class DrizzleLikeRepository implements LikeRepository {
 }
 
 /** A talent others can see: a complete profile on an active, verified account (ADR-037). */
+/** A post others can see: words on their own, or a file that is ready. */
+const livePost = or(isNull(portfolioItems.mediaId), eq(assets.status, 'ready'));
+
 const visibleTalent = and(
   eq(profiles.isComplete, true),
   eq(users.status, 'active'),
@@ -153,7 +169,7 @@ export class DrizzlePostSource implements PostSource {
         postedAt: portfolioItems.createdAt,
       })
       .from(portfolioItems)
-      .innerJoin(assets, and(eq(assets.id, portfolioItems.mediaId), eq(assets.status, 'ready')))
+      .leftJoin(assets, eq(assets.id, portfolioItems.mediaId))
       .innerJoin(profiles, eq(profiles.userId, portfolioItems.talentId))
       .innerJoin(users, eq(users.id, portfolioItems.talentId));
   }
@@ -179,14 +195,14 @@ export class DrizzlePostSource implements PostSource {
         )
       : undefined;
     return this.posts()
-      .where(and(visibleTalent, within, before))
+      .where(and(visibleTalent, livePost, within, before))
       .orderBy(desc(portfolioItems.createdAt), desc(portfolioItems.id))
       .limit(limit);
   }
 
   async find(itemId: string): Promise<PostRow | null> {
     const [row] = await this.posts()
-      .where(and(visibleTalent, eq(portfolioItems.id, itemId)))
+      .where(and(visibleTalent, livePost, eq(portfolioItems.id, itemId)))
       .limit(1);
     return row ?? null;
   }
@@ -196,8 +212,8 @@ export class DrizzlePostSource implements PostSource {
       .executor()
       .select({ total: count() })
       .from(portfolioItems)
-      .innerJoin(assets, and(eq(assets.id, portfolioItems.mediaId), eq(assets.status, 'ready')))
-      .where(eq(portfolioItems.talentId, talentId));
+      .leftJoin(assets, eq(assets.id, portfolioItems.mediaId))
+      .where(and(eq(portfolioItems.talentId, talentId), livePost));
     return row?.total ?? 0;
   }
 

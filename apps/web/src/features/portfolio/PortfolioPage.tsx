@@ -1,4 +1,9 @@
-import { PORTFOLIO_CAPTION_MAX, type MediaStatus, type MyPortfolioItem } from '@rt/contracts';
+import {
+  PORTFOLIO_CAPTION_MAX,
+  POST_TEXT_MAX,
+  type MediaStatus,
+  type MyPortfolioItem,
+} from '@rt/contracts';
 import { useState } from 'react';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
@@ -15,9 +20,11 @@ import { Button } from '../../shared/ui/Button';
 import { FormMessage } from '../../shared/ui/FormMessage';
 import { PageSkeleton } from '../../shared/ui/PageSkeleton';
 import { Page } from '../../shared/ui/Page';
+import { TextArea } from '../../shared/ui/TextArea';
 import { TextField } from '../../shared/ui/TextField';
 import {
   useAddItem,
+  useAddText,
   useMoveItem,
   useMyPortfolio,
   useRemoveItem,
@@ -109,11 +116,21 @@ export function PortfolioPage() {
           {t('portfolio.full')}
         </FormMessage>
       ) : (
-        <FilePicker
-          label={t('portfolio.add')}
-          accept={ACCEPT_MEDIA}
-          onPick={(file) => void pick(file)}
-        />
+        <div className="grid gap-4 rounded-2xl border bg-card p-4 shadow-xs sm:p-5">
+          <TextComposer
+            onPosted={() => {
+              setAnnouncement(t('portfolio.textPosted'));
+            }}
+          />
+          <div className="flex flex-wrap items-center gap-3 border-t pt-4">
+            <span className="text-sm text-muted-foreground">{t('portfolio.orAdd')}</span>
+            <FilePicker
+              label={t('portfolio.add')}
+              accept={ACCEPT_MEDIA}
+              onPick={(file) => void pick(file)}
+            />
+          </div>
+        </div>
       )}
       {items.length === 0 ? (
         <EmptyState icon={ImagePlus} title={t('portfolio.empty')} />
@@ -149,6 +166,51 @@ export function PortfolioPage() {
   );
 }
 
+/** Words on their own: no file is needed to post (ADR-057). */
+function TextComposer({ onPosted }: { readonly onPosted: () => void }) {
+  const add = useAddText();
+  const [text, setText] = useState('');
+  const words = text.trim();
+  return (
+    <form
+      className="grid gap-3"
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (!words || add.isPending) return;
+        add.mutate(words, {
+          onSuccess: () => {
+            setText('');
+            onPosted();
+          },
+        });
+      }}
+    >
+      <TextArea
+        label={t('portfolio.textLabel')}
+        hint={t('portfolio.textHint', { max: POST_TEXT_MAX })}
+        placeholder={t('portfolio.textPlaceholder')}
+        value={text}
+        maxLength={POST_TEXT_MAX}
+        rows={3}
+        onChange={(event) => {
+          setText(event.target.value);
+        }}
+      />
+      <FormMessage tone="error">{add.error ? errorMessage(add.error) : null}</FormMessage>
+      <Button
+        type="submit"
+        size="sm"
+        className="justify-self-start"
+        disabled={!words}
+        loading={add.isPending}
+      >
+        {t('portfolio.textPost')}
+      </Button>
+    </form>
+  );
+}
+
 interface CardProps {
   readonly item: MyPortfolioItem;
   readonly position: number;
@@ -173,7 +235,11 @@ function PortfolioItemCard({
   const [caption, setCaption] = useState(item.caption);
   const [editing, setEditing] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  const name = item.caption || t('portfolio.item', { position });
+  const isText = item.kind === 'text';
+  // A text post is named by its place, not by repeating all of its words.
+  const name = isText
+    ? t('portfolio.item', { position })
+    : item.caption || t('portfolio.item', { position });
   const headingId = `item-${item.id}`;
   const iconButton =
     'grid size-9 cursor-pointer place-items-center rounded-full text-foreground transition-colors hover:bg-accent disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent';
@@ -223,22 +289,35 @@ function PortfolioItemCard({
               );
             }}
           >
-            <TextField
-              label={t('portfolio.caption')}
-              hint={t('portfolio.captionHint', { max: PORTFOLIO_CAPTION_MAX })}
-              value={caption}
-              maxLength={PORTFOLIO_CAPTION_MAX}
-              autoFocus
-              onChange={(event) => {
-                setCaption(event.target.value);
-              }}
-            />
+            {isText ? (
+              <TextArea
+                label={t('portfolio.textField')}
+                value={caption}
+                maxLength={POST_TEXT_MAX}
+                rows={4}
+                autoFocus
+                onChange={(event) => {
+                  setCaption(event.target.value);
+                }}
+              />
+            ) : (
+              <TextField
+                label={t('portfolio.caption')}
+                hint={t('portfolio.captionHint', { max: PORTFOLIO_CAPTION_MAX })}
+                value={caption}
+                maxLength={PORTFOLIO_CAPTION_MAX}
+                autoFocus
+                onChange={(event) => {
+                  setCaption(event.target.value);
+                }}
+              />
+            )}
             <div className="row gap-2">
               <Button
                 type="submit"
                 size="sm"
                 loading={updateCaption.isPending}
-                disabled={caption.trim() === item.caption}
+                disabled={caption.trim() === item.caption || (isText && caption.trim() === '')}
               >
                 {t('portfolio.saveCaption')}
               </Button>
@@ -254,7 +333,8 @@ function PortfolioItemCard({
               </Button>
             </div>
           </form>
-        ) : (
+        ) : isText ? null : (
+          // The words of a text post are already on its tile.
           <p
             className={
               item.caption
@@ -273,9 +353,11 @@ function PortfolioItemCard({
         <div
           className="stack gap-2 rounded-xl bg-destructive-surface p-3"
           role="group"
-          aria-label={t('portfolio.removeConfirm')}
+          aria-label={t(isText ? 'portfolio.removeConfirmText' : 'portfolio.removeConfirm')}
         >
-          <p className="text-sm font-medium">{t('portfolio.removeConfirm')}</p>
+          <p className="text-sm font-medium">
+            {t(isText ? 'portfolio.removeConfirmText' : 'portfolio.removeConfirm')}
+          </p>
           <div className="row gap-2">
             <Button
               size="sm"
@@ -325,7 +407,7 @@ function PortfolioItemCard({
           <button
             type="button"
             className={`${iconButton} ml-auto`}
-            aria-label={t('portfolio.editCaption', { name })}
+            aria-label={t(isText ? 'portfolio.editText' : 'portfolio.editCaption', { name })}
             aria-expanded={editing}
             onClick={() => {
               setEditing(!editing);
@@ -350,6 +432,15 @@ function PortfolioItemCard({
 }
 
 function ItemMedia({ item, name }: { item: MyPortfolioItem; name: string }) {
+  if (item.kind === 'text') {
+    return (
+      <div className="flex aspect-[4/5] w-full items-center rounded-xl bg-secondary p-4 pt-10 text-secondary-foreground">
+        <p className="m-0 line-clamp-[9] text-sm leading-relaxed font-medium break-words whitespace-pre-line">
+          {item.caption}
+        </p>
+      </div>
+    );
+  }
   if (item.kind === 'video' && item.video) {
     return (
       <VideoPlayer

@@ -589,7 +589,7 @@
   },
   "portfolio": {
     "title": "Your portfolio",
-    "body": "Up to {max} photos, clips and recordings of your best work. Each one appears in the feed and on your page.",
+    "body": "Up to {max} posts: photos, clips, recordings, or just words. Each one appears in the feed and on your page.",
     "count": "{count} of {max} items",
     "add": "Add a photo, video or audio",
     "full": "Your portfolio is full. Remove an item to add another.",
@@ -615,7 +615,17 @@
     "processingBody": "Only you can see this until it is checked.",
     "videoLabel": "Video, {seconds} seconds",
     "videoLabelPlain": "Video",
-    "audioLabel": "Audio recording"
+    "audioLabel": "Audio recording",
+    "textLabel": "Write a post",
+    "textPlaceholder": "What are you working on?",
+    "textHint": "Up to {max} characters. No photo needed.",
+    "textPost": "Post",
+    "textPosted": "Posted.",
+    "textItem": "Text post",
+    "editText": "Edit the words of {name}",
+    "textField": "Your post",
+    "removeConfirmText": "Remove this post?",
+    "orAdd": "Or add a file"
   },
   "talent": {
     "notAvailable": "This profile is not available.",
@@ -629,8 +639,9 @@
     "about": "About",
     "contact": "Contact",
     "addWork": "Add work",
-    "noPortfolioMine": "Share your first photo or clip",
-    "audioAlt": "Recording {position} by {name}"
+    "noPortfolioMine": "Share your first post",
+    "audioAlt": "Recording {position} by {name}",
+    "textAlt": "Post {position} by {name}"
   },
   "place": {
     "country": "Country",
@@ -780,7 +791,9 @@
     "reports_dismiss": "Reports dismissed.",
     "reports_suspend": "Account suspended.",
     "reports_ban": "Account banned.",
-    "reportedAudioAlt": "Reported recording by {name}"
+    "reportedAudioAlt": "Reported recording by {name}",
+    "removedText": "Removed.",
+    "removeTextConfirm": "Remove this post? It cannot be brought back."
   },
   "verification": {
     "title": "Get verified",

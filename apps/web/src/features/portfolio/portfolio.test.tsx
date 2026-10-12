@@ -211,6 +211,48 @@ describe('portfolio', () => {
     expect(calls.some((call) => call.path === '/v1/media/upload-intents')).toBe(false);
   });
 
+  it('posts words on their own, with no file', async () => {
+    const fake = fakePortfolio();
+    const calls = stubApi({
+      '/v1/auth/web/refresh': () => signedIn(meFor({ status: 'active' })),
+      'GET /v1/me/portfolio': fake.get,
+      'POST /v1/me/portfolio/texts': (call) => {
+        fake.state.items.push(
+          item('0192a3b4-0000-7000-8000-0000000000a3', {
+            kind: 'text',
+            mediaId: null,
+            urls: null,
+            caption: (call.body as { text: string }).text,
+          }),
+        );
+        fake.state.version += 1;
+        return Response.json(
+          { items: fake.state.items, maxItems: 30, version: fake.state.version },
+          { status: 201 },
+        );
+      },
+    });
+    renderAt('/portfolio');
+    const user = userEvent.setup({ delay: null });
+    const field = await screen.findByLabelText(/Write a post/);
+    const send = screen.getByRole('button', { name: 'Post' });
+    expect(send).toBeDisabled();
+    await user.type(field, '  Trials are on Saturday.  ');
+    await user.click(send);
+
+    await waitFor(() => {
+      expect(screen.getAllByRole('article')).toHaveLength(3);
+    });
+    const third = screen.getAllByRole('article')[2] as HTMLElement;
+    expect(within(third).getByText('Trials are on Saturday.')).toBeVisible();
+    expect(within(third).getByRole('button', { name: 'Edit the words of Item 3' })).toBeVisible();
+    expect(field).toHaveValue('');
+    expect(calls.find((call) => call.path === '/v1/me/portfolio/texts')?.body).toEqual({
+      text: 'Trials are on Saturday.',
+    });
+    await expectNoAxeViolations();
+  });
+
   it('refuses a clip over 300 MB before asking the API for anything', async () => {
     const fake = fakePortfolio();
     const calls = stubApi({

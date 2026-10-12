@@ -49,7 +49,8 @@ export interface LikeRepository {
 export interface PostRow {
   readonly itemId: string;
   readonly talentId: string;
-  readonly mediaId: string;
+  /** Null for a text post. */
+  readonly mediaId: string | null;
   readonly kind: PortfolioItemKind;
   readonly caption: string;
   readonly postedAt: Date;

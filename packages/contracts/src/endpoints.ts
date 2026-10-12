@@ -27,6 +27,7 @@ import {
 } from './media.js';
 import {
   addPortfolioItemRequestSchema,
+  addTextPostRequestSchema,
   myPortfolioSchema,
   publicPortfolioSchema,
   sharedTalentProfileSchema,
@@ -469,6 +470,17 @@ export const endpoints = {
     tag: 'Portfolio',
     concurrency: 'etag',
   }),
+  'portfolio.addText': define({
+    method: 'POST',
+    path: '/v1/me/portfolio/texts',
+    summary: 'Post words on their own, with no photo, video or recording',
+    auth: true,
+    request: addTextPostRequestSchema,
+    response: myPortfolioSchema,
+    successStatus: 201,
+    errors: [ErrorCode.WrongRole, ErrorCode.PortfolioFull],
+    tag: 'Portfolio',
+  }),
   'portfolio.addItem': define({
     method: 'POST',
     path: '/v1/me/portfolio/items',
@@ -588,6 +600,16 @@ export const endpoints = {
     request: mediaRemovalSchema,
     successStatus: 204,
     errors: [ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.MediaWrongState],
+    tag: 'Moderation',
+  }),
+  'moderation.removeTextPost': define({
+    method: 'POST',
+    path: '/v1/moderation/posts/{id}/removal',
+    summary:
+      'Take down a text post. Posts with a file are taken down through their media. Recorded with the moderator',
+    auth: true,
+    successStatus: 204,
+    errors: [ErrorCode.Forbidden, ErrorCode.NotFound, ErrorCode.Conflict],
     tag: 'Moderation',
   }),
   'agentVerification.getMine': define({

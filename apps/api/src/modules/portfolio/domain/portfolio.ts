@@ -1,5 +1,6 @@
 import {
   ErrorCode,
+  PORTFOLIO_CAPTION_MAX,
   PORTFOLIO_MAX_ITEMS,
   type MediaStatus,
   type PortfolioItemKind,
@@ -33,6 +34,17 @@ export const PortfolioErrors = {
       ErrorCode.PortfolioFull,
       `A portfolio holds up to ${String(PORTFOLIO_MAX_ITEMS)} items. Remove one to add another.`,
     ),
+  captionTooLong: () =>
+    domainError(
+      ErrorCode.ValidationFailed,
+      `A caption can be up to ${String(PORTFOLIO_CAPTION_MAX)} characters.`,
+    ),
+  textRequired: () => domainError(ErrorCode.ValidationFailed, 'A text post needs some words.'),
+  notATextPost: () =>
+    domainError(
+      ErrorCode.Conflict,
+      'This post has a photo, video or recording. Remove that file to take it down.',
+    ),
   versionRequired: () =>
     domainError(
       ErrorCode.PreconditionRequired,
@@ -54,7 +66,8 @@ const ATTACHABLE: readonly MediaStatus[] = ['processing', 'scanning', 'ready', '
 
 export interface PortfolioItemProps {
   readonly id: string;
-  readonly mediaId: string;
+  /** Null for a text post: the caption is the post (ADR-057). */
+  readonly mediaId: string | null;
   readonly kind: PortfolioItemKind;
   readonly caption: string;
   readonly createdAt: Date;
@@ -154,9 +167,31 @@ export class Portfolio {
     return ok(item);
   }
 
+  /** A post that is only words. It takes a place in the portfolio like any other item. */
+  addText(input: { id: string; text: string; now: Date }): Result<PortfolioItemProps, DomainError> {
+    if (input.text.trim() === '') return err(PortfolioErrors.textRequired());
+    if (this.props.items.length >= PORTFOLIO_MAX_ITEMS) return err(PortfolioErrors.full());
+    const item: PortfolioItemProps = {
+      id: input.id,
+      mediaId: null,
+      kind: 'text',
+      caption: input.text,
+      createdAt: input.now,
+      updatedAt: input.now,
+    };
+    this.change({ items: [...this.props.items, item] }, input.now);
+    this.raise(PortfolioEvents.ItemAdded, item, input.now);
+    return ok(item);
+  }
+
   updateCaption(itemId: string, caption: string, now: Date): Result<void, DomainError> {
     const current = this.props.items.find((item) => item.id === itemId);
     if (!current) return err(PortfolioErrors.itemNotFound());
+    // The words of a text post are the post, so they cannot be emptied; a caption is shorter.
+    if (current.kind === 'text' && caption.trim() === '')
+      return err(PortfolioErrors.textRequired());
+    if (current.kind !== 'text' && caption.length > PORTFOLIO_CAPTION_MAX)
+      return err(PortfolioErrors.captionTooLong());
     if (current.caption === caption) return ok(undefined);
     this.change(
       {
@@ -229,4 +264,6 @@ export interface PortfolioRepository {
    * first, or already attached the same media.
    */
   save(portfolio: Portfolio): Promise<void>;
+  /** Whose portfolio an item is in, for a moderator who only has the post. */
+  findOwnerOfItem(itemId: string): Promise<string | null>;
 }

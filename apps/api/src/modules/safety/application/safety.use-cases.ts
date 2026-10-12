@@ -79,7 +79,9 @@ export interface SafetyConversations {
 
 /** What safety needs from posts. Implemented by the feed's PostSource. */
 export interface SafetyPosts {
-  find(postId: string): Promise<{ talentId: string; mediaId: string } | null>;
+  find(
+    postId: string,
+  ): Promise<{ talentId: string; mediaId: string | null; caption: string; postedAt: Date } | null>;
 }
 
 /** What safety needs from comments. Implemented by CommentEvidence (ADR-052). */
@@ -157,7 +159,14 @@ export class FileReportHandler {
       const post = await this.posts.find(target.postId);
       // A post nobody else can see answers like a missing one.
       if (!post || !(await this.talents.cardFor(post.talentId))) return null;
-      return { subjectId: post.talentId, evidence: [], mediaId: post.mediaId };
+      // A text post has no file to show the moderator, so its words are kept instead.
+      return post.mediaId === null
+        ? {
+            subjectId: post.talentId,
+            evidence: [{ body: post.caption, sentAt: post.postedAt }],
+            mediaId: null,
+          }
+        : { subjectId: post.talentId, evidence: [], mediaId: post.mediaId };
     }
     if (target.kind === 'comment') {
       const comment = await this.comments.forReport(target.commentId);

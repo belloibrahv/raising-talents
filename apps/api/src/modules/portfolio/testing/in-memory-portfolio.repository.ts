@@ -22,10 +22,17 @@ export class InMemoryPortfolioRepository implements PortfolioRepository {
     const mediaElsewhere = [...this.rows.values()]
       .filter((row) => row.talentId !== props.talentId)
       .flatMap((row) => row.items.map((item) => item.mediaId));
-    if (props.items.some((item) => mediaElsewhere.includes(item.mediaId)))
+    if (props.items.some((item) => item.mediaId !== null && mediaElsewhere.includes(item.mediaId)))
       throw new PortfolioConcurrencyError('media');
     this.rows.set(props.talentId, props);
     portfolio.markStored();
     await this.events.record(portfolio.pullEvents());
+  }
+
+  findOwnerOfItem(itemId: string): Promise<string | null> {
+    const owner = [...this.rows.values()].find((row) =>
+      row.items.some((item) => item.id === itemId),
+    );
+    return Promise.resolve(owner?.talentId ?? null);
   }
 }

@@ -169,7 +169,13 @@ export function SharedProfilePage() {
                         className={index === 0 ? 'col-span-2 row-span-2' : undefined}
                       >
                         <figure className="m-0 flex h-full flex-col gap-1.5">
-                          {item.kind === 'audio' ? (
+                          {item.kind === 'text' ? (
+                            <blockquote className="m-0 flex flex-1 items-center rounded-2xl bg-secondary p-4 text-secondary-foreground">
+                              <p className="m-0 leading-relaxed break-words whitespace-pre-line">
+                                {item.caption}
+                              </p>
+                            </blockquote>
+                          ) : item.kind === 'audio' ? (
                             <AudioPlayer
                               playback={item.audio}
                               label={t('talent.audioAlt', values)}
@@ -195,7 +201,7 @@ export function SharedProfilePage() {
                               decoding="async"
                             />
                           )}
-                          {item.caption ? (
+                          {item.caption && item.kind !== 'text' ? (
                             <figcaption className="text-sm text-muted-foreground">
                               {item.caption}
                             </figcaption>

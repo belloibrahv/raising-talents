@@ -269,7 +269,9 @@ function Tile({
       ? t('talent.videoAlt', values)
       : post.kind === 'audio'
         ? t('talent.audioAlt', values)
-        : t('talent.photoAlt', values);
+        : post.kind === 'text'
+          ? t('talent.textAlt', values)
+          : t('talent.photoAlt', values);
   return (
     <button
       type="button"
@@ -277,7 +279,14 @@ function Tile({
       aria-label={post.caption ? `${name}: ${post.caption}` : name}
       onClick={onOpen}
     >
-      {post.kind === 'image' ? (
+      {post.kind === 'text' ? (
+        // The opening words stand in for a picture.
+        <span className="flex size-full items-center bg-secondary p-2.5 text-left text-secondary-foreground sm:p-4">
+          <span className="line-clamp-5 text-xs leading-snug font-medium break-words sm:text-sm">
+            {post.caption}
+          </span>
+        </span>
+      ) : post.kind === 'image' ? (
         <img
           className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
           src={post.urls.medium}

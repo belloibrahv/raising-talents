@@ -4,7 +4,12 @@ import { assets } from '../../media/infrastructure/media.schema.js';
 
 export const portfolioSchema = pgSchema('portfolio');
 
-export const portfolioItemKindEnum = portfolioSchema.enum('item_kind', ['image', 'video', 'audio']);
+export const portfolioItemKindEnum = portfolioSchema.enum('item_kind', [
+  'image',
+  'video',
+  'audio',
+  'text',
+]);
 
 /** The aggregate root. Locking this row serialises every change to one talent's portfolio. */
 export const portfolios = portfolioSchema.table('portfolios', {
@@ -25,9 +30,8 @@ export const portfolioItems = portfolioSchema.table(
       .references(() => portfolios.talentId, { onDelete: 'cascade' }),
     // An item is nothing without its file. Erasing an account removes both along two
     // cascade paths at once; without this, the file could not go while the item remained.
-    mediaId: uuid('media_id')
-      .notNull()
-      .references(() => assets.id, { onDelete: 'cascade' }),
+    // Null for a text post, which has no file (ADR-057).
+    mediaId: uuid('media_id').references(() => assets.id, { onDelete: 'cascade' }),
     kind: portfolioItemKindEnum('kind').notNull(),
     caption: text('caption').notNull().default(''),
     position: integer('position').notNull(),

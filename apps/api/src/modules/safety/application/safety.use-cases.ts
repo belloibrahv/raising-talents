@@ -96,7 +96,7 @@ export interface SafetyMedia {
         kind: 'image' | 'video' | 'audio';
         status: string;
         urls: { medium: string } | null;
-        video: { posterUrl: string } | null;
+        video: { posterUrl: string; streamUrl: string; format: 'hls' | 'file' } | null;
         audio: { url: string } | null;
       }
     >
@@ -264,8 +264,19 @@ export class ListReportedAccountsQuery {
             .flatMap((entry) => {
               const file = files.get(entry.mediaId);
               const previewUrl = file?.urls?.medium ?? file?.video?.posterUrl ?? file?.audio?.url;
+              // A recording, or a video kept as a file, has no picture: it is played instead.
+              const playUrl =
+                file?.audio?.url ?? (file?.video?.format === 'file' ? file.video.streamUrl : null);
               return file?.status === 'ready' && previewUrl
-                ? [{ mediaId: entry.mediaId, reports: entry.count, previewUrl, kind: file.kind }]
+                ? [
+                    {
+                      mediaId: entry.mediaId,
+                      reports: entry.count,
+                      previewUrl,
+                      kind: file.kind,
+                      playUrl,
+                    },
+                  ]
                 : [];
             })
             .slice(0, REPORTED_MEDIA_SHOWN),

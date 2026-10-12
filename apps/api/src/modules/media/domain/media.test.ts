@@ -174,12 +174,12 @@ describe('MediaAsset video', () => {
     expect(asset.pullEvents()).toEqual([]);
   });
 
-  it('rejects a clip over 60 seconds and tells the owner how to fix it', () => {
+  it('rejects a clip over three minutes and tells the owner how to fix it', () => {
     const asset = requestVideo();
-    asset.videoTranscoded({ ...transcoded, durationSeconds: 61.2 }, now);
+    asset.videoTranscoded({ ...transcoded, durationSeconds: 181.2 }, now);
     expect(asset.status).toBe('rejected');
     expect(asset.snapshot().rejectionReason).toBe(
-      'Videos can be up to 60 seconds. Trim it and upload again.',
+      'Videos can be up to 180 seconds. Trim it and upload again.',
     );
   });
 

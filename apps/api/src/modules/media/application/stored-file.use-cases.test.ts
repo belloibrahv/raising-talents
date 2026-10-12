@@ -8,9 +8,13 @@ import {
 } from '../../../platform/testing/fakes.js';
 import { createAccountsHarness } from '../../accounts/testing/accounts-harness.js';
 import { MediaEvents } from '../domain/media-asset.js';
-import { FakeVideoProvider } from '../testing/fake-video-provider.js';
+import { StorageVideoProvider } from '../infrastructure/mux-video-provider.js';
 import { InMemoryMediaAssetRepository, InMemoryObjectStorage } from '../testing/fakes.js';
-import { looksLikeAudio, ProcessAudioHandler } from './audio.use-cases.js';
+import {
+  looksLikeAudio,
+  looksLikeVideo,
+  StoreUploadedFileHandler,
+} from './stored-file.use-cases.js';
 import { MediaFacade } from './media.facade.js';
 import { MediaPresenter } from './media-presenter.js';
 import { MediaUrls } from './media-urls.js';
@@ -22,14 +26,16 @@ import {
 
 const MP3 = Buffer.concat([Buffer.from('ID3'), Buffer.alloc(64, 1)]);
 
-describe('Audio pipeline', () => {
+const MP4 = Buffer.concat([Buffer.alloc(4), Buffer.from('ftypisom'), Buffer.alloc(64, 2)]);
+
+describe('Files served as they were uploaded', () => {
   let clock: FixedClock;
   let events: InMemoryEventRecorder;
   let assets: InMemoryMediaAssetRepository;
   let storage: InMemoryObjectStorage;
   let createIntent: CreateUploadIntentHandler;
   let complete: CompleteUploadHandler;
-  let process: ProcessAudioHandler;
+  let process: StoreUploadedFileHandler;
   let get: GetMediaQuery;
   let facade: MediaFacade;
   let talentId: string;
@@ -57,7 +63,7 @@ describe('Audio pipeline', () => {
     assets = new InMemoryMediaAssetRepository(events);
     storage = new InMemoryObjectStorage();
     const uow = new InMemoryUnitOfWork();
-    const video = new FakeVideoProvider();
+    const video = new StorageVideoProvider();
     const presenter = new MediaPresenter(
       new MediaUrls('https://media.staging.raisingtalents.app'),
       video,
@@ -71,7 +77,7 @@ describe('Audio pipeline', () => {
       clock,
     );
     complete = new CompleteUploadHandler(assets, storage, video, presenter, uow, clock);
-    process = new ProcessAudioHandler(assets, storage, uow, clock, pino({ level: 'silent' }));
+    process = new StoreUploadedFileHandler(assets, storage, uow, clock, pino({ level: 'silent' }));
     get = new GetMediaQuery(assets, presenter);
     facade = new MediaFacade(assets, presenter, clock, storage, video);
     talentId = await accounts.createAccount({ email: 'ngozi.sings@example.com', role: 'talent' });
@@ -127,6 +133,25 @@ describe('Audio pipeline', () => {
       bytes: 21 * 1024 * 1024,
     });
     expect(!tooBig.ok && tooBig.error.code).toBe('MEDIA_TOO_LARGE');
+  });
+
+  it('keeps a video in our storage where there is no video provider, and plays it as a file', async () => {
+    expect(looksLikeVideo(MP4)).toBe(true);
+    expect(looksLikeVideo(MP3)).toBe(false);
+    const mediaId = await upload(MP4, 'video/quicktime');
+    const view = await get.execute({ viewerId: talentId, mediaId });
+    const url = `https://media.staging.raisingtalents.app/media/${talentId}/${mediaId}/video`;
+    expect(view.ok && view.value).toMatchObject({
+      kind: 'video',
+      status: 'ready',
+      video: { format: 'file', streamUrl: url, durationSeconds: 0 },
+    });
+    expect(storage.objects.has(`media/${talentId}/${mediaId}/video`)).toBe(true);
+    expect(storage.objects.has(`pending/${talentId}/${mediaId}`)).toBe(false);
+
+    const fake = await upload(Buffer.from('<html>not a video at all</html>'), 'video/mp4');
+    expect(assets.rows.get(fake)?.status).toBe('failed');
+    expect(assets.rows.get(fake)?.failureReason).toContain('MP4 or MOV');
   });
 
   it('removes the stored recording when the owner deletes it', async () => {

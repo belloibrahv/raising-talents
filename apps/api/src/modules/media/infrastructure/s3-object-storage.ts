@@ -1,4 +1,6 @@
+import type { Readable } from 'node:stream';
 import {
+  CopyObjectCommand,
   DeleteObjectsCommand,
   GetObjectCommand,
   HeadObjectCommand,
@@ -55,6 +57,40 @@ export class S3ObjectStorage implements ObjectStorage {
     const object = await this.client.send(new GetObjectCommand({ Bucket: this.bucket, Key: key }));
     if (!object.Body) throw new Error(`Empty object at ${key}`);
     return Buffer.from(await object.Body.transformToByteArray());
+  }
+
+  async readStart(key: string, bytes: number): Promise<Buffer> {
+    const object = await this.client.send(
+      new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Range: `bytes=0-${String(bytes - 1)}`,
+      }),
+    );
+    if (!object.Body) throw new Error(`Empty object at ${key}`);
+    return Buffer.from(await object.Body.transformToByteArray());
+  }
+
+  async stream(key: string, range?: { start: number; end: number }): Promise<Readable> {
+    const object = await this.client.send(
+      new GetObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        ...(range ? { Range: `bytes=${String(range.start)}-${String(range.end)}` } : {}),
+      }),
+    );
+    if (!object.Body) throw new Error(`Empty object at ${key}`);
+    return object.Body as Readable;
+  }
+
+  async copy(fromKey: string, toKey: string): Promise<void> {
+    await this.client.send(
+      new CopyObjectCommand({
+        Bucket: this.bucket,
+        Key: toKey,
+        CopySource: `${this.bucket}/${fromKey.split('/').map(encodeURIComponent).join('/')}`,
+      }),
+    );
   }
 
   async write(key: string, body: Buffer, contentType: string): Promise<void> {

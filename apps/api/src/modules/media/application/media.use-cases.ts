@@ -48,7 +48,7 @@ export const MEDIA = {
   Complete: Symbol('CompleteUploadHandler'),
   Get: Symbol('GetMediaQuery'),
   Process: Symbol('ProcessImageHandler'),
-  ProcessAudio: Symbol('ProcessAudioHandler'),
+  StoreFile: Symbol('StoreUploadedFileHandler'),
   Facade: Symbol('MediaFacade'),
   RemoveDeleted: Symbol('RemoveDeletedMediaHandler'),
   EventHandlers: Symbol('MediaEventHandlers'),
@@ -82,7 +82,8 @@ export class CreateUploadIntentHandler {
     if (!account?.role || !PURPOSE_ROLES[input.purpose].includes(account.role)) {
       return err(domainError('WRONG_ROLE', 'Your account cannot upload this kind of file.'));
     }
-    if (mediaKindOf(input.contentType) === 'video' && !this.video.enabled)
+    const isVideo = mediaKindOf(input.contentType) === 'video';
+    if (isVideo && !this.video.enabled && !this.video.keepsInStorage)
       return err(MediaErrors.videoUnavailable());
     const limit = await this.rateLimiter.consume(
       `upload-intent:${input.userId}`,
@@ -107,7 +108,7 @@ export class CreateUploadIntentHandler {
     const asset = requested.value;
 
     let upload: UploadIntentResponse['upload'];
-    if (asset.kind === 'video') {
+    if (asset.kind === 'video' && this.video.enabled) {
       // The phone sends video straight to the provider; the asset id comes back in its webhooks.
       const created = await this.video.createUpload({ passthrough: asset.id });
       asset.attachProviderUpload(created.uploadId);
@@ -148,7 +149,8 @@ export class CompleteUploadHandler {
     if (asset?.ownerId !== input.userId) return err(MediaErrors.notFound());
     // A retry after a lost response: report where it is instead of failing.
     if (asset.status !== 'awaiting_upload') return ok(await this.presenter.view(asset));
-    if (asset.kind === 'video') return this.completeVideo(asset);
+    // A video kept in our storage is confirmed like any other file (ADR-056).
+    if (asset.withProvider) return this.completeVideo(asset);
 
     const stored = await this.storage.describe(asset.originalKey);
     if (!stored) return err(MediaErrors.notUploaded());

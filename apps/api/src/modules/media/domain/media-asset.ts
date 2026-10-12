@@ -72,8 +72,11 @@ const MAX_BYTES: Record<MediaKind, number> = {
 export const NOT_AUDIO_REASON =
   'The file is not a recording we can play. Use MP3, M4A, WAV or Ogg.';
 
-/** The name a ready recording is stored and served under. */
+export const NOT_VIDEO_REASON = 'The file is not a video we can play. Use MP4 or MOV.';
+
+/** The names a ready recording and a stored video are kept and served under. */
 export const AUDIO_FILE = 'audio';
+export const VIDEO_FILE = 'video';
 
 export const IMAGE_SIZES = { small: 256, medium: 1024, large: 2048 } as const;
 
@@ -178,17 +181,28 @@ export class MediaAsset {
     return `media/${this.props.ownerId}/${this.props.id}/${String(IMAGE_SIZES[size])}.webp`;
   }
 
-  /** Where a checked recording is kept. Audio only. */
-  get audioKey(): string {
-    return `media/${this.props.ownerId}/${this.props.id}/${AUDIO_FILE}`;
+  /** A video that went to the video provider, not into our own storage. */
+  get withProvider(): boolean {
+    return this.kind === 'video' && this.props.providerUploadId !== null;
+  }
+
+  /** A recording, or a video kept in our own storage: served as the file that was uploaded. */
+  get servedAsFile(): boolean {
+    return this.kind === 'audio' || (this.kind === 'video' && !this.withProvider);
+  }
+
+  /** Where a checked recording or stored video is kept. */
+  get fileKey(): string {
+    const name = this.kind === 'video' ? VIDEO_FILE : AUDIO_FILE;
+    return `media/${this.props.ownerId}/${this.props.id}/${name}`;
   }
 
   /**
-   * Audio: the file is what it claims to be and is in place. Nothing scans a recording, so
-   * it goes live at once; members report it and moderators take it down (ADR-048).
+   * The file is what it claims to be and is in place. Nothing scans a recording or a stored
+   * video, so it goes live at once; members report it and moderators take it down (ADR-048).
    */
-  audioStored(now: Date): void {
-    if (this.kind !== 'audio' || this.props.status !== 'processing') return;
+  fileStored(now: Date): void {
+    if (!this.servedAsFile || this.props.status !== 'processing') return;
     this.props = { ...this.props, status: 'ready', readyAt: now, updatedAt: now };
     this.raise(MediaEvents.Ready, now);
   }
@@ -363,10 +377,10 @@ export class MediaAsset {
     this.raise(MediaEvents.Deleted, now);
   }
 
-  /** Every object this asset can have in our storage. Video lives with the provider instead. */
+  /** Every object this asset can have in our storage. A provider's video lives with the provider. */
   get storedKeys(): string[] {
-    if (this.kind === 'video') return [];
-    if (this.kind === 'audio') return [this.originalKey, this.audioKey];
+    if (this.withProvider) return [];
+    if (this.servedAsFile) return [this.originalKey, this.fileKey];
     return [
       this.originalKey,
       ...(Object.keys(IMAGE_SIZES) as (keyof typeof IMAGE_SIZES)[]).map((size) =>

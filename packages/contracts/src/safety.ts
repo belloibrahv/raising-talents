@@ -73,6 +73,8 @@ export const reportedAccountSchema = z
         /** The photo, the video's poster, or the recording itself to listen to. */
         previewUrl: z.string(),
         kind: z.enum(['image', 'video', 'audio']),
+        /** Set when there is no picture to show: the recording or video file to play. */
+        playUrl: z.string().nullable().default(null),
       }),
     ),
     openReports: z.number().int().positive(),

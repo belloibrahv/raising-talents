@@ -59,3 +59,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-053](053-an-easier-password-rule.md)                               | An easier password rule                                              | Accepted                          |
 | [ADR-054](054-skills-follow-the-subcategory.md)                         | Skills follow the subcategory                                        | Accepted                          |
 | [ADR-055](055-audio-in-the-portfolio.md)                                | Audio in the portfolio                                               | Accepted                          |
+| [ADR-056](056-video-kept-in-our-storage.md)                             | Video kept in our own storage where there is no video provider       | Accepted                          |

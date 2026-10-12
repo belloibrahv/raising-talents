@@ -582,8 +582,8 @@
     "typeNotAllowed": "Use a photo (JPEG, PNG, WebP or HEIC), a video (MP4 or MOV) or a recording (MP3, M4A, WAV or Ogg).",
     "photoOnly": "Use a photo in JPEG, PNG, WebP or HEIC format.",
     "imageTooLarge": "That photo is over 15 MB. Choose a smaller one.",
-    "videoTooLarge": "That video is over 300 MB. Choose a shorter clip.",
-    "videoTooLong": "That video is {seconds} seconds long. Clips can be up to 60 seconds; trim it and try again.",
+    "videoTooLarge": "That video is over 300 MB. Choose a shorter clip or a lower quality.",
+    "videoTooLong": "That video is {seconds} seconds long. Clips can be up to {minutes} minutes; trim it and try again.",
     "uploadFailed": "The upload did not finish. Check your connection and try again.",
     "audioTooLarge": "That recording is over 20 MB. Choose a shorter one or save it as MP3."
   },
@@ -614,6 +614,7 @@
     "heldBody": "A moderator is checking this item. Only you can see it until then.",
     "processingBody": "Only you can see this until it is checked.",
     "videoLabel": "Video, {seconds} seconds",
+    "videoLabelPlain": "Video",
     "audioLabel": "Audio recording"
   },
   "talent": {

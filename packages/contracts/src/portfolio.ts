@@ -1,13 +1,18 @@
 import { z } from 'zod';
 import { idSchema, isoDateTimeSchema } from './common.js';
-import { imageUrlsSchema, mediaStatusSchema, videoPlaybackSchema } from './media.js';
+import {
+  audioPlaybackSchema,
+  imageUrlsSchema,
+  mediaStatusSchema,
+  videoPlaybackSchema,
+} from './media.js';
 
 /** Provisional limits (ADR-020) until the client signs off on section 6 of the design. */
 export const PORTFOLIO_MAX_ITEMS = 30;
 export const PORTFOLIO_CAPTION_MAX = 300;
 
 /** Clients must skip kinds they do not know, so new kinds can ship without breaking old apps. */
-export const portfolioItemKindSchema = z.enum(['image', 'video']);
+export const portfolioItemKindSchema = z.enum(['image', 'video', 'audio']);
 export type PortfolioItemKind = z.infer<typeof portfolioItemKindSchema>;
 
 const captionSchema = z.string().trim().max(PORTFOLIO_CAPTION_MAX);
@@ -51,6 +56,7 @@ export const myPortfolioItemSchema = z
     caption: z.string(),
     urls: imageUrlsSchema.nullable(),
     video: videoPlaybackSchema.nullable(),
+    audio: audioPlaybackSchema.nullable(),
     rejectionReason: z.string().nullable(),
     createdAt: isoDateTimeSchema,
   })
@@ -80,6 +86,12 @@ export const publicPortfolioItemSchema = z
       kind: z.literal('video'),
       caption: z.string(),
       video: videoPlaybackSchema,
+    }),
+    z.object({
+      id: idSchema,
+      kind: z.literal('audio'),
+      caption: z.string(),
+      audio: audioPlaybackSchema,
     }),
   ])
   .meta({ id: 'PublicPortfolioItem' });

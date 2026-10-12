@@ -232,6 +232,13 @@
       "when": 1791824840949,
       "tag": "0032_skills_by_subcategory",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1791825549795,
+      "tag": "0033_audio_in_portfolio",
+      "breakpoints": true
     }
   ]
 }

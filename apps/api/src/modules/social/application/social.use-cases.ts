@@ -5,6 +5,7 @@ import {
   FOLLOWING_MAX,
   SUGGESTIONS_MAX,
   type AccountStatus,
+  type AudioPlayback,
   type FeedScope,
   type ImageUrls,
   type LikeState,
@@ -71,10 +72,16 @@ export interface SocialAgents {
 
 /** What social needs from media. Implemented by MediaFacade. */
 export interface SocialMedia {
-  describe(
-    ids: readonly string[],
-  ): Promise<
-    Map<string, { status: MediaStatus; urls: ImageUrls | null; video: VideoPlayback | null }>
+  describe(ids: readonly string[]): Promise<
+    Map<
+      string,
+      {
+        status: MediaStatus;
+        urls: ImageUrls | null;
+        video: VideoPlayback | null;
+        audio: AudioPlayback | null;
+      }
+    >
   >;
 }
 
@@ -141,6 +148,7 @@ export class PostAssembler {
       };
       if (file.urls) return [{ ...shared, kind: 'image', urls: file.urls }];
       if (file.video) return [{ ...shared, kind: 'video', video: file.video }];
+      if (file.audio) return [{ ...shared, kind: 'audio', audio: file.audio }];
       return [];
     });
   }

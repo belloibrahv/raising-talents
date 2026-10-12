@@ -1,6 +1,7 @@
 import type { Post } from '@rt/contracts';
 import { useQuery } from '@tanstack/react-query';
 import {
+  AudioLines,
   Cake,
   Heart,
   ImageOff,
@@ -263,7 +264,12 @@ function Tile({
   readonly onOpen: () => void;
 }) {
   const values = { position, name: post.talent.displayName };
-  const name = post.kind === 'video' ? t('talent.videoAlt', values) : t('talent.photoAlt', values);
+  const name =
+    post.kind === 'video'
+      ? t('talent.videoAlt', values)
+      : post.kind === 'audio'
+        ? t('talent.audioAlt', values)
+        : t('talent.photoAlt', values);
   return (
     <button
       type="button"
@@ -283,7 +289,11 @@ function Tile({
         />
       ) : (
         <span className="grid size-full place-items-center bg-stage stage-glow text-stage-foreground">
-          <Play aria-hidden="true" className="size-8 fill-current" />
+          {post.kind === 'audio' ? (
+            <AudioLines aria-hidden="true" className="size-8" />
+          ) : (
+            <Play aria-hidden="true" className="size-8 fill-current" />
+          )}
         </span>
       )}
       <span className="absolute inset-0 hidden items-center justify-center gap-1.5 bg-black/45 font-semibold text-white group-hover:flex group-focus-visible:flex">

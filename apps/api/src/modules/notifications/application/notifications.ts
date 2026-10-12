@@ -47,7 +47,7 @@ export interface NotificationMedia {
       {
         ownerId: string;
         purpose: 'avatar' | 'portfolio';
-        kind: 'image' | 'video';
+        kind: 'image' | 'video' | 'audio';
         status: string;
         rejectionReason: string | null;
         reviewed: boolean;

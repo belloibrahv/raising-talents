@@ -29,6 +29,7 @@ const held = (id: string) => ({
     large: `https://media.test/${id}/2048.webp`,
   },
   video: null,
+  audio: null,
   heldAt: '2026-10-02T09:00:00.000Z',
 });
 

@@ -70,9 +70,9 @@ export const reportedAccountSchema = z
       z.object({
         mediaId: idSchema,
         reports: z.number().int().positive(),
-        /** A still image to look at: the photo, or the video's poster. */
+        /** The photo, the video's poster, or the recording itself to listen to. */
         previewUrl: z.string(),
-        kind: z.enum(['image', 'video']),
+        kind: z.enum(['image', 'video', 'audio']),
       }),
     ),
     openReports: z.number().int().positive(),

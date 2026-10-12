@@ -1,4 +1,5 @@
 import {
+  AUDIO_MAX_BYTES,
   ErrorCode,
   IMAGE_MAX_BYTES,
   mediaKindOf,
@@ -35,7 +36,11 @@ export const MediaErrors = {
   tooLarge: (kind: MediaKind) =>
     domainError(
       ErrorCode.MediaTooLarge,
-      kind === 'video' ? 'Videos can be up to 300 MB.' : 'Images can be up to 15 MB.',
+      kind === 'video'
+        ? 'Videos can be up to 300 MB.'
+        : kind === 'audio'
+          ? 'Audio can be up to 20 MB.'
+          : 'Images can be up to 15 MB.',
     ),
   videoNotAllowed: () =>
     domainError(ErrorCode.MediaTypeNotAllowed, 'Profile pictures must be photos.'),
@@ -57,6 +62,18 @@ export const MediaErrors = {
       `This upload is already ${status.replaceAll('_', ' ')}.`,
     ),
 };
+
+const MAX_BYTES: Record<MediaKind, number> = {
+  image: IMAGE_MAX_BYTES,
+  video: VIDEO_MAX_BYTES,
+  audio: AUDIO_MAX_BYTES,
+};
+
+export const NOT_AUDIO_REASON =
+  'The file is not a recording we can play. Use MP3, M4A, WAV or Ogg.';
+
+/** The name a ready recording is stored and served under. */
+export const AUDIO_FILE = 'audio';
 
 export const IMAGE_SIZES = { small: 256, medium: 1024, large: 2048 } as const;
 
@@ -104,10 +121,9 @@ export class MediaAsset {
     now: Date;
   }): Result<MediaAsset, DomainError> {
     const kind = mediaKindOf(input.contentType);
-    if (kind === 'video' && input.purpose !== 'portfolio')
+    if (kind !== 'image' && input.purpose !== 'portfolio')
       return err(MediaErrors.videoNotAllowed());
-    if (input.bytes > (kind === 'video' ? VIDEO_MAX_BYTES : IMAGE_MAX_BYTES))
-      return err(MediaErrors.tooLarge(kind));
+    if (input.bytes > MAX_BYTES[kind]) return err(MediaErrors.tooLarge(kind));
     return ok(
       new MediaAsset({
         id: input.id,
@@ -160,6 +176,21 @@ export class MediaAsset {
 
   variantKey(size: keyof typeof IMAGE_SIZES): string {
     return `media/${this.props.ownerId}/${this.props.id}/${String(IMAGE_SIZES[size])}.webp`;
+  }
+
+  /** Where a checked recording is kept. Audio only. */
+  get audioKey(): string {
+    return `media/${this.props.ownerId}/${this.props.id}/${AUDIO_FILE}`;
+  }
+
+  /**
+   * Audio: the file is what it claims to be and is in place. Nothing scans a recording, so
+   * it goes live at once; members report it and moderators take it down (ADR-048).
+   */
+  audioStored(now: Date): void {
+    if (this.kind !== 'audio' || this.props.status !== 'processing') return;
+    this.props = { ...this.props, status: 'ready', readyAt: now, updatedAt: now };
+    this.raise(MediaEvents.Ready, now);
   }
 
   snapshot(): MediaAssetProps {
@@ -335,6 +366,7 @@ export class MediaAsset {
   /** Every object this asset can have in our storage. Video lives with the provider instead. */
   get storedKeys(): string[] {
     if (this.kind === 'video') return [];
+    if (this.kind === 'audio') return [this.originalKey, this.audioKey];
     return [
       this.originalKey,
       ...(Object.keys(IMAGE_SIZES) as (keyof typeof IMAGE_SIZES)[]).map((size) =>

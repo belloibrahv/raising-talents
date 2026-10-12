@@ -162,17 +162,28 @@ function ReportedAccountCard({
           <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3">
             {item.reportedMedia.map((entry) => (
               <li key={entry.mediaId} className="grid content-start gap-2">
-                <img
-                  className="aspect-[4/5] w-full rounded-xl bg-muted object-cover"
-                  src={entry.previewUrl}
-                  alt={t(
-                    entry.kind === 'video'
-                      ? 'moderation.reportedVideoAlt'
-                      : 'moderation.reportedPhotoAlt',
-                    { name },
-                  )}
-                  loading="lazy"
-                />
+                {entry.kind === 'audio' ? (
+                  // A reported recording has to be listened to; its type is left to the browser.
+                  <audio
+                    className="w-full"
+                    controls
+                    preload="none"
+                    src={entry.previewUrl}
+                    aria-label={t('moderation.reportedAudioAlt', { name })}
+                  />
+                ) : (
+                  <img
+                    className="aspect-[4/5] w-full rounded-xl bg-muted object-cover"
+                    src={entry.previewUrl}
+                    alt={t(
+                      entry.kind === 'video'
+                        ? 'moderation.reportedVideoAlt'
+                        : 'moderation.reportedPhotoAlt',
+                      { name },
+                    )}
+                    loading="lazy"
+                  />
+                )}
                 <span className="text-xs text-muted-foreground">
                   {t(entry.reports === 1 ? 'moderation.reportedOnce' : 'moderation.reportedTimes', {
                     count: entry.reports,

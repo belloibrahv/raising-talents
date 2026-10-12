@@ -1,6 +1,7 @@
 import {
   type SharedTalentProfile,
   PORTFOLIO_MAX_ITEMS,
+  type AudioPlayback,
   type ImageUrls,
   type MediaKind,
   type MediaStatus,
@@ -54,6 +55,7 @@ export interface PortfolioMedia {
         rejectionReason: string | null;
         urls: ImageUrls | null;
         video: VideoPlayback | null;
+        audio: AudioPlayback | null;
       }
     >
   >;
@@ -82,6 +84,7 @@ async function present(portfolio: Portfolio, media: PortfolioMedia): Promise<MyP
         caption: item.caption,
         urls: file?.urls ?? null,
         video: file?.video ?? null,
+        audio: file?.audio ?? null,
         rejectionReason: file?.rejectionReason ?? null,
         createdAt: item.createdAt.toISOString(),
       };
@@ -246,6 +249,7 @@ export class GetPublicPortfolioQuery {
         const shared = { id: item.id, caption: item.caption };
         if (file.urls) return [{ ...shared, kind: 'image', urls: file.urls }];
         if (file.video) return [{ ...shared, kind: 'video', video: file.video }];
+        if (file.audio) return [{ ...shared, kind: 'audio', audio: file.audio }];
         return [];
       }),
     });
@@ -292,6 +296,7 @@ export class SharedTalentProfileQuery {
         const common = { id: item.id, caption: item.caption };
         if (file.urls) return [{ ...common, kind: 'image', urls: file.urls }];
         if (file.video) return [{ ...common, kind: 'video', video: file.video }];
+        if (file.audio) return [{ ...common, kind: 'audio', audio: file.audio }];
         return [];
       }),
     });

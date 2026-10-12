@@ -1,3 +1,4 @@
+import { ProcessAudioHandler } from './application/audio.use-cases.js';
 import { RekognitionClient } from '@aws-sdk/client-rekognition';
 import { S3Client } from '@aws-sdk/client-s3';
 import { createHmac } from 'node:crypto';
@@ -251,6 +252,23 @@ interface VideoParts {
       ) => new ProcessImageHandler(repo, storage, processor, scanner, policy, uow, clock, logger),
     },
     {
+      provide: MEDIA.ProcessAudio,
+      inject: [
+        MEDIA.Repository,
+        MEDIA.Storage,
+        PLATFORM.UnitOfWork,
+        PLATFORM.Clock,
+        PLATFORM.Logger,
+      ],
+      useFactory: (
+        repo: MediaAssetRepository,
+        storage: ObjectStorage,
+        uow: UnitOfWork,
+        clock: Clock,
+        logger: Logger,
+      ) => new ProcessAudioHandler(repo, storage, uow, clock, logger),
+    },
+    {
       provide: MEDIA.Facade,
       inject: [MEDIA.Repository, MEDIA.Presenter, PLATFORM.Clock, MEDIA.Storage, MEDIA.Video],
       useFactory: (
@@ -373,14 +391,16 @@ interface VideoParts {
     },
     {
       provide: MEDIA.EventHandlers,
-      inject: [MEDIA.Process, MEDIA.ScanVideo, MEDIA.RemoveDeleted],
+      inject: [MEDIA.Process, MEDIA.ProcessAudio, MEDIA.ScanVideo, MEDIA.RemoveDeleted],
       useFactory: (
         processImage: ProcessImageHandler,
+        processAudio: ProcessAudioHandler,
         scanVideo: ScanVideoHandler,
         removeDeleted: RemoveDeletedMediaHandler,
       ): ModuleEventHandlers => ({
         register: (dispatcher) => {
           dispatcher.on(MediaEvents.Uploaded, (event) => processImage.handle(event));
+          dispatcher.on(MediaEvents.Uploaded, (event) => processAudio.handle(event));
           dispatcher.on(MediaEvents.VideoTranscoded, (event) => scanVideo.handle(event));
           dispatcher.on(MediaEvents.Deleted, (event) => removeDeleted.handle(event));
           dispatcher.on(MediaEvents.Rejected, (event) => removeDeleted.handle(event));

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { idSchema, isoDateTimeSchema } from './common.js';
-import { imageUrlsSchema, videoPlaybackSchema } from './media.js';
+import { audioPlaybackSchema, imageUrlsSchema, videoPlaybackSchema } from './media.js';
 import { talentCardSchema } from './search.js';
 
 export const FEED_PAGE_SIZE = 12;
@@ -44,6 +44,7 @@ export const postSchema = z
   .discriminatedUnion('kind', [
     z.object({ ...postBase, kind: z.literal('image'), urls: imageUrlsSchema }),
     z.object({ ...postBase, kind: z.literal('video'), video: videoPlaybackSchema }),
+    z.object({ ...postBase, kind: z.literal('audio'), audio: audioPlaybackSchema }),
   ])
   .meta({ id: 'Post' });
 export type Post = z.infer<typeof postSchema>;

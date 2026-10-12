@@ -1,4 +1,6 @@
 import {
+  AUDIO_CONTENT_TYPES,
+  AUDIO_MAX_BYTES,
   IMAGE_CONTENT_TYPES,
   IMAGE_MAX_BYTES,
   VIDEO_CONTENT_TYPES,
@@ -15,13 +17,50 @@ import { prepareImage } from './prepare-image';
 import { videoDurationSeconds } from './video-duration';
 
 export const ACCEPT_IMAGES = IMAGE_CONTENT_TYPES.join(',');
-export const ACCEPT_MEDIA = [...IMAGE_CONTENT_TYPES, ...VIDEO_CONTENT_TYPES].join(',');
+/** Extensions too: some phones report no type for a recording, and then only the name tells. */
+export const ACCEPT_MEDIA = [
+  ...IMAGE_CONTENT_TYPES,
+  ...VIDEO_CONTENT_TYPES,
+  ...AUDIO_CONTENT_TYPES,
+  '.mp3',
+  '.m4a',
+  '.aac',
+  '.wav',
+  '.ogg',
+].join(',');
 
 /** A problem with the chosen file, found before anything is sent. The message is ready to show. */
 export class FileProblem extends Error {}
 
 type ImageType = (typeof IMAGE_CONTENT_TYPES)[number];
 type VideoType = (typeof VIDEO_CONTENT_TYPES)[number];
+
+type AudioType = (typeof AUDIO_CONTENT_TYPES)[number];
+
+/** What browsers call the same formats, and what the file name says when they say nothing. */
+const AUDIO_ALIASES: Record<string, AudioType> = {
+  'audio/mp3': 'audio/mpeg',
+  'audio/vnd.wave': 'audio/wav',
+  'audio/wave': 'audio/wav',
+  'audio/m4a': 'audio/mp4',
+};
+const AUDIO_BY_EXTENSION: Record<string, AudioType> = {
+  mp3: 'audio/mpeg',
+  m4a: 'audio/mp4',
+  aac: 'audio/aac',
+  wav: 'audio/wav',
+  ogg: 'audio/ogg',
+  oga: 'audio/ogg',
+};
+
+/** The recording's type as the API knows it, or null when the file is not audio we accept. */
+function audioTypeOf(file: File): AudioType | null {
+  if ((AUDIO_CONTENT_TYPES as readonly string[]).includes(file.type)) return file.type as AudioType;
+  const alias = AUDIO_ALIASES[file.type];
+  if (alias) return alias;
+  if (file.type !== '' && file.type !== 'application/octet-stream') return null;
+  return AUDIO_BY_EXTENSION[file.name.split('.').pop()?.toLowerCase() ?? ''] ?? null;
+}
 
 const isImage = (type: string): type is ImageType =>
   (IMAGE_CONTENT_TYPES as readonly string[]).includes(type);
@@ -41,6 +80,13 @@ export async function prepareForUpload(
       throw new FileProblem(t('media.videoTooLong', { seconds: Math.round(seconds) }));
     }
     return file;
+  }
+  const audioType = audioTypeOf(file);
+  if (audioType) {
+    if (!options.videoAllowed) throw new FileProblem(t('media.photoOnly'));
+    if (file.size > AUDIO_MAX_BYTES) throw new FileProblem(t('media.audioTooLarge'));
+    // Sent under the type the API expects, whatever the browser called it.
+    return file.type === audioType ? file : new File([file], file.name, { type: audioType });
   }
   if (!isImage(file.type)) {
     throw new FileProblem(options.videoAllowed ? t('media.typeNotAllowed') : t('media.photoOnly'));
@@ -108,7 +154,7 @@ export async function uploadMedia(input: {
   const intent = await api.call('media.createUploadIntent', {
     body: {
       purpose: input.purpose,
-      contentType: file.type as ImageType | VideoType,
+      contentType: file.type as ImageType | VideoType | AudioType,
       bytes: file.size,
     },
   });

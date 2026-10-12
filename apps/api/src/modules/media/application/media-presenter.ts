@@ -1,4 +1,9 @@
-import type { ImageUrls, MediaAsset as MediaAssetView, VideoPlayback } from '@rt/contracts';
+import type {
+  AudioPlayback,
+  ImageUrls,
+  MediaAsset as MediaAssetView,
+  VideoPlayback,
+} from '@rt/contracts';
 import type { MediaAsset } from '../domain/media-asset.js';
 import type { MediaUrls } from './media-urls.js';
 import type { PlaybackSigner } from './ports.js';
@@ -7,7 +12,10 @@ import type { PlaybackSigner } from './ports.js';
 export interface MediaLinks {
   readonly urls: ImageUrls | null;
   readonly video: VideoPlayback | null;
+  readonly audio: AudioPlayback | null;
 }
+
+const NOTHING: MediaLinks = { urls: null, video: null, audio: null };
 
 export class MediaPresenter {
   constructor(
@@ -17,12 +25,21 @@ export class MediaPresenter {
 
   async links(asset: MediaAsset): Promise<MediaLinks> {
     const props = asset.snapshot();
-    if (props.status !== 'ready') return { urls: null, video: null };
+    if (props.status !== 'ready') return NOTHING;
     if (asset.kind === 'image')
-      return { urls: this.urls.forImage(props.ownerId, props.id), video: null };
-    if (!props.playbackId) return { urls: null, video: null };
+      return { ...NOTHING, urls: this.urls.forImage(props.ownerId, props.id) };
+    if (asset.kind === 'audio') {
+      return {
+        ...NOTHING,
+        audio: {
+          url: this.urls.forAudio(props.ownerId, props.id),
+          contentType: props.contentType,
+        },
+      };
+    }
+    if (!props.playbackId) return NOTHING;
     return {
-      urls: null,
+      ...NOTHING,
       video: await this.signer.sign(props.playbackId, props.durationSeconds ?? 0),
     };
   }
@@ -31,10 +48,12 @@ export class MediaPresenter {
   async preview(asset: MediaAsset): Promise<MediaLinks> {
     const props = asset.snapshot();
     if (asset.kind === 'image')
-      return { urls: this.urls.forPreview(props.ownerId, props.id), video: null };
-    if (!props.playbackId) return { urls: null, video: null };
+      return { ...NOTHING, urls: this.urls.forPreview(props.ownerId, props.id) };
+    // A recording is never held, so there is nothing to preview before it is live.
+    if (asset.kind === 'audio') return this.links(asset);
+    if (!props.playbackId) return NOTHING;
     return {
-      urls: null,
+      ...NOTHING,
       video: await this.signer.sign(props.playbackId, props.durationSeconds ?? 0),
     };
   }

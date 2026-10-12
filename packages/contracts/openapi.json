@@ -9734,7 +9734,14 @@
               "image/webp",
               "image/heic",
               "video/mp4",
-              "video/quicktime"
+              "video/quicktime",
+              "audio/mpeg",
+              "audio/mp4",
+              "audio/x-m4a",
+              "audio/aac",
+              "audio/wav",
+              "audio/x-wav",
+              "audio/ogg"
             ]
           },
           "bytes": {
@@ -9854,6 +9861,23 @@
         ],
         "additionalProperties": false
       },
+      "AudioPlayback": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "contentType": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "contentType"
+        ],
+        "additionalProperties": false
+      },
       "MediaAsset": {
         "type": "object",
         "properties": {
@@ -9873,7 +9897,8 @@
             "type": "string",
             "enum": [
               "image",
-              "video"
+              "video",
+              "audio"
             ]
           },
           "status": {
@@ -9909,6 +9934,16 @@
               }
             ]
           },
+          "audio": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AudioPlayback"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "rejectionReason": {
             "type": [
               "string",
@@ -9928,6 +9963,7 @@
           "status",
           "urls",
           "video",
+          "audio",
           "rejectionReason",
           "createdAt"
         ],
@@ -10752,7 +10788,8 @@
             "type": "string",
             "enum": [
               "image",
-              "video"
+              "video",
+              "audio"
             ]
           },
           "mediaId": {
@@ -10796,6 +10833,16 @@
               }
             ]
           },
+          "audio": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AudioPlayback"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "rejectionReason": {
             "type": [
               "string",
@@ -10816,6 +10863,7 @@
           "caption",
           "urls",
           "video",
+          "audio",
           "rejectionReason",
           "createdAt"
         ],
@@ -10901,6 +10949,33 @@
               "kind",
               "caption",
               "video"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "kind": {
+                "type": "string",
+                "const": "audio"
+              },
+              "caption": {
+                "type": "string"
+              },
+              "audio": {
+                "$ref": "#/components/schemas/AudioPlayback"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "caption",
+              "audio"
             ],
             "additionalProperties": false
           }
@@ -11006,7 +11081,8 @@
             "type": "string",
             "enum": [
               "image",
-              "video"
+              "video",
+              "audio"
             ]
           },
           "labels": {
@@ -11179,7 +11255,8 @@
                 "type": "string",
                 "enum": [
                   "image",
-                  "video"
+                  "video",
+                  "audio"
                 ]
               },
               "purpose": {
@@ -11224,7 +11301,8 @@
                 "type": "string",
                 "enum": [
                   "image",
-                  "video"
+                  "video",
+                  "audio"
                 ]
               },
               "purpose": {
@@ -12631,7 +12709,8 @@
                   "type": "string",
                   "enum": [
                     "image",
-                    "video"
+                    "video",
+                    "audio"
                   ]
                 },
                 "status": {
@@ -13247,6 +13326,65 @@
               "comments",
               "kind",
               "video"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "mediaId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "caption": {
+                "type": "string"
+              },
+              "postedAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              "talent": {
+                "$ref": "#/components/schemas/TalentCard"
+              },
+              "likes": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "liked": {
+                "type": "boolean"
+              },
+              "comments": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "kind": {
+                "type": "string",
+                "const": "audio"
+              },
+              "audio": {
+                "$ref": "#/components/schemas/AudioPlayback"
+              }
+            },
+            "required": [
+              "id",
+              "mediaId",
+              "caption",
+              "postedAt",
+              "talent",
+              "likes",
+              "liked",
+              "comments",
+              "kind",
+              "audio"
             ],
             "additionalProperties": false
           }
@@ -13963,7 +14101,8 @@
                   "type": "string",
                   "enum": [
                     "image",
-                    "video"
+                    "video",
+                    "audio"
                   ]
                 }
               },

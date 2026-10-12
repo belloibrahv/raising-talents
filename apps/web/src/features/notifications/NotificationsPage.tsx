@@ -38,12 +38,17 @@ interface Shown {
   readonly to: string;
 }
 
-const fileName = (notice: { mediaKind: 'image' | 'video'; purpose: 'avatar' | 'portfolio' }) =>
+const fileName = (notice: {
+  mediaKind: 'image' | 'video' | 'audio';
+  purpose: 'avatar' | 'portfolio';
+}) =>
   notice.purpose === 'avatar'
     ? t('notifications.file.avatar')
     : notice.mediaKind === 'video'
       ? t('notifications.file.video')
-      : t('notifications.file.photo');
+      : notice.mediaKind === 'audio'
+        ? t('notifications.file.audio')
+        : t('notifications.file.photo');
 
 const longDate = new Intl.DateTimeFormat('en-NG', { dateStyle: 'long' });
 

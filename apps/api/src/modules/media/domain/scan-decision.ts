@@ -63,8 +63,17 @@ const REJECTION_REASON: Record<RejectionCategory, string> = {
   other: 'This image breaks the Community Guidelines, so it cannot be shown.',
 };
 
+/** Nothing looks at a recording, so only a moderator who listened takes one down. */
+const AUDIO_REJECTION_REASON =
+  'This recording breaks the Community Guidelines, so it cannot be shown.';
+
 /** For video the scanner sees frames, so the reason talks about the video. */
-export const rejectionReason = (category: RejectionCategory, kind: 'image' | 'video'): string =>
-  kind === 'video'
-    ? REJECTION_REASON[category].replace('This image', 'This video')
-    : REJECTION_REASON[category];
+export const rejectionReason = (
+  category: RejectionCategory,
+  kind: 'image' | 'video' | 'audio',
+): string =>
+  kind === 'audio'
+    ? AUDIO_REJECTION_REASON
+    : kind === 'video'
+      ? REJECTION_REASON[category].replace('This image', 'This video')
+      : REJECTION_REASON[category];

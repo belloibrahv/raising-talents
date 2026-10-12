@@ -93,10 +93,11 @@ export interface SafetyMedia {
     Map<
       string,
       {
-        kind: 'image' | 'video';
+        kind: 'image' | 'video' | 'audio';
         status: string;
         urls: { medium: string } | null;
         video: { posterUrl: string } | null;
+        audio: { url: string } | null;
       }
     >
   >;
@@ -262,7 +263,7 @@ export class ListReportedAccountsQuery {
             .slice(0, REPORTED_MEDIA_CHECKED)
             .flatMap((entry) => {
               const file = files.get(entry.mediaId);
-              const previewUrl = file?.urls?.medium ?? file?.video?.posterUrl;
+              const previewUrl = file?.urls?.medium ?? file?.video?.posterUrl ?? file?.audio?.url;
               return file?.status === 'ready' && previewUrl
                 ? [{ mediaId: entry.mediaId, reports: entry.count, previewUrl, kind: file.kind }]
                 : [];

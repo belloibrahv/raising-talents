@@ -29,6 +29,7 @@ const item = (id: string, overrides: Record<string, unknown> = {}) => ({
   caption: '',
   urls: urls(id),
   video: null,
+  audio: null,
   rejectionReason: null,
   createdAt: '2026-10-02T09:00:00.000Z',
   ...overrides,
@@ -179,6 +180,37 @@ describe('portfolio', () => {
     expect(await screen.findByText('Item removed.')).toBeInTheDocument();
   });
 
+  it('plays a recording in the portfolio, and refuses one over 20 MB before asking the API', async () => {
+    const calls = stubApi({
+      '/v1/auth/web/refresh': () => signedIn(meFor({ status: 'active' })),
+      'GET /v1/me/portfolio': () =>
+        Response.json({
+          items: [
+            item(ids[0], {
+              kind: 'audio',
+              caption: 'Demo, first verse',
+              urls: null,
+              audio: { url: 'https://media.test/a1/audio', contentType: 'audio/mpeg' },
+            }),
+          ],
+          maxItems: 30,
+          version: 1,
+        }),
+    });
+    renderAt('/portfolio');
+    const user = userEvent.setup({ delay: null });
+    const player = await screen.findByLabelText('Demo, first verse. Audio recording');
+    expect(player.tagName).toBe('AUDIO');
+    expect(player.querySelector('source')).toHaveAttribute('src', 'https://media.test/a1/audio');
+
+    // Some phones call an MP3 "audio/mp3"; it is still a recording, and still too big.
+    const huge = new File(['x'], 'album.mp3', { type: 'audio/mp3' });
+    Object.defineProperty(huge, 'size', { value: 21 * 1024 * 1024 });
+    await user.upload(screen.getByLabelText('Add a photo, video or audio'), huge);
+    expect(await screen.findByRole('alert')).toHaveTextContent('That recording is over 20 MB.');
+    expect(calls.some((call) => call.path === '/v1/media/upload-intents')).toBe(false);
+  });
+
   it('refuses a clip over 300 MB before asking the API for anything', async () => {
     const fake = fakePortfolio();
     const calls = stubApi({
@@ -189,7 +221,7 @@ describe('portfolio', () => {
     const user = userEvent.setup({ delay: null });
     const huge = new File(['x'], 'final-match.mp4', { type: 'video/mp4' });
     Object.defineProperty(huge, 'size', { value: 301 * 1024 * 1024 });
-    await user.upload(await screen.findByLabelText('Add a photo or video'), huge);
+    await user.upload(await screen.findByLabelText('Add a photo, video or audio'), huge);
     expect(await screen.findByRole('alert')).toHaveTextContent('That video is over 300 MB.');
     expect(calls.some((call) => call.path === '/v1/media/upload-intents')).toBe(false);
   });

@@ -145,7 +145,7 @@ export class ResetPasswordHandler {
     if (!limit.allowed) return err(IdentityErrors.rateLimited(limit.retryAfterSeconds));
 
     // The password is checked before the code is used, so a weak password does not burn the code.
-    const policy = checkPasswordPolicy(input.newPassword, input.email);
+    const policy = checkPasswordPolicy(input.newPassword);
     if (!policy.ok) return policy;
     if (
       this.settings.breachedPasswordCheck &&

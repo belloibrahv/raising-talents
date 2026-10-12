@@ -3,6 +3,14 @@ import type { Logger } from 'pino';
 import type { BreachedPasswordChecker } from '../application/ports.js';
 
 /**
+ * How often a password must have turned up in breaches before it is refused. Most passwords
+ * people actually use have leaked once or twice somewhere; refusing all of those turned new
+ * members away. At this level only the ones attackers try first ("password", "12345678",
+ * "qwertyuiop") are stopped.
+ */
+export const COMMON_PASSWORD_SIGHTINGS = 10_000;
+
+/**
  * Have I Been Pwned range API. Only the first 5 characters of the SHA-1 hash
  * leave our servers, so the password itself is never shared.
  * If the service is down we allow the password and log it, rather than block sign-ups.
@@ -26,7 +34,7 @@ export class HibpBreachedPasswordChecker implements BreachedPasswordChecker {
       const body = await response.text();
       return body.split('\n').some((line) => {
         const [candidate, count] = line.trim().split(':');
-        return candidate === suffix && Number(count) > 0;
+        return candidate === suffix && Number(count) >= COMMON_PASSWORD_SIGHTINGS;
       });
     } catch (error) {
       this.logger.warn({ err: error }, 'Breached password check unavailable, allowing password');

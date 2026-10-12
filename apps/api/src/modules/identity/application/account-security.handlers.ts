@@ -123,7 +123,7 @@ export class ChangePasswordHandler {
     if (input.newPassword === input.currentPassword) {
       return err(IdentityErrors.weakPassword('Choose a password different from the current one.'));
     }
-    const policy = checkPasswordPolicy(input.newPassword, account.email);
+    const policy = checkPasswordPolicy(input.newPassword);
     if (!policy.ok) return policy;
     if (
       this.settings.breachedPasswordCheck &&

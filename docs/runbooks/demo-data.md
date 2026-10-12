@@ -41,5 +41,17 @@ the worker restart, then remove them.
 
 ## Removing
 
-Set `SEED_DEMO=remove` on `worker`. On start it erases every demo account and its files, the
-same way account deletion does, and logs "demo data removed". Then remove the variable.
+Set `SEED_DEMO=remove` on `worker`. On start it erases the demo talent and agents and their
+files, the same way account deletion does, and logs "demo data removed" with the addresses.
+Then remove `SEED_DEMO` and `SEED_DEMO_PASSWORD`, or the next start does it again.
+
+- Only the addresses in the table above are erased. No other account is touched, whatever
+  its email domain.
+- The demo moderator is kept, because it may be the only moderator there is. Keep
+  `STAFF_GRANT` while you rely on it. `SEED_DEMO=remove-all` erases it as well: do that only
+  once a real person has been made a moderator.
+- Everything of theirs goes with them: posts, likes, follows, comments, conversations with
+  real members, and reports about them. It cannot be undone; `SEED_DEMO=run` creates fresh
+  ones.
+- The check in `tools/live-check` signs in as the demo talent, agent and moderator, so it
+  cannot run after this until it is given other accounts.

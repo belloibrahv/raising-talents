@@ -17,7 +17,7 @@ import type { UnitOfWork } from '../platform/unit-of-work.js';
  * verifies agencies only once an operator has made the demo moderator a moderator
  * (STAFF_GRANT). Until then it leaves them waiting, like any new member's; where photos go
  * live without a check (ADR-048) the profiles, follows and likes are in place regardless. Every account uses the DEMO_DOMAIN, so
- * SEED_DEMO=remove can find and erase all of them. Running it again changes nothing that is
+ * SEED_DEMO=remove can find and erase the talent and agents (remove-all takes the moderator too). Running it again changes nothing that is
  * already in place, and finishes what the moderator could not do before.
  */
 export const DEMO_DOMAIN = 'demo.raisingtalents.app';
@@ -709,11 +709,25 @@ export async function runDemoSeed(app: INestApplicationContext, logger: Logger):
 }
 
 /** Erases every demo account, and its files, the way account deletion does. */
-export async function removeDemoData(app: INestApplicationContext, logger: Logger): Promise<void> {
+/**
+ * Erases the demo talent and agents with everything of theirs: profiles, posts, files,
+ * follows, comments, conversations and reports. Only the addresses the seed itself created
+ * are touched, never another account, whatever its domain. The demo moderator is kept unless
+ * `includeModerator` is set, because it may be the only moderator the environment has.
+ */
+export async function removeDemoData(
+  app: INestApplicationContext,
+  logger: Logger,
+  options: { includeModerator: boolean } = { includeModerator: false },
+): Promise<void> {
   const accounts = app.get<AccountsFacade>(ACCOUNTS.Facade);
   const media = app.get<MediaFacade>(MEDIA.Facade);
   const uow = app.get<UnitOfWork>(PLATFORM.UnitOfWork);
-  const emails = [MODERATOR.email, ...TALENT.map((t) => t.email), ...AGENTS.map((a) => a.email)];
+  const emails = [
+    ...TALENT.map((t) => t.email),
+    ...AGENTS.map((a) => a.email),
+    ...(options.includeModerator ? [MODERATOR.email] : []),
+  ];
   const removed: string[] = [];
   for (const email of emails) {
     const found = await accounts.findSummaryByEmail(email);
@@ -722,5 +736,5 @@ export async function removeDemoData(app: INestApplicationContext, logger: Logge
     await uow.run(() => accounts.erase(found.id));
     removed.push(email);
   }
-  logger.warn({ removed }, 'demo data removed');
+  logger.warn({ removed, moderatorKept: !options.includeModerator }, 'demo data removed');
 }

@@ -1,5 +1,13 @@
-import { lazy, Suspense, type ReactNode } from 'react';
-import { Navigate, Outlet, useOutletContext, type RouteObject } from 'react-router';
+import { lazy, Suspense, useLayoutEffect, type ReactNode } from 'react';
+import {
+  Navigate,
+  NavigationType,
+  Outlet,
+  useLocation,
+  useNavigationType,
+  useOutletContext,
+  type RouteObject,
+} from 'react-router';
 import { useRestoreSession, useSession } from '../features/auth/use-auth';
 import { useMyTalentProfile } from '../features/profile/queries';
 import { PageSkeleton } from '../shared/ui/PageSkeleton';
@@ -108,6 +116,19 @@ function MyProfileRedirect() {
   return <Navigate to={profile.data ? `/talents/${profile.data.handle}` : '/account'} replace />;
 }
 
+/**
+ * A new screen opens at its top. Going back is left to the browser, which returns to where
+ * the list was left; a change of filters on the same screen does not move it at all.
+ */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  const type = useNavigationType();
+  useLayoutEffect(() => {
+    if (type !== NavigationType.Pop) window.scrollTo(0, 0);
+  }, [pathname, type]);
+  return null;
+}
+
 /** Around every screen: the skip link, the offline banner, the update prompt and the session restore. */
 function Shell({ updatePrompt }: { readonly updatePrompt: ReactNode }) {
   const { retry } = useRestoreSession();
@@ -121,6 +142,7 @@ function Shell({ updatePrompt }: { readonly updatePrompt: ReactNode }) {
         <Outlet context={retry} />
       </Suspense>
       {updatePrompt}
+      <ScrollToTop />
     </>
   );
 }

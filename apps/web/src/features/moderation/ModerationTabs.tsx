@@ -13,15 +13,15 @@ const TABS = [
 export function ModerationTabs() {
   return (
     <nav aria-label={t('moderation.tabs')}>
-      <ul className="inline-flex list-none gap-1 rounded-full bg-muted p-1">
+      <ul className="m-0 flex list-none gap-1 rounded-full bg-muted p-1 sm:inline-flex">
         {TABS.map(({ to, label, icon: Icon }) => (
-          <li key={to}>
+          <li key={to} className="min-w-0 flex-1 sm:flex-none">
             <NavLink
               to={to}
               end
               className={({ isActive }) =>
                 cn(
-                  'inline-flex h-10 items-center gap-2 rounded-full px-4 text-sm font-semibold text-muted-foreground no-underline transition-colors hover:text-foreground',
+                  'flex h-10 items-center justify-center gap-2 rounded-full px-2 text-sm sm:px-4 font-semibold text-muted-foreground no-underline transition-colors hover:text-foreground',
                   isActive && 'bg-background text-foreground shadow-sm',
                 )
               }

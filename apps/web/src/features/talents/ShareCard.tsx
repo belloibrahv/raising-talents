@@ -59,7 +59,7 @@ export function ShareCard({ profile }: { readonly profile: MyTalentProfile }) {
               id="share-link"
               readOnly
               value={link}
-              className="h-11 min-w-0 flex-1 rounded-full border bg-muted px-4 font-mono text-sm"
+              className="min-h-11 min-w-0 flex-1 rounded-full border bg-muted px-4 font-mono text-base sm:text-sm"
               onFocus={(event) => {
                 event.target.select();
               }}

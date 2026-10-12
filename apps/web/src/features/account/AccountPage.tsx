@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { Download, TriangleAlert } from 'lucide-react';
+import { Download, LogOut, TriangleAlert } from 'lucide-react';
 import { useRef, useState, type SubmitEvent } from 'react';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
@@ -11,7 +11,7 @@ import { FormMessage } from '../../shared/ui/FormMessage';
 import { Page } from '../../shared/ui/Page';
 import { PasswordField } from '../../shared/ui/TextField';
 import { useFocusFirstError } from '../../shared/ui/use-focus-first-error';
-import { useSession } from '../auth/use-auth';
+import { useSession, useSignOut } from '../auth/use-auth';
 import { SecuritySection } from './SecuritySection';
 
 /** Shown before deletion; the API decides the real date, from ACCOUNT_DELETION_GRACE_DAYS. */
@@ -33,6 +33,7 @@ function saveJson(data: unknown, fileName: string) {
 
 export function AccountPage() {
   const me = useSession().me;
+  const signOut = useSignOut();
   const download = useMutation({
     mutationFn: () => api.call('privacy.export'),
     onSuccess: (data) => {
@@ -104,6 +105,18 @@ export function AccountPage() {
           </Button>
         </div>
       </section>
+      {/* A phone's header has no room for it; wider screens keep it there. */}
+      <Button
+        variant="secondary"
+        className="sm:hidden"
+        loading={signOut.isPending}
+        onClick={() => {
+          signOut.mutate();
+        }}
+      >
+        <LogOut aria-hidden="true" />
+        {t('nav.signOut')}
+      </Button>
       {me?.deletionScheduledAt ? null : <DeleteAccount />}
     </Page>
   );

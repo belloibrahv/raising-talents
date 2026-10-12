@@ -90,12 +90,13 @@ export function WelcomePage() {
         <div className="mx-auto flex h-18 max-w-6xl items-center justify-between gap-4 px-4 sm:px-6">
           <span className="flex items-center gap-2.5 font-display text-base font-bold whitespace-nowrap sm:text-lg">
             <BrandMark className="size-9" />
-            {t('common.appName')}
+            {/* The narrowest phones keep the mark and the two actions. */}
+            <span className="max-[359px]:sr-only">{t('common.appName')}</span>
           </span>
           <nav aria-label={t('titles.welcome')} className="flex items-center gap-2">
             <Link
               to="/sign-in"
-              className="rounded-full px-3 py-2 text-sm font-semibold whitespace-nowrap text-foreground no-underline hover:bg-accent sm:px-4"
+              className="inline-flex h-10 items-center rounded-full px-3 text-sm font-semibold whitespace-nowrap text-foreground no-underline hover:bg-accent sm:px-4"
             >
               {t('welcome.signInShort')}
             </Link>
@@ -111,7 +112,7 @@ export function WelcomePage() {
 
       <main id="main" className="relative">
         <section
-          className="mx-auto grid max-w-6xl items-center gap-12 px-4 pt-8 pb-14 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-8 lg:pt-14 lg:pb-20"
+          className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)] items-center gap-12 px-4 pt-8 pb-14 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-8 lg:pt-14 lg:pb-20"
           aria-labelledby="welcome-heading"
         >
           <div className="flex flex-col gap-6">
@@ -267,7 +268,7 @@ function FeedPreview() {
       <div className="overflow-hidden rounded-[2rem] border bg-card shadow-2xl">
         <div className="flex justify-between gap-2 overflow-hidden border-b px-4 py-3">
           {PEOPLE.map((person) => (
-            <span key={person.name} className="grid w-14 shrink-0 justify-items-center gap-1">
+            <span key={person.name} className="grid w-14 min-w-0 justify-items-center gap-1">
               <span className="rounded-full ring-brand">
                 <Face tone={person.tone} className="size-11" />
               </span>

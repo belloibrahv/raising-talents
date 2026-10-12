@@ -51,8 +51,9 @@ export function HomePage() {
       className="px-0 pt-0 sm:px-6 sm:pt-2 [&>div]:max-w-5xl"
       titleClassName="sr-only"
     >
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,36rem)_minmax(0,1fr)] lg:items-start lg:gap-12">
-        <div className="grid gap-6">
+      {/* Columns that may shrink, so nothing inside can make a phone screen wider than it is. */}
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-8 lg:grid-cols-[minmax(0,36rem)_minmax(0,1fr)] lg:items-start lg:gap-12">
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
           <div className="grid gap-4 px-4 empty:hidden sm:px-0">
             <Attention />
             {agent ? <AgentNotices /> : <TalentNotices />}

@@ -61,3 +61,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-055](055-audio-in-the-portfolio.md)                                | Audio in the portfolio                                               | Accepted                          |
 | [ADR-056](056-video-kept-in-our-storage.md)                             | Video kept in our own storage where there is no video provider       | Accepted                          |
 | [ADR-057](057-text-posts.md)                                            | Posts that are only words                                            | Accepted                          |
+| [ADR-058](058-the-app-on-a-phone.md)                                    | The app on a phone                                                   | Accepted                          |

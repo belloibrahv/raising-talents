@@ -10,7 +10,8 @@ function Suggestion({ card }: { readonly card: TalentCard }) {
   const social = useTalentSocial(card.handle, false);
   const discipline = card.subcategories[0]?.name ?? card.category.name;
   return (
-    <li className="flex w-28 shrink-0 flex-col items-center gap-2 text-center">
+    // Positioned, so the hidden labels inside scroll with the row instead of widening the page.
+    <li className="relative flex w-30 shrink-0 flex-col items-center gap-2 text-center">
       <Link
         to={`/talents/${card.handle}`}
         className="flex w-full flex-col items-center gap-2 text-foreground no-underline"
@@ -26,7 +27,7 @@ function Suggestion({ card }: { readonly card: TalentCard }) {
         handle={card.handle}
         name={card.displayName}
         following={social.data?.followedByViewer ?? false}
-        className="h-8 px-3 text-xs"
+        className="h-10 px-3.5 text-sm"
       />
     </li>
   );
@@ -38,11 +39,14 @@ export function SuggestionRail() {
   const items = suggestions.data?.items ?? [];
   if (items.length === 0) return null;
   return (
-    <section aria-labelledby="suggestions-heading" className="grid gap-3">
+    <section
+      aria-labelledby="suggestions-heading"
+      className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3"
+    >
       <h2 id="suggestions-heading" className="px-4 text-base font-semibold sm:px-0">
         {t('social.suggested')}
       </h2>
-      <ul className="m-0 flex list-none gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:px-0">
+      <ul className="m-0 flex list-none gap-2 snap-x scroll-px-4 overflow-x-auto overscroll-x-contain px-4 pb-2 [scrollbar-width:none] sm:px-0 [&>li]:snap-start">
         {items.map((card) => (
           <Suggestion key={card.handle} card={card} />
         ))}

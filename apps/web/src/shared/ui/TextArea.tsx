@@ -21,7 +21,8 @@ export function TextArea({ label, hint, error, maxLength, value, ref, ...input }
     .join(' ');
   const nearLimit = value.length >= maxLength * 0.9;
   return (
-    <div className="grid gap-2">
+    // One column that may shrink: a text area sized by its content would otherwise push wider.
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-2">
       <label className={labelClass} htmlFor={id}>
         {label}
       </label>

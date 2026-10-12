@@ -96,4 +96,14 @@ export class DrizzlePortfolioRepository implements PortfolioRepository {
     portfolio.markStored();
     await this.events.record(portfolio.pullEvents());
   }
+
+  async findOwnerOfItem(itemId: string): Promise<string | null> {
+    const [row] = await this.uow
+      .executor()
+      .select({ talentId: portfolioItems.talentId })
+      .from(portfolioItems)
+      .where(eq(portfolioItems.id, itemId))
+      .limit(1);
+    return row?.talentId ?? null;
+  }
 }

@@ -23,6 +23,7 @@ const CONVERSATION = '0192a3b4-0000-7000-8000-0000000000e9';
 const POST_A = '0192a3b4-0000-7000-8000-0000000000a1';
 const POST_B = '0192a3b4-0000-7000-8000-0000000000a2';
 const POST_GONE = '0192a3b4-0000-7000-8000-0000000000a3';
+const POST_TEXT = '0192a3b4-0000-7000-8000-0000000000a4';
 const COMMENT = '0192a3b4-0000-7000-8000-0000000000c1';
 const MEDIA_A = '0192a3b4-0000-7000-8000-0000000000b1';
 const MEDIA_B = '0192a3b4-0000-7000-8000-0000000000b2';
@@ -87,9 +88,18 @@ describe('Reports and enforcement', () => {
     };
     // The talent has two live posts and one that was taken down.
     const posts = new Map([
-      [POST_A, { talentId, mediaId: MEDIA_A }],
-      [POST_B, { talentId, mediaId: MEDIA_B }],
-      [POST_GONE, { talentId, mediaId: MEDIA_GONE }],
+      [POST_A, { talentId, mediaId: MEDIA_A, caption: '', postedAt: clock.now() }],
+      [POST_B, { talentId, mediaId: MEDIA_B, caption: '', postedAt: clock.now() }],
+      [
+        POST_TEXT,
+        {
+          talentId,
+          mediaId: null,
+          caption: 'Send me ₦20,000 and I will share my agent contact.',
+          postedAt: clock.now(),
+        },
+      ],
+      [POST_GONE, { talentId, mediaId: MEDIA_GONE, caption: '', postedAt: clock.now() }],
     ]);
     comments = new Map([
       [
@@ -262,6 +272,21 @@ describe('Reports and enforcement', () => {
     expect(own.ok ? null : own.error.code).toBe('FORBIDDEN');
     const missing = await about(agentId, '0192a3b4-0000-7000-8000-00000000dead');
     expect(missing.ok ? null : missing.error.code).toBe('NOT_FOUND');
+  });
+
+  it('keeps the words of a reported text post for the moderator', async () => {
+    const reported = await file.execute(agentId, {
+      subject: { kind: 'post', postId: POST_TEXT },
+      category: 'scam_or_harassment',
+    });
+    expect(reported.ok).toBe(true);
+    const queue = await list.execute(moderatorId);
+    if (!queue.ok) throw new Error(queue.error.message);
+    expect(queue.value.items[0]).toMatchObject({
+      accountId: talentId,
+      reportedMedia: [],
+      evidence: [{ body: 'Send me ₦20,000 and I will share my agent contact.' }],
+    });
   });
 
   it('takes a report about a comment, about its author, and keeps the words', async () => {

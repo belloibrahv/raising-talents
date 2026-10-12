@@ -125,7 +125,7 @@ export class PostAssembler {
     const itemIds = rows.map((row) => row.itemId);
     const talentIds = [...new Set(rows.map((row) => row.talentId))];
     const [files, counts, comments, liked, cards] = await Promise.all([
-      this.media.describe(rows.map((row) => row.mediaId)),
+      this.media.describe(rows.flatMap((row) => (row.mediaId === null ? [] : [row.mediaId]))),
       this.likes.counts(itemIds),
       this.comments.counts(itemIds),
       this.likes.likedBy(viewerId, itemIds),
@@ -134,8 +134,7 @@ export class PostAssembler {
     const cardOf = new Map(talentIds.map((id, index) => [id, cards[index] ?? null]));
     return rows.flatMap((row): Post[] => {
       const talent = cardOf.get(row.talentId);
-      const file = files.get(row.mediaId);
-      if (!talent || file?.status !== 'ready') return [];
+      if (!talent) return [];
       const shared = {
         id: row.itemId,
         mediaId: row.mediaId,
@@ -146,6 +145,10 @@ export class PostAssembler {
         liked: liked.has(row.itemId),
         comments: comments.get(row.itemId) ?? 0,
       };
+      // Words on their own have no file to wait for.
+      if (row.mediaId === null) return row.kind === 'text' ? [{ ...shared, kind: 'text' }] : [];
+      const file = files.get(row.mediaId);
+      if (file?.status !== 'ready') return [];
       if (file.urls) return [{ ...shared, kind: 'image', urls: file.urls }];
       if (file.video) return [{ ...shared, kind: 'video', video: file.video }];
       if (file.audio) return [{ ...shared, kind: 'audio', audio: file.audio }];

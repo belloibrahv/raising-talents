@@ -16,9 +16,11 @@ import {
 } from '@nestjs/common';
 import {
   addPortfolioItemRequestSchema,
+  addTextPostRequestSchema,
   reorderPortfolioRequestSchema,
   updatePortfolioItemRequestSchema,
   type AddPortfolioItemRequest,
+  type AddTextPostRequest,
   type MyPortfolio,
   type PublicPortfolio,
   type ReorderPortfolioRequest,
@@ -34,6 +36,8 @@ import { body } from '../../../../platform/http/zod-validation.pipe.js';
 import {
   PORTFOLIO,
   type AddPortfolioItemHandler,
+  type AddTextPostHandler,
+  type RemoveTextPostHandler,
   type GetMyPortfolioQuery,
   type GetPublicPortfolioQuery,
   type RemovePortfolioItemHandler,
@@ -53,6 +57,8 @@ export class PortfolioController {
   constructor(
     @Inject(PORTFOLIO.GetMine) private readonly getMine: GetMyPortfolioQuery,
     @Inject(PORTFOLIO.Add) private readonly add: AddPortfolioItemHandler,
+    @Inject(PORTFOLIO.AddText) private readonly addTextPost: AddTextPostHandler,
+    @Inject(PORTFOLIO.RemoveText) private readonly removeTextPost: RemoveTextPostHandler,
     @Inject(PORTFOLIO.Update) private readonly update: UpdatePortfolioItemHandler,
     @Inject(PORTFOLIO.Remove) private readonly remove: RemovePortfolioItemHandler,
     @Inject(PORTFOLIO.Reorder) private readonly reorder: ReorderPortfolioHandler,
@@ -65,6 +71,29 @@ export class PortfolioController {
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<MyPortfolio> {
     return withEtag(reply, unwrap(await this.getMine.execute(principal.userId)));
+  }
+
+  @Post('me/portfolio/texts')
+  @HttpCode(201)
+  async addText(
+    @CurrentPrincipal() principal: Principal,
+    @Body(body(addTextPostRequestSchema)) request: AddTextPostRequest,
+    @Res({ passthrough: true }) reply: FastifyReply,
+  ): Promise<MyPortfolio> {
+    return withEtag(
+      reply,
+      unwrap(await this.addTextPost.execute({ userId: principal.userId, text: request.text })),
+    );
+  }
+
+  /** Moderators only. Posts with a file are taken down through their media (ADR-048). */
+  @Post('moderation/posts/:id/removal')
+  @HttpCode(204)
+  async removeText(
+    @CurrentPrincipal() principal: Principal,
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<void> {
+    unwrap(await this.removeTextPost.execute({ moderatorId: principal.userId, itemId: id }));
   }
 
   @Post('me/portfolio/items')

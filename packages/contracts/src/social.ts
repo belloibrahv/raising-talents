@@ -28,8 +28,8 @@ export const cursorQuerySchema = z.object({ cursor: z.string().max(200).optional
 const postBase = {
   /** The portfolio item's id. */
   id: idSchema,
-  /** The photo or video itself, which is what a moderator removes. */
-  mediaId: idSchema,
+  /** The photo, video or recording, which is what a moderator removes. Null for a text post. */
+  mediaId: idSchema.nullable(),
   caption: z.string(),
   postedAt: isoDateTimeSchema,
   talent: talentCardSchema,
@@ -45,6 +45,8 @@ export const postSchema = z
     z.object({ ...postBase, kind: z.literal('image'), urls: imageUrlsSchema }),
     z.object({ ...postBase, kind: z.literal('video'), video: videoPlaybackSchema }),
     z.object({ ...postBase, kind: z.literal('audio'), audio: audioPlaybackSchema }),
+    /** Only words: the caption is the post (ADR-057). */
+    z.object({ ...postBase, kind: z.literal('text') }),
   ])
   .meta({ id: 'Post' });
 export type Post = z.infer<typeof postSchema>;

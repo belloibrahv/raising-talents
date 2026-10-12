@@ -10,9 +10,11 @@ import {
 /** Provisional limits (ADR-020) until the client signs off on section 6 of the design. */
 export const PORTFOLIO_MAX_ITEMS = 30;
 export const PORTFOLIO_CAPTION_MAX = 300;
+/** A post that is only words (ADR-057). */
+export const POST_TEXT_MAX = 500;
 
 /** Clients must skip kinds they do not know, so new kinds can ship without breaking old apps. */
-export const portfolioItemKindSchema = z.enum(['image', 'video', 'audio']);
+export const portfolioItemKindSchema = z.enum(['image', 'video', 'audio', 'text']);
 export type PortfolioItemKind = z.infer<typeof portfolioItemKindSchema>;
 
 const captionSchema = z.string().trim().max(PORTFOLIO_CAPTION_MAX);
@@ -26,9 +28,17 @@ export const addPortfolioItemRequestSchema = z
   .meta({ id: 'AddPortfolioItemRequest' });
 export type AddPortfolioItemRequest = z.infer<typeof addPortfolioItemRequestSchema>;
 
+/** A post with no file: the words are the post. */
+export const addTextPostRequestSchema = z
+  .object({ text: z.string().trim().min(1).max(POST_TEXT_MAX) })
+  .strict()
+  .meta({ id: 'AddTextPostRequest' });
+export type AddTextPostRequest = z.infer<typeof addTextPostRequestSchema>;
+
+/** A caption up to 300 characters; the words of a text post up to 500, and never empty. */
 export const updatePortfolioItemRequestSchema = z
   .object({
-    caption: captionSchema,
+    caption: z.string().trim().max(POST_TEXT_MAX),
   })
   .strict()
   .meta({ id: 'UpdatePortfolioItemRequest' });
@@ -51,7 +61,9 @@ export const myPortfolioItemSchema = z
   .object({
     id: idSchema,
     kind: portfolioItemKindSchema,
-    mediaId: idSchema,
+    /** Null for a text post, which has no file. */
+    mediaId: idSchema.nullable(),
+    /** Always ready for a text post. */
     mediaStatus: mediaStatusSchema,
     caption: z.string(),
     urls: imageUrlsSchema.nullable(),
@@ -93,6 +105,8 @@ export const publicPortfolioItemSchema = z
       caption: z.string(),
       audio: audioPlaybackSchema,
     }),
+    /** The caption is the post. */
+    z.object({ id: idSchema, kind: z.literal('text'), caption: z.string() }),
   ])
   .meta({ id: 'PublicPortfolioItem' });
 export type PublicPortfolioItem = z.infer<typeof publicPortfolioItemSchema>;

@@ -35,6 +35,10 @@ function usePortfolioMutation<TInput>(
 export const useAddItem = () =>
   usePortfolioMutation((mediaId: string) => api.call('portfolio.addItem', { body: { mediaId } }));
 
+/** A post that is only words. */
+export const useAddText = () =>
+  usePortfolioMutation((text: string) => api.call('portfolio.addText', { body: { text } }));
+
 export const useUpdateCaption = () =>
   usePortfolioMutation((input: { itemId: string; caption: string }) =>
     api.call('portfolio.updateItem', {

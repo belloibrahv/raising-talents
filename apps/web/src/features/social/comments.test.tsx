@@ -206,6 +206,33 @@ describe('comments', () => {
     expect(within(post).queryByRole('textbox')).not.toBeInTheDocument();
   });
 
+  it('shows a text post without a picture, and lets a moderator take it down', async () => {
+    const text = postFor(1, {
+      kind: 'text',
+      mediaId: null,
+      urls: undefined,
+      caption: 'Trials are on Saturday. Wish me luck.',
+    });
+    const calls = as('moderator', {
+      [`GET /v1/posts/${POST}`]: () => Response.json(text),
+      [`GET ${COMMENTS}`]: () => Response.json({ items: [], nextCursor: null, total: 0 }),
+      [`POST /v1/moderation/posts/${POST}/removal`]: () => new Response(null, { status: 204 }),
+    });
+    renderAt(`/posts/${POST}`);
+    const user = userEvent.setup({ delay: null });
+    const post = await openPost();
+    expect(within(post).getByText('Trials are on Saturday. Wish me luck.')).toBeVisible();
+    expect(within(post).queryByRole('img')).not.toBeInTheDocument();
+
+    await user.click(within(post).getByRole('button', { name: "Remove Tobi Adebayo's post" }));
+    expect(calls.some((call) => call.path.endsWith('/removal'))).toBe(false);
+    const confirm = within(post).getByRole('group', {
+      name: 'Remove this post? It cannot be brought back.',
+    });
+    await user.click(within(confirm).getByRole('button', { name: 'Remove post' }));
+    expect(await within(post).findByText('Removed.')).toBeVisible();
+  });
+
   it('says so when the post is gone', async () => {
     as('agent', { [`GET /v1/posts/${POST}`]: () => problem(404, 'NOT_FOUND') });
     renderAt(`/posts/${POST}`);

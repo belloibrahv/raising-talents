@@ -16,6 +16,8 @@ import { TALENT } from '../talent-profiles/application/talent-profile.tokens.js'
 import { TalentProfilesModule } from '../talent-profiles/talent-profiles.module.js';
 import {
   AddPortfolioItemHandler,
+  AddTextPostHandler,
+  RemoveTextPostHandler,
   GetMyPortfolioQuery,
   GetPublicPortfolioQuery,
   SharedTalentProfileQuery,
@@ -80,6 +82,16 @@ type OwnerDeps = [PortfolioRepository, PortfolioAccounts, PortfolioMedia, UnitOf
       provide: PORTFOLIO.Add,
       inject: OWNER_DEPS,
       useFactory: (...deps: OwnerDeps) => new AddPortfolioItemHandler(...deps),
+    },
+    {
+      provide: PORTFOLIO.AddText,
+      inject: OWNER_DEPS,
+      useFactory: (...deps: OwnerDeps) => new AddTextPostHandler(...deps),
+    },
+    {
+      provide: PORTFOLIO.RemoveText,
+      inject: OWNER_DEPS,
+      useFactory: (...deps: OwnerDeps) => new RemoveTextPostHandler(...deps),
     },
     {
       provide: PORTFOLIO.Update,

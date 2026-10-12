@@ -106,9 +106,12 @@ if (process.env['SEARCH_REBUILD'] === 'run') {
 
 // Demo data for testing a live environment, switched on for one deploy (docs/runbooks/demo-data.md).
 const seedDemo = process.env['SEED_DEMO'];
-if (seedDemo === 'run' || seedDemo === 'remove') {
+if (seedDemo === 'run' || seedDemo === 'remove' || seedDemo === 'remove-all') {
   const { removeDemoData, runDemoSeed } = await import('./ops/demo-seed.js');
-  const task = seedDemo === 'run' ? runDemoSeed(app, logger) : removeDemoData(app, logger);
+  const task =
+    seedDemo === 'run'
+      ? runDemoSeed(app, logger)
+      : removeDemoData(app, logger, { includeModerator: seedDemo === 'remove-all' });
   void task.catch((error: unknown) => {
     logger.error({ err: error }, `demo data ${seedDemo} failed`);
   });

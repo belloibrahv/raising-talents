@@ -416,6 +416,7 @@
   "nav": {
     "home": "Home",
     "signOut": "Sign out",
+    "back": "Back",
     "main": "Main",
     "search": "Search",
     "moderation": "Moderation",

@@ -135,7 +135,7 @@ export function PortfolioPage() {
       {items.length === 0 ? (
         <EmptyState icon={ImagePlus} title={t('portfolio.empty')} />
       ) : (
-        <ol className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:gap-4 lg:grid-cols-3">
+        <ol className="m-0 grid list-none grid-cols-2 gap-3 p-0 max-[339px]:grid-cols-1 sm:gap-4 lg:grid-cols-3">
           {items.map((item, index) => (
             <li key={item.id}>
               <PortfolioItemCard
@@ -242,7 +242,7 @@ function PortfolioItemCard({
     : item.caption || t('portfolio.item', { position });
   const headingId = `item-${item.id}`;
   const iconButton =
-    'grid size-9 cursor-pointer place-items-center rounded-full text-foreground transition-colors hover:bg-accent disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent';
+    'grid h-10 min-w-0 flex-1 cursor-pointer place-items-center rounded-full text-foreground transition-colors hover:bg-accent disabled:cursor-default disabled:opacity-35 disabled:hover:bg-transparent';
 
   return (
     <article
@@ -381,7 +381,7 @@ function PortfolioItemCard({
           </div>
         </div>
       ) : (
-        <div className="flex items-center gap-0.5 border-t px-1 pt-2">
+        <div className="flex items-center border-t px-1 pt-2">
           <button
             type="button"
             className={iconButton}
@@ -406,7 +406,7 @@ function PortfolioItemCard({
           </button>
           <button
             type="button"
-            className={`${iconButton} ml-auto`}
+            className={iconButton}
             aria-label={t(isText ? 'portfolio.editText' : 'portfolio.editCaption', { name })}
             aria-expanded={editing}
             onClick={() => {

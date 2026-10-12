@@ -24,7 +24,7 @@ export function UpdatePrompt() {
   if (!needRefresh) return null;
   return (
     <div
-      className="fixed inset-x-4 bottom-24 z-40 mx-auto flex max-w-md animate-in flex-col gap-3 rounded-2xl bg-primary p-4 text-primary-foreground shadow-xl fade-in slide-in-from-bottom-4 md:bottom-6"
+      className="fixed inset-x-4 bottom-[calc(6rem+env(safe-area-inset-bottom))] z-40 mx-auto flex max-w-md animate-in flex-col gap-3 rounded-2xl bg-primary p-4 text-primary-foreground shadow-xl fade-in slide-in-from-bottom-4 md:bottom-6"
       role="status"
     >
       <p className="flex items-center gap-2 font-semibold">

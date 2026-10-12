@@ -348,7 +348,7 @@ export function FilterRow({
   return (
     <div role="group" aria-label={label} className="grid gap-2">
       <span className="text-sm font-semibold">{label}</span>
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+      <div className="-mx-4 flex gap-2 overflow-x-auto overscroll-x-contain px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0">
         {children}
       </div>
     </div>

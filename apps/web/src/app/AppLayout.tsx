@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import {
+  ArrowLeft,
   Bookmark,
   Compass,
   House,
@@ -11,8 +12,8 @@ import {
   SquarePlus,
   UserRound,
 } from 'lucide-react';
-import { Suspense } from 'react';
-import { NavLink, Outlet, useMatch } from 'react-router';
+import { Suspense, type CSSProperties } from 'react';
+import { NavLink, Outlet, useLocation, useMatch, useNavigate } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { DeletionBanner } from '../features/account/DeletionBanner';
@@ -26,6 +27,7 @@ import { useLiveUpdates } from '../shared/realtime/live-updates';
 import { InstallCard } from '../shared/pwa/InstallCard';
 import { BrandMark } from '../shared/ui/BrandMark';
 import { PageSkeleton } from '../shared/ui/PageSkeleton';
+import { useTyping } from '../shared/ui/use-typing';
 
 interface Destination {
   readonly to: string;
@@ -79,16 +81,45 @@ export function AppLayout() {
       : { to: '/account', label: t('nav.account'), icon: UserRound },
   ];
   const accountInHeader = destinations.every((entry) => entry.to !== '/account');
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  // An installed app has no browser bar, so a screen that is not a tab needs its own way back.
+  const deep = !onboarding && destinations.every((entry) => entry.to !== pathname);
+  const inChat = useMatch('/messages/:conversationId') !== null;
+  const typing = useTyping();
+  // A chat keeps the bottom of a phone for its message bar; so does the keyboard, for any form.
+  const tabsAway = inChat || typing;
+  const goBack = () => {
+    const steps = (window.history.state as { idx?: number } | null)?.idx ?? 0;
+    // Opened from a link or a notification, there is nothing behind: go up a level instead.
+    if (steps > 0) void navigate(-1);
+    else void navigate(inChat ? '/messages' : '/home', { replace: true });
+  };
   return (
-    <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-30 border-b bg-background/95">
-        <div className="mx-auto flex h-16 w-full max-w-5xl items-center gap-4 px-4 sm:px-6">
+    <div
+      className="flex min-h-dvh flex-col"
+      // How far a bar stuck to the bottom of a phone must sit above the edge to clear the tabs.
+      style={{ '--tabs-clear': onboarding || tabsAway ? '0.75rem' : '5.25rem' } as CSSProperties}
+    >
+      <header className="sticky top-0 z-30 border-b bg-background pt-[env(safe-area-inset-top)]">
+        <div className="mx-auto flex h-14 w-full max-w-5xl items-center gap-2 pr-[max(0.5rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:px-6 md:h-16 md:gap-4">
+          {deep ? (
+            <button
+              type="button"
+              aria-label={t('nav.back')}
+              className="-ml-2 grid size-11 shrink-0 cursor-pointer place-items-center rounded-full text-foreground hover:bg-accent active:bg-accent md:hidden"
+              onClick={goBack}
+            >
+              <ArrowLeft aria-hidden="true" className="size-5" />
+            </button>
+          ) : null}
           <NavLink
             to="/home"
-            className="flex min-w-0 items-center gap-2.5 rounded-lg font-display text-lg font-bold whitespace-nowrap no-underline"
+            className="flex min-h-11 min-w-0 items-center gap-2.5 rounded-lg font-display text-lg font-bold no-underline"
           >
-            <BrandMark />
-            <span>{t('common.appName')}</span>
+            {/* On a phone the back arrow takes the mark's place, so the name still fits. */}
+            <BrandMark className={deep ? 'max-md:hidden' : undefined} />
+            <span className="truncate">{t('common.appName')}</span>
           </NavLink>
           {onboarding ? (
             // Setting up is one focused flow: no tab bar, just a way to the account.
@@ -104,7 +135,10 @@ export function AppLayout() {
             <nav
               aria-label={t('nav.main')}
               // A floating bar on phones, clear of the home indicator; inline in the header when wide.
-              className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-30 mx-auto max-w-md rounded-full border bg-background/85 px-1.5 shadow-xl shadow-black/10 backdrop-blur-xl md:static md:mx-0 md:ml-auto md:max-w-none md:rounded-none md:border-0 md:bg-transparent md:px-0 md:shadow-none md:backdrop-blur-none"
+              className={cn(
+                'fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-30 mx-auto max-w-md rounded-full border bg-background/85 px-1.5 shadow-xl shadow-black/10 backdrop-blur-xl md:static md:mx-0 md:ml-auto md:max-w-none md:rounded-none md:border-0 md:bg-transparent md:px-0 md:shadow-none md:backdrop-blur-none',
+                tabsAway && 'max-md:hidden',
+              )}
             >
               <ul className="m-0 flex list-none justify-around p-0 md:gap-1">
                 {destinations.map(({ to, label, icon: Icon }) => (
@@ -114,7 +148,7 @@ export function AppLayout() {
                       end={to === '/home'}
                       className={({ isActive }) =>
                         cn(
-                          'flex min-h-15 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[0.6875rem] font-semibold text-muted-foreground no-underline transition-colors hover:text-foreground md:min-h-10 md:flex-row md:gap-2 md:px-4 md:text-sm',
+                          'flex min-h-15 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[0.6875rem] font-semibold text-muted-foreground no-underline transition-[color,scale] hover:text-foreground active:scale-95 md:min-h-10 md:flex-row md:gap-2 md:px-4 md:text-sm',
                           isActive && 'text-foreground md:bg-accent',
                         )
                       }
@@ -160,7 +194,7 @@ export function AppLayout() {
               </ul>
             </nav>
           )}
-          <div className="ml-auto flex items-center gap-1 md:ml-0">
+          <div className="ml-auto flex shrink-0 items-center md:ml-0 md:gap-1">
             <NotificationBell />
             {accountInHeader ? (
               <NavLink
@@ -173,7 +207,7 @@ export function AppLayout() {
                 }
                 className={({ isActive }) =>
                   cn(
-                    'relative grid size-10 place-items-center rounded-full text-foreground hover:bg-accent',
+                    'relative grid size-11 place-items-center rounded-full text-foreground hover:bg-accent md:size-10',
                     isActive && 'bg-accent',
                   )
                 }
@@ -190,6 +224,8 @@ export function AppLayout() {
             <Button
               variant="ghost"
               size="sm"
+              // On a phone signing out lives on the account screen, away from a stray thumb.
+              className={onboarding ? undefined : 'max-sm:hidden'}
               aria-label={t('nav.signOut')}
               onClick={() => {
                 signOut.mutate();

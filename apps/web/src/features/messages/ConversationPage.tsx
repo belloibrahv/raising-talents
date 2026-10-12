@@ -1,6 +1,6 @@
 import { MESSAGE_MAX, type ConversationSummary, type Message } from '@rt/contracts';
 import { ArrowLeft, Ban, Clock3, Info, MessageSquareOff, Send } from 'lucide-react';
-import { Fragment, useEffect, useState, type ReactNode, type SubmitEvent } from 'react';
+import { Fragment, useEffect, useRef, useState, type ReactNode, type SubmitEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { cn } from '@/lib/utils';
 import { t } from '../../i18n';
@@ -50,6 +50,21 @@ export function ConversationPage() {
     resetMark();
   }, [updatedAt, resetMark]);
 
+  // A chat opens on its newest message, and follows new ones unless the reader has scrolled
+  // up to look at something older.
+  const newestId = thread.data?.pages[0]?.items[0]?.id;
+  const shownId = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!newestId || shownId.current === newestId) return;
+    const opening = shownId.current === undefined;
+    shownId.current = newestId;
+    const page = document.documentElement;
+    const nearEnd = page.scrollHeight - window.innerHeight - window.scrollY < 320;
+    if (opening || nearEnd) {
+      window.scrollTo({ top: page.scrollHeight, behavior: opening ? 'auto' : 'smooth' });
+    }
+  }, [newestId]);
+
   if (conversation.isPending) return <PageSkeleton />;
   if (conversation.isError) {
     return (
@@ -83,7 +98,8 @@ export function ConversationPage() {
       subtitle={counterpartDetail(counterpart)}
       hero={
         <div className="flex items-center justify-between gap-3">
-          <Link className={buttonLink('text', 'sm')} to="/messages">
+          {/* A phone has the arrow in the header instead. */}
+          <Link className={cn(buttonLink('text', 'sm'), 'max-md:hidden')} to="/messages">
             <ArrowLeft aria-hidden="true" />
             {t('messages.back')}
           </Link>
@@ -474,7 +490,7 @@ function Composer({ conversationId }: { readonly conversationId: string }) {
   const nearLimit = body.length > MESSAGE_MAX * 0.9;
   return (
     <form
-      className="sticky bottom-[calc(5.25rem+env(safe-area-inset-bottom))] z-20 -mx-2 grid gap-2 rounded-3xl border bg-card/95 p-2 shadow-lg backdrop-blur md:bottom-4"
+      className="sticky bottom-[calc(var(--tabs-clear,0.75rem)+env(safe-area-inset-bottom))] z-20 -mx-2 grid gap-2 rounded-3xl border bg-card/95 p-2 shadow-lg backdrop-blur md:bottom-4"
       noValidate
       onSubmit={(event: SubmitEvent) => {
         event.preventDefault();

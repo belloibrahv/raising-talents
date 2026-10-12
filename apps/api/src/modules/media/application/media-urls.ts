@@ -1,6 +1,6 @@
 import type { ImageUrls } from '@rt/contracts';
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { AUDIO_FILE, IMAGE_SIZES } from '../domain/media-asset.js';
+import { AUDIO_FILE, IMAGE_SIZES, VIDEO_FILE } from '../domain/media-asset.js';
 
 /** Signs moderators' preview links when the API serves media (ADR-036). */
 export interface PreviewSigning {
@@ -26,9 +26,10 @@ export class MediaUrls {
     };
   }
 
-  /** Where a ready recording plays from. */
-  forAudio(ownerId: string, mediaId: string): string {
-    return `${this.cdnBaseUrl.replace(/\/$/, '')}/media/${ownerId}/${mediaId}/${AUDIO_FILE}`;
+  /** Where a ready recording, or a video kept in our storage, plays from. */
+  forFile(ownerId: string, mediaId: string, kind: 'audio' | 'video'): string {
+    const name = kind === 'video' ? VIDEO_FILE : AUDIO_FILE;
+    return `${this.cdnBaseUrl.replace(/\/$/, '')}/media/${ownerId}/${mediaId}/${name}`;
   }
 
   /**

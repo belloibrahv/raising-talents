@@ -6,16 +6,21 @@ interface VideoPlayerProps {
   readonly label: string;
 }
 
+const frame = 'aspect-[4/5] w-full rounded-xl bg-black object-contain';
+
 /**
- * Plays a Mux stream. Safari and most phones play HLS themselves; other browsers get
- * hls.js, loaded only when a clip is shown so nobody downloads it who does not need it.
+ * Plays a clip. A stored file plays as it is: the browser fetches only its opening to show
+ * the first frame, then the rest as it is watched. A stream is HLS: Safari and most phones
+ * play that themselves; other browsers get hls.js, loaded only when a clip is shown so
+ * nobody downloads it who does not need it.
  */
 export function VideoPlayer({ playback, label }: VideoPlayerProps) {
   const video = useRef<HTMLVideoElement>(null);
+  const isFile = playback.format === 'file';
 
   useEffect(() => {
     const element = video.current;
-    if (!element) return;
+    if (!element || isFile) return;
     if (element.canPlayType('application/vnd.apple.mpegurl')) {
       element.src = playback.streamUrl;
       return;
@@ -33,12 +38,25 @@ export function VideoPlayer({ playback, label }: VideoPlayerProps) {
       destroyed = true;
       instance?.destroy();
     };
-  }, [playback.streamUrl]);
+  }, [playback.streamUrl, isFile]);
 
+  if (isFile) {
+    return (
+      <video
+        className={frame}
+        // "#t=0.1" makes phones draw the first frame instead of a black box.
+        src={`${playback.streamUrl}#t=0.1`}
+        controls
+        playsInline
+        preload="metadata"
+        aria-label={label}
+      />
+    );
+  }
   return (
     <video
       ref={video}
-      className="aspect-[4/5] w-full rounded-xl bg-black object-contain"
+      className={frame}
       controls
       playsInline
       preload="none"

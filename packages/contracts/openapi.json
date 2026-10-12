@@ -9835,6 +9835,14 @@
       "VideoPlayback": {
         "type": "object",
         "properties": {
+          "format": {
+            "default": "hls",
+            "type": "string",
+            "enum": [
+              "hls",
+              "file"
+            ]
+          },
           "streamUrl": {
             "type": "string",
             "format": "uri"
@@ -9854,6 +9862,7 @@
           }
         },
         "required": [
+          "format",
           "streamUrl",
           "posterUrl",
           "durationSeconds",
@@ -14104,13 +14113,21 @@
                     "video",
                     "audio"
                   ]
+                },
+                "playUrl": {
+                  "default": null,
+                  "type": [
+                    "string",
+                    "null"
+                  ]
                 }
               },
               "required": [
                 "mediaId",
                 "reports",
                 "previewUrl",
-                "kind"
+                "kind",
+                "playUrl"
               ],
               "additionalProperties": false
             }

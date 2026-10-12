@@ -170,7 +170,7 @@ describe('Video pipeline', () => {
 
   it('rejects a clip that is too long without scanning it, and deletes it', async () => {
     const { mediaId, uploadId } = await requestVideo();
-    await ready(mediaId, uploadId, 95);
+    await ready(mediaId, uploadId, 195);
     await runWorker();
     expect(assets.rows.get(mediaId)?.status).toBe('rejected');
     expect(video.deletedAssets).toEqual([`asset-for-${uploadId}`]);

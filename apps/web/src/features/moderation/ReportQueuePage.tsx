@@ -162,13 +162,23 @@ function ReportedAccountCard({
           <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 sm:grid-cols-3">
             {item.reportedMedia.map((entry) => (
               <li key={entry.mediaId} className="grid content-start gap-2">
-                {entry.kind === 'audio' ? (
+                {entry.playUrl && entry.kind === 'video' ? (
+                  // A video kept as a file has no still picture, so it is played here.
+                  <video
+                    className="aspect-[4/5] w-full rounded-xl bg-black object-contain"
+                    controls
+                    playsInline
+                    preload="metadata"
+                    src={`${entry.playUrl}#t=0.1`}
+                    aria-label={t('moderation.reportedVideoAlt', { name })}
+                  />
+                ) : entry.kind === 'audio' ? (
                   // A reported recording has to be listened to; its type is left to the browser.
                   <audio
                     className="w-full"
                     controls
                     preload="none"
-                    src={entry.previewUrl}
+                    src={entry.playUrl ?? entry.previewUrl}
                     aria-label={t('moderation.reportedAudioAlt', { name })}
                   />
                 ) : (

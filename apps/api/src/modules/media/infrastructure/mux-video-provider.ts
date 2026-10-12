@@ -193,6 +193,14 @@ export class DisabledVideoProvider implements VideoProvider, PlaybackSigner {
   }
 }
 
+/**
+ * No provider: videos are kept in our own storage and played as the file that was uploaded
+ * (ADR-056). Nothing here is ever called, because such a video never has a provider upload.
+ */
+export class StorageVideoProvider extends DisabledVideoProvider {
+  readonly keepsInStorage = true;
+}
+
 const SIGNATURE_TOLERANCE_SECONDS = 300;
 
 /**

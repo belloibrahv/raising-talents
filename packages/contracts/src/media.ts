@@ -6,9 +6,9 @@ export const IMAGE_MAX_BYTES = 15 * 1024 * 1024;
 export const IMAGE_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'] as const;
 export const UPLOAD_INTENT_TTL_SECONDS = 600;
 
-/** Provisional (ADR-021): portfolio clips up to 60 seconds and 300 MB, until section 6.4 is confirmed. */
+/** Portfolio clips up to three minutes and 300 MB (ADR-021, raised from 60 seconds in ADR-056). */
 export const VIDEO_MAX_BYTES = 300 * 1024 * 1024;
-export const VIDEO_MAX_SECONDS = 60;
+export const VIDEO_MAX_SECONDS = 180;
 export const VIDEO_CONTENT_TYPES = ['video/mp4', 'video/quicktime'] as const;
 
 /**
@@ -84,9 +84,14 @@ export const imageUrlsSchema = z
   .meta({ id: 'ImageUrls' });
 export type ImageUrls = z.infer<typeof imageUrlsSchema>;
 
-/** Signed links for one video. They expire, so read the asset again after expiresAt. */
+/**
+ * Where one video plays from. `hls` is a stream from the video provider with signed links
+ * that expire, so read the asset again after expiresAt. `file` is the uploaded file itself,
+ * kept in our storage (ADR-056): it has no poster, and its length is 0 when not known.
+ */
 export const videoPlaybackSchema = z
   .object({
+    format: z.enum(['hls', 'file']).default('hls'),
     streamUrl: z.url(),
     posterUrl: z.url(),
     durationSeconds: z.number().nonnegative(),

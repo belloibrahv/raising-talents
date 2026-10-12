@@ -1,3 +1,5 @@
+import type { Readable } from 'node:stream';
+
 export interface PresignedUpload {
   readonly url: string;
   readonly fields: Record<string, string>;
@@ -15,6 +17,12 @@ export interface ObjectStorage {
   /** Size and type of a stored object, or null if nothing is there. */
   describe(key: string): Promise<{ bytes: number; contentType: string } | null>;
   read(key: string): Promise<Buffer>;
+  /** The first bytes of an object, to tell what kind of file it is without fetching it all. */
+  readStart(key: string, bytes: number): Promise<Buffer>;
+  /** Part of an object (both ends included), or all of it, as a stream. */
+  stream(key: string, range?: { start: number; end: number }): Promise<Readable>;
+  /** Copies inside the bucket, keeping the type. Nothing passes through this process. */
+  copy(fromKey: string, toKey: string): Promise<void>;
   write(key: string, body: Buffer, contentType: string): Promise<void>;
   remove(keys: readonly string[]): Promise<void>;
 }
@@ -43,6 +51,11 @@ export type ProviderUploadStatus =
 /** Transcoding, storage and streaming for video (ADR-007). Mux in every real environment. */
 export interface VideoProvider {
   readonly enabled: boolean;
+  /**
+   * True where there is no provider and videos are kept in our own storage instead, played
+   * as the file that was uploaded (ADR-056).
+   */
+  readonly keepsInStorage?: boolean;
   /** A one-off upload URL the phone PUTs the file to. passthrough comes back in every webhook. */
   createUpload(input: { passthrough: string }): Promise<{ uploadId: string; url: string }>;
   uploadStatus(uploadId: string): Promise<{ status: ProviderUploadStatus; assetId: string | null }>;

@@ -22,6 +22,8 @@ export const ACCEPT_MEDIA = [
   ...IMAGE_CONTENT_TYPES,
   ...VIDEO_CONTENT_TYPES,
   ...AUDIO_CONTENT_TYPES,
+  '.mp4',
+  '.mov',
   '.mp3',
   '.m4a',
   '.aac',
@@ -62,24 +64,40 @@ function audioTypeOf(file: File): AudioType | null {
   return AUDIO_BY_EXTENSION[file.name.split('.').pop()?.toLowerCase() ?? ''] ?? null;
 }
 
+/** A gallery clip sometimes arrives with no type at all; its name still says what it is. */
+function videoTypeOf(file: File): VideoType | null {
+  if ((VIDEO_CONTENT_TYPES as readonly string[]).includes(file.type)) return file.type as VideoType;
+  if (file.type !== '' && file.type !== 'application/octet-stream') return null;
+  const extension = file.name.split('.').pop()?.toLowerCase();
+  return extension === 'mp4' || extension === 'm4v'
+    ? 'video/mp4'
+    : extension === 'mov'
+      ? 'video/quicktime'
+      : null;
+}
+
 const isImage = (type: string): type is ImageType =>
   (IMAGE_CONTENT_TYPES as readonly string[]).includes(type);
-const isVideo = (type: string): type is VideoType =>
-  (VIDEO_CONTENT_TYPES as readonly string[]).includes(type);
 
 /** Checks the file against the same limits the API enforces, and shrinks photos. */
 export async function prepareForUpload(
   file: File,
   options: { videoAllowed: boolean },
 ): Promise<File> {
-  if (isVideo(file.type)) {
+  const videoType = videoTypeOf(file);
+  if (videoType) {
     if (!options.videoAllowed) throw new FileProblem(t('media.photoOnly'));
     if (file.size > VIDEO_MAX_BYTES) throw new FileProblem(t('media.videoTooLarge'));
     const seconds = await videoDurationSeconds(file);
     if (seconds !== null && seconds > VIDEO_MAX_SECONDS) {
-      throw new FileProblem(t('media.videoTooLong', { seconds: Math.round(seconds) }));
+      throw new FileProblem(
+        t('media.videoTooLong', {
+          seconds: Math.round(seconds),
+          minutes: VIDEO_MAX_SECONDS / 60,
+        }),
+      );
     }
-    return file;
+    return file.type === videoType ? file : new File([file], file.name, { type: videoType });
   }
   const audioType = audioTypeOf(file);
   if (audioType) {

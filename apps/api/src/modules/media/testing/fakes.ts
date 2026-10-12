@@ -1,3 +1,4 @@
+import { Readable } from 'node:stream';
 import type { EventRecorder } from '../../../platform/domain-event.js';
 import type {
   ContentScanner,
@@ -83,6 +84,18 @@ export class InMemoryObjectStorage implements ObjectStorage {
     const object = this.objects.get(key);
     if (!object) throw new Error(`No object at ${key}`);
     return object.body;
+  }
+  async readStart(key: string, bytes: number): Promise<Buffer> {
+    return (await this.read(key)).subarray(0, bytes);
+  }
+  async stream(key: string, range?: { start: number; end: number }): Promise<Readable> {
+    const body = await this.read(key);
+    return Readable.from([range ? body.subarray(range.start, range.end + 1) : body]);
+  }
+  async copy(fromKey: string, toKey: string): Promise<void> {
+    const object = this.objects.get(fromKey);
+    if (!object) throw new Error(`No object at ${fromKey}`);
+    this.objects.set(toKey, object);
   }
   async write(key: string, body: Buffer, contentType: string): Promise<void> {
     this.objects.set(key, { body, contentType });

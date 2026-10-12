@@ -1,4 +1,4 @@
-import { ProcessAudioHandler } from './application/audio.use-cases.js';
+import { StoreUploadedFileHandler } from './application/stored-file.use-cases.js';
 import { RekognitionClient } from '@aws-sdk/client-rekognition';
 import { S3Client } from '@aws-sdk/client-s3';
 import { createHmac } from 'node:crypto';
@@ -48,6 +48,7 @@ import {
 } from './infrastructure/rekognition-content-scanner.js';
 import {
   DisabledVideoProvider,
+  StorageVideoProvider,
   MuxPlaybackSigner,
   MuxVideoProvider,
   MuxWebhookVerifier,
@@ -87,7 +88,10 @@ interface VideoParts {
       inject: [PLATFORM.Config, PLATFORM.Clock],
       useFactory: (config: AppConfig, clock: Clock): VideoParts => {
         if (config.VIDEO_PROVIDER !== 'mux') {
-          const disabled = new DisabledVideoProvider();
+          const disabled =
+            config.VIDEO_PROVIDER === 'storage'
+              ? new StorageVideoProvider()
+              : new DisabledVideoProvider();
           return { provider: disabled, signer: disabled, verifier: null };
         }
         // loadConfig has already refused mux without every MUX_ setting.
@@ -252,7 +256,7 @@ interface VideoParts {
       ) => new ProcessImageHandler(repo, storage, processor, scanner, policy, uow, clock, logger),
     },
     {
-      provide: MEDIA.ProcessAudio,
+      provide: MEDIA.StoreFile,
       inject: [
         MEDIA.Repository,
         MEDIA.Storage,
@@ -266,7 +270,7 @@ interface VideoParts {
         uow: UnitOfWork,
         clock: Clock,
         logger: Logger,
-      ) => new ProcessAudioHandler(repo, storage, uow, clock, logger),
+      ) => new StoreUploadedFileHandler(repo, storage, uow, clock, logger),
     },
     {
       provide: MEDIA.Facade,
@@ -391,16 +395,16 @@ interface VideoParts {
     },
     {
       provide: MEDIA.EventHandlers,
-      inject: [MEDIA.Process, MEDIA.ProcessAudio, MEDIA.ScanVideo, MEDIA.RemoveDeleted],
+      inject: [MEDIA.Process, MEDIA.StoreFile, MEDIA.ScanVideo, MEDIA.RemoveDeleted],
       useFactory: (
         processImage: ProcessImageHandler,
-        processAudio: ProcessAudioHandler,
+        storeFile: StoreUploadedFileHandler,
         scanVideo: ScanVideoHandler,
         removeDeleted: RemoveDeletedMediaHandler,
       ): ModuleEventHandlers => ({
         register: (dispatcher) => {
           dispatcher.on(MediaEvents.Uploaded, (event) => processImage.handle(event));
-          dispatcher.on(MediaEvents.Uploaded, (event) => processAudio.handle(event));
+          dispatcher.on(MediaEvents.Uploaded, (event) => storeFile.handle(event));
           dispatcher.on(MediaEvents.VideoTranscoded, (event) => scanVideo.handle(event));
           dispatcher.on(MediaEvents.Deleted, (event) => removeDeleted.handle(event));
           dispatcher.on(MediaEvents.Rejected, (event) => removeDeleted.handle(event));

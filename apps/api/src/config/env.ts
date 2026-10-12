@@ -83,8 +83,12 @@ const envSchema = z.object({
   SCAN_REVIEW_AT: z.coerce.number().min(0).max(100).default(50),
   SCAN_REJECT_AT: z.coerce.number().min(0).max(100).default(80),
 
-  /** disabled refuses video uploads; mux needs every MUX_ setting. Staging and production use mux. */
-  VIDEO_PROVIDER: z.enum(['mux', 'disabled']).default('disabled'),
+  /**
+   * mux transcodes and streams, and needs every MUX_ setting. storage keeps the uploaded file
+   * in our bucket and plays it as it is, for hosts without Mux (ADR-056). disabled refuses
+   * video uploads.
+   */
+  VIDEO_PROVIDER: z.enum(['mux', 'storage', 'disabled']).default('disabled'),
   MUX_TOKEN_ID: z.string().min(1).optional(),
   MUX_TOKEN_SECRET: z.string().min(1).optional(),
   MUX_WEBHOOK_SECRET: z.string().min(1).optional(),

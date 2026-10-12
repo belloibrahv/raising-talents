@@ -354,7 +354,12 @@ function ItemMedia({ item, name }: { item: MyPortfolioItem; name: string }) {
     return (
       <VideoPlayer
         playback={item.video}
-        label={`${name}. ${t('portfolio.videoLabel', { seconds: Math.round(item.video.durationSeconds) })}`}
+        // A stored file does not say how long it is until it is played.
+        label={`${name}. ${
+          item.video.durationSeconds > 0
+            ? t('portfolio.videoLabel', { seconds: Math.round(item.video.durationSeconds) })
+            : t('portfolio.videoLabelPlain')
+        }`}
       />
     );
   }

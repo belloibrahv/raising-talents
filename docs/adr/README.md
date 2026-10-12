@@ -57,3 +57,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-051](051-reporting-a-post.md)                                      | Reporting a post                                                     | Accepted                          |
 | [ADR-052](052-comments-on-posts.md)                                     | Comments on posts                                                    | Accepted                          |
 | [ADR-053](053-an-easier-password-rule.md)                               | An easier password rule                                              | Accepted                          |
+| [ADR-054](054-skills-follow-the-subcategory.md)                         | Skills follow the subcategory                                        | Accepted                          |

@@ -4,6 +4,7 @@ import {
   index,
   integer,
   pgSchema,
+  primaryKey,
   text,
   varchar,
 } from 'drizzle-orm/pg-core';
@@ -38,6 +39,23 @@ export const skills = taxonomySchema.table('skills', {
   categorySlug: text('category_slug').references(() => categories.slug),
   active: boolean('active').notNull().default(true),
 });
+
+/**
+ * Which subcategories a skill belongs to: "Goalkeeping" for football and hockey. A skill with
+ * no rows here applies to its whole category, or to everyone when it has no category.
+ */
+export const skillSubcategories = taxonomySchema.table(
+  'skill_subcategories',
+  {
+    skillSlug: text('skill_slug')
+      .notNull()
+      .references(() => skills.slug, { onDelete: 'cascade' }),
+    subcategorySlug: text('subcategory_slug')
+      .notNull()
+      .references(() => subcategories.slug, { onDelete: 'cascade' }),
+  },
+  (table) => [primaryKey({ columns: [table.skillSlug, table.subcategorySlug] })],
+);
 
 /** ISO 3166-1 alpha-2 countries that have at least one city to pick (ADR-046). */
 export const countries = taxonomySchema.table('countries', {

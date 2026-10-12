@@ -6,7 +6,7 @@ import { err, ok, type Result } from '../../../platform/result.js';
 export interface TaxonomySnapshot {
   readonly categories: readonly { slug: string; name: string }[];
   readonly subcategories: readonly { slug: string; name: string; categorySlug: string }[];
-  readonly skills: readonly { slug: string; name: string; categorySlug: string | null }[];
+  readonly skills: readonly SkillRow[];
   /** By name. */
   readonly countries: readonly { code: string; name: string; searchTerms: string }[];
   /** Largest first within each country. */
@@ -19,6 +19,26 @@ export interface TaxonomySnapshot {
 }
 
 type CityRow = TaxonomySnapshot['cities'][number];
+
+interface SkillRow {
+  readonly slug: string;
+  readonly name: string;
+  readonly categorySlug: string | null;
+  /**
+   * The subcategories the skill belongs to. Empty or absent: it applies to its whole
+   * category, or to everyone when it has no category (languages).
+   */
+  readonly subcategorySlugs?: readonly string[];
+}
+
+type Discipline = Pick<TalentSelection, 'categorySlug' | 'subcategorySlugs'>;
+
+/** Whether someone with these subcategories can list the skill. */
+function skillFits(skill: SkillRow, chosen: Discipline): boolean {
+  const linked = skill.subcategorySlugs ?? [];
+  if (linked.length > 0) return linked.some((slug) => chosen.subcategorySlugs.includes(slug));
+  return skill.categorySlug === null || skill.categorySlug === chosen.categorySlug;
+}
 
 export interface TalentSelection {
   readonly categorySlug: string | null;
@@ -36,7 +56,7 @@ const unknown = (detail: string): DomainError => domainError('UNKNOWN_TAXONOMY',
 export class TaxonomyCatalog {
   private readonly categories: Map<string, { slug: string; name: string }>;
   private readonly subcategories: Map<string, { slug: string; name: string; categorySlug: string }>;
-  private readonly skills: Map<string, { slug: string; name: string; categorySlug: string | null }>;
+  private readonly skills: Map<string, SkillRow>;
   private readonly cities: Map<string, CityRow>;
   private readonly citiesByCountry = new Map<string, CityOption[]>();
   private readonly countries: Map<string, Country>;
@@ -80,11 +100,19 @@ export class TaxonomyCatalog {
     for (const slug of selection.skillSlugs) {
       const skill = this.skills.get(slug);
       if (!skill) return err(unknown(`There is no skill "${slug}".`));
-      if (skill.categorySlug !== null && skill.categorySlug !== selection.categorySlug) {
-        return err(unknown(`"${slug}" is not a skill for the chosen category.`));
+      if (!skillFits(skill, selection)) {
+        return err(unknown(`"${slug}" is not a skill for what you chose.`));
       }
     }
     return this.validateCity(selection.citySlug);
+  }
+
+  /** The skills among these that still fit, after the subcategories changed. */
+  fittingSkills(skillSlugs: readonly string[], chosen: Discipline): string[] {
+    return skillSlugs.filter((slug) => {
+      const skill = this.skills.get(slug);
+      return skill !== undefined && skillFits(skill, chosen);
+    });
   }
 
   validateCategories(slugs: readonly string[]): Result<void, DomainError> {
@@ -160,10 +188,11 @@ export class TaxonomyCatalog {
           .filter((subcategory) => subcategory.categorySlug === category.slug)
           .map(({ slug, name }) => ({ slug, name })),
       })),
-      skills: this.snapshot.skills.map(({ slug, name, categorySlug }) => ({
+      skills: this.snapshot.skills.map(({ slug, name, categorySlug, subcategorySlugs }) => ({
         slug,
         name,
         categorySlug,
+        subcategorySlugs: [...(subcategorySlugs ?? [])],
       })),
       countries: [...this.countries.values()],
     };

@@ -35,8 +35,9 @@ export const TAXONOMY = {
     { slug: 'sports', name: 'Sports', subcategories: [{ slug: 'football', name: 'Football' }] },
   ],
   skills: [
-    { slug: 'vocals', name: 'Vocals', categorySlug: 'music' },
-    { slug: 'yoruba', name: 'Yoruba', categorySlug: null },
+    { slug: 'vocals', name: 'Vocals', categorySlug: 'music', subcategorySlugs: ['singer'] },
+    { slug: 'drums', name: 'Drums', categorySlug: 'music', subcategorySlugs: ['drummer'] },
+    { slug: 'yoruba', name: 'Yoruba', categorySlug: null, subcategorySlugs: [] },
   ],
   countries: [
     { code: 'NG', name: 'Nigeria', searchTerms: ['Naija'] },

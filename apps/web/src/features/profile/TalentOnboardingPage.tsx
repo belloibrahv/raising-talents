@@ -327,9 +327,18 @@ function DisciplineStep({
   );
   const [skills, setSkills] = useState<readonly string[]>(profile.skills.map((ref) => ref.slug));
   const chosen = taxonomy.categories.find((entry) => entry.slug === category);
-  const skillOptions = taxonomy.skills.filter(
-    (skill) => skill.categorySlug === null || skill.categorySlug === category,
-  );
+  // Skills follow the subcategories chosen above; languages are open to everyone and come last.
+  const fits = (skill: TaxonomyResponse['skills'][number]) =>
+    skill.subcategorySlugs.length > 0
+      ? skill.subcategorySlugs.some((slug) => subcategories.includes(slug))
+      : skill.categorySlug === null || skill.categorySlug === category;
+  const skillOptions =
+    subcategories.length === 0
+      ? []
+      : [
+          ...taxonomy.skills.filter((skill) => fits(skill) && skill.categorySlug !== null),
+          ...taxonomy.skills.filter((skill) => fits(skill) && skill.categorySlug === null),
+        ];
 
   const submit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -388,7 +397,8 @@ function DisciplineStep({
           legend={t('onboarding.discipline.skills')}
           hint={t('onboarding.discipline.skillsHint', { max: MAX_SKILLS })}
           max={MAX_SKILLS}
-          value={skills}
+          // Only what is still on offer counts, so the limit matches what is saved.
+          value={skills.filter((slug) => skillOptions.some((skill) => skill.slug === slug))}
           onChange={setSkills}
           options={skillOptions.map((entry) => ({ value: entry.slug, label: entry.name }))}
         />

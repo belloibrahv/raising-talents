@@ -13,6 +13,13 @@ export const SAMPLE_TAXONOMY = new TaxonomyCatalog({
   ],
   skills: [
     { slug: 'sprinting', name: 'Sprinting', categorySlug: 'sports' },
+    {
+      slug: 'goalkeeping',
+      name: 'Goalkeeping',
+      categorySlug: 'sports',
+      subcategorySlugs: ['football'],
+    },
+    { slug: 'hurdles', name: 'Hurdles', categorySlug: 'sports', subcategorySlugs: ['athletics'] },
     { slug: 'vocals', name: 'Vocals', categorySlug: 'music' },
     { slug: 'yoruba', name: 'Yoruba', categorySlug: null },
   ],

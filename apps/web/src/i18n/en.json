@@ -579,18 +579,19 @@
     "failed": "Upload failed",
     "awaiting_upload": "Waiting for upload",
     "deleted": "Removed",
-    "typeNotAllowed": "Use a photo (JPEG, PNG, WebP or HEIC) or a video (MP4 or MOV).",
+    "typeNotAllowed": "Use a photo (JPEG, PNG, WebP or HEIC), a video (MP4 or MOV) or a recording (MP3, M4A, WAV or Ogg).",
     "photoOnly": "Use a photo in JPEG, PNG, WebP or HEIC format.",
     "imageTooLarge": "That photo is over 15 MB. Choose a smaller one.",
     "videoTooLarge": "That video is over 300 MB. Choose a shorter clip.",
     "videoTooLong": "That video is {seconds} seconds long. Clips can be up to 60 seconds; trim it and try again.",
-    "uploadFailed": "The upload did not finish. Check your connection and try again."
+    "uploadFailed": "The upload did not finish. Check your connection and try again.",
+    "audioTooLarge": "That recording is over 20 MB. Choose a shorter one or save it as MP3."
   },
   "portfolio": {
     "title": "Your portfolio",
-    "body": "Up to {max} photos and clips of your best work. Each one appears in the feed and on your page.",
+    "body": "Up to {max} photos, clips and recordings of your best work. Each one appears in the feed and on your page.",
     "count": "{count} of {max} items",
-    "add": "Add a photo or video",
+    "add": "Add a photo, video or audio",
     "full": "Your portfolio is full. Remove an item to add another.",
     "empty": "Nothing here yet. Start with your strongest work.",
     "caption": "Caption",
@@ -612,7 +613,8 @@
     "rejectedReason": "Why: {reason}",
     "heldBody": "A moderator is checking this item. Only you can see it until then.",
     "processingBody": "Only you can see this until it is checked.",
-    "videoLabel": "Video, {seconds} seconds"
+    "videoLabel": "Video, {seconds} seconds",
+    "audioLabel": "Audio recording"
   },
   "talent": {
     "notAvailable": "This profile is not available.",
@@ -626,7 +628,8 @@
     "about": "About",
     "contact": "Contact",
     "addWork": "Add work",
-    "noPortfolioMine": "Share your first photo or clip"
+    "noPortfolioMine": "Share your first photo or clip",
+    "audioAlt": "Recording {position} by {name}"
   },
   "place": {
     "country": "Country",
@@ -690,6 +693,7 @@
     "item": "{kind} for {purpose}, held {when}",
     "image": "Photo",
     "video": "Video",
+    "audio": "Recording",
     "avatar": "a profile photo",
     "portfolio": "a portfolio",
     "labels": "What the scanner saw",
@@ -774,7 +778,8 @@
     "confirmBan": "Ban account",
     "reports_dismiss": "Reports dismissed.",
     "reports_suspend": "Account suspended.",
-    "reports_ban": "Account banned."
+    "reports_ban": "Account banned.",
+    "reportedAudioAlt": "Reported recording by {name}"
   },
   "verification": {
     "title": "Get verified",
@@ -913,7 +918,8 @@
     "file": {
       "avatar": "profile photo",
       "photo": "portfolio photo",
-      "video": "portfolio video"
+      "video": "portfolio video",
+      "audio": "portfolio recording"
     },
     "mediaApproved": "Your {file} is approved",
     "mediaApprovedBody": "It is on your profile now.",
@@ -997,7 +1003,8 @@
     "postBy": "Post by {name}",
     "photoBy": "Photo by {name}",
     "videoBy": "Video by {name}",
-    "suggested": "Suggested for you"
+    "suggested": "Suggested for you",
+    "audioBy": "Recording by {name}"
   },
   "comments": {
     "title": "Comments on {name}'s post",

@@ -1,4 +1,11 @@
-import type { ImageUrls, MediaKind, MediaPurpose, MediaStatus, VideoPlayback } from '@rt/contracts';
+import type {
+  AudioPlayback,
+  ImageUrls,
+  MediaKind,
+  MediaPurpose,
+  MediaStatus,
+  VideoPlayback,
+} from '@rt/contracts';
 import type { Logger } from 'pino';
 import type { Clock } from '../../../platform/clock.js';
 import type { DomainEvent } from '../../../platform/domain-event.js';
@@ -20,6 +27,8 @@ export interface MediaSummary {
   readonly urls: ImageUrls | null;
   /** Set only when a ready video. */
   readonly video: VideoPlayback | null;
+  /** Set only when a ready recording. */
+  readonly audio: AudioPlayback | null;
 }
 
 /** How other modules read and release media. They never touch media tables or storage. */

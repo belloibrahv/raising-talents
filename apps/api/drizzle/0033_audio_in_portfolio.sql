@@ -1,0 +1,1 @@
+ALTER TYPE "portfolio"."item_kind" ADD VALUE 'audio';

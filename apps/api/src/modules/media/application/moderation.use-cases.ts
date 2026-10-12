@@ -45,13 +45,16 @@ export class ListHeldMediaQuery {
     const items = await Promise.all(
       page.map(async (asset) => {
         const props = asset.snapshot();
+        // Recordings are never held, so the queue shows pictures and video only.
+        const { urls, video } = await this.presenter.preview(asset);
         return {
           id: props.id,
           ownerId: props.ownerId,
           purpose: props.purpose,
           kind: asset.kind,
           labels: props.moderationLabels.map((label) => ({ ...label })),
-          ...(await this.presenter.preview(asset)),
+          urls,
+          video,
           heldAt: props.updatedAt.toISOString(),
         };
       }),

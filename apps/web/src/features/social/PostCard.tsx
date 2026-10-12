@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { cn } from '@/lib/utils';
 import { t } from '../../i18n';
+import { AudioPlayer } from '../../shared/media/AudioPlayer';
 import { VideoPlayer } from '../../shared/media/VideoPlayer';
 import { placeLabel } from '../../shared/places';
 import { timeAgo } from '../../shared/relative-time';
@@ -143,7 +144,13 @@ export function PostCard({ post, eager = false, commentsOpen = false }: PostCard
           </time>
         </header>
 
-        {post.kind === 'video' ? (
+        {post.kind === 'audio' ? (
+          <AudioPlayer
+            playback={post.audio}
+            label={t('social.audioBy', { name: talent.displayName })}
+            shape="band"
+          />
+        ) : post.kind === 'video' ? (
           <div className="bg-black">
             <VideoPlayer
               playback={post.video}

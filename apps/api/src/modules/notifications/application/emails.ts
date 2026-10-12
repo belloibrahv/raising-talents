@@ -32,12 +32,20 @@ ${input.paragraphs.map((paragraph) => `    <p>${escape(paragraph)}</p>`).join('\
   return { to: input.to, subject: input.subject, text, html };
 }
 
-const fileName = (kind: 'image' | 'video', purpose: 'avatar' | 'portfolio') =>
-  purpose === 'avatar' ? 'profile photo' : kind === 'video' ? 'portfolio video' : 'portfolio photo';
+type FileKind = 'image' | 'video' | 'audio';
+
+const fileName = (kind: FileKind, purpose: 'avatar' | 'portfolio') =>
+  purpose === 'avatar'
+    ? 'profile photo'
+    : kind === 'video'
+      ? 'portfolio video'
+      : kind === 'audio'
+        ? 'portfolio recording'
+        : 'portfolio photo';
 
 export function mediaApprovedEmail(input: {
   to: string;
-  kind: 'image' | 'video';
+  kind: FileKind;
   purpose: 'avatar' | 'portfolio';
   appUrl: string;
 }): EmailMessage {
@@ -57,7 +65,7 @@ export function mediaApprovedEmail(input: {
 
 export function mediaRejectedEmail(input: {
   to: string;
-  kind: 'image' | 'video';
+  kind: FileKind;
   purpose: 'avatar' | 'portfolio';
   reason: string;
   appUrl: string;

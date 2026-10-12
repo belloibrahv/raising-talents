@@ -105,6 +105,7 @@ describe('Reports and enforcement', () => {
           status,
           urls: { medium: `https://media.test/${id}/1024.webp` },
           video: null,
+          audio: null,
         },
       ] as const;
     const files = new Map([

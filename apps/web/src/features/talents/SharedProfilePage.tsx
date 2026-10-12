@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { t } from '../../i18n';
 import { isApiError } from '../../shared/api/api-error';
 import { api } from '../../shared/api/client';
+import { AudioPlayer } from '../../shared/media/AudioPlayer';
 import { VideoPlayer } from '../../shared/media/VideoPlayer';
 import { BrandMark } from '../../shared/ui/BrandMark';
 import { Button } from '../../shared/ui/Button';
@@ -168,7 +169,13 @@ export function SharedProfilePage() {
                         className={index === 0 ? 'col-span-2 row-span-2' : undefined}
                       >
                         <figure className="m-0 flex h-full flex-col gap-1.5">
-                          {item.kind === 'video' ? (
+                          {item.kind === 'audio' ? (
+                            <AudioPlayer
+                              playback={item.audio}
+                              label={t('talent.audioAlt', values)}
+                              className="flex-1 rounded-2xl"
+                            />
+                          ) : item.kind === 'video' ? (
                             <VideoPlayer
                               playback={item.video}
                               label={t('talent.videoAlt', values)}

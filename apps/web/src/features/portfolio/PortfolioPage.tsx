@@ -9,6 +9,7 @@ import {
   prepareForUpload,
   uploadMedia,
 } from '../../shared/media/upload';
+import { AudioPlayer } from '../../shared/media/AudioPlayer';
 import { VideoPlayer } from '../../shared/media/VideoPlayer';
 import { Button } from '../../shared/ui/Button';
 import { FormMessage } from '../../shared/ui/FormMessage';
@@ -24,7 +25,7 @@ import {
 } from './queries';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, ImagePlus, PenLine, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, AudioLines, ImagePlus, PenLine, Trash2 } from 'lucide-react';
 import { EmptyState } from '../../shared/ui/EmptyState';
 
 /** Ready is good news, held and in progress are neutral, rejected and failed need the owner. */
@@ -357,6 +358,9 @@ function ItemMedia({ item, name }: { item: MyPortfolioItem; name: string }) {
       />
     );
   }
+  if (item.kind === 'audio' && item.audio) {
+    return <AudioPlayer playback={item.audio} label={`${name}. ${t('portfolio.audioLabel')}`} />;
+  }
   if (item.urls) {
     return (
       <img
@@ -375,7 +379,11 @@ function ItemMedia({ item, name }: { item: MyPortfolioItem; name: string }) {
       className="grid aspect-[4/5] w-full place-items-center rounded-xl bg-muted text-muted-foreground"
       aria-hidden="true"
     >
-      <ImagePlus className="size-8 opacity-50" />
+      {item.kind === 'audio' ? (
+        <AudioLines className="size-8 opacity-50" />
+      ) : (
+        <ImagePlus className="size-8 opacity-50" />
+      )}
     </div>
   );
 }

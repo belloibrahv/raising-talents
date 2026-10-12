@@ -11,11 +11,27 @@ export const VIDEO_MAX_BYTES = 300 * 1024 * 1024;
 export const VIDEO_MAX_SECONDS = 60;
 export const VIDEO_CONTENT_TYPES = ['video/mp4', 'video/quicktime'] as const;
 
-export const mediaKindSchema = z.enum(['image', 'video']);
+/**
+ * Recordings for a portfolio: a song, a voice reel, a podcast clip. Up to 20 MB, which is
+ * about eight minutes of a good MP3. The types are what phones and browsers report for MP3,
+ * M4A, AAC, WAV and Ogg files.
+ */
+export const AUDIO_MAX_BYTES = 20 * 1024 * 1024;
+export const AUDIO_CONTENT_TYPES = [
+  'audio/mpeg',
+  'audio/mp4',
+  'audio/x-m4a',
+  'audio/aac',
+  'audio/wav',
+  'audio/x-wav',
+  'audio/ogg',
+] as const;
+
+export const mediaKindSchema = z.enum(['image', 'video', 'audio']);
 export type MediaKind = z.infer<typeof mediaKindSchema>;
 
 export const mediaKindOf = (contentType: string): MediaKind =>
-  contentType.startsWith('video/') ? 'video' : 'image';
+  contentType.startsWith('video/') ? 'video' : contentType.startsWith('audio/') ? 'audio' : 'image';
 
 export const mediaPurposeSchema = z.enum(['avatar', 'portfolio']);
 export type MediaPurpose = z.infer<typeof mediaPurposeSchema>;
@@ -35,7 +51,7 @@ export type MediaStatus = z.infer<typeof mediaStatusSchema>;
 export const createUploadIntentRequestSchema = z
   .object({
     purpose: mediaPurposeSchema,
-    contentType: z.enum([...IMAGE_CONTENT_TYPES, ...VIDEO_CONTENT_TYPES]),
+    contentType: z.enum([...IMAGE_CONTENT_TYPES, ...VIDEO_CONTENT_TYPES, ...AUDIO_CONTENT_TYPES]),
     bytes: z.number().int().positive(),
   })
   .strict()
@@ -43,7 +59,7 @@ export const createUploadIntentRequestSchema = z
 export type CreateUploadIntentRequest = z.infer<typeof createUploadIntentRequestSchema>;
 
 /**
- * How to send the file. POST (images): a form with every field, then the file as the
+ * How to send the file. POST (images and audio): a form with every field, then the file as the
  * last field named "file". PUT (video): the raw file as the body, with its Content-Type.
  */
 export const uploadIntentResponseSchema = z
@@ -79,6 +95,12 @@ export const videoPlaybackSchema = z
   .meta({ id: 'VideoPlayback' });
 export type VideoPlayback = z.infer<typeof videoPlaybackSchema>;
 
+/** Where a ready recording plays from, and its type for the player. */
+export const audioPlaybackSchema = z
+  .object({ url: z.url(), contentType: z.string() })
+  .meta({ id: 'AudioPlayback' });
+export type AudioPlayback = z.infer<typeof audioPlaybackSchema>;
+
 /** The owner sees every state and the reason for a rejection. Others only ever see ready media. */
 export const mediaAssetSchema = z
   .object({
@@ -90,6 +112,8 @@ export const mediaAssetSchema = z
     urls: imageUrlsSchema.nullable(),
     /** Ready videos only. */
     video: videoPlaybackSchema.nullable(),
+    /** Ready audio only. */
+    audio: audioPlaybackSchema.nullable(),
     rejectionReason: z.string().nullable(),
     createdAt: isoDateTimeSchema,
   })

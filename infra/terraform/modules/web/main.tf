@@ -14,7 +14,7 @@ locals {
     "style-src 'self'",
     "font-src 'self'",
     "img-src 'self' data: blob: ${var.media_url} https://image.mux.com",
-    "media-src 'self' blob: https://stream.mux.com https://*.mux.com",
+    "media-src 'self' blob: ${var.media_url} https://stream.mux.com https://*.mux.com",
     "connect-src 'self' ${var.api_url} ${var.media_url} ${join(" ", var.upload_origins)} https://stream.mux.com https://*.mux.com https://storage.googleapis.com ${var.error_reporting_origin}",
     "worker-src 'self' blob:",
     "manifest-src 'self'",

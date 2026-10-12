@@ -2529,19 +2529,6 @@
               }
             }
           },
-          "429": {
-            "description": "Too many requests. Codes: RATE_LIMITED.",
-            "x-error-codes": [
-              "RATE_LIMITED"
-            ],
-            "content": {
-              "application/problem+json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Problem"
-                }
-              }
-            }
-          },
           "500": {
             "description": "Something went wrong. Codes: INTERNAL.",
             "x-error-codes": [

@@ -109,6 +109,15 @@ Check the live site, not only the build:
    prints PASS or FAIL for each step. It acts only on demo accounts, and dismisses the one
    report it files.
 
+3. After a change to how screens are laid out, try to slide them sideways as a phone would
+   (ADR-058). Use a test account, never a member's:
+
+   ```bash
+   cd tools/phone-check && npm install
+   BASE=https://raisingtalents.up.railway.app EMAIL=<test account> PASSWORD=<its password> \
+     node phone-check.mjs /home /search /messages /account
+   ```
+
 ## Every day
 
 Posts and profile photos go live without a check first (`CONTENT_SCANNER=off`, ADR-048), so a moderator should read the reports queue at least daily and take down what breaks the rules: "Remove post" under a post, "Remove profile photo" on a profile. Grant the role with `STAFF_GRANT` on `worker` (above).

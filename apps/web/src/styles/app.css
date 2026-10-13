@@ -134,13 +134,18 @@
     /* No grey flash on a tap: every control shows its own pressed state. */
     -webkit-tap-highlight-color: transparent;
     /*
-     * A phone screen never slides sideways, whatever is on it. Hidden for browsers without
-     * clip; clip where it exists, because it does not turn the page into a second scroller.
-     * The same pair on the body below catches what is placed absolutely.
+     * A phone screen never slides sideways, whatever is on it. Hidden here for browsers
+     * without clip; clip, just below, where it exists, because it does not turn the page
+     * into a second scroller. The body clips too, to catch what is placed absolutely.
      */
     overflow-x: hidden;
-    overflow-x: clip;
     overscroll-behavior-x: none;
+  }
+  /* Its own rule: written beside the fallback above, the build keeps only the last of the two. */
+  @supports (overflow: clip) {
+    html {
+      overflow-x: clip;
+    }
   }
   body {
     @apply min-h-dvh bg-background font-sans text-foreground antialiased;

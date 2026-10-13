@@ -133,10 +133,19 @@
     text-size-adjust: 100%;
     /* No grey flash on a tap: every control shows its own pressed state. */
     -webkit-tap-highlight-color: transparent;
+    /*
+     * A phone screen never slides sideways, whatever is on it. Hidden for browsers without
+     * clip; clip where it exists, because it does not turn the page into a second scroller.
+     * The same pair on the body below catches what is placed absolutely.
+     */
+    overflow-x: hidden;
+    overflow-x: clip;
+    overscroll-behavior-x: none;
   }
   body {
     @apply min-h-dvh bg-background font-sans text-foreground antialiased;
-    /* One wide element must never make a phone screen slide sideways or push the tab bar away. */
+    /* Positioned, so that anything placed absolutely is measured from here and clipped here. */
+    position: relative;
     overflow-x: clip;
     /* A long link or a word with no spaces wraps instead of running off a narrow screen. */
     overflow-wrap: break-word;
@@ -154,6 +163,14 @@
   }
   a {
     @apply underline-offset-4;
+  }
+  /*
+   * A grid with no columns named gets one that may shrink. Left to itself its column is as
+   * wide as the widest thing inside (a long name, a row that scrolls, a text box), and on a
+   * phone that pushes the card past the edge of the screen. Any grid-cols utility wins over this.
+   */
+  .grid:not([class*='grid-flow-col'], [class*='auto-cols-']) {
+    grid-template-columns: minmax(0, 1fr);
   }
   /* A tap acts at once: no wait to see whether it is the first half of a double-tap zoom. */
   a,

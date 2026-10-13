@@ -17,8 +17,15 @@ post box wider than its card, and buttons too small for a thumb.
 ## Decision
 
 - **Nothing may widen the page.** The row's items are positioned, so what is inside them
-  scrolls with the row. Grids that hold a sideways row or a text box name a column that may
-  shrink. `body` clips sideways overflow as a last guard.
+  scrolls with the row. A grid with no columns named gets one that may shrink
+  (`minmax(0, 1fr)`), set once in the base styles: left alone, its column grows to the
+  widest thing inside and pushes the card off a narrow screen.
+- **And if something does, the page still does not slide.** `html` and `body` both clip
+  sideways overflow, and `body` is positioned so that what is placed absolutely is clipped
+  too. Clipping `body` alone was tried first and did not hold: the phone still laid the
+  page out wide.
+- **A check that tries it.** `tools/phone-check` opens each screen as a phone at 320, 375
+  and 412 pixels, opens the menus, and tries to slide the page.
 - **The header on a phone.** Mark, name, notifications and settings. Signing out moves to
   the account screen. A screen that is not one of the tabs shows a back arrow in place of
   the mark: an installed app has no browser bar. With nothing behind it (opened from a
@@ -38,7 +45,8 @@ post box wider than its card, and buttons too small for a thumb.
 ## Not done, on purpose
 
 - **Pull to refresh of our own.** The browser's stays.
-- **A check on real devices in CI.** The screens were measured in Chrome's phone emulation.
+- **A check on real devices, or in CI.** `tools/phone-check` is run by hand, in Chrome's
+  phone emulation.
   iOS Safari was not available to test; the choices above follow its documented behaviour.
 - **Landscape.** The installed app is portrait only.
 

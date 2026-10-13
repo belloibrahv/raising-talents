@@ -1,0 +1,12 @@
+{
+  "name": "rt-phone-check",
+  "private": true,
+  "type": "module",
+  "description": "Tries to slide every screen sideways at phone widths, as a thumb would",
+  "scripts": {
+    "check": "node phone-check.mjs"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}

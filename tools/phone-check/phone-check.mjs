@@ -103,23 +103,33 @@ for (const path of paths) {
     await page.setViewport(phone(width));
     await page.goto(`${base}${path}`, { waitUntil: 'domcontentloaded' });
     await wait(settleMs);
+    // Sent somewhere else (signed out, or not this account's screen), there is nothing to pass.
+    const landed = await page.evaluate(() => location.pathname);
+    if (landed !== new URL(path, base).pathname) {
+      failures += 1;
+      console.log(`FAIL ${path} at ${width}  opened ${landed} instead`);
+      continue;
+    }
     report(`${path} at ${width}`, await measure(width), width);
     if (width !== widths[0]) continue;
-    const openers = await page.evaluate((s) => document.querySelectorAll(s).length, OPENERS);
+    // Numbered once: an opened control stops matching, which would shift the ones after it.
+    const openers = await page.evaluate((s) => {
+      const found = document.querySelectorAll(s);
+      found.forEach((element, index) => {
+        element.dataset.phoneCheck = String(index);
+      });
+      return found.length;
+    }, OPENERS);
     for (let index = 0; index < Math.min(openers, 14); index += 1) {
-      const name = await page.evaluate(
-        (s, index) => {
-          const element = document.querySelectorAll(s)[index];
-          if (!element || element.disabled) return null;
-          element.scrollIntoView({ block: 'center' });
-          element.click();
-          return (element.getAttribute('aria-label') ?? element.textContent ?? '')
-            .trim()
-            .slice(0, 30);
-        },
-        OPENERS,
-        index,
-      );
+      const name = await page.evaluate((index) => {
+        const element = document.querySelector(`[data-phone-check="${index}"]`);
+        if (!element || element.disabled) return null;
+        element.scrollIntoView({ block: 'center' });
+        element.click();
+        return (element.getAttribute('aria-label') ?? element.textContent ?? '')
+          .trim()
+          .slice(0, 30);
+      }, index);
       if (name === null) continue;
       await wait(500);
       report(`${path} at ${width}, after opening "${name}"`, await measure(width), width, true);

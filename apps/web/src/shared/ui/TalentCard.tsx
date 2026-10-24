@@ -15,6 +15,7 @@ export function TalentCard({
   caption,
   meta,
   action,
+  level = 'h3',
   className,
 }: {
   readonly name: ReactNode;
@@ -27,12 +28,15 @@ export function TalentCard({
   /** "2.4k followers" */
   readonly meta?: ReactNode;
   readonly action?: ReactNode;
+  /** The name's heading level, to follow the page's outline. */
+  readonly level?: 'h2' | 'h3';
   readonly className?: string;
 }) {
+  const Heading = level;
   return (
     <article
       className={cn(
-        'flex flex-col overflow-hidden rounded-lg border bg-card text-card-foreground',
+        'relative flex flex-col overflow-hidden rounded-lg border bg-card text-card-foreground',
         className,
       )}
     >
@@ -41,14 +45,14 @@ export function TalentCard({
         {tag ? <StageTag className="absolute top-3 left-3">{tag}</StageTag> : null}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-4">
-        <h3 className="m-0 font-display text-xl leading-tight font-bold tracking-[-0.01em]">
+        <Heading className="m-0 font-display text-xl leading-tight font-bold tracking-[-0.01em]">
           {name}
-        </h3>
+        </Heading>
         <p className="m-0 text-sm text-muted-foreground">{detail}</p>
         {meta || action ? (
           <div className="mt-auto flex items-center justify-between gap-3 pt-3">
             {meta ? <span className="text-sm text-muted-foreground">{meta}</span> : <span />}
-            {action}
+            {action ? <span className="relative z-10">{action}</span> : null}
           </div>
         ) : null}
       </div>

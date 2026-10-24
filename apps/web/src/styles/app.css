@@ -29,6 +29,8 @@
   --stage: #16130f;
   --stage-ink: #f7f2ea;
   --stage-ink-muted: #c9bfb0;
+  /* Verified on the stage: the dark scheme's teal, which reads 7.7:1 there. */
+  --stage-verified: #4fc2b2;
   --canvas: #f7f2ea;
   --surface: #ffffff;
   --surface-sunk: #efe8dc;
@@ -110,6 +112,7 @@
   --color-stage-foreground: var(--stage-foreground);
   --color-stage-ink: var(--stage-ink);
   --color-stage-ink-muted: var(--stage-ink-muted);
+  --color-stage-verified: var(--stage-verified);
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
   --color-surface-sunk: var(--surface-sunk);

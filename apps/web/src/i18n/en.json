@@ -163,37 +163,93 @@
     "close": "Close"
   },
   "welcome": {
-    "headlineStart": "Share your talent",
-    "headlineEnd": "with the world.",
-    "body": "Post your work, grow a following and get discovered. Everyone is welcome, wherever you are.",
-    "joinTalent": "Join as talent",
-    "joinAgent": "Join as agent",
-    "signIn": "Already have an account? Sign in",
-    "free": "Free to join. You need to be 13 or older.",
-    "disciplinesLabel": "Who is here",
     "eyebrow": "Open in 244 countries and territories",
-    "join": "Join free",
+    "nav": {
+      "label": "Raising Talents",
+      "discover": "Discover",
+      "how": "How it works",
+      "agents": "For agents",
+      "safety": "Safety"
+    },
     "signInShort": "Sign in",
-    "world": "Wherever you are, you are welcome",
-    "worldMore": "and everywhere else",
-    "preview": {
-      "role": "Dancer · London, UK",
+    "join": "Join free",
+    "headline": "Your talent deserves",
+    "headlineAccent": "a stage.",
+    "body": "Post your best work, grow a following and get found by verified agents and scouts. For athletes, musicians, models, actors, dancers, artists and creators, wherever you are.",
+    "joinTalent": "Join as talent",
+    "scout": "I scout talent",
+    "joinAgent": "Join as agent",
+    "free": "Free for talent. You need to be 13 or older.",
+    "signIn": "Already have an account? Sign in",
+    "showcase": {
       "likes": "1,204 likes",
-      "caption": "Rehearsal day. Opening night is Friday.",
-      "follower": "Lucas started following you",
-      "followerFrom": "São Paulo, Brazil",
-      "liked": "Aiko liked your post"
+      "saved": "A verified agency saved your profile",
+      "savedWhen": "Lagos · 2 minutes ago"
+    },
+    "disciplinesLabel": "Who is here",
+    "discover": {
+      "eyebrow": "Discover",
+      "title": "Real people.",
+      "titleAccent": "Real work.",
+      "body": "Every profile is a person who posted what they do best. Pick a discipline and see who is rising.",
+      "filter": "Show",
+      "view": "View",
+      "followers": "{count} followers",
+      "sample": "Sample profiles. Live profiles appear here once talent agree to be featured."
     },
     "steps": {
-      "title": "How it works",
-      "post": "Post your work",
-      "postBody": "Photos and clips of what you do, on a page of your own.",
+      "eyebrow": "How it works",
+      "title": "Three steps from your phone to",
+      "titleAccent": "their shortlist.",
+      "post": "Post your best work",
+      "postBody": "Photos, clips and audio of what you do, on a page of your own. Your portfolio, ready to share with one link.",
       "follow": "Grow a following",
-      "followBody": "People follow you and like your posts, from your city and from the other side of the world.",
+      "followBody": "People follow you, like your posts and comment, from your street and from the other side of the world.",
       "found": "Get discovered",
-      "foundBody": "Agents and scouts search by what you do and where you are, and get in touch."
+      "foundBody": "Verified agents search by what you do and where you are. They send a request first, and you choose who can message you."
     },
-    "safe": "Agencies are checked before they can message anyone, and you choose who you talk to. Your date of birth, email and phone number are never shown.",
+    "agents": {
+      "eyebrow": "For agents and scouts",
+      "title": "Find the one before",
+      "titleAccent": "everyone else does.",
+      "search": "Search by discipline, skill and city across 244 countries and territories.",
+      "shortlist": "Save talent to shortlists and come back when the brief arrives.",
+      "badge": "A verified badge on your agency, so talent know your request is real.",
+      "cta": "Get your agency verified",
+      "query": "Afrobeats vocalist, Lagos",
+      "save": "Save",
+      "saved": "Saved"
+    },
+    "safe": {
+      "title": "Safe by design.",
+      "titleAccent": "Not by luck.",
+      "body": "Being discovered should never mean being exposed. These rules are built into the app, not added later.",
+      "verified": "Verified agencies",
+      "verifiedBody": "A moderator checks every agency before it gets the badge. Talent can see who is verified at a glance.",
+      "moderated": "Moderators on watch",
+      "moderatedBody": "Anyone can report a photo, a post or a profile, and moderators take down what breaks the rules.",
+      "choose": "You choose who messages you",
+      "chooseBody": "Agents and other talent send a request first. Nothing reaches you until you accept it.",
+      "report": "Report and block",
+      "reportBody": "On every profile, post and conversation. Your date of birth, email and phone number are never shown."
+    },
+    "cities": "From Lagos to everywhere",
+    "cta": {
+      "title": "The next one to rise could be",
+      "titleAccent": "you."
+    },
+    "footer": {
+      "made": "Made in Lagos for talent everywhere.",
+      "talent": "Talent",
+      "agents": "Agents",
+      "legal": "Legal",
+      "staySafe": "Staying safe",
+      "verification": "Verification",
+      "discover": "Discover talent",
+      "terms": "Terms",
+      "guidelines": "Community guidelines",
+      "privacy": "Privacy"
+    },
     "safety": {
       "verified": "Every agency is checked",
       "verifiedBody": "A moderator confirms that each agent works for the agency they name before they can contact anyone.",
@@ -201,11 +257,6 @@
       "controlBody": "Nobody can message you until you accept. Decline or report in one tap.",
       "private": "Private by default",
       "privateBody": "Your date of birth, email and phone number are never shown. Others see your age in years only."
-    },
-    "footer": {
-      "made": "For talented and creative people everywhere.",
-      "terms": "Terms",
-      "guidelines": "Community Guidelines"
     },
     "disciplines": {
       "athletes": "Athletes",
@@ -537,7 +588,11 @@
   "agents": {
     "title": "Agents",
     "body": "Verified agents and scouts. See who they look for and whether they are taking people on.",
-    "tabs": { "label": "Explore", "talent": "Talent", "agents": "Agents" },
+    "tabs": {
+      "label": "Explore",
+      "talent": "Talent",
+      "agents": "Agents"
+    },
     "view": "Which agents",
     "all": "All agents",
     "savedTab": "Saved",
@@ -569,7 +624,10 @@
     "notListedYet": "Only you can see this page until your agency is verified. Talent will find it in Agents after that.",
     "howContact": "This agent has not said they are open for submissions. They can still contact you: keep your profile and posts up to date.",
     "howContactFull": "This agent is not taking on new talent right now. Save them and check back later.",
-    "roster": { "open": "Open for submissions", "full": "Roster full" },
+    "roster": {
+      "open": "Open for submissions",
+      "full": "Roster full"
+    },
     "photo": {
       "title": "Your photo or logo",
       "body": "Optional. Talent see it beside your agency name.",

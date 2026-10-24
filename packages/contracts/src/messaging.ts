@@ -97,8 +97,11 @@ export type Message = z.infer<typeof messageSchema>;
 export const conversationSummarySchema = z
   .object({
     id: idSchema,
-    /** Between an agent and a talent, or between two talent (ADR-061). */
-    kind: z.enum(['agent', 'peer']),
+    /**
+     * Between an agent and a talent, or between two talent (ADR-061). Defaults to an agent
+     * conversation, so an app released first still reads an API that does not send it yet.
+     */
+    kind: z.enum(['agent', 'peer']).default('agent'),
     status: conversationStatusSchema,
     counterpart: counterpartSchema,
     lastMessage: messageSchema.nullable(),

@@ -1,26 +1,13 @@
 import { z } from 'zod';
-import { idSchema, isoDateTimeSchema } from './common.js';
+import { idSchema, isoDateTimeSchema, webAddressSchema } from './common.js';
 import { namedRefSchema } from './taxonomy.js';
 
 export const VERIFICATION_NOTE_MAX = 500;
 
-/**
- * A CAC number as Nigerian companies write it: RC (companies), BN (business names) or IT
- * (incorporated trustees), then digits. Normalised to "RC 123456". Provisional (ADR-026).
- */
-export const cacNumberSchema = z
-  .string()
-  .trim()
-  .toUpperCase()
-  .regex(/^(RC|BN|IT)\s?-?\d{4,8}$/, 'Use the CAC number as printed, for example RC 123456')
-  // overwrite keeps the type a string, so the OpenAPI document can still describe it.
-  .overwrite((value) => value.replace(/^(RC|BN|IT)\s?-?/, '$1 '));
-
 export const requestAgentVerificationSchema = z
   .object({
     /** A page that shows the agent works for the agency: its website team page, or its official social page. */
-    evidenceUrl: z.url({ protocol: /^https$/, error: 'Use a full https:// address' }).max(300),
-    registrationNumber: cacNumberSchema.optional(),
+    evidenceUrl: webAddressSchema(300),
     note: z.string().trim().max(VERIFICATION_NOTE_MAX).optional(),
   })
   .strict()
@@ -67,6 +54,7 @@ export const verificationForReviewSchema = z
     specializations: z.array(namedRefSchema),
     website: z.string().nullable(),
     evidenceUrl: z.string(),
+    /** A CAC number from a request made before ADR-060; new requests have none. */
     registrationNumber: z.string().nullable(),
     note: z.string(),
     submittedAt: isoDateTimeSchema,

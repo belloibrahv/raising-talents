@@ -476,13 +476,15 @@ describe('agent onboarding', () => {
     await user.click(await screen.findByRole('option', { name: 'Nigeria' }));
     await user.click(screen.getByRole('combobox', { name: 'City' }));
     await user.click(await screen.findByRole('option', { name: 'Lagos' }));
-    await user.type(screen.getByLabelText('Website (optional)'), 'eko-talent.example');
+    await user.type(screen.getByLabelText('Website (optional)'), 'http://eko-talent.example');
     await user.click(screen.getByRole('button', { name: 'Save profile' }));
     expect(screen.getByLabelText('Website (optional)')).toHaveAccessibleDescription(
-      /Use a full address starting with https:\/\//,
+      /Use a web address such as www.youragency.com/,
     );
     await user.clear(screen.getByLabelText('Website (optional)'));
     await expectNoAxeViolations();
+    // Typed as people say it: the app adds the https:// (ADR-060).
+    await user.type(screen.getByLabelText('Website (optional)'), 'www.eko-talent.example');
     await user.click(screen.getByRole('button', { name: 'Save profile' }));
     expect(await screen.findByText(/We verify every agency/)).toBeVisible();
     const patch = calls.find((call) => call.method === 'PATCH');
@@ -491,7 +493,7 @@ describe('agent onboarding', () => {
       jobTitle: 'Talent scout',
       specializationSlugs: ['music'],
       citySlug: 'ng-lagos',
-      website: null,
+      website: 'https://www.eko-talent.example',
       bio: '',
       rosterStatus: null,
     });

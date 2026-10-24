@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { idSchema, isoDateTimeSchema } from './common.js';
+import { idSchema, isoDateTimeSchema, webAddressSchema } from './common.js';
 import { imageUrlsSchema } from './media.js';
 import { namedRefSchema, slugSchema } from './taxonomy.js';
 
@@ -127,11 +127,7 @@ export const updateAgentProfileRequestSchema = z
     jobTitle: z.string().trim().min(2).max(60).optional(),
     specializationSlugs: z.array(slugSchema).max(MAX_SPECIALIZATIONS).optional(),
     citySlug: slugSchema.optional(),
-    website: z
-      .url({ protocol: /^https$/, error: 'Use a full https:// address' })
-      .max(200)
-      .nullable()
-      .optional(),
+    website: webAddressSchema(200).nullable().optional(),
     /** Certifications, who they have worked with, what they look for. Optional. */
     bio: z.string().trim().max(AGENT_BIO_MAX).optional(),
     /** Null clears it: the profile then says nothing either way. */

@@ -107,7 +107,10 @@ function AgentRequest({
         {item.evidenceUrl}
       </a>,
     ],
-    [t('moderation.registration'), item.registrationNumber ?? t('moderation.none')],
+    // Only requests made before the CAC number was dropped have one (ADR-060).
+    ...(item.registrationNumber
+      ? ([[t('moderation.registration'), item.registrationNumber]] as [string, React.ReactNode][])
+      : []),
     [t('moderation.website'), item.website ?? t('moderation.none')],
     [t('moderation.noteLabel'), item.note || t('moderation.none')],
   ];

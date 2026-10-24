@@ -11,6 +11,7 @@ import { Link, useSearchParams } from 'react-router';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { api } from '../../shared/api/client';
+import { TalentCard as TalentCardView } from '../../shared/ui/TalentCard';
 import { placeLabel } from '../../shared/places';
 import { Button } from '../../shared/ui/Button';
 import { FormMessage } from '../../shared/ui/FormMessage';
@@ -389,14 +390,14 @@ function ResultCard({ card }: { readonly card: TalentCard }) {
   ].filter(Boolean);
   const discipline = card.subcategories[0]?.name ?? card.category.name;
   return (
-    <Link
-      className="group flex flex-col gap-3 rounded-2xl no-underline"
-      to={`/talents/${card.handle}`}
-    >
-      <span className="relative block aspect-[4/5] overflow-hidden rounded-2xl bg-muted">
-        {card.avatarUrls ? (
+    <TalentCardView
+      level="h2"
+      className="group h-full"
+      tag={discipline}
+      media={
+        card.avatarUrls ? (
           <img
-            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+            className="size-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
             src={card.avatarUrls.medium}
             srcSet={`${card.avatarUrls.small} 256w, ${card.avatarUrls.medium} 1024w`}
             sizes="(max-width: 48rem) 50vw, 18rem"
@@ -406,29 +407,29 @@ function ResultCard({ card }: { readonly card: TalentCard }) {
           />
         ) : (
           <span
-            className="grid size-full place-items-center bg-stage font-display text-5xl font-bold text-stage-foreground/80"
+            className="grid size-full place-items-center bg-stage stage-glow font-display text-5xl font-bold text-stage-ink/80"
             aria-hidden="true"
           >
             {card.displayName.slice(0, 1)}
           </span>
-        )}
-        <span className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-stage/45 to-transparent" />
-        <span className="absolute bottom-3 left-3 rounded-full bg-stage/45 px-2.5 py-1 text-xs font-semibold text-stage-ink backdrop-blur-sm">
-          {discipline}
-        </span>
-      </span>
-      <span className="flex flex-col gap-0.5 px-0.5">
-        <span className="flex items-center gap-1.5 font-semibold text-foreground">
+        )
+      }
+      name={
+        // The whole card opens the profile; the name is the link, stretched over the card.
+        <Link
+          to={`/talents/${card.handle}`}
+          className="flex items-center gap-1.5 text-foreground no-underline after:absolute after:inset-0 after:content-['']"
+        >
           <span className="truncate">{card.displayName}</span>
           {card.verified ? (
             <>
-              <BadgeCheck aria-hidden="true" className="size-4 shrink-0 text-success" />
+              <BadgeCheck aria-hidden="true" className="size-4 shrink-0 text-verified" />
               <span className="sr-only">{`, ${t('talent.verified')}`}</span>
             </>
           ) : null}
-        </span>
-        <span className="truncate text-sm text-muted-foreground">{facts.join(' · ')}</span>
-      </span>
-    </Link>
+        </Link>
+      }
+      detail={<span className="block truncate">{facts.join(' · ')}</span>}
+    />
   );
 }

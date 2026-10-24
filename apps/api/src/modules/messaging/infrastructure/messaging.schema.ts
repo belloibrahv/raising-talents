@@ -12,11 +12,18 @@ export const conversationStatus = messagingSchema.enum('conversation_status', [
 
 export const conversationSide = messagingSchema.enum('conversation_side', ['agent', 'talent']);
 
-/** One per agent and talent. Both sides cascade: an erased account takes its conversations. */
+/** Between an agent and a talent (ADR-038), or between two talent (ADR-061). */
+export const conversationKind = messagingSchema.enum('conversation_kind', ['agent', 'peer']);
+
+/**
+ * One per pair. Both sides cascade: an erased account takes its conversations. Between two
+ * talent, agent_id holds the one whose id sorts first, so the pair index still holds one.
+ */
 export const conversations = messagingSchema.table(
   'conversations',
   {
     id: uuid('id').primaryKey(),
+    kind: conversationKind('kind').notNull().default('agent'),
     agentId: uuid('agent_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),

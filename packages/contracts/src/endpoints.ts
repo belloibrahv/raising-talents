@@ -1102,7 +1102,7 @@ export const endpoints = {
     method: 'POST',
     path: '/v1/talents/{handle}/contact',
     summary:
-      'Ask to contact a talent, with a first message. Verified agents only. Safe to retry with the same clientMessageId',
+      'Ask to contact a talent, with a first message: a verified agent, or another talent in the same age group (under 18, or adult). The talent accepts or declines. Safe to retry with the same clientMessageId',
     auth: true,
     request: requestContactSchema,
     response: conversationSummarySchema,
@@ -1154,11 +1154,12 @@ export const endpoints = {
   'messaging.withTalent': define({
     method: 'GET',
     path: '/v1/me/conversations/with/{handle}',
-    summary: "The agent's conversation with this talent, if there is one. 404 when there is none",
+    summary:
+      "The viewer's conversation with this talent, if there is one: an agent's, or another talent's. 404 when there is none; 403 when a talent in the other age group may not write to them",
     auth: true,
     response: conversationSummarySchema,
     successStatus: 200,
-    errors: [ErrorCode.WrongRole, ErrorCode.NotFound],
+    errors: [ErrorCode.WrongRole, ErrorCode.Forbidden, ErrorCode.NotFound],
     tag: 'Messaging',
   }),
   'messaging.list': define({
@@ -1218,7 +1219,8 @@ export const endpoints = {
   'messaging.respond': define({
     method: 'POST',
     path: '/v1/me/conversations/{conversationId}/response',
-    summary: 'The person who was asked accepts or declines: a talent for a contact request, an agent for a submission',
+    summary:
+      'The person who was asked accepts or declines: a talent for a contact request, an agent for a submission',
     auth: true,
     request: contactResponseSchema,
     response: conversationSummarySchema,

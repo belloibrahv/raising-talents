@@ -222,6 +222,24 @@ export function submissionReceivedEmail(input: {
   });
 }
 
+/** One talent wrote to another (ADR-061). The text stays in the app, as for agents. */
+export function messageRequestEmail(input: {
+  to: string;
+  talentName: string;
+  conversationId: string;
+  appUrl: string;
+}): EmailMessage {
+  return email({
+    to: input.to,
+    subject: `${input.talentName} would like to message you`,
+    paragraphs: [
+      `${input.talentName}, another talent on Raising Talents, wrote to you.`,
+      'Read it in the app and look at their profile, then accept to start chatting, or decline. They only see your answer, never your email address.',
+    ],
+    link: { href: `${input.appUrl}/messages/${input.conversationId}`, label: 'Read the message' },
+  });
+}
+
 export function contactAcceptedEmail(input: {
   to: string;
   talentName: string;

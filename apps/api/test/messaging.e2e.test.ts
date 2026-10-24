@@ -213,4 +213,86 @@ describe('Contact requests and chat over HTTP (ADR-038)', () => {
     ).toBe(404);
     expect((await call('GET', '/v1/me/conversations/not-a-uuid', agent)).statusCode).toBe(400);
   });
+  it('lets one talent message another, who accepts before chat opens (ADR-061)', async () => {
+    const tola = await signUp('tola.visuals@example.com', 'talent');
+    const step = await call('PATCH', '/v1/me/talent-profile', tola, {
+      displayName: 'Tola Bakare',
+      handle: 'tola.visuals',
+      categorySlug: 'music',
+      subcategorySlugs: ['singer'],
+      citySlug: 'ng-lagos',
+      bio: 'Music video director in Yaba. Looking for session players for a highlife video.',
+    });
+    const tolaId = step.json<MyTalentProfile>().userId;
+    const profile = await testApp.talentProfiles.findByUserId(tolaId);
+    if (!profile) throw new Error('profile missing');
+    profile.setApprovedAvatar('0192a3b4-0000-7000-8000-0000000000de', new Date());
+    await testApp.talentProfiles.save(profile);
+    await testApp.moduleRef.get<AccountsFacade>(ACCOUNTS.Facade).completeOnboarding(tolaId);
+
+    const hello = 'Hello Chidi, I am shooting a highlife video next month. Would you play on it?';
+    expect((await call('GET', '/v1/me/conversations/with/chidi.strings', tola)).statusCode).toBe(
+      404,
+    );
+    const asked = await call('POST', '/v1/talents/chidi.strings/contact', tola, {
+      message: hello,
+      clientMessageId: '0192a3b4-0000-7000-8000-00000000b011',
+    });
+    expect(asked.statusCode).toBe(201);
+    const conversation = asked.json<ConversationSummary>();
+    expect(conversation).toMatchObject({
+      kind: 'peer',
+      status: 'requested',
+      requestedByMe: true,
+      counterpart: { kind: 'talent', handle: 'chidi.strings' },
+    });
+    // Writing to yourself is refused.
+    const self = await call('POST', '/v1/talents/tola.visuals/contact', tola, {
+      message: hello,
+      clientMessageId: '0192a3b4-0000-7000-8000-00000000b012',
+    });
+    expect(self.json<ProblemDetails>().code).toBe('CONFLICT');
+
+    await testApp.deliverEvents();
+    const email = testApp.email.sent.findLast(
+      (message) => message.to === 'chidi.strings@example.com',
+    );
+    expect(email?.subject).toBe('Tola Bakare would like to message you');
+    expect(email?.text).not.toContain(hello);
+
+    const seen = await call('GET', '/v1/me/conversations/with/tola.visuals', talent);
+    expect(seen.json<ConversationSummary>()).toMatchObject({
+      id: conversation.id,
+      kind: 'peer',
+      awaitingMyAnswer: true,
+      counterpart: { kind: 'talent', handle: 'tola.visuals', displayName: 'Tola Bakare' },
+    });
+    const accepted = await call(
+      'POST',
+      `/v1/me/conversations/${conversation.id}/response`,
+      talent,
+      { decision: 'accept' },
+    );
+    expect(accepted.json<ConversationSummary>()).toMatchObject({
+      status: 'accepted',
+      canSend: true,
+    });
+    const reply = await call('POST', `/v1/me/conversations/${conversation.id}/messages`, talent, {
+      body: 'Yes, send me the song.',
+      clientMessageId: '0192a3b4-0000-7000-8000-00000000b013',
+    });
+    expect(reply.statusCode).toBe(201);
+    await testApp.deliverEvents();
+    const notices = (await call('GET', '/v1/me/notifications', tola)).json<NotificationPage>();
+    expect(notices.items[0]).toMatchObject({
+      kind: 'message_request_accepted',
+      conversationId: conversation.id,
+      talentName: 'Chidi Okoro',
+    });
+    const thread = await call('GET', `/v1/me/conversations/${conversation.id}/messages`, tola);
+    expect(thread.json<MessagePage>().items.map((message) => message.body)).toEqual([
+      'Yes, send me the song.',
+      hello,
+    ]);
+  });
 });

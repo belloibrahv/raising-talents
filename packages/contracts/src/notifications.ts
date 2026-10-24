@@ -66,6 +66,20 @@ export const notificationSchema = z
       agencyName: z.string(),
     }),
     z.object({ ...common, kind: z.literal('submission_declined'), agencyName: z.string() }),
+    /** Another talent wrote first (ADR-061). The name is theirs in each case. */
+    z.object({
+      ...common,
+      kind: z.literal('message_request_received'),
+      conversationId: idSchema,
+      talentName: z.string(),
+    }),
+    z.object({
+      ...common,
+      kind: z.literal('message_request_accepted'),
+      conversationId: idSchema,
+      talentName: z.string(),
+    }),
+    z.object({ ...common, kind: z.literal('message_request_declined'), talentName: z.string() }),
     z.object({
       ...common,
       kind: z.literal('new_follower'),

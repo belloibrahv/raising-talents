@@ -11,6 +11,7 @@ import {
   agentVerifiedEmail,
   contactAcceptedEmail,
   contactRequestedEmail,
+  messageRequestEmail,
   submissionReceivedEmail,
   mediaApprovedEmail,
   mediaRejectedEmail,
@@ -64,12 +65,17 @@ export interface NotificationVerifications {
 
 export interface NotificationContacts {
   describe(conversationId: string): Promise<{
+    kind: 'agent' | 'peer';
     agentId: string;
     talentId: string;
     status: string;
     requestedBy: 'agent' | 'talent';
     agencyName: string;
     talentName: string;
+    requesterId: string;
+    responderId: string;
+    requesterName: string;
+    responderName: string;
   } | null>;
 }
 
@@ -151,12 +157,31 @@ export class Notifier {
   }
 
   /**
-   * Someone asked: a verified agent to contact a talent, or a talent with a submission to an
-   * agent (ADR-050). The person asked is told. Skipped if it was taken back before it went out.
+   * Someone asked: a verified agent to contact a talent, a talent with a submission to an
+   * agent (ADR-050), or one talent writing to another (ADR-061). The person asked is told. Skipped if it was taken back before it went out.
    */
   async contactRequested(event: DomainEvent): Promise<void> {
     const contact = await this.contacts.describe(event.aggregateId);
     if (contact?.status !== 'requested') return;
+    if (contact.kind === 'peer') {
+      await this.deliver(
+        event,
+        contact.responderId,
+        {
+          kind: 'message_request_received',
+          conversationId: event.aggregateId,
+          talentName: contact.requesterName,
+        },
+        (to) =>
+          messageRequestEmail({
+            to,
+            talentName: contact.requesterName,
+            conversationId: event.aggregateId,
+            appUrl: this.appUrl,
+          }),
+      );
+      return;
+    }
     if (contact.requestedBy === 'talent') {
       await this.deliver(
         event,
@@ -195,6 +220,29 @@ export class Notifier {
   async contactAnswered(event: DomainEvent, accepted: boolean): Promise<void> {
     const contact = await this.contacts.describe(event.aggregateId);
     if (!contact) return;
+    if (contact.kind === 'peer') {
+      await this.deliver(
+        event,
+        contact.requesterId,
+        accepted
+          ? {
+              kind: 'message_request_accepted',
+              conversationId: event.aggregateId,
+              talentName: contact.responderName,
+            }
+          : { kind: 'message_request_declined', talentName: contact.responderName },
+        accepted
+          ? (to) =>
+              contactAcceptedEmail({
+                to,
+                talentName: contact.responderName,
+                conversationId: event.aggregateId,
+                appUrl: this.appUrl,
+              })
+          : null,
+      );
+      return;
+    }
     if (contact.requestedBy === 'talent') {
       await this.deliver(
         event,

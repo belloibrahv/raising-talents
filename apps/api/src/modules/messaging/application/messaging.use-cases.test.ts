@@ -21,11 +21,15 @@ import {
   MessagingExport,
   MessagingUnreadQuery,
   ConversationWithAgentQuery,
+  ConversationWithTalentQuery,
+  MessageTalentHandler,
   RequestContactHandler,
+  TALENT_MESSAGE_LIMIT,
   SubmitToAgentHandler,
   RespondToContactHandler,
   SendMessageHandler,
   WithdrawContactHandler,
+  type MessagingAccounts,
   type MessagingAgents,
   type MessagingTalents,
 } from './messaging.use-cases.js';
@@ -544,6 +548,169 @@ describe('contact requests and chat (ADR-011, ADR-038)', () => {
       }
       const sixth = await apply(ids.b);
       expect(sixth.ok ? null : sixth.error.code).toBe('RATE_LIMITED');
+    });
+  });
+  describe('between two talent (ADR-061)', () => {
+    const HELLO = 'Hi Ngozi, I produce music videos in Lagos. Would you sing on my next one?';
+    let contact: RequestContactHandler;
+    let withTalent: ConversationWithTalentQuery;
+    let tobiId: string;
+    /** Ages set by the test; everyone else is the harness's adult. */
+    const ages = new Map<string, number>();
+    const withAges: MessagingAccounts = {
+      profileContext: async (userId) => {
+        const context = await accounts.facade.profileContext(userId);
+        const age = ages.get(userId);
+        return context && age !== undefined ? { ...context, ageYears: age } : context;
+      },
+    };
+
+    beforeEach(async () => {
+      ages.clear();
+      const uow = new InMemoryUnitOfWork();
+      const views = new ConversationViews(conversations, withAges, talents, agents);
+      const peers = new MessageTalentHandler(
+        conversations,
+        views,
+        withAges,
+        talents,
+        limiter,
+        uow,
+        clock,
+      );
+      // The same address agents use: a talent's request goes to the peer handler.
+      contact = new RequestContactHandler(
+        conversations,
+        views,
+        withAges,
+        talents,
+        agents,
+        limiter,
+        uow,
+        clock,
+        peers,
+      );
+      withTalent = new ConversationWithTalentQuery(conversations, views, withAges, talents);
+      tobiId = await addTalent('tobi', 'Tobi Adewale');
+    });
+
+    async function addTalent(handle: string, name: string, age?: number) {
+      const id = await accounts.createAccount({ email: `${handle}@example.com`, role: 'talent' });
+      await accounts.facade.completeOnboarding(id);
+      if (age !== undefined) ages.set(id, age);
+      talents.visible.set(handle, id);
+      talents.names.set(id, name);
+      return id;
+    }
+
+    const write = (from: string, to: string, clientMessageId = ids.c, message = HELLO) =>
+      contact.execute(from, to, { message, clientMessageId });
+
+    it('lets one talent ask another, and opens a chat when they accept', async () => {
+      const asked = await write(tobiId, 'ngozi');
+      if (!asked.ok) throw new Error(asked.error.message);
+      expect(asked.value).toMatchObject({
+        status: 'requested',
+        counterpart: { kind: 'talent', handle: 'ngozi', displayName: 'Ngozi Adeyemi' },
+        requestedByMe: true,
+        canSend: false,
+      });
+      const [requested] = events.ofType(ConversationEvents.ContactRequested);
+      expect(requested?.payload).toMatchObject({ kind: 'peer' });
+
+      // Ngozi sees Tobi, as a talent, waiting for her answer.
+      const inbox = await list.execute(talentId);
+      expect(inbox.ok && inbox.value.items[0]).toMatchObject({
+        counterpart: { kind: 'talent', handle: 'tobi', displayName: 'Tobi Adewale' },
+        awaitingMyAnswer: true,
+      });
+      expect(await unread.execute(talentId)).toEqual({ unread: 1 });
+      // Only the one asked can answer.
+      const byTobi = await respond.execute(tobiId, asked.value.id, true);
+      expect(byTobi.ok ? null : byTobi.error.code).toBe('NOT_FOUND');
+
+      const accepted = await respond.execute(talentId, asked.value.id, true);
+      expect(accepted.ok && accepted.value).toMatchObject({ status: 'accepted', canSend: true });
+      const reply = await send.execute(talentId, asked.value.id, {
+        body: 'Yes, tell me more.',
+        clientMessageId: ids.d,
+      });
+      expect(reply.ok && reply.value.mine).toBe(true);
+      const thread = await messages.execute(tobiId, asked.value.id);
+      expect(thread.ok && thread.value.items.map((message) => message.body)).toEqual([
+        'Yes, tell me more.',
+        HELLO,
+      ]);
+      const found = await withTalent.execute(talentId, 'tobi');
+      expect(found.ok && found.value.id).toBe(asked.value.id);
+    });
+
+    it('keeps one conversation per pair, whoever asks', async () => {
+      const asked = await write(tobiId, 'ngozi');
+      const again = await write(tobiId, 'ngozi', ids.d);
+      expect(again.ok ? null : again.error.code).toBe('CONTACT_REQUEST_PENDING');
+      const fromNgozi = await write(talentId, 'tobi', ids.d);
+      expect(fromNgozi.ok ? null : fromNgozi.error.message).toMatch(/already asked to contact you/);
+      // A retry of the first request answers with the same conversation.
+      const retried = await write(tobiId, 'ngozi');
+      expect(retried.ok && asked.ok && retried.value.id).toBe(asked.ok && asked.value.id);
+      expect(conversations.rows.size).toBe(1);
+    });
+
+    it('keeps under-18s and adults apart, both ways', async () => {
+      const teenId = await addTalent('kemi', 'Kemi Bello', 16);
+      const toTeen = await write(tobiId, 'kemi');
+      expect(toTeen.ok ? null : toTeen.error.code).toBe('FORBIDDEN');
+      const fromTeen = await write(teenId, 'ngozi');
+      expect(fromTeen.ok ? null : fromTeen.error.code).toBe('FORBIDDEN');
+      // The profile page asks first, and offers nothing to send.
+      const lookup = await withTalent.execute(tobiId, 'kemi');
+      expect(lookup.ok ? null : lookup.error.code).toBe('FORBIDDEN');
+
+      await addTalent('dayo', 'Dayo Bello', 15);
+      // Eighteen is an adult: the line sits at the birthday.
+      await addTalent('femi', 'Femi Bello', 18);
+      const adults = await write(tobiId, 'femi');
+      expect(adults.ok).toBe(true);
+      const teens = await write(teenId, 'dayo');
+      expect(teens.ok && teens.value.status).toBe('requested');
+      expect(conversations.rows.size).toBe(2);
+    });
+
+    it('asks the writer for a verified email and a profile others can see', async () => {
+      const unverified = await accounts.createAccount({
+        email: 'new@example.com',
+        role: 'talent',
+        verified: false,
+      });
+      await accounts.facade.completeOnboarding(unverified);
+      talents.visible.set('new', unverified);
+      const noEmail = await write(unverified, 'ngozi');
+      expect(noEmail.ok ? null : noEmail.error.code).toBe('EMAIL_NOT_VERIFIED');
+
+      talents.visible.delete('tobi');
+      const hidden = await write(tobiId, 'ngozi');
+      expect(hidden.ok ? null : hidden.error.code).toBe('FORBIDDEN');
+      talents.visible.set('tobi', tobiId);
+
+      const self = await write(tobiId, 'tobi');
+      expect(self.ok ? null : self.error.code).toBe('CONFLICT');
+      const nobody = await write(tobiId, 'nobody');
+      expect(nobody.ok ? null : nobody.error.code).toBe('NOT_FOUND');
+    });
+
+    it('limits how many conversations a talent starts in a day', async () => {
+      for (let n = 0; n < TALENT_MESSAGE_LIMIT.perDay; n += 1) {
+        await addTalent(`singer${String(n)}`, `Singer ${String(n)}`);
+        const ok = await write(
+          tobiId,
+          `singer${String(n)}`,
+          `0192a3b4-0000-7000-8000-0000000001${String(n).padStart(2, '0')}`,
+        );
+        expect(ok.ok).toBe(true);
+      }
+      const over = await write(tobiId, 'ngozi');
+      expect(over.ok ? null : over.error.code).toBe('RATE_LIMITED');
     });
   });
 });

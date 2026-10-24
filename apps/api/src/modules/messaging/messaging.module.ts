@@ -31,6 +31,7 @@ import {
   ListMessagesQuery,
   MarkConversationReadHandler,
   MESSAGING,
+  MessageTalentHandler,
   MessagingExport,
   MessagingUnreadQuery,
   RequestContactHandler,
@@ -44,7 +45,10 @@ import { MessagingController } from './interface/http/messaging.controller.js';
 
 const Views = Symbol('ConversationViews');
 
-/** Contact requests from verified agents, and the chat that opens when talent accept (ADR-038). */
+/**
+ * Contact requests from verified agents, and the chat that opens when talent accept (ADR-038).
+ * Talent also write to agents who are open (ADR-050), and to each other (ADR-061).
+ */
 @Module({
   imports: [AccountsModule, TalentProfilesModule, AgentProfilesModule],
   controllers: [MessagingController],
@@ -66,6 +70,27 @@ const Views = Symbol('ConversationViews');
       ) => new ConversationViews(conversations, accounts, talents, agents),
     },
     {
+      provide: MESSAGING.MessageTalent,
+      inject: [
+        MESSAGING.Conversations,
+        Views,
+        ACCOUNTS.Facade,
+        TALENT.Directory,
+        PLATFORM.RateLimiter,
+        PLATFORM.UnitOfWork,
+        PLATFORM.Clock,
+      ],
+      useFactory: (
+        conversations: ConversationRepository,
+        views: ConversationViews,
+        accounts: AccountsFacade,
+        talents: TalentDirectory,
+        limiter: RateLimiter,
+        uow: UnitOfWork,
+        clock: Clock,
+      ) => new MessageTalentHandler(conversations, views, accounts, talents, limiter, uow, clock),
+    },
+    {
       provide: MESSAGING.RequestContact,
       inject: [
         MESSAGING.Conversations,
@@ -76,6 +101,7 @@ const Views = Symbol('ConversationViews');
         PLATFORM.RateLimiter,
         PLATFORM.UnitOfWork,
         PLATFORM.Clock,
+        MESSAGING.MessageTalent,
       ],
       useFactory: (
         conversations: ConversationRepository,
@@ -86,6 +112,7 @@ const Views = Symbol('ConversationViews');
         limiter: RateLimiter,
         uow: UnitOfWork,
         clock: Clock,
+        peers: MessageTalentHandler,
       ) =>
         new RequestContactHandler(
           conversations,
@@ -96,6 +123,7 @@ const Views = Symbol('ConversationViews');
           limiter,
           uow,
           clock,
+          peers,
         ),
     },
     {

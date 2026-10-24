@@ -104,7 +104,7 @@ resource "aws_cloudfront_function" "spa_routes" {
     function handler(event) {
       var request = event.request;
       var uri = request.uri;
-      var isFile = uri.indexOf('/assets/') === 0 || uri.indexOf('/icons/') === 0 || ROOT_FILES.test(uri);
+      var isFile = /^\/(assets|icons|images|brand)\//.test(uri) || ROOT_FILES.test(uri);
       if (!isFile) request.uri = '/index.html';
       return request;
     }

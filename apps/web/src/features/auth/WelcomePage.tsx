@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { t } from '../../i18n';
 import { LEGAL_URLS } from '../../shared/config';
 import { BrandLockup, BrandMark } from '../../shared/ui/BrandMark';
-import { Eyebrow, StagePlaceholder, StageTag } from '../../shared/ui/Stage';
+import { Eyebrow, StageTag } from '../../shared/ui/Stage';
 import { TalentCard } from '../../shared/ui/TalentCard';
 
 const DISCIPLINES = [
@@ -25,13 +25,16 @@ interface Sample {
   readonly what: string;
   readonly city: string;
   readonly tag: string;
-  readonly photo: string;
+  /** In public/images/landing; credits in docs/brand/photo-credits.md. */
+  readonly image: string;
+  readonly alt: string;
   readonly followers: string;
 }
 
 /**
  * Sample profiles until talent agree to be featured (brand guide section 07: consent first).
- * Africa first, the world always. The caption names the photo each one needs.
+ * The photos are from Unsplash and show nobody whose face can be told, so the invented names
+ * never sit on a real person. Africa first, the world always.
  */
 const SAMPLES: Record<Discipline, readonly Sample[]> = {
   athletes: [
@@ -40,31 +43,35 @@ const SAMPLES: Record<Discipline, readonly Sample[]> = {
       what: 'Sprinter',
       city: 'Ibadan, Nigeria',
       tag: '100m',
-      photo: 'sprinter leaving the blocks, golden hour',
+      image: 'athletes-1',
+      alt: 'A runner on a beach at sunset, in silhouette',
       followers: '2.4k',
     },
     {
       name: 'Amara Diallo',
-      what: 'Footballer',
+      what: 'Distance runner',
       city: 'Dakar, Senegal',
-      tag: 'Forward',
-      photo: 'striker mid-volley, floodlights',
+      tag: 'Road running',
+      image: 'athletes-2',
+      alt: 'A runner with arms out on the sand at golden hour',
       followers: '3.1k',
     },
     {
       name: 'Lucas Silva',
-      what: 'Swimmer',
+      what: 'Skateboarder',
       city: 'São Paulo',
-      tag: 'Butterfly',
-      photo: 'swimmer breaking the surface',
+      tag: 'Street',
+      image: 'athletes-3',
+      alt: 'A skateboarder in silhouette against the sun',
       followers: '1.7k',
     },
     {
       name: 'Hana Kim',
-      what: 'Volleyball',
+      what: 'Climber',
       city: 'Seoul',
-      tag: 'Setter',
-      photo: 'setter at the net, side light',
+      tag: 'Bouldering',
+      image: 'athletes-4',
+      alt: 'A climber in silhouette on a rock face',
       followers: '2.2k',
     },
   ],
@@ -74,49 +81,55 @@ const SAMPLES: Record<Discipline, readonly Sample[]> = {
       what: 'Vocalist',
       city: 'Nairobi, Kenya',
       tag: 'Soul',
-      photo: 'vocalist at the mic, warm lamp',
+      image: 'musicians-1',
+      alt: 'A vocalist at the mic under warm stage light',
       followers: '4.8k',
     },
     {
       name: 'Femi Oduya',
-      what: 'Producer',
+      what: 'Rapper',
       city: 'Lagos, Nigeria',
       tag: 'Afrobeats',
-      photo: 'producer at the desk, one lamp',
+      image: 'musicians-2',
+      alt: 'A singer in silhouette against red stage light',
       followers: '3.3k',
     },
     {
       name: 'Bisi Lawal',
-      what: 'Vocalist',
+      what: 'Singer-songwriter',
       city: 'Lagos, Nigeria',
-      tag: 'Highlife',
-      photo: 'singer between lines, stage light',
+      tag: 'Acoustic',
+      image: 'musicians-3',
+      alt: 'A guitarist on stage under spotlights',
       followers: '2.9k',
     },
     {
       name: 'Ravi Mehta',
-      what: 'Tabla',
+      what: 'Vocalist',
       city: 'Mumbai',
-      tag: 'Classical',
-      photo: 'hands on the tabla, close',
+      tag: 'Jazz',
+      image: 'musicians-4',
+      alt: 'A singer at a mic stand in a single spotlight',
       followers: '1.6k',
     },
   ],
   models: [
     {
       name: 'Ifeoma Obi',
-      what: 'Runway',
+      what: 'Editorial',
       city: 'Abuja, Nigeria',
-      tag: 'Runway',
-      photo: 'model mid-stride on the runway',
+      tag: 'Editorial',
+      image: 'models-1',
+      alt: "A model's shadow in a hat on a sunlit wall",
       followers: '5.2k',
     },
     {
       name: 'Carla Duarte',
-      what: 'Editorial',
+      what: 'Fashion',
       city: 'Lisbon',
-      tag: 'Editorial',
-      photo: 'portrait in window light',
+      tag: 'Fashion',
+      image: 'models-2',
+      alt: 'A model in a red dress in a lit doorway',
       followers: '2.7k',
     },
     {
@@ -124,7 +137,8 @@ const SAMPLES: Record<Discipline, readonly Sample[]> = {
       what: 'Commercial',
       city: 'Cairo, Egypt',
       tag: 'Commercial',
-      photo: 'studio portrait, single softbox',
+      image: 'models-3',
+      alt: 'A model in profile, lit from behind',
       followers: '1.9k',
     },
     {
@@ -132,7 +146,8 @@ const SAMPLES: Record<Discipline, readonly Sample[]> = {
       what: 'Runway',
       city: 'Cape Town',
       tag: 'Runway',
-      photo: 'model turning at the end of the runway',
+      image: 'models-4',
+      alt: 'A model in silhouette against a bright doorway',
       followers: '3.6k',
     },
   ],
@@ -142,31 +157,35 @@ const SAMPLES: Record<Discipline, readonly Sample[]> = {
       what: 'Stage actor',
       city: 'Accra, Ghana',
       tag: 'Theatre',
-      photo: 'actor mid-monologue, spotlight',
+      image: 'actors-1',
+      alt: 'An actor in a lion costume mid-scene',
       followers: '1.4k',
     },
     {
       name: 'Sofia Marín',
-      what: 'Screen actor',
+      what: 'Performer',
       city: 'Mexico City',
-      tag: 'Screen',
-      photo: 'close-up from a short film',
+      tag: 'Physical theatre',
+      image: 'actors-2',
+      alt: 'A performer alone on a dark blue stage',
       followers: '2.8k',
     },
     {
       name: 'Tunde Bakare',
-      what: 'Screen actor',
+      what: 'Ensemble actor',
       city: 'Ibadan, Nigeria',
-      tag: 'Screen',
-      photo: 'actor on set between takes',
+      tag: 'Theatre',
+      image: 'actors-3',
+      alt: 'A cast rehearsing under studio lights',
       followers: '2.1k',
     },
     {
       name: 'Priya Nair',
-      what: 'Theatre',
+      what: 'Comedian',
       city: 'London',
-      tag: 'Theatre',
-      photo: 'actor taking a bow, stage light',
+      tag: 'Stand-up',
+      image: 'actors-4',
+      alt: 'A microphone in a single spotlight',
       followers: '1.8k',
     },
   ],
@@ -176,31 +195,35 @@ const SAMPLES: Record<Discipline, readonly Sample[]> = {
       what: 'Contemporary',
       city: 'London, UK',
       tag: 'Contemporary',
-      photo: 'dancer mid-leap, single spotlight',
+      image: 'dancers-1',
+      alt: 'A dancer reaching up into a single spotlight',
       followers: '9.4k',
-    },
-    {
-      name: 'Seun Afolabi',
-      what: 'Afro dance',
-      city: 'Lagos, Nigeria',
-      tag: 'Afro',
-      photo: 'street cypher at dusk',
-      followers: '6.1k',
     },
     {
       name: 'Aiko Tanaka',
       what: 'Ballet',
       city: 'Tokyo',
       tag: 'Ballet',
-      photo: 'pointe work in the studio',
+      image: 'dancers-2',
+      alt: 'A ballet dancer in silhouette',
       followers: '4.3k',
+    },
+    {
+      name: 'Seun Afolabi',
+      what: 'Afro dance',
+      city: 'Lagos, Nigeria',
+      tag: 'Afro',
+      image: 'dancers-3',
+      alt: 'A dancer in silhouette mid-move',
+      followers: '6.1k',
     },
     {
       name: 'Jordan Lee',
       what: 'Hip hop',
       city: 'New York',
       tag: 'Hip hop',
-      photo: 'freeze on a subway platform',
+      image: 'dancers-4',
+      alt: 'A dancer in silhouette against an orange sky',
       followers: '3.9k',
     },
   ],
@@ -210,69 +233,102 @@ const SAMPLES: Record<Discipline, readonly Sample[]> = {
       what: 'Painter',
       city: 'Abuja, Nigeria',
       tag: 'Painting',
-      photo: 'painter at a large canvas',
+      image: 'artists-1',
+      alt: 'Paint-stained hands holding brushes',
       followers: '2.6k',
     },
     {
       name: 'Mateo Ruiz',
-      what: 'Illustrator',
+      what: 'Watercolourist',
       city: 'Bogotá',
-      tag: 'Illustration',
-      photo: 'hands inking a page',
+      tag: 'Watercolour',
+      image: 'artists-2',
+      alt: 'A painter mixing watercolours',
       followers: '1.9k',
     },
     {
       name: 'Esi Owusu',
-      what: 'Sculptor',
+      what: 'Painter',
       city: 'Accra, Ghana',
-      tag: 'Sculpture',
-      photo: 'carving wood',
+      tag: 'Oils',
+      image: 'artists-3',
+      alt: "A painter's hand over a palette",
       followers: '1.2k',
     },
     {
       name: 'Lina Haddad',
-      what: 'Photographer',
+      what: 'Muralist',
       city: 'Beirut',
-      tag: 'Photo',
-      photo: 'photographer on a rooftop',
+      tag: 'Murals',
+      image: 'artists-4',
+      alt: "A muralist's gloved hand on a painted wall",
       followers: '3.4k',
     },
   ],
   creators: [
     {
       name: 'Dayo Adeyemi',
-      what: 'Comedy',
+      what: 'Filmmaker',
       city: 'Lagos, Nigeria',
-      tag: 'Comedy',
-      photo: 'creator filming a sketch on a phone',
+      tag: 'Film',
+      image: 'creators-1',
+      alt: 'A creator filming the city at sunset',
       followers: '8.7k',
     },
     {
       name: 'Noor Saleh',
-      what: 'Fashion',
+      what: 'Video creator',
       city: 'Dubai',
-      tag: 'Fashion',
-      photo: 'outfit check in a market',
+      tag: 'Video',
+      image: 'creators-2',
+      alt: 'A creator with a video camera under pink light',
       followers: '5.5k',
     },
     {
       name: 'Ana Costa',
-      what: 'Travel',
+      what: 'Photographer',
       city: 'Rio de Janeiro',
-      tag: 'Travel',
-      photo: 'creator on a hilltop at sunrise',
+      tag: 'Photo',
+      image: 'creators-3',
+      alt: 'A photographer in silhouette at golden hour',
       followers: '4.2k',
     },
     {
       name: 'Yuki Sato',
-      what: 'Food',
+      what: 'Travel creator',
       city: 'Osaka',
-      tag: 'Food',
-      photo: 'chef plating at the counter',
+      tag: 'Travel',
+      image: 'creators-4',
+      alt: 'A creator crouched by a tripod on a hill',
       followers: '3.0k',
     },
   ],
 };
+
+/** A photo from public/images/landing, 640 by 800 (4:5), filling its frame. */
+function Photo({
+  image,
+  alt,
+  eager = false,
+  className,
+}: {
+  readonly image: string;
+  readonly alt: string;
+  readonly eager?: boolean;
+  readonly className?: string;
+}) {
+  return (
+    <img
+      src={`/images/landing/${image}.webp`}
+      alt={alt}
+      width={640}
+      height={800}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+      className={cn('size-full object-cover', className)}
+    />
+  );
+}
 
 /** Places people will recognise from every continent. A flavour of "anywhere", not a list of where we are. */
 const CITIES = [
@@ -620,19 +676,19 @@ function Showcase() {
       <ShowcaseCard
         className="top-10 left-0 h-[15rem] w-[52%] sm:h-[18rem]"
         tag="Athlete · 100m"
-        photo="Photo: sprinter leaving the blocks, golden hour"
+        image="athletes-1"
         name="Tobi Adebayo"
         city="Ibadan, Nigeria"
       />
       <ShowcaseCard
         className="top-0 right-0 h-[17rem] w-[52%] sm:h-[15rem]"
         tag="Dancer · Contemporary"
-        photo="Photo: dancer mid-leap under a single spotlight"
+        image="dancers-1"
       />
       <ShowcaseCard
         className="right-[6%] bottom-0 h-[12rem] w-[44%] max-sm:hidden sm:h-[13.5rem]"
         tag="Musician"
-        photo="Photo: vocalist at the mic"
+        image="musicians-1"
         name="Wanjiru K."
         city="Nairobi, Kenya"
       />
@@ -656,27 +712,28 @@ function Showcase() {
 function ShowcaseCard({
   className,
   tag,
-  photo,
+  image,
   name,
   city,
 }: {
   readonly className: string;
   readonly tag: string;
-  readonly photo: string;
+  readonly image: string;
   readonly name?: string;
   readonly city?: string;
 }) {
   return (
     <div
       className={cn(
-        'absolute overflow-hidden rounded-3xl border border-stage-ink/10 bg-stage-ink/5 shadow-lg',
+        'absolute overflow-hidden rounded-3xl border border-stage-ink/10 bg-stage shadow-lg',
         className,
       )}
     >
-      <StagePlaceholder caption={photo} className="size-full bg-transparent" />
+      {/* The hero's first picture: loaded at once, the rest of the page's photos lazily. */}
+      <Photo image={image} alt="" eager />
       <StageTag className="absolute top-3 left-3">{tag}</StageTag>
       {name ? (
-        <span className="absolute bottom-4 left-4 grid">
+        <span className="absolute inset-x-0 bottom-0 grid bg-gradient-to-t from-stage/85 to-transparent px-4 pt-10 pb-4">
           <span className="font-display text-xl font-bold">{name}</span>
           <span className="text-xs text-stage-ink-muted">{city}</span>
         </span>
@@ -736,7 +793,7 @@ function Discover() {
               name={sample.name}
               detail={`${sample.what} · ${sample.city}`}
               tag={sample.tag}
-              caption={`Photo: ${sample.photo}`}
+              media={<Photo image={sample.image} alt={sample.alt} />}
               meta={
                 <span className="max-sm:hidden">
                   {t('welcome.discover.followers', { count: sample.followers })}
@@ -763,9 +820,14 @@ function Discover() {
 /** The agents panel: what an agent gets, with a glimpse of search. */
 function ForAgents() {
   const rows = [
-    { name: 'Femi Oduya', what: 'Producer · Lagos · 3 videos', saved: true },
-    { name: 'Bisi Lawal', what: 'Vocalist · Lagos · 5 videos', saved: false },
-    { name: 'Kemi Ade', what: 'Vocalist · Ikeja · 2 videos', saved: false },
+    { name: 'Femi Oduya', what: 'Rapper · Lagos · 3 videos', saved: true, image: 'musicians-2' },
+    {
+      name: 'Bisi Lawal',
+      what: 'Singer-songwriter · Lagos · 5 videos',
+      saved: false,
+      image: 'musicians-3',
+    },
+    { name: 'Kemi Ade', what: 'Vocalist · Ikeja · 2 videos', saved: false, image: 'musicians-4' },
   ];
   return (
     <section
@@ -819,7 +881,9 @@ function ForAgents() {
           </span>
           {rows.map((row) => (
             <span key={row.name} className="flex items-center gap-3 rounded-lg bg-stage-ink/5 p-3">
-              <StagePlaceholder className="size-10 shrink-0 rounded-sm" />
+              <span className="size-10 shrink-0 overflow-hidden rounded-sm">
+                <Photo image={row.image} alt="" />
+              </span>
               <span className="grid flex-1 text-sm">
                 <span className="font-semibold">{row.name}</span>
                 <span className="text-xs text-stage-ink-muted">{row.what}</span>

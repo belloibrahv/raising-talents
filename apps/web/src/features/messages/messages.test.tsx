@@ -44,6 +44,7 @@ const intro = (mine: boolean) => ({
 
 const summary = (overrides: Partial<ConversationSummary>): ConversationSummary => ({
   id: ID,
+  kind: 'agent',
   status: 'requested',
   counterpart: agentSide,
   lastMessage: intro(false),
@@ -236,6 +237,89 @@ describe('messages', () => {
     };
     expect(body.message).toBe(INTRO);
     expect(body.clientMessageId).toMatch(/^[0-9a-f-]{36}$/);
+  });
+
+  describe('between two talent (ADR-061)', () => {
+    const profileStubs = {
+      'GET /v1/me/notifications/unread': () => Response.json({ unread: 0 }),
+      'GET /v1/me/conversations/unread': () => Response.json({ unread: 0 }),
+      'GET /v1/talents/ada.sings': () => Response.json(profile),
+      'GET /v1/talents/ada.sings/portfolio': () => Response.json({ items: [] }),
+    };
+
+    it('lets a talent message another from their profile, with no agency check', async () => {
+      let existing: ConversationSummary | null = null;
+      const calls = stubApi({
+        '/v1/auth/web/refresh': () => signedIn(talent),
+        ...profileStubs,
+        'GET /v1/me/conversations/with/ada.sings': () =>
+          existing ? Response.json(existing) : problem(404, 'NOT_FOUND'),
+        'POST /v1/talents/ada.sings/contact': () => {
+          existing = summary({
+            kind: 'peer',
+            counterpart: talentSide,
+            lastMessage: intro(true),
+            unread: 0,
+            awaitingMyAnswer: false,
+            requestedByMe: true,
+          });
+          return Response.json(existing, { status: 201 });
+        },
+      });
+      renderAt('/talents/ada.sings');
+      const user = userEvent.setup({ delay: null });
+      expect(await screen.findByRole('heading', { name: 'Message Ada Nwosu' })).toBeVisible();
+      await user.type(screen.getByLabelText('Your introduction'), INTRO);
+      await expectNoAxeViolations();
+      await user.click(screen.getByRole('button', { name: 'Send message' }));
+      expect(
+        await screen.findByRole('heading', {
+          name: 'Your request is waiting for Ada Nwosu to answer',
+        }),
+      ).toBeVisible();
+      expect(calls.some((call) => call.path.includes('agent-verification'))).toBe(false);
+    });
+
+    it('offers no way to write to a talent in the other age group', async () => {
+      stubApi({
+        '/v1/auth/web/refresh': () => signedIn(talent),
+        ...profileStubs,
+        'GET /v1/me/conversations/with/ada.sings': () => problem(403, 'FORBIDDEN'),
+      });
+      renderAt('/talents/ada.sings');
+      expect(await screen.findByRole('heading', { level: 1, name: 'Ada Nwosu' })).toBeVisible();
+      await waitFor(() => {
+        expect(screen.queryByLabelText('Your introduction')).toBeNull();
+      });
+      expect(screen.queryByRole('heading', { name: 'Message Ada Nwosu' })).toBeNull();
+    });
+
+    it('words a request from another talent as a message, not an agency', async () => {
+      const current = summary({ kind: 'peer', counterpart: talentSide, unread: 0 });
+      stubApi({
+        '/v1/auth/web/refresh': () => signedIn(talent),
+        'GET /v1/me/notifications/unread': () => Response.json({ unread: 0 }),
+        'GET /v1/me/conversations/unread': () => Response.json({ unread: 1 }),
+        [`GET /v1/me/conversations/${ID}`]: () => Response.json(current),
+        [`GET /v1/me/conversations/${ID}/messages`]: () =>
+          Response.json({ items: [intro(false)], nextCursor: null }),
+        [`POST /v1/me/conversations/${ID}/read`]: () => new Response(null, { status: 204 }),
+      });
+      renderAt(`/messages/${ID}`);
+      const user = userEvent.setup({ delay: null });
+      expect(
+        await screen.findByRole('heading', {
+          level: 2,
+          name: 'Ada Nwosu would like to message you',
+        }),
+      ).toBeVisible();
+      await user.click(screen.getByRole('button', { name: 'Decline' }));
+      expect(
+        screen.getByText(
+          'Decline this message? Ada Nwosu will be told, and cannot write again for 30 days.',
+        ),
+      ).toBeVisible();
+    });
   });
 
   it('points an agent who is not verified yet to verification instead', async () => {

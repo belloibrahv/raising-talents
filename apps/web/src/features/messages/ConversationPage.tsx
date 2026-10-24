@@ -276,26 +276,40 @@ function Answer({
 }) {
   const respond = useRespond(summary.id);
   const [confirming, setConfirming] = useState(false);
-  // An agent answering a talent's submission, rather than a talent answering an agent.
-  const submission = summary.counterpart.kind === 'talent';
+  // A talent answering another talent (ADR-061), an agent answering a talent's submission,
+  // or a talent answering an agent.
+  const copy =
+    summary.kind === 'peer'
+      ? ({
+          title: 'messages.peerTitle',
+          body: 'messages.peerBody',
+          confirm: 'messages.declinePeerConfirm',
+        } as const)
+      : summary.counterpart.kind === 'talent'
+        ? ({
+            title: 'messages.submissionTitle',
+            body: 'messages.submissionBody',
+            confirm: 'messages.declineSubmissionConfirm',
+          } as const)
+        : ({
+            title: 'messages.requestTitle',
+            body: 'messages.requestBody',
+            confirm: 'messages.declineConfirm',
+          } as const);
   return (
     <section
       className="stack gap-4 rounded-2xl border-2 border-spotlight bg-spotlight/10 p-5"
       aria-labelledby="answer-heading"
     >
       <h2 id="answer-heading" className="text-lg font-semibold">
-        {t(submission ? 'messages.submissionTitle' : 'messages.requestTitle', { agency: name })}
+        {t(copy.title, { agency: name })}
       </h2>
-      <p className="m-0 text-sm">
-        {t(submission ? 'messages.submissionBody' : 'messages.requestBody')}
-      </p>
+      <p className="m-0 text-sm">{t(copy.body)}</p>
       <FormMessage tone="error">{respond.error ? errorMessage(respond.error) : null}</FormMessage>
       {confirming ? (
         <div className="stack gap-3" role="group" aria-labelledby="decline-confirm">
           <p id="decline-confirm" className="m-0 font-medium">
-            {t(submission ? 'messages.declineSubmissionConfirm' : 'messages.declineConfirm', {
-              agency: name,
-            })}
+            {t(copy.confirm, { agency: name })}
           </p>
           <div className="row gap-2">
             <Button
@@ -382,7 +396,9 @@ function Blocked({
   const block = useBlock(summary.id);
   const navigate = useNavigate();
   // A talent who unblocks a request they declined has nothing left to do here.
-  const leaveAfter = summary.counterpart.kind === 'agent' && summary.status === 'declined';
+  const leaveAfter =
+    summary.status === 'declined' &&
+    (summary.counterpart.kind === 'agent' || (summary.kind === 'peer' && !summary.requestedByMe));
   return (
     <Note icon={Ban} title={t('messages.blockedTitle', { name })} body={t('messages.blockedBody')}>
       <FormMessage tone="error">{block.error ? errorMessage(block.error) : null}</FormMessage>

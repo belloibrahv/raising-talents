@@ -7991,7 +7991,7 @@
     "/v1/talents/{handle}/contact": {
       "post": {
         "operationId": "messaging_requestContact",
-        "summary": "Ask to contact a talent, with a first message. Verified agents only. Safe to retry with the same clientMessageId",
+        "summary": "Ask to contact a talent, with a first message: a verified agent, or another talent in the same age group (under 18, or adult). The talent accepts or declines. Safe to retry with the same clientMessageId",
         "tags": [
           "Messaging"
         ],
@@ -8378,7 +8378,7 @@
     "/v1/me/conversations/with/{handle}": {
       "get": {
         "operationId": "messaging_withTalent",
-        "summary": "The agent's conversation with this talent, if there is one. 404 when there is none",
+        "summary": "The viewer's conversation with this talent, if there is one: an agent's, or another talent's. 404 when there is none; 403 when a talent in the other age group may not write to them",
         "tags": [
           "Messaging"
         ],
@@ -8436,9 +8436,10 @@
             }
           },
           "403": {
-            "description": "Not allowed. Codes: WRONG_ROLE.",
+            "description": "Not allowed. Codes: WRONG_ROLE, FORBIDDEN.",
             "x-error-codes": [
-              "WRONG_ROLE"
+              "WRONG_ROLE",
+              "FORBIDDEN"
             ],
             "content": {
               "application/problem+json": {
@@ -12015,6 +12016,117 @@
               },
               "kind": {
                 "type": "string",
+                "const": "message_request_received"
+              },
+              "conversationId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "talentName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind",
+              "conversationId",
+              "talentName"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              "read": {
+                "type": "boolean"
+              },
+              "kind": {
+                "type": "string",
+                "const": "message_request_accepted"
+              },
+              "conversationId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "talentName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind",
+              "conversationId",
+              "talentName"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              "read": {
+                "type": "boolean"
+              },
+              "kind": {
+                "type": "string",
+                "const": "message_request_declined"
+              },
+              "talentName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "createdAt",
+              "read",
+              "kind",
+              "talentName"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              "read": {
+                "type": "boolean"
+              },
+              "kind": {
+                "type": "string",
                 "const": "new_follower"
               },
               "followerName": {
@@ -12317,6 +12429,13 @@
             "format": "uuid",
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
           },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "agent",
+              "peer"
+            ]
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -12369,6 +12488,7 @@
         },
         "required": [
           "id",
+          "kind",
           "status",
           "counterpart",
           "lastMessage",

@@ -24,6 +24,8 @@ export function ContactPanel({ handle, name }: { readonly handle: string; readon
   if (!me || verification.isPending || existing.isPending) return null;
 
   const conversation = existing.data;
+  // Only a talent viewer is ever refused; an agent never sees this.
+  if (conversation === 'not-allowed') return null;
   if (conversation && conversation.status !== 'withdrawn') {
     const open = (
       <Link className={buttonLink('primary', 'sm')} to={`/messages/${conversation.id}`}>
@@ -76,8 +78,82 @@ export function ContactPanel({ handle, name }: { readonly handle: string; readon
       </Panel>
     );
   }
-  return <RequestForm handle={handle} name={name} />;
+  return <RequestForm handle={handle} name={name} copy={AGENT_COPY} />;
 }
+
+/**
+ * How one talent reaches another from their profile (ADR-061): the same request and answer
+ * as an agent's, without agency verification. Nothing shows for a talent in the other age
+ * group, or for a profile the viewer cannot write to.
+ */
+export function TalentMessagePanel({
+  handle,
+  name,
+}: {
+  readonly handle: string;
+  readonly name: string;
+}) {
+  const me = useSession().me;
+  const existing = useConversationWithTalent(handle, true);
+  if (!me || existing.isPending || existing.isError) return null;
+  const conversation = existing.data;
+  if (conversation === 'not-allowed') return null;
+  if (conversation && conversation.status !== 'withdrawn') {
+    const open = (
+      <Link className={buttonLink('primary', 'sm')} to={`/messages/${conversation.id}`}>
+        {t('contact.open')}
+      </Link>
+    );
+    if (conversation.status === 'accepted') {
+      return (
+        <Panel icon={CheckCircle2} title={t('contact.chatOpen', { name })}>
+          <div>{open}</div>
+        </Panel>
+      );
+    }
+    if (conversation.status === 'requested') {
+      return (
+        <Panel
+          icon={Clock3}
+          title={
+            conversation.awaitingMyAnswer
+              ? t('contact.peerWroteToYou', { name })
+              : t('contact.waiting', { name })
+          }
+        >
+          <div>{open}</div>
+        </Panel>
+      );
+    }
+    return <Panel icon={Clock3} title={t('contact.declined', { name })} />;
+  }
+  if (!me.emailVerified) {
+    return (
+      <Panel icon={MailWarning} title={t('contact.peerNeedEmail')}>
+        <div>
+          <Link className={buttonLink('secondary', 'sm')} to="/verify-email">
+            {t('contact.verifyEmail')}
+          </Link>
+        </div>
+      </Panel>
+    );
+  }
+  return <RequestForm handle={handle} name={name} copy={PEER_COPY} />;
+}
+
+const AGENT_COPY = {
+  title: 'contact.title',
+  body: 'contact.body',
+  hint: 'contact.messageHint',
+  send: 'contact.send',
+} as const;
+
+const PEER_COPY = {
+  title: 'contact.peerTitle',
+  body: 'contact.peerBody',
+  hint: 'contact.peerMessageHint',
+  send: 'contact.peerSend',
+} as const;
 
 function Panel({
   icon: Icon,
@@ -102,7 +178,15 @@ function Panel({
   );
 }
 
-function RequestForm({ handle, name }: { readonly handle: string; readonly name: string }) {
+function RequestForm({
+  handle,
+  name,
+  copy,
+}: {
+  readonly handle: string;
+  readonly name: string;
+  readonly copy: typeof AGENT_COPY | typeof PEER_COPY;
+}) {
   const request = useRequestContact();
   const [message, setMessage] = useState('');
   const [tooShort, setTooShort] = useState(false);
@@ -115,9 +199,9 @@ function RequestForm({ handle, name }: { readonly handle: string; readonly name:
           aria-hidden="true"
           className="mt-1 size-5 shrink-0 text-muted-foreground"
         />
-        {t('contact.title', { name })}
+        {t(copy.title, { name })}
       </h2>
-      <p className="m-0 text-sm text-muted-foreground">{t('contact.body', { name })}</p>
+      <p className="m-0 text-sm text-muted-foreground">{t(copy.body, { name })}</p>
       <form
         className="stack gap-3"
         noValidate
@@ -133,7 +217,7 @@ function RequestForm({ handle, name }: { readonly handle: string; readonly name:
         <FormMessage tone="error">{request.error ? errorMessage(request.error) : null}</FormMessage>
         <TextArea
           label={t('contact.message')}
-          hint={t('contact.messageHint')}
+          hint={t(copy.hint)}
           value={message}
           maxLength={CONTACT_MESSAGE_MAX}
           error={tooShort ? t('contact.tooShort') : undefined}
@@ -146,7 +230,7 @@ function RequestForm({ handle, name }: { readonly handle: string; readonly name:
         />
         <div>
           <Button type="submit" loading={request.isPending}>
-            {t('contact.send')}
+            {t(copy.send)}
           </Button>
         </div>
       </form>

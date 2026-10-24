@@ -6,6 +6,8 @@ import { meResponseSchema } from './accounts.js';
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 128;
 export const MINIMUM_AGE_YEARS = 18;
+/** Talent under this age message only each other, and adults only adults (ADR-061). */
+export const ADULT_AGE_YEARS = 18;
 export const VERIFICATION_CODE_LENGTH = 6;
 
 // Trims and lowercases before checking. The input side of that pipeline is a plain

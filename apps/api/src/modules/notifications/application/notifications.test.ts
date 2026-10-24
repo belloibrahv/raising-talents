@@ -14,6 +14,24 @@ import {
 
 const OWNER = 'owner-1';
 const AGENT = 'agent-1';
+const PEER = 'talent-2';
+
+/** An agent conversation as ContactNotices describes it, with who asked worked out. */
+const agentContact = (input: {
+  status: string;
+  requestedBy: 'agent' | 'talent';
+  agencyName: string;
+  talentName: string;
+}) => ({
+  kind: 'agent' as const,
+  agentId: AGENT,
+  talentId: OWNER,
+  requesterId: input.requestedBy === 'agent' ? AGENT : OWNER,
+  responderId: input.requestedBy === 'agent' ? OWNER : AGENT,
+  requesterName: input.requestedBy === 'agent' ? input.agencyName : input.talentName,
+  responderName: input.requestedBy === 'agent' ? input.talentName : input.agencyName,
+  ...input,
+});
 
 type File =
   Awaited<ReturnType<NotificationMedia['describe']>> extends Map<string, infer F> ? F : never;
@@ -56,6 +74,7 @@ describe('Notifier', () => {
           ({
             [OWNER]: { email: 'amaka.okafor@example.com' },
             [AGENT]: { email: 'tunde@eko-talent.example' },
+            [PEER]: { email: 'tobi.adewale@example.com' },
           })[id] ?? null,
       },
       media,
@@ -69,14 +88,12 @@ describe('Notifier', () => {
   });
 
   it('tells the talent about a contact request, and the agent about the answer', async () => {
-    const contact = {
-      agentId: AGENT,
-      talentId: OWNER,
+    const contact = agentContact({
       status: 'requested',
-      requestedBy: 'agent' as const,
+      requestedBy: 'agent',
       agencyName: 'Eko Talent Partners',
       talentName: 'Amaka Okafor',
-    };
+    });
     contacts.set('c1', contact);
     await notifier.contactRequested(event('messaging.ContactRequested', 'c1'));
     expect(sent[0]).toMatchObject({
@@ -98,14 +115,15 @@ describe('Notifier', () => {
   });
 
   it('tells an agent about a decline in the app only, and skips a withdrawn request', async () => {
-    contacts.set('c2', {
-      agentId: AGENT,
-      talentId: OWNER,
-      status: 'withdrawn',
-      requestedBy: 'agent' as const,
-      agencyName: 'Eko Talent Partners',
-      talentName: 'Amaka Okafor',
-    });
+    contacts.set(
+      'c2',
+      agentContact({
+        status: 'withdrawn',
+        requestedBy: 'agent',
+        agencyName: 'Eko Talent Partners',
+        talentName: 'Amaka Okafor',
+      }),
+    );
     await notifier.contactRequested(event('messaging.ContactRequested', 'c2'));
     await notifier.contactAnswered(event('messaging.ContactDeclined', 'c2'), false);
     expect(sent).toEqual([]);
@@ -248,14 +266,12 @@ describe('Notifier', () => {
   });
 
   it('tells the agent about a submission, and the talent about the answer (ADR-050)', async () => {
-    const submission = {
-      agentId: AGENT,
-      talentId: OWNER,
+    const submission = agentContact({
       status: 'requested',
-      requestedBy: 'talent' as const,
+      requestedBy: 'talent',
       agencyName: 'Eko Talent Partners',
       talentName: 'Amaka Okafor',
-    };
+    });
     contacts.set('s1', submission);
     await notifier.contactRequested(event('messaging.ContactRequested', 's1'));
     expect(sent.at(-1)).toMatchObject({
@@ -276,6 +292,47 @@ describe('Notifier', () => {
     expect((await inbox.page(OWNER, null, 10))[0]?.content).toEqual({
       kind: 'submission_declined',
       agencyName: 'Eko Talent Partners',
+    });
+  });
+
+  it('tells a talent another talent wrote, and the writer about the answer (ADR-061)', async () => {
+    const request = {
+      kind: 'peer' as const,
+      agentId: OWNER,
+      talentId: PEER,
+      status: 'requested',
+      requestedBy: 'talent' as const,
+      agencyName: '',
+      talentName: '',
+      requesterId: PEER,
+      responderId: OWNER,
+      requesterName: 'Tobi Adewale',
+      responderName: 'Amaka Okafor',
+    };
+    contacts.set('p1', request);
+    await notifier.contactRequested(event('messaging.ContactRequested', 'p1'));
+    expect(sent.at(-1)).toMatchObject({
+      to: 'amaka.okafor@example.com',
+      subject: 'Tobi Adewale would like to message you',
+    });
+    // The message itself is never in the email.
+    expect(sent.at(-1)?.text).toContain('https://app.raisingtalents.test/messages/p1');
+    expect((await inbox.page(OWNER, null, 10))[0]?.content).toEqual({
+      kind: 'message_request_received',
+      conversationId: 'p1',
+      talentName: 'Tobi Adewale',
+    });
+
+    contacts.set('p1', { ...request, status: 'accepted' });
+    await notifier.contactAnswered(event('messaging.ContactAccepted', 'p1'), true);
+    expect(sent.at(-1)).toMatchObject({
+      to: 'tobi.adewale@example.com',
+      subject: 'Amaka Okafor accepted your request',
+    });
+    expect((await inbox.page(PEER, null, 10))[0]?.content).toEqual({
+      kind: 'message_request_accepted',
+      conversationId: 'p1',
+      talentName: 'Amaka Okafor',
     });
   });
 });

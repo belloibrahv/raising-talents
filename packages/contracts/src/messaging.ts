@@ -43,6 +43,8 @@ export type ContactResponse = z.infer<typeof contactResponseSchema>;
 
 /** How many submissions a talent can send to agents in a day (ADR-050). */
 export const SUBMISSIONS_PER_DAY = 5;
+/** Provisional (ADR-061): new message requests one talent can send to others in a day. */
+export const TALENT_MESSAGE_REQUESTS_PER_DAY = 10;
 
 /**
  * requested: one person asked and the other has not answered. accepted: chat is open.
@@ -95,6 +97,8 @@ export type Message = z.infer<typeof messageSchema>;
 export const conversationSummarySchema = z
   .object({
     id: idSchema,
+    /** Between an agent and a talent, or between two talent (ADR-061). */
+    kind: z.enum(['agent', 'peer']),
     status: conversationStatusSchema,
     counterpart: counterpartSchema,
     lastMessage: messageSchema.nullable(),
@@ -103,7 +107,7 @@ export const conversationSummarySchema = z
     canSend: z.boolean(),
     /** The viewer was asked and has not answered yet. */
     awaitingMyAnswer: z.boolean(),
-    /** The viewer is the one who asked: an agent's request, or a talent's submission. */
+    /** The viewer is the one who asked: an agent's request, a talent's submission or message. */
     requestedByMe: z.boolean(),
     /** The viewer blocked the other person. Only the viewer can undo it (ADR-040). */
     blockedByMe: z.boolean(),

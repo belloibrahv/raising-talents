@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router';
-import { Badge } from '@/components/ui/badge';
 import { t } from '../../i18n';
 import { errorMessage } from '../../i18n/error-message';
 import { isApiError } from '../../shared/api/api-error';
@@ -89,101 +88,112 @@ export function TalentProfilePage() {
       className="[&>div]:max-w-4xl [&>div>header]:sr-only"
       hero={
         <section className="grid gap-5" aria-label={talent.displayName}>
-          {/* A lit stage behind the face: the cover every profile shares. */}
-          <div className="grid justify-items-center">
-            <div
-              aria-hidden="true"
-              className="h-28 w-full rounded-3xl bg-stage stage-glow sm:h-44"
-            />
-            <Avatar
-              name={talent.displayName}
-              urls={talent.avatarUrls}
-              size="xl"
-              ring
-              className="-mt-12 shadow-lg sm:-mt-18"
-            />
-          </div>
-
-          <div className="grid justify-items-center gap-2 text-center">
+          {/*
+           * Who they are, on the stage (UI design, profile): the face in the spotlight, the
+           * name in display type, what they do in marigold capitals, their numbers below.
+           */}
+          <div className="-mx-4 -mt-6 grid justify-items-center gap-3 bg-stage stage-glow px-5 pt-8 pb-6 text-center text-stage-ink sm:mx-0 sm:mt-0 sm:rounded-3xl sm:px-10 sm:pt-10">
+            <Avatar name={talent.displayName} urls={talent.avatarUrls} size="xl" ring />
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
               <p
-                className="m-0 font-display text-2xl leading-tight font-bold sm:text-3xl"
+                className="m-0 font-display text-4xl leading-none font-bold tracking-[-0.01em] sm:text-5xl"
                 aria-hidden="true"
               >
                 {talent.displayName}
               </p>
               {talent.verified ? <VerifiedBadge /> : null}
             </div>
-            <p className="m-0 font-semibold">{discipline}</p>
-            <ul className="m-0 flex list-none flex-wrap justify-center gap-x-4 gap-y-1 p-0 text-sm text-muted-foreground">
+            <p className="m-0 label-caps text-spotlight">{discipline}</p>
+            <ul className="m-0 flex list-none flex-wrap justify-center gap-x-4 gap-y-1 p-0 text-sm text-stage-ink-muted">
               <li className="inline-flex items-center gap-1.5">
-                <MapPin aria-hidden="true" className="size-4" />
+                <MapPin aria-hidden="true" className="size-4" strokeWidth={1.75} />
                 {placeLabel(talent.city, 'long')}
               </li>
               {talent.ageYears === null ? null : (
                 <li className="inline-flex items-center gap-1.5">
-                  <Cake aria-hidden="true" className="size-4" />
+                  <Cake aria-hidden="true" className="size-4" strokeWidth={1.75} />
                   {t('talent.age', { age: talent.ageYears })}
                 </li>
               )}
             </ul>
-            <p className="m-0 max-w-xl leading-relaxed whitespace-pre-line text-muted-foreground">
-              {talent.bio}
-            </p>
-            {talent.skills.length > 0 ? (
-              <ul
-                className="m-0 mt-1 flex list-none flex-wrap justify-center gap-2 p-0"
-                aria-label={t('talent.skills')}
-              >
-                {talent.skills.map((skill) => (
-                  <li key={skill.slug}>
-                    <Badge variant="secondary" className="px-3 py-1 text-sm">
-                      {skill.name}
-                    </Badge>
-                  </li>
-                ))}
-              </ul>
-            ) : null}
+            <p className="m-0 max-w-xl leading-relaxed whitespace-pre-line">{talent.bio}</p>
+            <dl className="m-0 mt-2 grid w-full max-w-md grid-cols-3 border-t border-stage-ink/15 pt-5">
+              {stats.map((stat) => (
+                <div key={stat.label} className="grid gap-1">
+                  <dt className="text-sm text-stage-ink-muted">{stat.label}</dt>
+                  <dd className="m-0 font-display text-3xl leading-none font-bold">
+                    {stat.value ?? '–'}
+                  </dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
-          <dl className="m-0 mx-auto grid w-full max-w-sm grid-cols-3 divide-x text-center">
-            {stats.map((stat) => (
-              <div key={stat.label} className="flex flex-col-reverse px-2">
-                <dt className="text-sm text-muted-foreground">{stat.label}</dt>
-                <dd className="m-0 text-xl font-bold">{stat.value ?? '–'}</dd>
-              </div>
-            ))}
-          </dl>
-
-          <div className="flex flex-wrap items-start justify-center gap-2">
+          {/* One marigold action for whoever is looking; everything else in outline. */}
+          <div className="grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:justify-center">
             {isSelf ? (
               <>
-                <Link className={buttonLink('secondary', 'sm')} to="/onboarding/talent/about">
-                  <PenLine aria-hidden="true" />
-                  {t('home.editProfile')}
-                </Link>
-                <Link className={buttonLink('primary', 'sm')} to="/portfolio">
+                <Link className={buttonLink('primary')} to="/portfolio">
                   <ImagePlus aria-hidden="true" />
                   {t('talent.addWork')}
                 </Link>
+                <Link className={buttonLink('secondary')} to="/onboarding/talent/about">
+                  <PenLine aria-hidden="true" />
+                  {t('home.editProfile')}
+                </Link>
               </>
-            ) : social.data ? (
-              <FollowButton
-                handle={talent.handle}
-                name={talent.displayName}
-                following={social.data.followedByViewer}
-              />
-            ) : null}
-            {isAgent ? (
+            ) : isAgent ? (
               <>
-                <a href="#contact" className={buttonLink('secondary', 'sm')}>
+                <a href="#contact" className={buttonLink('primary')}>
                   <MessageCircle aria-hidden="true" />
                   {t('talent.contact')}
                 </a>
-                <SaveToggle handle={talent.handle} name={talent.displayName} />
+                <SaveToggle handle={talent.handle} name={talent.displayName} size="default" />
+                {social.data ? (
+                  <FollowButton
+                    handle={talent.handle}
+                    name={talent.displayName}
+                    following={social.data.followedByViewer}
+                    size="default"
+                    className="w-full sm:w-auto"
+                  />
+                ) : null}
+              </>
+            ) : social.data ? (
+              <>
+                <FollowButton
+                  handle={talent.handle}
+                  name={talent.displayName}
+                  following={social.data.followedByViewer}
+                  size="default"
+                  prominent
+                  className="w-full sm:w-auto"
+                />
+                {isTalent ? (
+                  <a href="#contact" className={buttonLink('secondary')}>
+                    <MessageCircle aria-hidden="true" />
+                    {t('talent.message')}
+                  </a>
+                ) : null}
               </>
             ) : null}
           </div>
+
+          {talent.skills.length > 0 ? (
+            <ul
+              className="m-0 flex list-none flex-wrap justify-center gap-2 p-0"
+              aria-label={t('talent.skills')}
+            >
+              {talent.skills.map((skill) => (
+                <li
+                  key={skill.slug}
+                  className="rounded-full border-[1.5px] border-input bg-card px-4 py-2 text-sm font-medium"
+                >
+                  {skill.name}
+                </li>
+              ))}
+            </ul>
+          ) : null}
           {talent.avatarMediaId ? (
             <RemoveMedia mediaId={talent.avatarMediaId} what="photo" owner={talent.displayName} />
           ) : null}

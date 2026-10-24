@@ -28,7 +28,7 @@ export function ContactPanel({ handle, name }: { readonly handle: string; readon
   if (conversation === 'not-allowed') return null;
   if (conversation && conversation.status !== 'withdrawn') {
     const open = (
-      <Link className={buttonLink('primary', 'sm')} to={`/messages/${conversation.id}`}>
+      <Link className={buttonLink('secondary', 'sm')} to={`/messages/${conversation.id}`}>
         {t('contact.open')}
       </Link>
     );
@@ -100,7 +100,7 @@ export function TalentMessagePanel({
   if (conversation === 'not-allowed') return null;
   if (conversation && conversation.status !== 'withdrawn') {
     const open = (
-      <Link className={buttonLink('primary', 'sm')} to={`/messages/${conversation.id}`}>
+      <Link className={buttonLink('secondary', 'sm')} to={`/messages/${conversation.id}`}>
         {t('contact.open')}
       </Link>
     );

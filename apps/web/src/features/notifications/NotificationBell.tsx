@@ -20,11 +20,11 @@ export function NotificationBell() {
         )
       }
     >
-      <Bell aria-hidden="true" className="size-5" />
+      <Bell aria-hidden="true" className="size-5" strokeWidth={1.75} />
       {unread > 0 ? (
         <span
           aria-hidden="true"
-          className="absolute top-0 right-0 grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[11px] font-bold text-destructive-foreground ring-2 ring-background"
+          className="absolute top-0 right-0 grid h-5 min-w-5 place-items-center rounded-full bg-ember-text px-1 text-[11px] font-bold text-ember-ink ring-2 ring-background"
         >
           {unread > 9 ? '9+' : unread}
         </span>

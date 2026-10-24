@@ -1,5 +1,5 @@
 import { MESSAGE_MAX, type ConversationSummary, type Message } from '@rt/contracts';
-import { ArrowLeft, Ban, Clock3, Info, MessageSquareOff, Send } from 'lucide-react';
+import { ArrowLeft, Ban, Clock3, Info, MessageSquareOff, Send, ShieldCheck } from 'lucide-react';
 import { Fragment, useEffect, useRef, useState, type ReactNode, type SubmitEvent } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { cn } from '@/lib/utils';
@@ -164,9 +164,10 @@ function Thread({
               <li className={cn('flex', message.mine ? 'justify-end' : 'justify-start')}>
                 <div
                   className={cn(
-                    'max-w-[85%] rounded-2xl px-4 py-2.5 shadow-xs sm:max-w-[70%]',
+                    'max-w-[85%] rounded-[1.25rem] px-4 py-2.5 sm:max-w-[70%]',
+                    // Mine in ink, theirs on the surface, as in the chat design.
                     message.mine
-                      ? 'rounded-br-md bg-primary text-primary-foreground'
+                      ? 'rounded-br-md bg-foreground text-background'
                       : 'rounded-bl-md border bg-card text-card-foreground',
                   )}
                 >
@@ -176,7 +177,7 @@ function Thread({
                     dateTime={message.sentAt}
                     className={cn(
                       'mt-1 block text-right text-[11px]',
-                      message.mine ? 'text-primary-foreground/70' : 'text-muted-foreground',
+                      message.mine ? 'text-background/70' : 'text-muted-foreground',
                     )}
                   >
                     {timeOfDay(message.sentAt)}
@@ -284,27 +285,38 @@ function Answer({
           title: 'messages.peerTitle',
           body: 'messages.peerBody',
           confirm: 'messages.declinePeerConfirm',
+          eyebrow: 'messages.eyebrowPeer',
         } as const)
       : summary.counterpart.kind === 'talent'
         ? ({
             title: 'messages.submissionTitle',
             body: 'messages.submissionBody',
             confirm: 'messages.declineSubmissionConfirm',
+            eyebrow: 'messages.eyebrowSubmission',
           } as const)
         : ({
             title: 'messages.requestTitle',
             body: 'messages.requestBody',
             confirm: 'messages.declineConfirm',
+            eyebrow: 'messages.eyebrowRequest',
           } as const);
   return (
     <section
-      className="stack gap-4 rounded-2xl border-2 border-spotlight bg-spotlight/10 p-5"
+      className="stack gap-4 rounded-lg border bg-card p-5 text-card-foreground"
       aria-labelledby="answer-heading"
     >
-      <h2 id="answer-heading" className="text-lg font-semibold">
+      <p className="m-0 label-caps text-spotlight-text">{t(copy.eyebrow)}</p>
+      <h2 id="answer-heading" className="text-lg font-bold">
         {t(copy.title, { agency: name })}
       </h2>
-      <p className="m-0 text-sm">{t(copy.body)}</p>
+      <p className="m-0 text-sm text-muted-foreground">{t(copy.body)}</p>
+      {summary.counterpart.kind === 'agent' && summary.counterpart.verified ? (
+        // Verified is earned (brand guide): said only when a moderator has checked the agency.
+        <p className="m-0 flex gap-3 rounded-md bg-verified-soft p-4 text-sm text-verified">
+          <ShieldCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0" strokeWidth={1.75} />
+          {t('messages.verifiedNote')}
+        </p>
+      ) : null}
       <FormMessage tone="error">{respond.error ? errorMessage(respond.error) : null}</FormMessage>
       {confirming ? (
         <div className="stack gap-3" role="group" aria-labelledby="decline-confirm">
@@ -332,15 +344,7 @@ function Answer({
           </div>
         </div>
       ) : (
-        <div className="row gap-2">
-          <Button
-            loading={respond.isPending && respond.variables === 'accept'}
-            onClick={() => {
-              respond.mutate('accept');
-            }}
-          >
-            {t('messages.accept')}
-          </Button>
+        <div className="grid grid-cols-2 gap-3">
           <Button
             variant="secondary"
             onClick={() => {
@@ -348,6 +352,14 @@ function Answer({
             }}
           >
             {t('messages.decline')}
+          </Button>
+          <Button
+            loading={respond.isPending && respond.variables === 'accept'}
+            onClick={() => {
+              respond.mutate('accept');
+            }}
+          >
+            {t('messages.accept')}
           </Button>
         </div>
       )}

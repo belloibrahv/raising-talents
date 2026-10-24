@@ -5,7 +5,15 @@ import { Button } from '../../shared/ui/Button';
 import { useRemoveFromShortlist, useSaveToShortlist, useShortlistEntry } from './queries';
 
 /** On a talent's profile, for agents: one press saves, another removes. */
-export function SaveToggle({ handle, name }: { readonly handle: string; readonly name: string }) {
+export function SaveToggle({
+  handle,
+  name,
+  size = 'sm',
+}: {
+  readonly handle: string;
+  readonly name: string;
+  readonly size?: 'default' | 'sm';
+}) {
   const entry = useShortlistEntry(handle, true);
   const save = useSaveToShortlist();
   const remove = useRemoveFromShortlist();
@@ -15,8 +23,8 @@ export function SaveToggle({ handle, name }: { readonly handle: string; readonly
   return (
     <div className="flex flex-col items-end gap-1">
       <Button
-        variant={saved ? 'secondary' : 'primary'}
-        size="sm"
+        variant={saved ? 'ink' : 'secondary'}
+        size={size}
         loading={busy}
         // A second press while saving would repeat the same request.
         disabled={entry.isPending || busy}

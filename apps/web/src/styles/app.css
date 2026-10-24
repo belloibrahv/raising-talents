@@ -29,6 +29,8 @@
   --stage: #16130f;
   --stage-ink: #f7f2ea;
   --stage-ink-muted: #c9bfb0;
+  /* Verified on the stage: the dark scheme's teal, which reads 7.7:1 there. */
+  --stage-verified: #4fc2b2;
   --canvas: #f7f2ea;
   --surface: #ffffff;
   --surface-sunk: #efe8dc;
@@ -38,6 +40,8 @@
   --line-strong: #8a8072;
   --ember: #e8492b;
   --ember-text: #c2361b;
+  /* The number on an ember count badge (badges use ember-text as their fill). */
+  --ember-ink: #ffffff;
   --verified: #0f6e63;
   --verified-soft: #e2f0ed;
   --danger: #b3261e;
@@ -86,6 +90,7 @@
     --line-strong: #8f8576;
     --ember: #ff7a5c;
     --ember-text: #ff7a5c;
+    --ember-ink: #16130f;
     --verified: #4fc2b2;
     --verified-soft: #12302b;
     --danger: #ff8f87;
@@ -110,6 +115,7 @@
   --color-stage-foreground: var(--stage-foreground);
   --color-stage-ink: var(--stage-ink);
   --color-stage-ink-muted: var(--stage-ink-muted);
+  --color-stage-verified: var(--stage-verified);
   --color-canvas: var(--canvas);
   --color-surface: var(--surface);
   --color-surface-sunk: var(--surface-sunk);
@@ -119,6 +125,7 @@
   --color-line-strong: var(--line-strong);
   --color-ember: var(--ember);
   --color-ember-text: var(--ember-text);
+  --color-ember-ink: var(--ember-ink);
   --color-verified: var(--verified);
   --color-verified-soft: var(--verified-soft);
   --color-danger: var(--danger);

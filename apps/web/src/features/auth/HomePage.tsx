@@ -205,11 +205,11 @@ function ShareStart() {
   return (
     <Link
       to="/portfolio"
-      className="mx-4 flex items-center gap-3 rounded-2xl border bg-card p-3 text-foreground no-underline shadow-xs transition-colors hover:border-input sm:mx-0"
+      className="mx-4 flex items-center gap-3 rounded-lg border bg-card p-3 text-foreground no-underline transition-colors hover:border-input sm:mx-0"
     >
       <Avatar name={profile?.displayName ?? ''} urls={profile?.avatarUrls ?? null} />
       <span className="flex-1 text-muted-foreground">{t('home.sharePrompt')}</span>
-      <span className={buttonLink('primary', 'sm')}>
+      <span className={buttonLink('secondary', 'sm')}>
         <ImagePlus aria-hidden="true" />
         {t('home.shareAction')}
       </span>
@@ -224,7 +224,7 @@ function SearchStart() {
   return (
     <form
       role="search"
-      className="mx-4 flex items-center gap-2 rounded-full border bg-card p-1.5 pl-4 shadow-xs focus-within:border-ring sm:mx-0"
+      className="mx-4 flex items-center gap-2 rounded-full border-[1.5px] border-input bg-card p-1.5 pl-4 focus-within:border-ring sm:mx-0"
       onSubmit={(event: SubmitEvent) => {
         event.preventDefault();
         const q = query.trim();
@@ -357,7 +357,7 @@ function AgentCard() {
               'inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold',
               data.verified
                 ? 'bg-success-surface text-success'
-                : 'bg-spotlight text-spotlight-foreground',
+                : 'bg-spotlight-soft text-foreground',
             )}
           >
             {data.verified ? (
@@ -448,13 +448,13 @@ function Attention() {
   return (
     <Link
       to="/messages"
-      className="group flex items-center gap-4 rounded-2xl border-2 border-spotlight bg-spotlight/15 p-5 text-foreground no-underline transition-colors hover:bg-spotlight/25"
+      className="group flex items-center gap-4 rounded-lg border-[1.5px] border-foreground bg-spotlight-soft p-5 text-foreground no-underline transition-colors hover:bg-spotlight-soft/70"
     >
       <span className="relative grid size-12 shrink-0 place-items-center rounded-full bg-spotlight text-spotlight-foreground">
         <MessagesSquare aria-hidden="true" className="size-6" />
         <span
           aria-hidden="true"
-          className="absolute -top-0.5 -right-0.5 size-3.5 rounded-full bg-destructive ring-2 ring-background"
+          className="absolute -top-0.5 -right-0.5 size-3.5 rounded-full bg-ember ring-2 ring-spotlight-soft"
         />
       </span>
       <span className="grid flex-1 gap-0.5">

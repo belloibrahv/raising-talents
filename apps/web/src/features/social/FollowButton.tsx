@@ -9,6 +9,8 @@ interface FollowButtonProps {
   readonly name: string;
   readonly following: boolean;
   readonly size?: 'default' | 'sm';
+  /** The screen's one marigold action; otherwise an outline (brand guide: one spotlight). */
+  readonly prominent?: boolean;
   readonly className?: string;
 }
 
@@ -18,13 +20,14 @@ export function FollowButton({
   name,
   following,
   size = 'sm',
+  prominent = false,
   className,
 }: FollowButtonProps) {
   const follow = useFollow(handle);
   return (
     <span className="inline-flex flex-col items-start gap-1">
       <Button
-        variant={following ? 'secondary' : 'primary'}
+        variant={following ? 'ink' : prominent ? 'primary' : 'secondary'}
         size={size}
         className={className}
         aria-pressed={following}

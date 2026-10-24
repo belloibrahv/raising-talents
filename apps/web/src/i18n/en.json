@@ -486,7 +486,9 @@
     "messagesUnread": "{count} need your attention",
     "explore": "Explore",
     "post": "Post",
-    "profile": "Profile"
+    "profile": "Profile",
+    "discover": "Discover",
+    "verifiedAgency": "Verified agency"
   },
   "onboarding": {
     "stepOf": "Step {current} of {total}",

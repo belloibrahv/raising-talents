@@ -103,13 +103,13 @@ describe('Auth over HTTP', () => {
     expect(problem.fields?.map((field) => field.path).sort()).toEqual(['acceptedTerms', 'email']);
     expect(problem.traceId).toBeTruthy();
 
-    const minor = await post('/v1/auth/sign-up', {
+    const child = await post('/v1/auth/sign-up', {
       ...tunde,
       email: 'young.striker@example.com',
-      dateOfBirth: '2012-05-05',
+      dateOfBirth: '2016-05-05',
     });
-    expect(minor.statusCode).toBe(422);
-    expect(minor.json<ProblemDetails>().code).toBe(ErrorCode.UnderMinimumAge);
+    expect(child.statusCode).toBe(422);
+    expect(child.json<ProblemDetails>().code).toBe(ErrorCode.UnderMinimumAge);
 
     const wrongPassword = await post('/v1/auth/sign-in', {
       email: tunde.email,

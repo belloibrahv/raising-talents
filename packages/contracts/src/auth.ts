@@ -5,7 +5,7 @@ import { meResponseSchema } from './accounts.js';
 /** Eight, as most services ask: long enough to matter, short enough not to turn people away. */
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 128;
-export const MINIMUM_AGE_YEARS = 18;
+export const MINIMUM_AGE_YEARS = 13;
 export const VERIFICATION_CODE_LENGTH = 6;
 
 // Trims and lowercases before checking. The input side of that pipeline is a plain

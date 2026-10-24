@@ -15,7 +15,7 @@
   },
   "signUp": {
     "title": "Create your account",
-    "subtitle": "You need to be 18 or older to join.",
+    "subtitle": "You need to be 13 or older to join.",
     "email": "Email",
     "password": "Password",
     "passwordHint": "At least 8 characters.",
@@ -83,7 +83,7 @@
     "RATE_LIMITED": "Too many attempts. Wait a few minutes and try again.",
     "VALIDATION_FAILED": "Some details need fixing. Check the highlighted fields.",
     "EMAIL_ALREADY_REGISTERED": "An account with this email already exists. Sign in instead.",
-    "UNDER_MINIMUM_AGE": "You need to be 18 or older to join Raising Talents.",
+    "UNDER_MINIMUM_AGE": "You need to be 13 or older to join Raising Talents.",
     "WEAK_PASSWORD": "Choose a stronger password.",
     "INVALID_CREDENTIALS": "That email and password do not match.",
     "ACCOUNT_SUSPENDED": "This account is suspended. Check your email for details.",

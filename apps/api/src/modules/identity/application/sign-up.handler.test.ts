@@ -41,8 +41,8 @@ describe('SignUpHandler', () => {
     );
   });
 
-  it('turns away under-18s without creating anything', async () => {
-    const result = await harness.signUp.execute({ ...AMAKA, dateOfBirth: '2010-01-01' });
+  it('turns away under-13s without creating anything', async () => {
+    const result = await harness.signUp.execute({ ...AMAKA, dateOfBirth: '2016-01-01' });
     expect(!result.ok && result.error.code).toBe(ErrorCode.UnderMinimumAge);
     expect(harness.accountRepository.rows.size).toBe(0);
     expect(harness.credentials.hashes.size).toBe(0);

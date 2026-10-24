@@ -3259,7 +3259,7 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "minimum": 18,
+              "minimum": 13,
               "maximum": 99
             }
           },
@@ -3269,7 +3269,7 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "minimum": 18,
+              "minimum": 13,
               "maximum": 99
             }
           },

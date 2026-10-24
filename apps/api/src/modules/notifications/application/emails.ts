@@ -140,7 +140,7 @@ const RESTRICTION_REASON: Record<ReportCategory, string> = {
   fake_or_impersonation: 'The profile was not genuine, or pretended to be someone else.',
   inappropriate_content: 'The profile showed content that breaks the Community Guidelines.',
   scam_or_harassment: 'The account was used to ask people for money, scam them or harass them.',
-  underage: 'We believe the account holder is under 18, the minimum age for Raising Talents.',
+  underage: 'We believe the account holder is under 13, the minimum age for Raising Talents.',
   other: 'The account broke the Community Guidelines.',
 };
 

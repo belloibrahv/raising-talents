@@ -11,6 +11,9 @@ auditConfig:
     # braces also reaches us only through @expo/cli (its Metro file map), build tooling for the
     # parked native app. No patched version exists yet. Review by 2026-11-03.
     - GHSA-vfj7-8cjw-p6xm
+    # zod 3 reaches us only through @expo/cli, which pins it; the API, the web app and the
+    # contracts use the patched zod 4.6.7. No zod 3 release has the fix. Review by 2026-11-07.
+    - GHSA-mrhx-c7xc-m3w5
 
 packageExtensions:
   # Its multipart interceptor imports rxjs without declaring it, so it worked only while pnpm

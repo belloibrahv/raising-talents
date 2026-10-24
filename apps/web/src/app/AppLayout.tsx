@@ -2,14 +2,14 @@ import type { LucideIcon } from 'lucide-react';
 import {
   ArrowLeft,
   Bookmark,
-  Compass,
+  Check,
   House,
   LogOut,
   MessagesSquare,
+  Plus,
   Search,
   Settings,
   ShieldCheck,
-  SquarePlus,
   UserRound,
 } from 'lucide-react';
 import { Suspense, type CSSProperties } from 'react';
@@ -25,7 +25,8 @@ import { useMessagingUnread } from '../features/messages/queries';
 import { useMyTalentProfile } from '../features/profile/queries';
 import { useLiveUpdates } from '../shared/realtime/live-updates';
 import { InstallCard } from '../shared/pwa/InstallCard';
-import { BrandMark } from '../shared/ui/BrandMark';
+import { BrandLockup, BrandMark } from '../shared/ui/BrandMark';
+import { useMyVerification } from '../features/profile/verification-queries';
 import { PageSkeleton } from '../shared/ui/PageSkeleton';
 import { useTyping } from '../shared/ui/use-typing';
 
@@ -33,6 +34,8 @@ interface Destination {
   readonly to: string;
   readonly label: string;
   readonly icon: LucideIcon;
+  /** The one marigold action in the bar: posting, for talent. */
+  readonly primary?: boolean;
 }
 
 /**
@@ -59,19 +62,19 @@ export function AppLayout() {
       ? [
           { to: '/moderation', label: t('nav.moderation'), icon: ShieldCheck },
           // Posts go live without a check first, so moderators browse like anyone else (ADR-048).
-          { to: '/search', label: t('nav.explore'), icon: Compass },
+          { to: '/search', label: t('nav.discover'), icon: Search },
         ]
       : []),
     ...(me?.role === 'agent' && !onboarding
       ? [
-          { to: '/search', label: t('nav.search'), icon: Search },
+          { to: '/search', label: t('nav.discover'), icon: Search },
           { to: '/shortlist', label: t('nav.shortlist'), icon: Bookmark },
         ]
       : []),
     ...(talent
       ? [
-          { to: '/search', label: t('nav.explore'), icon: Compass },
-          { to: '/portfolio', label: t('nav.post'), icon: SquarePlus },
+          { to: '/search', label: t('nav.discover'), icon: Search },
+          { to: '/portfolio', label: t('nav.post'), icon: Plus, primary: true },
         ]
       : []),
     ...(talks ? [{ to: '/messages', label: t('nav.messages'), icon: MessagesSquare }] : []),
@@ -95,9 +98,10 @@ export function AppLayout() {
     if (steps > 0) void navigate(-1);
     else void navigate(inChat ? '/messages' : '/home', { replace: true });
   };
+  const sidebar = !onboarding;
   return (
     <div
-      className="flex min-h-dvh flex-col"
+      className={cn('flex min-h-dvh flex-col', sidebar && 'md:pl-64')}
       // How far a bar stuck to the bottom of a phone must sit above the edge to clear the tabs.
       style={{ '--tabs-clear': onboarding || tabsAway ? '0.75rem' : '5.25rem' } as CSSProperties}
     >
@@ -115,14 +119,18 @@ export function AppLayout() {
           ) : null}
           <NavLink
             to="/home"
-            className="flex min-h-11 min-w-0 items-center gap-[0.45em] rounded-lg font-display text-xl font-bold tracking-[-0.01em] no-underline"
+            // On wide screens the name is at the top of the sidebar instead.
+            className={cn(
+              'flex min-h-11 min-w-0 items-center gap-[0.45em] rounded-lg font-display text-xl font-bold tracking-[-0.01em] no-underline',
+              sidebar && 'md:hidden',
+            )}
           >
             {/* On a phone the back arrow takes the mark's place, so the name still fits. */}
             <BrandMark className={cn('size-[1.4em]', deep && 'max-md:hidden')} />
             <span className="truncate">{t('common.appName')}</span>
           </NavLink>
           {onboarding ? (
-            // Setting up is one focused flow: no tab bar, just a way to the account.
+            // Setting up is one focused flow: no tabs, just a way to the account.
             <nav aria-label={t('nav.main')} className="ml-auto">
               <NavLink
                 to="/account"
@@ -132,69 +140,15 @@ export function AppLayout() {
               </NavLink>
             </nav>
           ) : (
-            <nav
-              aria-label={t('nav.main')}
-              // A floating bar on phones, clear of the home indicator; inline in the header when wide.
-              className={cn(
-                'fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-30 mx-auto max-w-md rounded-full border bg-background/85 px-1.5 shadow-xl shadow-black/10 backdrop-blur-xl md:static md:mx-0 md:ml-auto md:max-w-none md:rounded-none md:border-0 md:bg-transparent md:px-0 md:shadow-none md:backdrop-blur-none',
-                tabsAway && 'max-md:hidden',
-              )}
-            >
-              <ul className="m-0 flex list-none justify-around p-0 md:gap-1">
-                {destinations.map(({ to, label, icon: Icon }) => (
-                  <li key={to} className="flex-1 md:flex-none">
-                    <NavLink
-                      to={to}
-                      end={to === '/home'}
-                      className={({ isActive }) =>
-                        cn(
-                          'flex min-h-15 flex-col items-center justify-center gap-0.5 rounded-full px-1 text-[0.6875rem] font-semibold text-muted-foreground no-underline transition-[color,scale] hover:text-foreground active:scale-95 md:min-h-10 md:flex-row md:gap-2 md:px-4 md:text-sm',
-                          isActive && 'text-foreground md:bg-accent',
-                        )
-                      }
-                    >
-                      {({ isActive }) => (
-                        <>
-                          <span
-                            className={cn(
-                              'relative grid size-9 place-items-center rounded-full transition-colors md:size-auto',
-                              // The tab you are on is a filled circle, as in the bar's design.
-                              isActive &&
-                                'bg-primary text-primary-foreground shadow-md shadow-primary/30 md:bg-transparent md:text-current md:shadow-none',
-                            )}
-                          >
-                            <Icon aria-hidden="true" className="size-5 md:size-4" />
-                            {to === '/account' && me && !me.emailVerified ? (
-                              <span
-                                aria-hidden="true"
-                                className="absolute top-0 right-0 size-2.5 rounded-full bg-destructive ring-2 ring-background md:-top-0.5 md:-right-1"
-                              />
-                            ) : null}
-                            {to === '/messages' && waiting > 0 ? (
-                              <span
-                                aria-hidden="true"
-                                className="absolute -top-1 -right-1.5 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-destructive px-1 text-[10px] leading-none font-bold text-destructive-foreground ring-2 ring-background md:-top-2 md:-right-3"
-                              >
-                                {waiting > 9 ? '9+' : waiting}
-                              </span>
-                            ) : null}
-                          </span>
-                          {label}
-                          {to === '/account' && me && !me.emailVerified ? (
-                            <span className="sr-only">{`, ${t('verifyBanner.dot')}`}</span>
-                          ) : null}
-                          {to === '/messages' && waiting > 0 ? (
-                            <span className="sr-only">{`, ${t('nav.messagesUnread', { count: waiting })}`}</span>
-                          ) : null}
-                        </>
-                      )}
-                    </NavLink>
-                  </li>
-                ))}
-              </ul>
-            </nav>
+            <MainNav
+              destinations={destinations}
+              hidden={tabsAway}
+              unverifiedEmail={me ? !me.emailVerified : false}
+              waiting={waiting}
+              agent={me?.role === 'agent'}
+            />
           )}
-          <div className="ml-auto flex shrink-0 items-center md:ml-0 md:gap-1">
+          <div className="ml-auto flex shrink-0 items-center md:gap-1">
             <NotificationBell />
             {accountInHeader ? (
               <NavLink
@@ -212,11 +166,11 @@ export function AppLayout() {
                   )
                 }
               >
-                <Settings aria-hidden="true" className="size-5" />
+                <Settings aria-hidden="true" className="size-5" strokeWidth={1.75} />
                 {me && !me.emailVerified ? (
                   <span
                     aria-hidden="true"
-                    className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-destructive ring-2 ring-background"
+                    className="absolute top-1.5 right-1.5 size-2.5 rounded-full bg-ember ring-2 ring-background"
                   />
                 ) : null}
               </NavLink>
@@ -250,5 +204,112 @@ export function AppLayout() {
         </aside>
       )}
     </div>
+  );
+}
+
+/**
+ * The one navigation landmark (brand guide, UI design): a bottom bar on phones, where thumbs
+ * reach it, with posting as the marigold button in the middle; the stage as a sidebar on wider
+ * screens. Unread counts are ember, the colour of energy, never an error.
+ */
+function MainNav({
+  destinations,
+  hidden,
+  unverifiedEmail,
+  waiting,
+  agent,
+}: {
+  readonly destinations: readonly Destination[];
+  readonly hidden: boolean;
+  readonly unverifiedEmail: boolean;
+  readonly waiting: number;
+  readonly agent: boolean;
+}) {
+  const verified = useMyVerification(agent).data?.state === 'verified';
+  return (
+    <nav
+      aria-label={t('nav.main')}
+      className={cn(
+        'fixed inset-x-0 bottom-0 z-30 border-t bg-card pb-[env(safe-area-inset-bottom)]',
+        'md:top-0 md:right-auto md:w-64 md:flex-col md:border-t-0 md:bg-stage md:p-4 md:text-stage-ink',
+        hidden ? 'max-md:hidden' : null,
+        'md:flex',
+      )}
+    >
+      <NavLink
+        to="/home"
+        className="mb-6 hidden min-h-11 items-center px-2 text-xl text-stage-ink no-underline md:flex"
+      >
+        <BrandLockup version="spotlight" />
+      </NavLink>
+      <ul className="m-0 flex list-none items-stretch justify-around p-0 md:flex-col md:gap-1">
+        {destinations.map(({ to, label, icon: Icon, primary }) => (
+          <li key={to} className="flex-1 md:flex-none">
+            <NavLink
+              to={to}
+              end={to === '/home'}
+              className={({ isActive }) =>
+                cn(
+                  'group flex min-h-16 flex-col items-center justify-center gap-1 text-[0.6875rem] font-semibold text-muted-foreground no-underline transition-colors hover:text-foreground',
+                  'md:min-h-11 md:flex-row md:justify-start md:gap-3 md:rounded-md md:px-3 md:text-base md:font-medium md:text-stage-ink-muted md:hover:bg-stage-ink/5 md:hover:text-stage-ink',
+                  isActive &&
+                    'font-bold text-foreground md:bg-stage-ink/10 md:font-semibold md:text-spotlight md:hover:text-spotlight',
+                )
+              }
+            >
+              <span
+                className={cn(
+                  'relative grid place-items-center',
+                  // Posting is the marigold button in the middle of the bar on a phone.
+                  primary &&
+                    'size-12 rounded-[14px] bg-spotlight text-spotlight-ink md:size-auto md:rounded-none md:bg-transparent md:text-current',
+                )}
+              >
+                <Icon
+                  aria-hidden="true"
+                  className={cn('size-6 md:size-5', primary && 'max-md:size-6')}
+                  strokeWidth={1.75}
+                />
+                {to === '/account' && unverifiedEmail ? (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-ember ring-2 ring-card md:ring-stage"
+                  />
+                ) : null}
+                {to === '/messages' && waiting > 0 ? (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -top-1.5 -right-2.5 grid h-4.5 min-w-4.5 place-items-center rounded-full bg-ember-text px-1 text-[10px] leading-none font-bold text-ember-ink ring-2 ring-card md:hidden"
+                  >
+                    {waiting > 9 ? '9+' : waiting}
+                  </span>
+                ) : null}
+              </span>
+              <span className={cn('md:flex-1', primary && 'max-md:sr-only')}>{label}</span>
+              {to === '/messages' && waiting > 0 ? (
+                <span
+                  aria-hidden="true"
+                  className="hidden min-w-6 rounded-full bg-ember-text px-1.5 text-center text-xs font-bold text-ember-ink md:inline"
+                >
+                  {waiting > 9 ? '9+' : waiting}
+                </span>
+              ) : null}
+              {to === '/account' && unverifiedEmail ? (
+                <span className="sr-only">{`, ${t('verifyBanner.dot')}`}</span>
+              ) : null}
+              {to === '/messages' && waiting > 0 ? (
+                <span className="sr-only">{`, ${t('nav.messagesUnread', { count: waiting })}`}</span>
+              ) : null}
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+      {verified ? (
+        <p className="mt-auto mb-0 hidden items-center gap-2 rounded-md bg-stage-verified/15 p-3 text-sm font-semibold text-stage-verified md:flex">
+          <Check aria-hidden="true" className="size-4" />
+          {t('nav.verifiedAgency')}
+        </p>
+      ) : null}
+    </nav>
   );
 }

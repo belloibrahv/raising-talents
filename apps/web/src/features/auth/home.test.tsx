@@ -80,7 +80,7 @@ describe('home', () => {
       'href',
       '/talents/ngozi.sings',
     );
-    expect(within(nav).getByRole('link', { name: 'Explore' })).toHaveAttribute('href', '/search');
+    expect(within(nav).getByRole('link', { name: 'Discover' })).toHaveAttribute('href', '/search');
     await expectNoAxeViolations();
   });
 

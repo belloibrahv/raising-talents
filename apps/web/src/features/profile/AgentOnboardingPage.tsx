@@ -1,6 +1,8 @@
 import {
   AGENT_BIO_MAX,
   MAX_SPECIALIZATIONS,
+  webAddressSchema,
+  withHttps,
   type MyAgentProfile,
   type RosterStatus,
   type TaxonomyResponse,
@@ -93,7 +95,7 @@ function AgentForm({
     if (jobTitle.trim().length < 2) found['jobTitle'] = t('validation.nameShort');
     if (specializations.length === 0) found['specializationSlugs'] = t('validation.chooseOne');
     if (!place.citySlug) found['citySlug'] = t('validation.chooseOne');
-    if (website.trim() && !/^https:\/\/\S+\.\S+/.test(website.trim()))
+    if (website.trim() && !webAddressSchema(200).safeParse(website).success)
       found['website'] = t('validation.websiteInvalid');
     setErrors(found);
     if (Object.keys(found).length > 0) return;
@@ -103,7 +105,7 @@ function AgentForm({
         jobTitle: jobTitle.trim(),
         specializationSlugs: [...specializations],
         citySlug: place.citySlug,
-        website: website.trim() || null,
+        website: website.trim() ? withHttps(website) : null,
         bio: bio.trim(),
         rosterStatus: roster === 'unset' ? null : roster,
       },
@@ -182,7 +184,7 @@ function AgentForm({
         }}
         error={errors['website']}
         autoComplete="url"
-        placeholder="https://"
+        placeholder="www.youragency.com"
       />
       <ChoiceGroup
         layout="chips"

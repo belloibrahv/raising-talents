@@ -10768,8 +10768,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "maxLength": 200,
-                "format": "uri"
+                "pattern": "^\\S+$"
               },
               {
                 "type": "null"
@@ -12565,12 +12564,7 @@
         "properties": {
           "evidenceUrl": {
             "type": "string",
-            "maxLength": 300,
-            "format": "uri"
-          },
-          "registrationNumber": {
-            "type": "string",
-            "pattern": "^(RC|BN|IT)\\s?-?\\d{4,8}$"
+            "pattern": "^\\S+$"
           },
           "note": {
             "type": "string",

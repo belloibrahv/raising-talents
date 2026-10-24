@@ -20,7 +20,6 @@ import {
 
 const EVIDENCE = {
   evidenceUrl: 'https://eko-talent.example/team',
-  registrationNumber: 'RC 1234567',
   note: 'Scout since 2019.',
 };
 
@@ -133,7 +132,7 @@ describe('Agent verification', () => {
       city: { slug: 'ng-lagos', name: 'Lagos' },
       specializations: [{ slug: 'music', name: 'Music' }],
       evidenceUrl: 'https://eko-talent.example/team',
-      registrationNumber: 'RC 1234567',
+      registrationNumber: null,
       previouslyDeclined: 0,
     });
 

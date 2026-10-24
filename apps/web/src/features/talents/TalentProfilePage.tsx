@@ -28,7 +28,7 @@ import { Page } from '../../shared/ui/Page';
 import { PageSkeleton } from '../../shared/ui/PageSkeleton';
 import { VerifiedBadge } from '../../shared/ui/VerifiedBadge';
 import { useSession } from '../auth/use-auth';
-import { ContactPanel } from '../messages/ContactPanel';
+import { ContactPanel, TalentMessagePanel } from '../messages/ContactPanel';
 import { useMyTalentProfile } from '../profile/queries';
 import { SaveToggle } from '../shortlist/SaveToggle';
 import { FollowButton } from '../social/FollowButton';
@@ -70,6 +70,7 @@ export function TalentProfilePage() {
 
   const talent = profile.data;
   const isAgent = me?.role === 'agent' && me.status === 'active';
+  const isTalent = me?.role === 'talent' && me.status === 'active';
   const discipline =
     talent.subcategories.map((entry) => entry.name).join(', ') || talent.category.name;
   const items = posts.data?.pages.flatMap((page) => page.items) ?? [];
@@ -237,6 +238,9 @@ export function TalentProfilePage() {
       {isSelf ? null : (
         <aside className="grid gap-4 border-t pt-6" id="contact" aria-label={t('talent.contact')}>
           {isAgent ? <ContactPanel handle={talent.handle} name={talent.displayName} /> : null}
+          {isTalent ? (
+            <TalentMessagePanel handle={talent.handle} name={talent.displayName} />
+          ) : null}
           <ReportProfile handle={talent.handle} />
         </aside>
       )}

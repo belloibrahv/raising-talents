@@ -147,6 +147,7 @@ describe('agents, as talent find them', () => {
       [`POST /v1/agents/${EKO}/submission`]: () => {
         submission = {
           id: '0192a3b4-0000-7000-8000-0000000000c1',
+          kind: 'agent',
           status: 'requested',
           counterpart: {
             kind: 'agent',

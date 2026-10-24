@@ -1,0 +1,2 @@
+CREATE TYPE "messaging"."conversation_kind" AS ENUM('agent', 'peer');--> statement-breakpoint
+ALTER TABLE "messaging"."conversations" ADD COLUMN "kind" "messaging"."conversation_kind" DEFAULT 'agent' NOT NULL;

@@ -59,6 +59,20 @@ export const MessagingErrors = {
     domainError(ErrorCode.Conflict, 'You are already in touch. Open the conversation.'),
   notRequested: () =>
     domainError(ErrorCode.Conflict, 'This request has already been answered or withdrawn.'),
+  /** Between two talent (ADR-061). */
+  notYourself: () => domainError(ErrorCode.Conflict, 'You cannot send a message to yourself.'),
+  peerNotVisible: () =>
+    domainError(
+      ErrorCode.Forbidden,
+      'Finish your profile and add a photo before you message other talent. They will want to see who you are.',
+    ),
+  peerEmailNotVerified: () =>
+    domainError(ErrorCode.EmailNotVerified, 'Verify your email before you message other talent.'),
+  otherAgeGroup: () =>
+    domainError(
+      ErrorCode.Forbidden,
+      'Talent under 18 can message only other talent under 18, and adults only adults.',
+    ),
   closed: () =>
     domainError(
       ErrorCode.ConversationClosed,
@@ -68,8 +82,21 @@ export const MessagingErrors = {
 
 export type ConversationSide = 'agent' | 'talent';
 
+/**
+ * 'agent': an agent and a talent, in their own columns. 'peer': two talent (ADR-061), with
+ * the one whose id sorts first in the agent column, so a pair has one place whoever asks.
+ * The columns are then only two places, and the rules below work on places, not roles.
+ */
+export type ConversationKind = 'agent' | 'peer';
+
+/** Where two talent go in a peer conversation, whichever of them asks. */
+export function peerPlaces(one: string, other: string): { agentId: string; talentId: string } {
+  return one < other ? { agentId: one, talentId: other } : { agentId: other, talentId: one };
+}
+
 export interface ConversationProps {
   readonly id: string;
+  readonly kind: ConversationKind;
   readonly agentId: string;
   readonly talentId: string;
   readonly status: ConversationStatus;
@@ -87,10 +114,11 @@ export interface ConversationProps {
 }
 
 /**
- * One agent and one talent. It starts as a request whose first message is an introduction:
- * an agent asking to contact a talent (ADR-011, ADR-038), or a talent's submission to an
- * agent who is open (ADR-050). It becomes a chat when the other person accepts. A pair only
- * ever has one conversation, so a later request from either side reopens the same one.
+ * Two people. It starts as a request whose first message is an introduction: an agent asking
+ * to contact a talent (ADR-011, ADR-038), a talent's submission to an agent who is open
+ * (ADR-050), or one talent writing to another (ADR-061). It becomes a chat when the other
+ * person accepts. A pair only ever has one conversation, so a later request from either
+ * side reopens the same one.
  */
 export class Conversation {
   private pendingEvents: DomainEvent[] = [];
@@ -99,6 +127,7 @@ export class Conversation {
 
   static request(input: {
     id: string;
+    kind?: ConversationKind;
     agentId: string;
     talentId: string;
     requestedBy?: ConversationSide;
@@ -107,6 +136,7 @@ export class Conversation {
     const requestedBy = input.requestedBy ?? 'agent';
     const conversation = new Conversation({
       id: input.id,
+      kind: input.kind ?? 'agent',
       agentId: input.agentId,
       talentId: input.talentId,
       status: 'requested',
@@ -130,6 +160,9 @@ export class Conversation {
   get id(): string {
     return this.props.id;
   }
+  get kind(): ConversationKind {
+    return this.props.kind;
+  }
   get agentId(): string {
     return this.props.agentId;
   }
@@ -144,7 +177,7 @@ export class Conversation {
     return { ...this.props };
   }
 
-  /** Which side the user is on, or null when they are not in it. */
+  /** The user's place (for an agent conversation, their role), or null when not in it. */
   sideOf(userId: string): 'agent' | 'talent' | null {
     if (userId === this.props.agentId) return 'agent';
     if (userId === this.props.talentId) return 'talent';
@@ -307,6 +340,7 @@ export class Conversation {
       aggregateId: this.props.id,
       occurredAt,
       payload: {
+        kind: this.props.kind,
         agentId: this.props.agentId,
         talentId: this.props.talentId,
         requestedBy: this.props.requestedBy,

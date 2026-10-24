@@ -65,16 +65,20 @@ export function useThread(id: string, enabled: boolean) {
   });
 }
 
-/** The agent's conversation with this talent, or null when there is none yet. */
+/**
+ * The viewer's conversation with this talent, or null when there is none yet. 'not-allowed'
+ * when the viewer is a talent in the other age group, who cannot write to them (ADR-061).
+ */
 export function useConversationWithTalent(handle: string, enabled: boolean) {
   return useQuery({
     queryKey: withTalentKey(handle),
     enabled,
-    queryFn: async (): Promise<ConversationSummary | null> => {
+    queryFn: async (): Promise<ConversationSummary | null | 'not-allowed'> => {
       try {
         return await api.call('messaging.withTalent', { params: { handle } });
       } catch (error) {
         if (isApiError(error, 'NOT_FOUND')) return null;
+        if (isApiError(error, 'FORBIDDEN')) return 'not-allowed';
         throw error;
       }
     },

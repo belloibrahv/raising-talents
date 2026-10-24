@@ -85,7 +85,15 @@ settings follow it. The old address stops answering, the browser refuses the API
    railway run --service api pnpm --filter @rt/api storage:cors https://<new address>
    ```
 
-4. Open the new address and check the console is clean and sign-in works.
+4. Open the new address and check the console is clean and sign-in works, and that
+   profile photos load: a photo address that does not answer shows a broken image on
+   every profile while everything else works.
+
+Use the address that answers, exactly. `MEDIA_CDN_URL` is put in front of every photo, so
+`https://www.<domain>` breaks all photos if only `https://<domain>` is set up (check with
+`railway domain --service web`, and that the name resolves). Set the same values on
+`worker` as on `api`: the worker sends every email and writes the links in them, so a
+worker left on the old address sends links that go nowhere.
 
 To keep both addresses working for a while, give `WEB_ORIGINS` and `storage:cors` both,
 separated by a comma and a space respectively. The app itself calls one address only.
@@ -117,6 +125,21 @@ Check the live site, not only the build:
    BASE=https://raisingtalents.up.railway.app EMAIL=<test account> PASSWORD=<its password> \
      node phone-check.mjs /home /search /messages /account
    ```
+
+## Email
+
+The worker sends every email: sign-in codes, password resets, and notices about requests
+and verification. It needs `EMAIL_FROM` and the four `SMTP_` variables, the same as `api`.
+Reference them from `api` (for example `SMTP_PASSWORD=${{api.SMTP_PASSWORD}}`) so there is one
+copy. When they are missing, the worker log shows `Outbox event handler failed` for each
+email and, after ten tries, `dead-lettered` (outbox-dead-letter.md).
+
+`EMAIL_FROM` must be on a domain the provider has verified. With Resend, add the domain in
+its dashboard, put the DNS records it gives at the domain's DNS host, and wait for it to
+show Verified. Until then Resend delivers only to the Resend account's own address. Then set
+`EMAIL_FROM=Raising Talents <no-reply@<domain>>` on `api` (and `worker`, by reference).
+
+To check, ask for a password reset for an address you can read, and watch the worker log.
 
 ## Every day
 

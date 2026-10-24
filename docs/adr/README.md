@@ -63,3 +63,5 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-057](057-text-posts.md)                                            | Posts that are only words                                            | Accepted                          |
 | [ADR-058](058-the-app-on-a-phone.md)                                    | The app on a phone                                                   | Accepted                          |
 | [ADR-059](059-members-from-thirteen.md)                                 | Members from thirteen                                                | Accepted                          |
+| [ADR-060](060-agency-evidence-without-a-cac-number.md)                  | Agency evidence without a CAC number                                 | Accepted                          |
+| [ADR-061](061-messages-between-talent.md)                               | Messages between talent                                              | Accepted                          |

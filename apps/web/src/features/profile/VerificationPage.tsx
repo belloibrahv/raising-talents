@@ -1,4 +1,4 @@
-import { VERIFICATION_NOTE_MAX } from '@rt/contracts';
+import { VERIFICATION_NOTE_MAX, webAddressSchema, withHttps } from '@rt/contracts';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, type SubmitEvent } from 'react';
 import { Link } from 'react-router';
@@ -15,12 +15,11 @@ import { useFocusFirstError } from '../../shared/ui/use-focus-first-error';
 import { fieldErrorsFrom } from '../auth/form-errors';
 import { verificationKey } from './verification-queries';
 
-type Errors = Partial<Record<'evidenceUrl' | 'registrationNumber', string>>;
+type Errors = Partial<Record<'evidenceUrl', string>>;
 
 export function VerificationPage() {
   const queryClient = useQueryClient();
   const [evidenceUrl, setEvidenceUrl] = useState('');
-  const [registrationNumber, setRegistrationNumber] = useState('');
   const [note, setNote] = useState('');
   const [errors, setErrors] = useState<Errors>({});
   const form = useFocusFirstError(errors);
@@ -28,8 +27,7 @@ export function VerificationPage() {
     mutationFn: () =>
       api.call('agentVerification.request', {
         body: {
-          evidenceUrl: evidenceUrl.trim(),
-          ...(registrationNumber.trim() ? { registrationNumber: registrationNumber.trim() } : {}),
+          evidenceUrl: withHttps(evidenceUrl),
           ...(note.trim() ? { note: note.trim() } : {}),
         },
       }),
@@ -39,7 +37,7 @@ export function VerificationPage() {
   const submit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     const found: Errors = {};
-    if (!/^https:\/\/\S+\.\S+/.test(evidenceUrl.trim()))
+    if (!webAddressSchema(300).safeParse(evidenceUrl).success)
       found.evidenceUrl = t('validation.websiteInvalid');
     setErrors(found);
     if (Object.keys(found).length > 0) return;
@@ -75,7 +73,7 @@ export function VerificationPage() {
             hint={t('verification.evidenceHint')}
             type="url"
             inputMode="url"
-            placeholder="https://"
+            placeholder="www.youragency.com/team"
             value={evidenceUrl}
             onChange={(event) => {
               setEvidenceUrl(event.target.value);
@@ -83,17 +81,6 @@ export function VerificationPage() {
             error={errors.evidenceUrl}
             maxLength={300}
             required
-          />
-          <TextField
-            label={t('verification.registration')}
-            hint={t('verification.registrationHint')}
-            value={registrationNumber}
-            onChange={(event) => {
-              setRegistrationNumber(event.target.value);
-            }}
-            error={errors.registrationNumber}
-            autoCapitalize="characters"
-            maxLength={14}
           />
           <TextArea
             label={t('verification.note')}

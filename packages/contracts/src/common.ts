@@ -23,3 +23,26 @@ export function cursorPageSchema<T extends z.ZodType>(item: T) {
     nextCursor: z.string().nullable(),
   });
 }
+
+/** A web address as people type it: "www.agency.com" or "agency.com/team" gets https:// in front. */
+export function withHttps(raw: string): string {
+  const value = raw.trim();
+  return /^[a-z][a-z\d+.-]*:\/\//i.test(value) ? value : `https://${value}`;
+}
+
+/** A secure web page with a real domain. Typing the https:// is optional; http:// is refused. */
+export const webAddressSchema = (max: number) =>
+  z
+    .string()
+    .trim()
+    .regex(/^\S+$/, 'A web address has no spaces')
+    .overwrite(withHttps)
+    .pipe(
+      z
+        .url({
+          protocol: /^https$/,
+          hostname: z.regexes.domain,
+          error: 'Use a web address such as www.agency.com',
+        })
+        .max(max),
+    );

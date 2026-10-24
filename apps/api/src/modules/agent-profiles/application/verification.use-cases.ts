@@ -131,11 +131,7 @@ export class RequestVerificationHandler {
 
   async execute(
     agentId: string,
-    input: {
-      evidenceUrl: string;
-      registrationNumber?: string | undefined;
-      note?: string | undefined;
-    },
+    input: { evidenceUrl: string; note?: string | undefined },
   ): Promise<Result<MyAgentVerification, DomainError>> {
     const account = await this.accounts.profileContext(agentId);
     if (account?.role !== 'agent') return err(AgentProfileErrors.wrongRole());
@@ -167,7 +163,8 @@ export class RequestVerificationHandler {
       id: newId(),
       agentId,
       evidenceUrl: input.evidenceUrl,
-      registrationNumber: input.registrationNumber ?? null,
+      // No longer asked for: agencies are not only in Nigeria (ADR-060).
+      registrationNumber: null,
       note: input.note ?? '',
       now: this.clock.now(),
     });

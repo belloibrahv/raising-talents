@@ -314,7 +314,7 @@
     "codeInvalid": "Enter the 6-digit code from the email.",
     "nameShort": "Enter at least 2 characters.",
     "chooseOne": "Choose at least one.",
-    "websiteInvalid": "Use a full address starting with https://"
+    "websiteInvalid": "Use a web address such as www.youragency.com"
   },
   "errors": {
     "NETWORK": "No connection. Check your data or Wi-Fi and try again.",
@@ -514,7 +514,7 @@
       "specializationsHint": "Choose up to {max}.",
       "city": "City",
       "website": "Website (optional)",
-      "websiteHint": "Must start with https://",
+      "websiteHint": "For example www.youragency.com",
       "roster": "Are you taking on new talent?",
       "rosterHint": "Shown on your page. While you are open, talent can send you a submission, which you accept or decline.",
       "rosterUnset": "Not saying",
@@ -800,9 +800,7 @@
     "title": "Get verified",
     "body": "Talent only accept contact from verified agents. Show us that you work for your agency; a moderator checks every request by hand.",
     "evidence": "A page that shows you work there",
-    "evidenceHint": "For example your agency's team page, or its official Instagram or LinkedIn page that names you. Must start with https://",
-    "registration": "CAC registration number (optional)",
-    "registrationHint": "As printed on the certificate, for example RC 123456 or BN 1234567.",
+    "evidenceHint": "For example your agency's team page, or its official Instagram or LinkedIn page that names you.",
     "note": "Anything else we should know (optional)",
     "submit": "Send for review",
     "sent": "Sent. A moderator will check it, usually within two working days.",

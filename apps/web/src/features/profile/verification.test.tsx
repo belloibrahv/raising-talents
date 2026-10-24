@@ -86,23 +86,21 @@ describe('agent verification', () => {
     await screen.findByRole('heading', { level: 1, name: 'Get verified' });
 
     const evidence = screen.getByLabelText('A page that shows you work there');
-    await user.type(evidence, 'eko-talent.example/team');
+    await user.type(evidence, 'http://eko-talent.example/team');
     await user.click(screen.getByRole('button', { name: 'Send for review' }));
     await waitFor(() => expect(evidence).toHaveAttribute('aria-invalid', 'true'));
     await expectNoAxeViolations();
 
     await user.clear(evidence);
-    await user.type(evidence, 'https://eko-talent.example/team');
-    await user.type(screen.getByLabelText('CAC registration number (optional)'), 'RC 1234567');
+    // No CAC number any more (ADR-060), and the address can start with www.
+    expect(screen.queryByLabelText(/CAC/)).toBeNull();
+    await user.type(evidence, 'www.eko-talent.example/team');
     await user.click(screen.getByRole('button', { name: 'Send for review' }));
     expect(await screen.findByText(/Sent. A moderator will check it/)).toBeVisible();
     expect(
       calls.find((call) => call.method === 'POST' && call.path === '/v1/me/agent-verification')
         ?.body,
-    ).toEqual({
-      evidenceUrl: 'https://eko-talent.example/team',
-      registrationNumber: 'RC 1234567',
-    });
+    ).toEqual({ evidenceUrl: 'https://www.eko-talent.example/team' });
   });
 
   it('gives moderators an agent queue next to the media queue, and verifies with one action', async () => {

@@ -92,11 +92,11 @@ export function ChoiceGroup(props: SingleProps | MultipleProps) {
             return (
               <label
                 key={option.value}
-                className="relative flex min-h-28 cursor-pointer flex-col justify-between gap-3 rounded-2xl border-2 border-border bg-card p-4 transition-all select-none hover:-translate-y-0.5 hover:border-input hover:shadow-sm has-checked:border-primary has-checked:bg-accent has-checked:shadow-md has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:translate-y-0 has-disabled:hover:border-border has-disabled:hover:shadow-none has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
+                className="group relative flex min-h-28 cursor-pointer flex-col justify-between gap-3 rounded-2xl border-2 border-border bg-card p-4 transition-all select-none hover:border-input has-checked:border-foreground has-disabled:cursor-not-allowed has-disabled:opacity-50 has-disabled:hover:border-border has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
               >
                 {input}
                 {Icon ? (
-                  <span className="grid size-11 place-items-center rounded-xl bg-spotlight/25 text-foreground">
+                  <span className="grid size-11 place-items-center rounded-sm bg-muted text-foreground transition-colors group-has-checked:bg-spotlight group-has-checked:text-spotlight-ink">
                     <Icon aria-hidden="true" className="size-6" />
                   </span>
                 ) : null}
@@ -106,7 +106,7 @@ export function ChoiceGroup(props: SingleProps | MultipleProps) {
                 {checked ? (
                   <span
                     aria-hidden="true"
-                    className="absolute top-3 right-3 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground"
+                    className="absolute top-3 right-3 grid size-6 place-items-center rounded-full bg-foreground text-background"
                   >
                     <Check className="size-4" />
                   </span>
@@ -117,7 +117,7 @@ export function ChoiceGroup(props: SingleProps | MultipleProps) {
           return chips ? (
             <label
               key={option.value}
-              className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-full border-2 border-input bg-background px-4 text-sm font-semibold transition-colors select-none hover:bg-accent has-checked:border-primary has-checked:bg-primary has-checked:text-primary-foreground has-disabled:cursor-not-allowed has-disabled:opacity-50 has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
+              className="inline-flex min-h-10 cursor-pointer items-center gap-1.5 rounded-full border-[1.5px] border-input bg-card px-4 text-sm font-semibold transition-colors select-none hover:border-foreground has-checked:border-foreground has-checked:bg-spotlight-soft has-disabled:cursor-not-allowed has-disabled:opacity-50 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
             >
               {input}
               {checked ? <Check aria-hidden="true" className="size-4" /> : null}
@@ -126,7 +126,7 @@ export function ChoiceGroup(props: SingleProps | MultipleProps) {
           ) : (
             <label
               key={option.value}
-              className="flex min-h-14 cursor-pointer items-start gap-3 rounded-xl border-2 border-border bg-card px-4 py-3.5 transition-colors hover:border-input has-checked:border-primary has-checked:bg-accent has-disabled:cursor-not-allowed has-disabled:opacity-50"
+              className="flex min-h-14 cursor-pointer items-start gap-3 rounded-lg border-2 border-border bg-card px-4 py-3.5 transition-colors hover:border-input has-checked:border-foreground has-disabled:cursor-not-allowed has-disabled:opacity-50"
             >
               {input}
               <span className="choice__title text-base font-semibold leading-snug">

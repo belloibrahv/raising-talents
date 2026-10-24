@@ -119,12 +119,12 @@ function SavedTalent({
           )}
           <span className="sr-only">{t('shortlist.open', { name: talent.displayName })}</span>
         </Link>
-        <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-black/45 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+        <span className="pointer-events-none absolute bottom-2 left-2 rounded-full bg-stage/45 px-2.5 py-1 text-xs font-semibold text-stage-ink backdrop-blur-sm">
           {discipline}
         </span>
         <button
           type="button"
-          className="absolute top-2 right-2 grid size-9 cursor-pointer place-items-center rounded-full bg-white/90 text-[#14111f] shadow-sm transition-colors hover:bg-white disabled:opacity-60"
+          className="absolute top-2 right-2 grid size-9 cursor-pointer place-items-center rounded-full bg-stage-ink/90 text-spotlight-ink shadow-sm transition-colors hover:bg-white disabled:opacity-60"
           aria-label={t('shortlist.removeLabel', { name: talent.displayName })}
           disabled={remove.isPending}
           onClick={() => {

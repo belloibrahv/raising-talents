@@ -9,7 +9,7 @@ import { isApiError } from '../../shared/api/api-error';
 import { api } from '../../shared/api/client';
 import { AudioPlayer } from '../../shared/media/AudioPlayer';
 import { VideoPlayer } from '../../shared/media/VideoPlayer';
-import { BrandMark } from '../../shared/ui/BrandMark';
+import { BrandLockup } from '../../shared/ui/BrandMark';
 import { Button } from '../../shared/ui/Button';
 import { FullScreenStatus } from '../../shared/ui/FullScreenStatus';
 
@@ -43,12 +43,8 @@ export function SharedProfilePage() {
     <div className="min-h-dvh bg-background text-foreground">
       <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between gap-4 px-4 sm:px-6">
-          <Link
-            to="/welcome"
-            className="flex items-center gap-2.5 font-display text-lg font-bold whitespace-nowrap no-underline"
-          >
-            <BrandMark />
-            {t('common.appName')}
+          <Link to="/welcome" className="flex min-h-11 items-center text-xl no-underline">
+            <BrandLockup />
           </Link>
           <Link
             to="/sign-up"

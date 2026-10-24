@@ -165,7 +165,7 @@ function ReportedAccountCard({
                 {entry.playUrl && entry.kind === 'video' ? (
                   // A video kept as a file has no still picture, so it is played here.
                   <video
-                    className="aspect-[4/5] w-full rounded-xl bg-black object-contain"
+                    className="aspect-[4/5] w-full rounded-xl bg-stage object-contain"
                     controls
                     playsInline
                     preload="metadata"

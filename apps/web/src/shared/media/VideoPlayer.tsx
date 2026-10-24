@@ -6,7 +6,7 @@ interface VideoPlayerProps {
   readonly label: string;
 }
 
-const frame = 'aspect-[4/5] w-full rounded-xl bg-black object-contain';
+const frame = 'aspect-[4/5] w-full rounded-xl bg-stage object-contain';
 
 /**
  * Plays a clip. A stored file plays as it is: the browser fetches only its opening to show

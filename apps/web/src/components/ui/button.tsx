@@ -4,17 +4,22 @@ import { cn } from '@/lib/utils';
 import { Slot } from 'radix-ui';
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full text-base font-semibold whitespace-nowrap transition-all outline-none active:scale-[0.97] focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:ring-destructive/20 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
+  // Pills in Archivo 600 (brand guide section 09). Focus uses the global 2px ring, offset 2px.
+  "inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-full text-base font-semibold whitespace-nowrap transition-[color,background-color,border-color,transform] active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-5",
   {
     variants: {
       variant: {
+        // The one action on a screen: spotlight, with ink text.
         default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        // Destructive actions are a red outline, never a red fill.
         destructive:
-          'bg-destructive text-destructive-foreground hover:bg-destructive/90 focus-visible:ring-destructive/30',
-        outline: 'border-2 border-primary bg-background text-foreground hover:bg-accent',
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-accent',
-        spotlight: 'bg-spotlight text-spotlight-foreground hover:bg-spotlight/85',
-        ghost: 'hover:bg-accent hover:text-accent-foreground',
+          'border-[1.5px] border-destructive bg-transparent text-destructive hover:bg-destructive-surface',
+        // Every other action. It takes the colour of the text around it, so it reads in ink on
+        // paper and in warm white on the stage.
+        outline: 'border-[1.5px] border-current bg-transparent hover:bg-current/10',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        spotlight: 'bg-spotlight text-spotlight-foreground hover:bg-spotlight/90',
+        ghost: 'hover:bg-current/10',
         link: 'h-auto px-0 text-foreground underline underline-offset-4 hover:decoration-2',
       },
       size: {

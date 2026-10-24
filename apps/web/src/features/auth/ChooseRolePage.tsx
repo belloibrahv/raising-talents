@@ -61,7 +61,7 @@ export function ChooseRolePage() {
           {OPTIONS.map(({ role: value, title, body, icon: Icon }) => (
             <label
               key={value}
-              className="flex cursor-pointer items-start gap-4 rounded-2xl border-2 border-border bg-card p-5 transition-colors hover:border-input has-checked:border-primary has-checked:bg-accent has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
+              className="flex cursor-pointer items-start gap-4 rounded-2xl border-2 border-border bg-card p-5 transition-colors hover:border-input has-checked:border-primary has-checked:bg-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
             >
               <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-spotlight text-spotlight-foreground">
                 <Icon aria-hidden="true" className="size-6" />

@@ -59,7 +59,7 @@ const STEPS: readonly { key: 'post' | 'follow' | 'found'; icon: LucideIcon }[] =
 
 const joinButton = cn(
   buttonVariants({ size: 'lg' }),
-  'bg-brand-cta text-white no-underline shadow-lg shadow-primary/25 hover:opacity-95',
+  'bg-primary text-primary-foreground no-underline hover:bg-primary/90',
 );
 const agentButton = cn(buttonVariants({ variant: 'outline', size: 'lg' }), 'no-underline');
 
@@ -179,7 +179,7 @@ export function WelcomePage() {
           <ol className="m-0 grid list-none gap-4 p-0 sm:grid-cols-3">
             {STEPS.map(({ key, icon: Icon }) => (
               <li key={key} className="grid gap-3 rounded-3xl border bg-card p-6 shadow-xs">
-                <span className="grid size-12 place-items-center rounded-2xl bg-brand text-white">
+                <span className="grid size-12 place-items-center rounded-2xl bg-primary text-primary-foreground">
                   <Icon aria-hidden="true" className="size-6" />
                 </span>
                 <h3 className="text-xl font-semibold">{t(`welcome.steps.${key}`)}</h3>
@@ -247,8 +247,8 @@ function Face({ tone, className }: { readonly tone: string; readonly className?:
         className,
       )}
     >
-      <span className="absolute top-[22%] left-1/2 size-[38%] -translate-x-1/2 rounded-full bg-black/25" />
-      <span className="absolute -bottom-[18%] left-1/2 h-[52%] w-[78%] -translate-x-1/2 rounded-t-full bg-black/25" />
+      <span className="absolute top-[22%] left-1/2 size-[38%] -translate-x-1/2 rounded-full bg-stage/25" />
+      <span className="absolute -bottom-[18%] left-1/2 h-[52%] w-[78%] -translate-x-1/2 rounded-t-full bg-stage/25" />
     </span>
   );
 }
@@ -294,8 +294,8 @@ function FeedPreview() {
           </span>
         </div>
         <div className="relative aspect-[4/5] overflow-hidden bg-gradient-to-br from-orange-300 via-pink-500 to-violet-700">
-          <span className="absolute top-[20%] left-1/2 size-28 -translate-x-1/2 rounded-full bg-black/25" />
-          <span className="absolute -bottom-8 left-1/2 h-48 w-64 -translate-x-1/2 rounded-t-full bg-black/25" />
+          <span className="absolute top-[20%] left-1/2 size-28 -translate-x-1/2 rounded-full bg-stage/25" />
+          <span className="absolute -bottom-8 left-1/2 h-48 w-64 -translate-x-1/2 rounded-t-full bg-stage/25" />
         </div>
         <div className="grid gap-1 px-4 py-3">
           <span className="flex items-center gap-2 text-sm font-semibold">

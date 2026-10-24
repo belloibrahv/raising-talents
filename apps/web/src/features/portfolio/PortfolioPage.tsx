@@ -251,7 +251,7 @@ function PortfolioItemCard({
     >
       <div className="relative">
         <ItemMedia item={item} name={name} />
-        <span className="absolute top-2 left-2 grid h-7 min-w-7 place-items-center rounded-full bg-black/55 px-2 text-xs font-bold text-white backdrop-blur-sm">
+        <span className="absolute top-2 left-2 grid h-7 min-w-7 place-items-center rounded-full bg-stage/55 px-2 text-xs font-bold text-stage-ink backdrop-blur-sm">
           <span aria-hidden="true">{position}</span>
           <h2 id={headingId} className="sr-only">
             {t('portfolio.item', { position })}

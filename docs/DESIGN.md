@@ -11,5 +11,8 @@ Read it before you change code. A short reading order for new developers:
 4. Section 8 for API standards: error codes, pagination, idempotency, versioning.
 5. Section 19 for how we work, including the writing standards that CI enforces.
 
+The brand style guide and the screen designs are in [docs/brand](brand/README.md). Build the
+front end to them.
+
 Decisions are also kept in the repository as files under [docs/adr](adr/README.md).
 If the code and the document disagree, raise it in the pull request. One of them is wrong and must be fixed in the same change.

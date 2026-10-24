@@ -1,93 +1,129 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import '@fontsource-variable/figtree';
-@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource/archivo/400.css';
+@import '@fontsource/archivo/600.css';
+@import '@fontsource/archivo/700.css';
+@import '@fontsource/archivo-narrow/700.css';
+@import '@fontsource/instrument-serif/400-italic.css';
 
 /* Dark follows the phone's setting. There is no in-app switch yet. */
 @custom-variant dark (@media (prefers-color-scheme: dark));
 
 /*
- * Raising Talents on shadcn/ui tokens (ADR-047). A social home for creative people: clean
- * neutral surfaces so the work carries the colour, violet for actions, and the brand
- * gradient (violet to pink to orange) for the moments that belong to the brand: the mark,
- * the ring around a face, a like. Text and control borders meet WCAG AA (4.5:1 text, 3:1
- * for the outline of a control) in both schemes.
+ * Raising Talents brand style guide v1.0 (docs/brand, ADR-062): the stage and the spotlight.
+ * A warm near-black stage for heroes and showcases, warm paper for reading, and one bright
+ * colour per job: spotlight (marigold) for the one action on a screen, ember for likes and
+ * live moments, verified (teal) only for what a moderator checked. Ink on marigold, always.
+ *
+ * The guide's names are the source; the shadcn names the components use point at them
+ * (guide section 10), so both can be used. Every text pairing meets WCAG AA in both schemes.
  */
 :root {
-  --radius: 0.875rem;
-  --background: #ffffff;
-  --foreground: #14111f;
-  --card: #ffffff;
-  --card-foreground: #14111f;
-  --popover: #ffffff;
-  --popover-foreground: #14111f;
-  --primary: #6d28d9;
-  --primary-foreground: #ffffff;
-  --secondary: #f5f3fa;
-  --secondary-foreground: #14111f;
-  --muted: #f5f3fa;
-  --muted-foreground: #5d5873;
-  --accent: #ede8fd;
-  --accent-foreground: #3b1a8a;
-  --destructive: #b3261e;
+  --spotlight: #ffb627;
+  --spotlight-ink: #16130f;
+  /* Marigold as text or a thin icon on paper. A shade under the guide's #9A6A00, which reads
+   * 4.25:1 on canvas; this one passes AA on canvas, white and spotlight-soft. */
+  --spotlight-text: #936500;
+  --spotlight-soft: #fff1d1;
+  /* The stage stays dark in both schemes: it is a moment, not a surface. */
+  --stage: #16130f;
+  --stage-ink: #f7f2ea;
+  --stage-ink-muted: #c9bfb0;
+  --canvas: #f7f2ea;
+  --surface: #ffffff;
+  --surface-sunk: #efe8dc;
+  --ink: #16130f;
+  --ink-muted: #5e574d;
+  --line: #e4dccf;
+  --line-strong: #8a8072;
+  --ember: #e8492b;
+  --ember-text: #c2361b;
+  --verified: #0f6e63;
+  --verified-soft: #e2f0ed;
+  --danger: #b3261e;
+  --danger-soft: #fbedec;
+  --focus: #16130f;
+
+  --radius: 1rem;
+  --background: var(--canvas);
+  --foreground: var(--ink);
+  --card: var(--surface);
+  --card-foreground: var(--ink);
+  --popover: var(--surface);
+  --popover-foreground: var(--ink);
+  --primary: var(--spotlight);
+  --primary-foreground: var(--spotlight-ink);
+  --secondary: var(--surface-sunk);
+  --secondary-foreground: var(--ink);
+  --muted: var(--surface-sunk);
+  --muted-foreground: var(--ink-muted);
+  --accent: var(--spotlight-soft);
+  --accent-foreground: var(--ink);
+  --destructive: var(--danger);
   --destructive-foreground: #ffffff;
-  --destructive-surface: #fbedec;
-  --success: #1e7a4c;
-  --success-surface: #e9f5ee;
-  /* The highlight: a selected tab, a badge. Light, so it also reads as text on the stage. */
-  --spotlight: #ff9ec7;
-  --spotlight-foreground: #3d0a24;
-  /* The stage is deep violet in both schemes: it is the brand moment, not a surface. */
-  --stage: #160f2e;
-  --stage-foreground: #ffffff;
-  /* A like. Red in every app people already use, so it needs no explaining. */
-  --like: #e11d48;
-  --brand-from: #7c3aed;
-  --brand-via: #db2777;
-  --brand-to: #f97316;
-  /* The gradient as text: these ends read at 4.5:1 or better on the background. */
-  --brand-text-from: #7c3aed;
-  --brand-text-to: #db2777;
-  --border: #e6e2ef;
-  --input: #8983a0;
-  --ring: #7c3aed;
+  --destructive-surface: var(--danger-soft);
+  --success: var(--verified);
+  --success-surface: var(--verified-soft);
+  --spotlight-foreground: var(--spotlight-ink);
+  --stage-foreground: var(--stage-ink);
+  --like: var(--ember);
+  --border: var(--line);
+  --input: var(--line-strong);
+  --ring: var(--focus);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0f0d17;
-    --foreground: #f5f3fb;
-    --card: #1a1726;
-    --card-foreground: #f5f3fb;
-    --popover: #1a1726;
-    --popover-foreground: #f5f3fb;
-    --primary: #b79cff;
-    --primary-foreground: #1b0f3a;
-    --secondary: #252131;
-    --secondary-foreground: #f5f3fb;
-    --muted: #252131;
-    --muted-foreground: #b5b0c9;
-    --accent: #2e2748;
-    --accent-foreground: #ede8fd;
-    /* Light red, so error text reads at 6.9:1 or better on every dark surface; buttons take ink text. */
-    --destructive: #ff8f87;
-    --destructive-foreground: #1b0f3a;
-    --destructive-surface: #3a1d22;
-    --success: #6fd3a0;
-    --success-surface: #173326;
-    --like: #ff5c7a;
-    --brand-text-from: #b79cff;
-    --brand-text-to: #ff7ab8;
-    --border: #322d44;
-    --input: #7d7896;
-    --ring: #b79cff;
+    --spotlight-text: #ffb627;
+    --spotlight-soft: #3a2e14;
+    --stage: #0e0c09;
+    --canvas: #16130f;
+    --surface: #211d18;
+    --surface-sunk: #2a251f;
+    --ink: #f7f2ea;
+    --ink-muted: #b5ac9e;
+    --line: #36302a;
+    --line-strong: #8f8576;
+    --ember: #ff7a5c;
+    --ember-text: #ff7a5c;
+    --verified: #4fc2b2;
+    --verified-soft: #12302b;
+    --danger: #ff8f87;
+    --danger-soft: #3a1d1a;
+    --focus: #ffb627;
+    /* Light red buttons take ink text, so the label reads at AA. */
+    --destructive-foreground: #16130f;
     color-scheme: dark;
   }
 }
 
 @theme inline {
-  --font-sans: 'Figtree Variable', system-ui, sans-serif;
-  --font-display: 'Bricolage Grotesque Variable', system-ui, sans-serif;
+  --font-sans: 'Archivo', system-ui, sans-serif;
+  --font-display: 'Archivo Narrow', 'Archivo', system-ui, sans-serif;
+  --font-accent: 'Instrument Serif', Georgia, serif;
+  --color-spotlight: var(--spotlight);
+  --color-spotlight-ink: var(--spotlight-ink);
+  --color-spotlight-text: var(--spotlight-text);
+  --color-spotlight-soft: var(--spotlight-soft);
+  --color-spotlight-foreground: var(--spotlight-foreground);
+  --color-stage: var(--stage);
+  --color-stage-foreground: var(--stage-foreground);
+  --color-stage-ink: var(--stage-ink);
+  --color-stage-ink-muted: var(--stage-ink-muted);
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-sunk: var(--surface-sunk);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ember: var(--ember);
+  --color-ember-text: var(--ember-text);
+  --color-verified: var(--verified);
+  --color-verified-soft: var(--verified-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-focus: var(--focus);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -107,21 +143,27 @@
   --color-destructive-surface: var(--destructive-surface);
   --color-success: var(--success);
   --color-success-surface: var(--success-surface);
-  --color-spotlight: var(--spotlight);
-  --color-spotlight-foreground: var(--spotlight-foreground);
-  --color-stage: var(--stage);
-  --color-stage-foreground: var(--stage-foreground);
   --color-like: var(--like);
-  --color-brand-from: var(--brand-from);
-  --color-brand-via: var(--brand-via);
-  --color-brand-to: var(--brand-to);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 6px);
-  --radius-md: calc(var(--radius) - 4px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  /* Guide section 08: 8px inputs and tags, 16px cards and sheets, 28px hero media. */
+  --radius-sm: 8px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-xl: 16px;
+  --radius-2xl: 16px;
+  --radius-3xl: 28px;
+  /* Borders, not shadows, for structure. The one shadow is for things that float. */
+  --shadow-2xs: none;
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: 0 12px 32px -12px rgb(22 19 15 / 0.28);
+  --shadow-lg: 0 12px 32px -12px rgb(22 19 15 / 0.28);
+  --shadow-xl: 0 12px 32px -12px rgb(22 19 15 / 0.28);
+  --shadow-2xl: 0 12px 32px -12px rgb(22 19 15 / 0.28);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
 }
 
 @layer base {
@@ -155,16 +197,19 @@
     /* A long link or a word with no spaces wraps instead of running off a narrow screen. */
     overflow-wrap: break-word;
   }
-  h1,
+  /* Page titles are display type, sentence case; section and card titles are text type. */
+  h1 {
+    @apply font-display font-bold tracking-[-0.01em];
+  }
   h2,
   h3 {
-    @apply font-display tracking-tight;
+    @apply font-sans font-bold;
   }
   h2 {
-    @apply text-xl font-semibold;
+    @apply text-xl leading-tight;
   }
   h3 {
-    @apply text-lg font-semibold;
+    @apply text-lg leading-snug;
   }
   a {
     @apply underline-offset-4;
@@ -190,7 +235,7 @@
   }
   /* Keyboard focus is always visible; pointer clicks do not leave a ring behind. */
   :focus-visible {
-    @apply outline-3 outline-offset-2 outline-ring;
+    @apply outline-2 outline-offset-2 outline-ring;
   }
   /* Headings take focus on each new screen so screen readers announce it; no ring for that. */
   [tabindex='-1']:focus {
@@ -227,42 +272,57 @@
   @apply absolute -top-24 left-4 z-50 rounded-full bg-primary px-4 py-2 font-semibold text-primary-foreground focus:top-4;
 }
 
-/* The brand gradient as a fill. White text on it is for large or bold type only. */
+/* The brand fill: spotlight, solid. The guide allows no gradients in the interface. */
 @utility bg-brand {
-  background-image: linear-gradient(
-    120deg,
-    var(--brand-from) 0%,
-    var(--brand-via) 55%,
-    var(--brand-to) 110%
-  );
+  background-color: var(--spotlight);
+  color: var(--spotlight-ink);
 }
 
-/* Violet to pink only: every point of it carries white text at 4.5:1 or better. */
 @utility bg-brand-cta {
-  background-image: linear-gradient(120deg, var(--brand-from) 0%, var(--brand-via) 100%);
+  background-color: var(--spotlight);
+  color: var(--spotlight-ink);
 }
 
+/* Marigold as text: the darker gold on paper, marigold itself on the dark scheme. */
 @utility text-brand {
-  background-image: linear-gradient(120deg, var(--brand-text-from) 0%, var(--brand-text-to) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--spotlight-text);
 }
 
-/* The ring around a face, as on every social app: a gradient border with a gap inside. */
+/* A face in the spotlight: a marigold ring with a gap inside. */
 @utility ring-brand {
-  background:
-    linear-gradient(var(--background), var(--background)) padding-box,
-    linear-gradient(135deg, var(--brand-to), var(--brand-via) 45%, var(--brand-from)) border-box;
-  border: 2.5px solid transparent;
+  border: 2.5px solid var(--spotlight);
   padding: 2px;
 }
 
-/* The glow behind the stage: the brand colours as light, not as a surface. */
+/*
+ * The one gradient the guide allows: a soft radial spotlight of marigold, 25 to 40%, behind
+ * hero media on the stage.
+ */
 @utility stage-glow {
-  background-image:
-    radial-gradient(ellipse 70% 90% at 92% 0%, rgb(219 39 119 / 0.42), transparent 62%),
-    radial-gradient(ellipse 60% 80% at 0% 100%, rgb(124 58 237 / 0.45), transparent 60%);
+  background-image: radial-gradient(
+    ellipse 60% 70% at 50% 30%,
+    rgb(255 182 39 / 0.32),
+    rgb(255 182 39 / 0.08) 55%,
+    transparent 75%
+  );
+}
+
+/* One to three words inside a headline: the human note (guide section 06). */
+@utility accent-word {
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* Eyebrows, tags and tabs: Archivo 600, 13px, uppercase, +0.06em. */
+@utility label-caps {
+  font-size: 0.8125rem;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 /*

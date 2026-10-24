@@ -412,8 +412,8 @@ function ResultCard({ card }: { readonly card: TalentCard }) {
             {card.displayName.slice(0, 1)}
           </span>
         )}
-        <span className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/45 to-transparent" />
-        <span className="absolute bottom-3 left-3 rounded-full bg-black/45 px-2.5 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+        <span className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-stage/45 to-transparent" />
+        <span className="absolute bottom-3 left-3 rounded-full bg-stage/45 px-2.5 py-1 text-xs font-semibold text-stage-ink backdrop-blur-sm">
           {discipline}
         </span>
       </span>

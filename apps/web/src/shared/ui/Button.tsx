@@ -11,6 +11,7 @@ const VARIANTS = {
   quiet: 'ghost',
   danger: 'destructive',
   spotlight: 'spotlight',
+  ink: 'ink',
 } as const;
 
 interface ButtonProps extends Omit<ComponentProps<typeof UiButton>, 'variant'> {

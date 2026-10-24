@@ -18,6 +18,8 @@ const buttonVariants = cva(
         // paper and in warm white on the stage.
         outline: 'border-[1.5px] border-current bg-transparent hover:bg-current/10',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+        // An action that is on: Following, Saved. Filled in ink, as in the designs.
+        ink: 'bg-foreground text-background hover:bg-foreground/90',
         spotlight: 'bg-spotlight text-spotlight-foreground hover:bg-spotlight/90',
         ghost: 'hover:bg-current/10',
         link: 'h-auto px-0 text-foreground underline underline-offset-4 hover:decoration-2',

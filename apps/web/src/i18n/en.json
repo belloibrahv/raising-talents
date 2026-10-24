@@ -109,7 +109,11 @@
     "send": "Send",
     "sent": "Sent",
     "today": "Today",
-    "yesterday": "Yesterday"
+    "yesterday": "Yesterday",
+    "eyebrowRequest": "Contact request",
+    "eyebrowSubmission": "Submission",
+    "eyebrowPeer": "Message request",
+    "verifiedNote": "A moderator checked this agency. They can only message you if you accept. You can block them at any time."
   },
   "submission": {
     "title": "Send {name} a submission",
@@ -711,7 +715,8 @@
     "addWork": "Add work",
     "noPortfolioMine": "Share your first post",
     "audioAlt": "Recording {position} by {name}",
-    "textAlt": "Post {position} by {name}"
+    "textAlt": "Post {position} by {name}",
+    "message": "Message"
   },
   "place": {
     "country": "Country",

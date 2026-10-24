@@ -18,7 +18,7 @@ accounts were not designed. The client asked for younger talent to be able to jo
 - **Search reaches the same ages.** Agents can filter talent from 13 (`SEARCH_MIN_AGE`).
 - **Reports and bans follow the new line.** "May be under 13" replaces "May be under 18"
   for moderators, and a ban is for anyone who seems under 13.
-- **Messages between talent keep to one age band** (ADR-060): under-18s write only to
+- **Messages between talent keep to one age band** (ADR-061): under-18s write only to
   under-18s, adults only to adults. Verified agents can still ask to contact any talent, and
   the talent must accept first (ADR-011).
 

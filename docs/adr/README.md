@@ -15,7 +15,7 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-009](009-writes-over-rest-delivery-over-websocket.md)              | Writes over REST, delivery over WebSocket                            | Accepted                          |
 | [ADR-010](010-in-house-authentication-module.md)                        | In-house authentication module                                       | Accepted                          |
 | [ADR-011](011-only-verified-agents-can-contact-talent.md)               | Only verified agents can contact talent                              | Proposed                          |
-| [ADR-012](012-adults-only-18-in-v1.md)                                  | Adults only (18+) in v1                                              | Proposed                          |
+| [ADR-012](012-adults-only-18-in-v1.md)                                  | Adults only (18+) in v1                                              | Superseded by ADR-059             |
 | [ADR-013](013-nigeria-as-launch-market.md)                              | Nigeria as launch market                                             | Proposed                          |
 | [ADR-014](014-eas-internal-distribution-for-v1.md)                      | EAS internal distribution for v1                                     | Superseded for the MVP by ADR-023 |
 | [ADR-015](015-aws-region-chosen-by-latency-test.md)                     | AWS region chosen by latency test                                    | Proposed                          |
@@ -62,5 +62,6 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-056](056-video-kept-in-our-storage.md)                             | Video kept in our own storage where there is no video provider       | Accepted                          |
 | [ADR-057](057-text-posts.md)                                            | Posts that are only words                                            | Accepted                          |
 | [ADR-058](058-the-app-on-a-phone.md)                                    | The app on a phone                                                   | Accepted                          |
+| [ADR-059](059-members-from-thirteen.md)                                 | Members from thirteen                                                | Accepted                          |
 | [ADR-060](060-agency-evidence-without-a-cac-number.md)                  | Agency evidence without a CAC number                                 | Accepted                          |
 | [ADR-061](061-messages-between-talent.md)                               | Messages between talent                                              | Accepted                          |

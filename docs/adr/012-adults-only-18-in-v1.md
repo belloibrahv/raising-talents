@@ -1,6 +1,6 @@
 # ADR-012: Adults only (18+) in v1
 
-Status: Proposed
+Status: Superseded by ADR-059
 
 ## Context
 

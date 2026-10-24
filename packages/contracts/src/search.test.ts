@@ -21,9 +21,9 @@ describe('searchTalentsQuerySchema', () => {
     });
   });
 
-  it('refuses an age range that is upside down, ages under 18, and unknown parameters', () => {
+  it('refuses an age range that is upside down, ages under 13, and unknown parameters', () => {
     expect(searchTalentsQuerySchema.safeParse({ ageMin: '30', ageMax: '20' }).success).toBe(false);
-    expect(searchTalentsQuerySchema.safeParse({ ageMin: '16' }).success).toBe(false);
+    expect(searchTalentsQuerySchema.safeParse({ ageMin: '12' }).success).toBe(false);
     expect(searchTalentsQuerySchema.safeParse({ city: 'ng-lagos' }).success).toBe(false);
   });
 

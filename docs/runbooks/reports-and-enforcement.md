@@ -6,7 +6,7 @@ Moderators handle reports in the app, under Moderation, Reports (ADR-028). This 
 
 - Dismiss when the profile breaks no guideline. The reporter is not told.
 - Suspend for a first or unclear breach. The person is signed out, hidden and emailed the reason with the appeal address.
-- Ban for scams, impersonation, anyone who seems under 18, or repeated harm after a suspension. "Suspended or banned before" on the card shows the history.
+- Ban for scams, impersonation, anyone who seems under 13, or repeated harm after a suspension. "Suspended or banned before" on the card shows the history.
 
 Never contact the reporter about the outcome, and never tell the reported person who reported them.
 

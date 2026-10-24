@@ -5,7 +5,7 @@ import { meResponseSchema } from './accounts.js';
 /** Eight, as most services ask: long enough to matter, short enough not to turn people away. */
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 128;
-export const MINIMUM_AGE_YEARS = 18;
+export const MINIMUM_AGE_YEARS = 13;
 /** Talent under this age message only each other, and adults only adults (ADR-061). */
 export const ADULT_AGE_YEARS = 18;
 export const VERIFICATION_CODE_LENGTH = 6;

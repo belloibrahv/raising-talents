@@ -14,12 +14,12 @@ const register = (dateOfBirth: string) =>
   });
 
 describe('Account age gate', () => {
-  it('accepts someone who turns 18 today', () => {
-    expect(register('2008-10-01').ok).toBe(true);
+  it('accepts someone who turns 13 today', () => {
+    expect(register('2013-10-01').ok).toBe(true);
   });
 
-  it('rejects someone whose 18th birthday is tomorrow', () => {
-    const result = register('2008-10-02');
+  it('rejects someone whose 13th birthday is tomorrow', () => {
+    const result = register('2013-10-02');
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error.code).toBe(ErrorCode.UnderMinimumAge);
   });

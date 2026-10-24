@@ -5,7 +5,7 @@ import { countryCodeSchema, namedRefSchema, slugSchema } from './taxonomy.js';
 
 export const SEARCH_PAGE_SIZE = 24;
 export const SEARCH_MAX_PAGE = 50;
-export const SEARCH_MIN_AGE = 18;
+export const SEARCH_MIN_AGE = 13;
 export const SEARCH_MAX_AGE = 99;
 
 /** Several values in one query parameter, comma separated: cities=ng-lagos,ng-abuja. */

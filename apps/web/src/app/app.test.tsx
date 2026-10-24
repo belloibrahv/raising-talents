@@ -118,7 +118,7 @@ describe('the web app', () => {
     stubApi({
       '/v1/auth/web/refresh': () => problem(401, 'UNAUTHENTICATED'),
       '/v1/auth/web/sign-up': () =>
-        problem(422, 'UNDER_MINIMUM_AGE', 'You need to be 18 or older.'),
+        problem(422, 'UNDER_MINIMUM_AGE', 'You need to be 13 or older.'),
     });
     renderAt('/sign-up');
     const user = userEvent.setup({ delay: null });

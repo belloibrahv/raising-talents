@@ -65,3 +65,4 @@ Each file records one decision: the context, what we chose, what we rejected and
 | [ADR-059](059-members-from-thirteen.md)                                 | Members from thirteen                                                | Accepted                          |
 | [ADR-060](060-agency-evidence-without-a-cac-number.md)                  | Agency evidence without a CAC number                                 | Accepted                          |
 | [ADR-061](061-messages-between-talent.md)                               | Messages between talent                                              | Accepted                          |
+| [ADR-062](062-the-stage-and-the-spotlight.md)                           | The stage and the spotlight                                          | Accepted                          |

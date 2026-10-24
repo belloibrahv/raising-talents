@@ -115,10 +115,10 @@ export function AppLayout() {
           ) : null}
           <NavLink
             to="/home"
-            className="flex min-h-11 min-w-0 items-center gap-2.5 rounded-lg font-display text-lg font-bold no-underline"
+            className="flex min-h-11 min-w-0 items-center gap-[0.45em] rounded-lg font-display text-xl font-bold tracking-[-0.01em] no-underline"
           >
             {/* On a phone the back arrow takes the mark's place, so the name still fits. */}
-            <BrandMark className={deep ? 'max-md:hidden' : undefined} />
+            <BrandMark className={cn('size-[1.4em]', deep && 'max-md:hidden')} />
             <span className="truncate">{t('common.appName')}</span>
           </NavLink>
           {onboarding ? (

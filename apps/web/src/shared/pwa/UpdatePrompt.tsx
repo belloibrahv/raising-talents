@@ -38,7 +38,7 @@ export function UpdatePrompt() {
         <Button
           variant="quiet"
           size="sm"
-          className="text-primary-foreground hover:bg-white/10 hover:text-primary-foreground"
+          className="text-primary-foreground hover:bg-stage-ink/10 hover:text-primary-foreground"
           onClick={() => {
             setNeedRefresh(false);
           }}

@@ -44,7 +44,7 @@ export function FilePicker({
         htmlFor={id}
         className={cn(
           buttonLink(variant),
-          'peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring aria-disabled:pointer-events-none aria-disabled:opacity-50',
+          'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ring aria-disabled:pointer-events-none aria-disabled:opacity-50',
         )}
         aria-disabled={disabled || undefined}
       >

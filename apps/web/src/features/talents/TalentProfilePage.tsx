@@ -309,7 +309,7 @@ function Tile({
           )}
         </span>
       )}
-      <span className="absolute inset-0 hidden items-center justify-center gap-1.5 bg-black/45 font-semibold text-white group-hover:flex group-focus-visible:flex">
+      <span className="absolute inset-0 hidden items-center justify-center gap-1.5 bg-stage/45 font-semibold text-stage-ink group-hover:flex group-focus-visible:flex">
         <Heart aria-hidden="true" className="size-5 fill-current" />
         {post.likes}
       </span>
@@ -339,7 +339,7 @@ function PostDialog({
     <dialog
       ref={dialog}
       aria-label={post ? t('social.postBy', { name: post.talent.displayName }) : undefined}
-      className="m-auto w-[min(calc(100vw-1rem),32rem)] max-w-none overflow-visible bg-transparent p-0 backdrop:bg-black/70"
+      className="m-auto w-[min(calc(100vw-1rem),32rem)] max-w-none overflow-visible bg-transparent p-0 backdrop:bg-stage/70"
       onClose={onClose}
       // A press on the dimmed area around the post closes it.
       onClick={(event) => {
@@ -351,7 +351,7 @@ function PostDialog({
           <button
             type="button"
             aria-label={t('common.close')}
-            className="grid size-11 cursor-pointer place-items-center justify-self-end rounded-full bg-white/15 text-white hover:bg-white/30"
+            className="grid size-11 cursor-pointer place-items-center justify-self-end rounded-full bg-stage-ink/15 text-stage-ink hover:bg-stage-ink/30"
             onClick={onClose}
           >
             <X aria-hidden="true" className="size-5" />

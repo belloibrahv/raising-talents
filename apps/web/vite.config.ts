@@ -4,7 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
-const BRAND_VIOLET = '#6D28D9';
+/** The stage (brand guide section 05): the splash screen and the bar around the installed app. */
+const BRAND_STAGE = '#16130F';
 
 /**
  * Opens the connection to the API while the app downloads, so the first call (restoring the
@@ -46,8 +47,8 @@ export default defineConfig(({ mode }) => ({
         scope: '/',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#FFFFFF',
-        theme_color: BRAND_VIOLET,
+        background_color: BRAND_STAGE,
+        theme_color: BRAND_STAGE,
         categories: ['entertainment', 'social', 'sports'],
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },

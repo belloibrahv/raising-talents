@@ -23,7 +23,7 @@ export function AudioPlayer({ playback, label, shape = 'tile', className }: Audi
         className,
       )}
     >
-      <span className="grid size-20 place-items-center rounded-full bg-white/10 ring-1 ring-white/20">
+      <span className="grid size-20 place-items-center rounded-full bg-stage-ink/10 ring-1 ring-stage-ink/20">
         <AudioLines aria-hidden="true" className="size-9" />
       </span>
       {/* The API answers range requests, so the length shows and seeking works. */}

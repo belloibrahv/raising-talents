@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { BadgeCheck, EyeOff, Hand } from 'lucide-react';
 import { Link } from 'react-router';
 import { t } from '../i18n';
-import { BrandMark } from '../shared/ui/BrandMark';
+import { BrandLockup } from '../shared/ui/BrandMark';
 
 const POINTS = [
   { key: 'verified', icon: BadgeCheck },
@@ -19,12 +19,8 @@ export function AuthFrame({ children }: { readonly children: ReactNode }) {
     <div className="grid min-h-dvh bg-muted/60 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)] lg:bg-background">
       <div className="flex min-h-dvh flex-col">
         <header className="mx-auto flex h-16 w-full max-w-xl items-center px-4 sm:px-6">
-          <Link
-            to="/welcome"
-            className="flex items-center gap-2.5 font-display text-lg font-bold no-underline"
-          >
-            <BrandMark />
-            {t('common.appName')}
+          <Link to="/welcome" className="flex min-h-11 items-center text-xl no-underline">
+            <BrandLockup />
           </Link>
         </header>
         <div className="flex flex-1 flex-col lg:justify-center [&>main]:pb-10 sm:[&>main>div]:rounded-3xl sm:[&>main>div]:border sm:[&>main>div]:bg-card sm:[&>main>div]:p-10 sm:[&>main>div]:shadow-sm lg:[&>main>div]:border-0 lg:[&>main>div]:bg-transparent lg:[&>main>div]:p-0 lg:[&>main>div]:shadow-none">

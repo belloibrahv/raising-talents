@@ -99,7 +99,7 @@ export function PostCard({ post, eager = false, commentsOpen = false }: PostCard
             // Words on their own keep their header close; a picture carries its header on it.
             post.kind === 'text' && 'pb-1',
             post.kind === 'image' &&
-              'absolute inset-x-0 top-0 z-10 bg-gradient-to-b from-black/70 via-black/35 to-transparent pb-10 text-white',
+              'absolute inset-x-0 top-0 z-10 bg-gradient-to-b from-stage/70 via-stage/35 to-transparent pb-10 text-stage-ink',
           )}
         >
           <Link to={profile} className="rounded-full" tabIndex={-1} aria-hidden="true">
@@ -110,7 +110,7 @@ export function PostCard({ post, eager = false, commentsOpen = false }: PostCard
               to={profile}
               className={cn(
                 'flex items-center gap-1 font-semibold no-underline hover:underline',
-                post.kind === 'image' ? 'text-white' : 'text-foreground',
+                post.kind === 'image' ? 'text-stage-ink' : 'text-foreground',
               )}
             >
               <span className="truncate">{talent.displayName}</span>
@@ -120,7 +120,7 @@ export function PostCard({ post, eager = false, commentsOpen = false }: PostCard
                     aria-hidden="true"
                     className={cn(
                       'size-4 shrink-0',
-                      post.kind === 'image' ? 'text-white' : 'text-success',
+                      post.kind === 'image' ? 'text-stage-ink' : 'text-success',
                     )}
                   />
                   <span className="sr-only">{`, ${t('talent.verified')}`}</span>
@@ -130,7 +130,7 @@ export function PostCard({ post, eager = false, commentsOpen = false }: PostCard
             <span
               className={cn(
                 'truncate text-sm',
-                post.kind === 'image' ? 'text-white/85' : 'text-muted-foreground',
+                post.kind === 'image' ? 'text-stage-ink/85' : 'text-muted-foreground',
               )}
             >
               {`${discipline} · ${placeLabel(talent.city)}`}
@@ -139,7 +139,7 @@ export function PostCard({ post, eager = false, commentsOpen = false }: PostCard
           <time
             className={cn(
               'shrink-0 text-sm',
-              post.kind === 'image' ? 'text-white/85' : 'text-muted-foreground',
+              post.kind === 'image' ? 'text-stage-ink/85' : 'text-muted-foreground',
             )}
             dateTime={post.postedAt}
           >
@@ -158,7 +158,7 @@ export function PostCard({ post, eager = false, commentsOpen = false }: PostCard
             shape="band"
           />
         ) : post.kind === 'video' ? (
-          <div className="bg-black">
+          <div className="bg-stage">
             <VideoPlayer
               playback={post.video}
               label={t('social.videoBy', { name: talent.displayName })}
@@ -178,7 +178,7 @@ export function PostCard({ post, eager = false, commentsOpen = false }: PostCard
             {burst ? (
               <Heart
                 aria-hidden="true"
-                className="pointer-events-none absolute top-1/2 left-1/2 size-24 -translate-1/2 animate-ping fill-white text-white drop-shadow-lg [animation-iteration-count:1]"
+                className="pointer-events-none absolute top-1/2 left-1/2 size-24 -translate-1/2 animate-ping fill-stage-ink text-stage-ink drop-shadow-lg [animation-iteration-count:1]"
               />
             ) : null}
           </div>

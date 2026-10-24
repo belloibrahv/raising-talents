@@ -93,7 +93,7 @@ export function SignUpPage() {
             {ROLES.map((value) => (
               <label
                 key={value}
-                className="flex min-h-12 cursor-pointer items-center justify-center rounded-xl border-2 border-border bg-card px-3 text-center text-sm font-semibold transition-colors hover:border-input has-checked:border-primary has-checked:bg-accent has-checked:text-primary has-focus-visible:outline-3 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
+                className="flex min-h-12 cursor-pointer items-center justify-center rounded-xl border-2 border-border bg-card px-3 text-center text-sm font-semibold transition-colors hover:border-input has-checked:border-primary has-checked:bg-accent has-checked:text-primary has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-ring"
               >
                 <input
                   type="radio"
